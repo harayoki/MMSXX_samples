@@ -46,7 +46,43 @@ layout: default
 
 <!-- Files -->
 <h3>Files</h3>
-<ul>
+<style>
+  .file-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .file-card {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0.75rem;
+    background-color: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  }
+
+  .file-card img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 3px;
+  }
+
+  .file-card-title {
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+    word-break: break-word;
+  }
+
+  .file-card-desc {
+    margin-top: 0.35rem;
+    color: #555;
+  }
+</style>
+<div class="file-grid">
 {% assign lfs_base = site.lfs_media_base %}
 {% for f in site.static_files %}
   {% if f.path contains target_path %}
@@ -54,30 +90,28 @@ layout: default
     {% assign rel = f.path | replace_first: target_path, '' %}
     {% unless rel contains '/' %}
       {% assign desc = page.descriptions[f.name] %}
-      
+
       {% if ext == '.png' or ext == '.jpg' or ext == '.jpeg'
             or ext == '.gif' or ext == '.webp' %}
         {% assign media_url = lfs_base | append: f.path %}
-        <li style="list-style: none; padding-left: 0;">
-          <p>
-          <div>{{ f.name }}</div>
+        <div class="file-card">
+          <div class="file-card-title">{{ f.name }}</div>
           <a href="{{ media_url }}">
-            <img src="{{ media_url }}" style="max-width:100%; height:auto;">
+            <img src="{{ media_url }}" alt="{{ f.name }}">
           </a>
-          <div>{% if desc %}<small>{{ desc }}</small>{% endif %}</div>
-          </p>
-        </li>
+          <div class="file-card-desc">{% if desc %}<small>{{ desc }}</small>{% endif %}</div>
+        </div>
 
       {% else %}
-        <li style="list-style: none; padding-left: 0;">
+        <div class="file-card">
           <a href="{{ f.path | relative_url }}">{{ f.name }}</a><br>
-          {% if desc %}<small>{{ desc }}</small>{% endif %}
-        </li>
+          <div class="file-card-desc">{% if desc %}<small>{{ desc }}</small>{% endif %}</div>
+        </div>
       {% endif %}
     {% endunless %}
   {% endif %}
 {% endfor %}
-</ul>
+</div>
 
 
 <!--
