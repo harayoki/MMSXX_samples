@@ -2,7 +2,7 @@
 layout: default
 ---
 
-{% assign target_path = page.dir %}
+{% assign target_path = page.target_path | default: page.dir %}
 
 <h1>{{ page.title }}</h1>
 
