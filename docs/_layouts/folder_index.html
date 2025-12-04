@@ -8,7 +8,7 @@ layout: default
 
 <!-- Parent directory link -->
 {% assign parts = target_path | split:'/' %}
-{% assign parent_length = parts.size | minus: 2 %}
+{% assign parent_length = parts.size | minus: 1 %}
 {% assign parent_parts = parts | slice: 0, parent_length %}
 {% assign parent_path = parent_parts | join:'/' | append:'/' %}
 <p><a href="{{ parent_path | relative_url }}">Parent directory</a></p>
