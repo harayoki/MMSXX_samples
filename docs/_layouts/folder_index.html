@@ -46,3 +46,10 @@ layout: default
   {% endif %}
 {% endfor %}
 </ul>
+
+<h2>DEBUG: static_files path</h2>
+<pre>
+{% for f in site.static_files %}
+{{ f.path }}
+{% endfor %}
+</pre>
