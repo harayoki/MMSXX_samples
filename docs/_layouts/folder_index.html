@@ -38,30 +38,30 @@ layout: default
 <!-- Files -->
 <h2>Files</h2>
 <ul>
+{% assign lfs_base = site.lfs_media_base %}
 {% for f in site.static_files %}
   {% if f.path contains target_path %}
     {% assign ext = f.extname | downcase %}
     {% assign rel = f.path | replace_first: target_path, '' %}
     {% unless rel contains '/' %}
+      {% assign desc = page.descriptions[f.name] %}
+      
       {% if ext == '.png' or ext == '.jpg' or ext == '.jpeg'
             or ext == '.gif' or ext == '.webp' %}
+        {% assign media_url = lfs_base | append: f.path %}
         <li>
-          <a href="{{ f.path | relative_url }}">
-            <img src="{{ f.path | relative_url }}" style="max-width:50%; height:auto;">
+          <a href="{{ media_url }}">
+            <img src="{{ media_url }}" style="max-width:50%; height:auto;">
           </a><br>
           {{ f.name }}<br>
-          {% assign desc = page.descriptions[f.name] %}
-          {% if desc %}
-            <small>{{ desc }}</small>
-          {% endif %}
+          {% if desc %}<small>{{ desc }}</small>{% endif %}
         </li>
+
       {% elsif ext == '.zip' %}
+        <!-- zip は今まで通り Pages の相対パス -->
         <li>
           <a href="{{ f.path | relative_url }}">{{ f.name }}</a><br>
-          {% assign desc = page.descriptions[f.name] %}
-          {% if desc %}
-            <small>{{ desc }}</small>
-          {% endif %}
+          {% if desc %}<small>{{ desc }}</small>{% endif %}
         </li>
       {% endif %}
     {% endunless %}
@@ -80,6 +80,7 @@ layout: default
 {% endfor %}
 </pre>
 -->
+
 
 
 
