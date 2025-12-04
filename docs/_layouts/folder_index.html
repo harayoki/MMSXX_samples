@@ -49,9 +49,9 @@ layout: default
       {% if ext == '.png' or ext == '.jpg' or ext == '.jpeg'
             or ext == '.gif' or ext == '.webp' %}
         {% assign media_url = lfs_base | append: f.path %}
-        <li>
+        <li style="list-style: none; padding-left: 0;">
           <a href="{{ media_url }}">
-            <img src="{{ media_url }}" style="max-width:50%; height:auto;">
+            <img src="{{ media_url }}" style="max-width:100%; height:auto;">
           </a><br>
           {{ f.name }}<br>
           {% if desc %}<small>{{ desc }}</small>{% endif %}
@@ -59,17 +59,17 @@ layout: default
 
       {% elsif ext == '.mp4' or ext == '.mp3' %}
         {% assign media_url = lfs_base | append: f.path %}
-        <li>
+        <li style="list-style: none; padding-left: 0;">
           <a href="{{ media_url }}">{{ f.name }}</a><br>
           {% if ext == '.mp4' %}
-            <video src="{{ media_url }}" controls style="max-width:50%; height:auto;"></video><br>
+            <video src="{{ media_url }}" controls style="max-width:100%; height:auto;"></video><br>
           {% endif %}
           {% if desc %}<small>{{ desc }}</small>{% endif %}
         </li>
 
       {% elsif ext == '.zip' %}
         <!-- zip は今まで通り Pages の相対パス -->
-        <li>
+        <li style="list-style: none; padding-left: 0;">
           <a href="{{ f.path | relative_url }}">{{ f.name }}</a><br>
           {% if desc %}<small>{{ desc }}</small>{% endif %}
         </li>
