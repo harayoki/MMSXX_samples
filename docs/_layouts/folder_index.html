@@ -39,7 +39,6 @@ layout: default
 <h2>Files</h2>
 <ul>
 {% assign lfs_base = site.lfs_media_base %}
-lfs base: {{ lfs_base }} 
 {% for f in site.static_files %}
   {% if f.path contains target_path %}
     {% assign ext = f.extname | downcase %}
@@ -59,7 +58,6 @@ lfs base: {{ lfs_base }}
         </li>
 
       {% elsif ext == '.mp4' or ext == '.mp3' %}
-      lfs media base: {{ lfs_media_base }}
         {% assign media_url = lfs_base | append: f.path %}
         <li>
           <a href="{{ media_url }}">{{ f.name }}</a><br>
