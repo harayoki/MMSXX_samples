@@ -35,28 +35,39 @@ layout: default
 {% endfor %}
 </ul>
 
-<!-- Files -->
 <h2>Files</h2>
 <ul>
 {% for f in site.static_files %}
   {% if f.path contains target_path %}
     {% assign ext = f.extname | downcase %}
-    {% if ext == '.png' or ext == '.jpg' or ext == '.jpeg' 
-          or ext == '.gif' or ext == '.webp' or ext == '.zip' %}
-      {% assign rel = f.path | replace_first: target_path, '' %}
-      {% unless rel contains '/' %}
-        <li><a href="{{ f.path | relative_url }}">{{ f.name }}</a></li>
-      {% endunless %}
-    {% endif %}
+    {% assign rel = f.path | replace_first: target_path, '' %}
+    {% unless rel contains '/' %}
+      {% if ext == '.png' or ext == '.jpg' or ext == '.jpeg'
+            or ext == '.gif' or ext == '.webp' %}
+        <li>
+          <a href="{{ f.path | relative_url }}">
+            <img src="{{ f.path | relative_url }}" style="max-width:50%;height:auto;">
+          </a><br>
+          {{ f.name }}
+        </li>
+      {% elsif ext == '.zip' %}
+        <li>
+          <a href="{{ f.path | relative_url }}">{{ f.name }}</a>
+        </li>
+      {% endif %}
+    {% endunless %}
   {% endif %}
 {% endfor %}
 </ul>
 
 
-<h2>DEBUG: static_files path</h2>
+<!--
+<h2>static_files path</h2>
 <pre>
 {% for f in site.static_files %}
 {{ f.path }}
 {% endfor %}
 </pre>
+-->
+
 
