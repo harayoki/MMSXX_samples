@@ -4,7 +4,7 @@ layout: default
 
 {% assign target_path = page.target_path | default: page.dir %}
 
-<h1>{{ page.title }}</h1>
+<h2>{{ page.title }}</h2>
 
 <!-- Parent directory link -->
 {% assign parts = target_path | split:'/' %}
@@ -13,7 +13,7 @@ layout: default
 <p><a href="{{ parent_path | relative_url }}">⬆ Parent directory</a></p>
 
 <!-- Subdirectories -->
-<h2>Folders</h2>
+<h3>Folders</h3>
 <ul>
 {% assign seen = "" | split: "|" %}
 {% for f in site.static_files %}
@@ -36,7 +36,7 @@ layout: default
 </ul>
 
 <!-- Files -->
-<h2>Files</h2>
+<h3>Files</h3>
 <ul>
 {% assign lfs_base = site.lfs_media_base %}
 {% for f in site.static_files %}
@@ -50,10 +50,10 @@ layout: default
             or ext == '.gif' or ext == '.webp' %}
         {% assign media_url = lfs_base | append: f.path %}
         <li style="list-style: none; padding-left: 0;">
+          <div>{{ f.name }}</div>
           <a href="{{ media_url }}">
             <img src="{{ media_url }}" style="max-width:100%; height:auto;">
           </a><br>
-          {{ f.name }}<br>
           {% if desc %}<small>{{ desc }}</small>{% endif %}
         </li>
 
@@ -80,10 +80,8 @@ layout: default
 </ul>
 
 
-
-
 <!--
-<h2>static_files path</h2>
+<h3>static_files path</h3>
 <pre>
 {% for f in site.static_files %}
 {{ f.path }}
