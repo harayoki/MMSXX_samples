@@ -5,7 +5,7 @@ This repository distributes works, assets, and materials created with homemade M
 
 All downloads from this site are provided under the Creative Commons Attribution 4.0 International (CC BY 4.0) license.
 - Author: harayoki
-- Full license text: https://creativecommons.org/licenses/by/4.0/deed.ja
+- Full license text: https://creativecommons.org/licenses/by/4.0/deed.en
 
 - Quoting on social media or other minor non-commercial uses are fine even without attribution.
 - For commercial use or redistribution, please follow CC BY and credit the author name or link to this site.
