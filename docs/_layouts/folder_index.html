@@ -50,11 +50,13 @@ layout: default
             or ext == '.gif' or ext == '.webp' %}
         {% assign media_url = lfs_base | append: f.path %}
         <li style="list-style: none; padding-left: 0;">
+          <p>
           <div>{{ f.name }}</div>
           <a href="{{ media_url }}">
             <img src="{{ media_url }}" style="max-width:100%; height:auto;">
-          </a><br>
-          {% if desc %}<small>{{ desc }}</small>{% endif %}
+          </a>
+          <div>{% if desc %}<small>{{ desc }}</small>{% endif %}</div>
+          </p>
         </li>
 
       {% elsif ext == '.mp4' or ext == '.mp3' %}
