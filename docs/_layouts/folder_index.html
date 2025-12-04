@@ -10,7 +10,7 @@ layout: default
 {% assign parts = target_path | split:'/' %}
 {% assign parent_parts = parts | slice: 0, parts.size-2 %}
 {% assign parent_path = parent_parts | join:'/' | append:'/' %}
-<p><a href="{{ parent_path | relative_url }}">⬆ Parent directory</a></p>
+<p><a href="{{ parent_path | relative_url }}">Parent directory</a></p>
 
 <!-- Subdirectories -->
 <h3>Folders</h3>
@@ -23,7 +23,7 @@ layout: default
     {% if sub.size > 1 %}
       {% assign dirname = sub[0] %}
       {% unless seen contains dirname %}
-        <li>
+        <li style="list-style: none; padding-left: 0;">
           <a href="{{ target_path | append: dirname | append:'/' | relative_url }}">
             {{ dirname }}/
           </a>
