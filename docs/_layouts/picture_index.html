@@ -1,0 +1,105 @@
+---
+layout: default
+---
+
+{% assign target_path = page.target_path | default: page.dir %}
+
+<h2>{{ page.title }}</h2>
+
+<!-- Parent directory link -->
+{% assign parts = target_path | split:'/' %}
+{% assign parent_parts = parts | slice: 0, parts.size-2 %}
+{% assign parent_path = parent_parts | join:'/' | append:'/' %}
+<p><a href="{{ parent_path | relative_url }}">Parent directory</a></p>
+
+<p>target_path: {{ target_path }}</p>
+<p>parts: {{ parts }}</p>
+<p>parent_parts: {{ parent_parts }}</p>
+<p>parent_path: {{ parent_path }}</p>
+
+
+<!-- Subdirectories -->
+<h3>Folders</h3>
+<ul>
+{% assign seen = "" | split: "|" %}
+{% for f in site.static_files %}
+  {% if f.path contains target_path %}
+    {% assign rel = f.path | replace_first: target_path, '' %}
+    {% assign sub = rel | split:'/' %}
+    {% if sub.size > 1 %}
+      {% assign dirname = sub[0] %}
+      {% unless seen contains dirname %}
+        <li style="list-style: none; padding-left: 0;">
+          <a href="{{ target_path | append: dirname | append:'/' | relative_url }}">
+            {{ dirname }}/
+          </a>
+        </li>
+        {% assign seen = seen | push: dirname %}
+      {% endunless %}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+</ul>
+
+<!-- Files -->
+<h3>Files</h3>
+<ul>
+{% assign lfs_base = site.lfs_media_base %}
+{% for f in site.static_files %}
+  {% if f.path contains target_path %}
+    {% assign ext = f.extname | downcase %}
+    {% assign rel = f.path | replace_first: target_path, '' %}
+    {% unless rel contains '/' %}
+      {% assign desc = page.descriptions[f.name] %}
+      
+      {% if ext == '.png' or ext == '.jpg' or ext == '.jpeg'
+            or ext == '.gif' or ext == '.webp' %}
+        {% assign media_url = lfs_base | append: f.path %}
+        <li style="list-style: none; padding-left: 0;">
+          <p>
+          <div>{{ f.name }}</div>
+          <a href="{{ media_url }}">
+            <img src="{{ media_url }}" style="max-width:100%; height:auto;">
+          </a>
+          <div>{% if desc %}<small>{{ desc }}</small>{% endif %}</div>
+          </p>
+        </li>
+
+      {% elsif ext == '.mp4' or ext == '.mp3' %}
+        {% assign media_url = lfs_base | append: f.path %}
+        <li style="list-style: none; padding-left: 0;">
+          <a href="{{ media_url }}">{{ f.name }}</a><br>
+          {% if ext == '.mp4' %}
+            <video src="{{ media_url }}" controls style="max-width:100%; height:auto;"></video><br>
+          {% endif %}
+          {% if desc %}<small>{{ desc }}</small>{% endif %}
+        </li>
+
+      {% elsif ext == '.zip' %}
+        <!-- zip は今まで通り Pages の相対パス -->
+        <li style="list-style: none; padding-left: 0;">
+          <a href="{{ f.path | relative_url }}">{{ f.name }}</a><br>
+          {% if desc %}<small>{{ desc }}</small>{% endif %}
+        </li>
+      {% endif %}
+    {% endunless %}
+  {% endif %}
+{% endfor %}
+</ul>
+
+
+<!--
+<h3>static_files path</h3>
+<pre>
+{% for f in site.static_files %}
+{{ f.path }}
+{% endfor %}
+</pre>
+-->
+
+
+
+
+
+
+
