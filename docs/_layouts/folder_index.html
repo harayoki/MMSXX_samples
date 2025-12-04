@@ -1,0 +1,48 @@
+---
+layout: default
+---
+
+<h1>{{ page.title }}</h1>
+
+<!-- ▼ 1階層上へのリンク -->
+{% assign parts = page.target_path | split:'/' %}
+{% assign parent_parts = parts | slice: 0, parts.size-2 %}
+{% assign parent_path = parent_parts | join:'/' | append:'/' %}
+<p><a href="{{ parent_path | relative_url }}">⬆ 上の階層へ</a></p>
+
+
+<!-- ▼ 下位ディレクトリの一覧 -->
+<h2>フォルダ</h2>
+<ul>
+{% for f in site.static_files %}
+  {% if f.path contains page.target_path %}
+    {% assign rel = f.path | replace_first: page.target_path, '' %}
+    {% assign sub = rel | split:'/' %}
+    {% if sub.size > 1 %}
+      {% assign dirname = sub[0] %}
+      {% unless seen[dirname] %}
+        <li><a href="{{ page.target_path | append: dirname | append:'/' | relative_url }}">{{ dirname }}/</a></li>
+        {% assign seen = seen | push: dirname %}
+      {% endunless %}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+</ul>
+
+
+<!-- ▼ ファイル一覧（画像＋zip） -->
+<h2>ファイル</h2>
+<ul>
+{% for f in site.static_files %}
+  {% if f.path contains page.target_path %}
+    {% assign ext = f.extname | downcase %}
+    {% if ext == '.png' or ext == '.jpg' or ext == '.jpeg' or 
+          ext == '.gif' or ext == '.webp' or ext == '.zip' %}
+      {% assign rel = f.path | replace_first: page.target_path, '' %}
+      {% unless rel contains '/' %}
+        <li><a href="{{ f.path | relative_url }}">{{ f.name }}</a></li>
+      {% endunless %}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+</ul>
