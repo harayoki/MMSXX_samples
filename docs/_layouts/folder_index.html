@@ -49,17 +49,26 @@ layout: default
           <a href="{{ f.path | relative_url }}">
             <img src="{{ f.path | relative_url }}" style="max-width:50%; height:auto;">
           </a><br>
-          {{ f.name }}
+          {{ f.name }}<br>
+          {% assign desc = page.descriptions[f.name] %}
+          {% if desc %}
+            <small>{{ desc }}</small>
+          {% endif %}
         </li>
       {% elsif ext == '.zip' %}
         <li>
-          <a href="{{ f.path | relative_url }}">{{ f.name }}</a>
+          <a href="{{ f.path | relative_url }}">{{ f.name }}</a><br>
+          {% assign desc = page.descriptions[f.name] %}
+          {% if desc %}
+            <small>{{ desc }}</small>
+          {% endif %}
         </li>
       {% endif %}
     {% endunless %}
   {% endif %}
 {% endfor %}
 </ul>
+
 
 
 
@@ -71,6 +80,7 @@ layout: default
 {% endfor %}
 </pre>
 -->
+
 
 
 
