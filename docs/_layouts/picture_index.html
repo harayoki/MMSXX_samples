@@ -5,6 +5,9 @@ layout: default
 {% assign target_path = page.target_path | default: page.dir %}
 
 <h2>{{ page.title }}</h2>
+{% if page.subtitle != ""%}
+{{ page.subtitle }}
+{% endfor %}
 
 <!-- Parent directory link -->
 {% assign parts = target_path | split:'/' %}
