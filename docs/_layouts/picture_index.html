@@ -5,8 +5,8 @@ layout: default
 {% assign target_path = page.target_path | default: page.dir %}
 
 <h2>{{ page.title }}</h2>
-{% if page.subtitle != "" %}
-{{ page.subtitle }}
+{% if page.folder_description %}
+  <p>{{ page.folder_description }}</p>
 {% endif %}
 
 <!-- Parent directory link -->
@@ -125,6 +125,7 @@ layout: default
 {% endfor %}
 </pre>
 -->
+
 
 
 
