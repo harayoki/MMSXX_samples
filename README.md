@@ -3,7 +3,7 @@
 ## Overview (English)
 This repository distributes works, assets, and materials created with homemade MSX-related tools.
 
-All downloads from this site are provided under the Creative Commons Attribution 4.0 International (CC BY 4.0) license.
+Unless otherwise specified for an individual work, all materials distributed on this site are licensed under the Creative Commons Attribution 4.0 International License (CC BY 4.0).
 - Author: harayoki
 - Full license text: https://creativecommons.org/licenses/by/4.0/deed.en
 
