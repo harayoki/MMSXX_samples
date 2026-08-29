@@ -13,7 +13,7 @@ All downloads from this site are provided under the Creative Commons Attribution
 ## 概要（日本語）
 このリポジトリではMSX関連の自作ツールで作った作品・アセットや素材を配布します。
 
-当サイトの配布物は Creative Commons Attribution 4.0 International（CC BY 4.0）で提供します。
+当サイトの配布物は 個別にライセンス記載がない限り、Creative Commons Attribution 4.0 International（CC BY 4.0）で提供します。
 著作者：harayoki
 ライセンス全文：https://creativecommons.org/licenses/by/4.0/deed.ja
 
