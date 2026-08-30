@@ -83,7 +83,7 @@ o5 v7 @{pulse18} @e{flat} d2 d8 d+32 e32 f32 f+32 g32 g+32 a32 b-32 b32 &gt;c32 
 // 代わりに音階を順次進行にして滑らかに聞かせる。4・8小節目は全休符にして合いの手へ渡す。
 // イントロだけは全パートが同じフレーズをユニゾンで演奏する。
 // デチューン高音に埋もれないようv12。@e{soft}で80%まで穏やかに減衰する。
-// 2分音符だけ@{tnLead}へ切替。約0.3秒は直音、その後ビブラートが立ち上がる。
+// 2分音符だけ@{tnLead}へ切替。約0.3秒はビブラートなしの直進音、その後ビブラートが立ち上がる。
 t135 l16 q8 v12 @{pulse25} @e{soft}
 // 1小節イントロ共通フレーズ。
 [ o5 v9 d8. f+16 a8 &gt;d8 &lt;a4 f+8 e8
@@ -177,7 +177,7 @@ r1
 v15 r8 g8 b8 &gt;d8 &lt;a8 f+8 e8 c+8
 r1 r1 r1
 v15 r8 a8 &gt;c+8 e8 &lt;b8 a8 f+8 e8
-// Bメロ: Fメジャー内で主旋律の主に3度下。リズムと休符位置は主旋律に揃える。
+// Bメロ: Fメジャー内で主旋律からおおむね3度下。リズムと休符位置は主旋律に揃える。
 o5 l16 q8 v8 @{pulse18} @e{soft} f2 e4 d4
 o5 v7 e2 c4 r4
 o5 v7 d2 f4 e4
@@ -197,7 +197,7 @@ o5 v8 f+2 a4 c+4
 o5 v8 e2 c+4 a4
 // 静かな4小節ではハモリを止める。
 o4 r1 r1 r1 r1
-// I2の最後だけ低い合の手を入れる。
+// I2の最後だけ低い合いの手を入れる。
 o4 r1
 o4 v11 @{tnArpBite} @e{percussive} a8. f+16 d8 e8 f+4 e8 c+8 ]2
 // Ending: major third rises chromatically by one octave.
@@ -268,6 +268,7 @@ r1 }
 $HAT8 = { v6 r8 c8 r8 c8 r8 c8 r8 c8 v6 r8 c8 r8 c8 r8 c8 r8 c8 v6 r8 c8 r8 c8 r8 c8 r8 c8 v5 r8 c8 r8 c8 r8 c8 r8 c8 v6 r8 c8 r8 c8 r8 c8 r8 c8 v6 r8 c8 r8 c8 r8 c8 r8 c8 v6 r8 c8 r8 c8 r8 c8 r8 c8 v5 r8 c8 r8 c8 r8 c8 r8 c8 }
 // I1 [A B C QUIET I2]2 E
 r1 [ $HAT8 $HAT8 $HAT8 r1 r1 r1 r1 r1 v5 r8 c8 r8 c8 r8 c8 r8 c8 ]2 r1</textarea>
+<p>This <a href="./vol_par_crt_256.png">cover art</a> was created with mmsxx-pixel-studio.</p>
 </div>
 <style>
   #mmsxx-inline {
@@ -276,17 +277,23 @@ r1 [ $HAT8 $HAT8 $HAT8 r1 r1 r1 r1 r1 v5 r8 c8 r8 c8 r8 c8 r8 c8 ]2 r1</textarea
     width:min(100%, 1000px);
     margin-inline:auto;
   }
+  #mmsxx-inline h3 {
+    margin: 0 0 0;
+  }
+  #mmsxx-inline p {
+    margin: 2px;
+  }
   #mmsxx-inline textarea {
     font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
     resize:vertical;
     color:#fff;
     caret-color:#fff;
-    background-image:url("./volcano-parade-background.jpg");
+    background-image:url("./vol_par_crt.jpg");
     width:100%;
     height:auto;
     aspect-ratio:1867 / 1375;
-    background-size:100% 100%;
-    background-position:top center;
+    background-size-:100%;
+    background-position:center center;
     background-repeat:no-repeat;
     background-attachment:scroll;
   }
@@ -432,7 +439,7 @@ r1 [ $HAT8 $HAT8 $HAT8 r1 r1 r1 r1 r1 v5 r8 c8 r8 c8 r8 c8 r8 c8 ]2 r1</textarea
     master=ctx.createGain(); master.gain.value=.42; master.connect(ctx.destination);
     const parsed=voicesOf(src.value).map(parse), base=ctx.currentTime+.06;
     const total=Math.max(0,...parsed.map(v=>v.total));
-    // ベース全音で、三角波へ以前の矩形波を半分の強さで重ねる。
+    // ベース全音で、三角波へ矩形波を半分の強さで重ねる。
     if(parsed[2]) parsed[2].events.forEach(e=>{ e.squareLayer=true; });
     // メロディ・ハモリ・合いの手と衝突する瞬間だけアルペジオを約半分へ。
     const foreground=[parsed[1],parsed[3],parsed[4]].filter(Boolean).flatMap(v=>v.events);
