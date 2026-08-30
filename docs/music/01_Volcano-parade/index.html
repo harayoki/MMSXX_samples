@@ -28,14 +28,15 @@
   </div>
   <label class="form-label" for="mmsxx-src">MML</label>
   <textarea class="form-control" id="mmsxx-src" rows="24" spellcheck="false">// この曲だけの音色 — ページの側で登録してから鳴らす(mmsxx-mml-studio の addWave / registerTone)。
-//   @{saw}      アルペジオとハモリ。作りつけの鋸波
-//   @{vpLead}   主旋律の伸ばし。矩形波 + 0.30 秒遅れて掛かるビブラート(6Hz / 2%)
-//   @{vpPiano}  合いの手。キンキンした硬いピアノ(2 オペ FM)
-//   @{vpTom}    合いの手の下敷き。丸い太鼓。音階を聞かせるために重ねる
-//   @{vpBass}   ベース。三角波に、ローパスを通した矩形波を混ぜた形
-//   @{noise}    ハイハット。o4 の a で鳴らすと白色ノイズになる
+//   @{saw}      アルペジオとハモリ。のこぎり派（矩形波？）。
+//   @{vpLead}   主旋律の伸ばし。矩形波 + 0.30 秒遅れて掛かるビブラート(6Hz / 2%)。
+//   @{vpPiano}  合いの手。キンキンした硬いピアノ風(2 オペ FM)。
+//   @{vpTom}    合いの手に重ねるタム。音階を聞かせる。
+//   @{vpBass}   ベース。三角波に、ローパスを通した矩形波を混ぜている。
+//   @{noise}    ハイハット。o4 の a で鳴らすと白色ノイズになる。
 // 音量とグルーヴ(重なったときの引き / 8 分の裏の張り / 16 打ごとのオープン)は
-// MML では書けないので、鳴らす側が音符の v を書き換えている。
+// 現在のMMLでは書けないので、動的にJS処理が音量を書き換えている。
+
 // Title: Volcano Parade
 // Copyright 2026 harayoki. All rights reserved.
 // Powered by mmsxx-mml-studio (software planned for release under the MIT License).
