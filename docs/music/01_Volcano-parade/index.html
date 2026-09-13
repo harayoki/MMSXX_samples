@@ -84,6 +84,8 @@ function bassCycle(s, e) {
 	return Array.from({ length: 32 }, (o, n) => triangleAt(n / 32) + e * t[n]);
 }
 window.registerVolcanoVoices = function(sound, registerTone) {
+	// ページ全体の音量補正。全曲約 -19 LUFS、最大ピーク -1 dBTP以下を目安。
+	sound.volume = 10 ** (12.56 / 20);
 	registerTone("vpLead", {
 		wave: "pulse50",
 		vib: {
@@ -177,6 +179,7 @@ for(var i=0;i<d.length;i++)o+=String.fromCharCode(d.charCodeAt(i)^k.charCodeAt(i
 </script>
 </body>
 </html>
+
 
 
 

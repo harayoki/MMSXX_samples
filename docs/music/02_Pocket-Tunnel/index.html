@@ -145,6 +145,12 @@ function ptNativeVolume(linear) {
 	return 15 * Math.pow(Math.max(0, linear) / 0.14, 1 / 1.8);
 }
 const SONGS=[{"id": "original", "title": "ノーマル", "duration": 54, "file": "original.mml"}, {"id": "jazz", "title": "おしゃれアレンジ", "duration": 54.75, "file": "jazz.mml"}, {"id": "fusion-v1", "title": "チップチューン アレンジ", "duration": 56, "file": "fusion-v1.mml"}];
+// ページ全体の音量補正。全曲約 -19 LUFS、最大ピーク -1 dBTP以下を目安。
+const PT_PLAYBACK_GAIN = {
+	original: 10 ** (3.74 / 20),
+	jazz: 10 ** (5.42 / 20),
+	'fusion-v1': 10 ** (13.10 / 20)
+};
 function ptPrepare(song,source){
  const legacy=song.id==='fusion-v1';
  const tracks=source.split(/\n\s*\/\/ --- channel ---\s*\n/).map((part,ch)=>{
@@ -164,7 +170,7 @@ function ptPrepare(song,source){
   }
   return t;
  });
- return {tracks,length:Math.max(...tracks.map(t=>t.total)),gain:legacy?1/.45:.24,tune:legacy};
+ return {tracks,length:Math.max(...tracks.map(t=>t.total)),gain:(legacy?1/.45:.24)*PT_PLAYBACK_GAIN[song.id],tune:legacy};
 }
 
 // 初期譜面のFM音色・エンベロープをロード時に登録。
@@ -230,6 +236,7 @@ window.PocketTunnel={select:id=>select(SONGS.find(s=>s.id===id)),stop,get state(
 })();
 </script>
 </body></html>
+
 
 
 

@@ -4,6 +4,7 @@
 //# license CC BY 4.0 (music, artwork and MML source; https://creativecommons.org/licenses/by/4.0/)
 
 // 使用音色：
+// 本編メロディは標準エコー @s6。イントロと終止は @s0。
 //   @{ptJazzLead}   おしゃれアレンジのメロディ用矩形波。ノーマルより音量を15%抑える。
 //   @{ptJazzBass}   おしゃれアレンジのベース用三角波。音量を25%増やす。
 //   @{ptJazzChord}   おしゃれアレンジの和音用三角波。短い減衰で鳴らす。
@@ -22,7 +23,7 @@ t120 q8
 o3 a20&a100 r32 r400 o4 d16&d64&d640&d3200 r25 r200 o4 f20&f100 r32 r400 o4 a16&a160&a800 r20 r200 o4
 b16&b64&b640&b3200 r16 r80 r800 o5 d16&d40&d400 r16 r32 r320 r1600 o5 e16&e160&e800
 // 本編 1小節
-r5 r25 r400 @s3 q6 o5 f16 o5 a16 q3 o6 c8 q6 o5 a16 o6 c16 o6 f8 o6 e16 o6 d16 o6 c8 o5 a8 o5 g8
+r5 r25 r400 @s6 q6 o5 f16 o5 a16 q3 o6 c8 q6 o5 a16 o6 c16 o6 f8 o6 e16 o6 d16 o6 c8 o5 a8 o5 g8
 // 本編 2小節
 o5 g16 o5 b16 q3 o6 d8 q6 o5 b16 o6 d16 o6 g8 o6 f16 o6 e16 o6 d8 q3 o5 b4
 // 本編 3小節
@@ -514,4 +515,5 @@ q6 o5 f16 o5 a16 q3 o6 c8 q6 o5 a16 o6 c16 o6 f8 o6 f16 o6 c16 o6 c8 [o5 a8]2
 q6 o6 c16 o6 c16 q3 o6 f8 q6 o6 c16 o6 f16 o7 c8 [o6 f16]2 [o6 c8]3
 // 本編 24小節
 q7 o5 g16 o6 d16 o6 e16 r16 o6 d16 o5 g16 o5 e8 o5 e4 r1 r1 r4
+
 
