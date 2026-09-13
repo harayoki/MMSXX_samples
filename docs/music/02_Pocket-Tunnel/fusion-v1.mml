@@ -2,11 +2,12 @@
 // Arrangement: チップチューン アレンジ
 // Copyright 2026 harayoki.
 // Music, artwork and MML source: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/).
+
 // 使用音色：
 //   @{ptChipPulse}   チップチューン アレンジの矩形波。標準pulse50の音量を補正。
 //   @{noise}   標準ノイズによるドラム。
 // @e{percussive} は元の音長に合わせて共通JSで減衰時間を換算。
-// JS再生エンジン：ライセンス未定。現在、再配布不可。
+
 
 // パート 1 — メロディ
 t120o5 l8 q6 v9 @{ptChipPulse} @e{percussive}
