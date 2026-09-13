@@ -60,21 +60,90 @@ JS再生エンジン：ライセンス未定。現在、再配布不可。CC BY 
 
 
 // 再生エンジンは改造しない。音符・反復・エフェクト指定は外部MMLを正本とする。
-const E=MMSXX.sound;
-E.registerEnvelope('ptHeld',{a:.003,d:0,s:1,r:.004});
-E.registerEnvelope('ptDecay',{a:.003,d:.1,s:.32,r:.04});
-E.registerFM('ptKick',{ratio:1,depth:0,attack:.003,decay:.12,sustain:0,drop:125/45-1,dropTime:.12},{role:'perc'});
-const PT_TONES={"ptLead": {"wave": "pulse50", "unit": 0.5}, "ptJazzLead": {"wave": "pulse50", "unit": 0.425}, "ptArp": {"wave": "saw", "unit": 1}, "ptBass": {"wave": "pulse50", "unit": 1}, "ptJazzBass": {"wave": "triangle", "unit": 1.25}, "ptChord": {"wave": "pulse50", "unit": 0.5}, "ptJazzChord": {"wave": "triangle", "unit": 0.5}, "ptJazzAnswer": {"wave": "triangle", "unit": 0.6}, "ptHarmony": {"wave": "pulse50", "unit": 1}, "ptChipPulse": {"wave": "pulse50", "unit": 1}};
-for(const [name,spec] of Object.entries(PT_TONES))E.registerTone(name,{wave:spec.wave,env:'ptHeld'});
-const ptEnvelopeCache=new Map();
-function ptEnv(gate,sustain,legacy){
- const key=[gate,sustain,legacy].join('_');if(ptEnvelopeCache.has(key))return ptEnvelopeCache.get(key);
- const name='ptEnv'+ptEnvelopeCache.size;
- const spec=legacy?{a:.002,d:.25*Math.max(.02,gate),s:0,r:.05}:sustain?{a:.003,d:0,s:1,r:.004}:{a:.003,d:Math.max(0,gate*.7-.003),s:.32,r:gate*.3};
- E.registerEnvelope(name,{...spec,note:'Pocket Tunnel envelope',noteJa:legacy?'旧Fusionの音長比例の減衰を秒指定へ変換':sustain?'3msの立ち上がりと4msのリリース':'旧版の減衰を既存ADSRで近似'});
- ptEnvelopeCache.set(key,name);return name;
+const E = MMSXX.sound;
+E.registerEnvelope("ptHeld", {
+	a: 3e-3,
+	d: 0,
+	s: 1,
+	r: 4e-3
+});
+E.registerEnvelope("ptDecay", {
+	a: 3e-3,
+	d: 0.1,
+	s: 0.32,
+	r: 0.04
+});
+E.registerFM("ptKick", {
+	ratio: 1,
+	depth: 0,
+	attack: 3e-3,
+	decay: 0.12,
+	sustain: 0,
+	drop: 125 / 45 - 1,
+	dropTime: 0.12
+}, {
+	role: "perc"
+});
+const PT_TONES = {
+	"ptLead": {
+		"wave": "pulse50",
+		"unit": 0.5
+	},
+	"ptJazzLead": {
+		"wave": "pulse50",
+		"unit": 0.425
+	},
+	"ptArp": {
+		"wave": "saw",
+		"unit": 1
+	},
+	"ptBass": {
+		"wave": "pulse50",
+		"unit": 1
+	},
+	"ptJazzBass": {
+		"wave": "triangle",
+		"unit": 1.25
+	},
+	"ptChord": {
+		"wave": "pulse50",
+		"unit": 0.5
+	},
+	"ptJazzChord": {
+		"wave": "triangle",
+		"unit": 0.5
+	},
+	"ptJazzAnswer": {
+		"wave": "triangle",
+		"unit": 0.6
+	},
+	"ptHarmony": {
+		"wave": "pulse50",
+		"unit": 1
+	},
+	"ptChipPulse": {
+		"wave": "pulse50",
+		"unit": 1
+	}
+};
+for (const [name, spec] of Object.entries(PT_TONES)) E.registerTone(name, { wave: spec.wave, env: "ptHeld" });
+const ptEnvelopeCache = /* @__PURE__ */ new Map();
+function ptEnv(gate, sustain, legacy) {
+	const key = [gate, sustain, legacy].join("_");
+	if (ptEnvelopeCache.has(key)) return ptEnvelopeCache.get(key);
+	const name = "ptEnv" + ptEnvelopeCache.size;
+	const spec = legacy ? { a: 2e-3, d: 0.25 * Math.max(0.02, gate), s: 0, r: 0.05 } : sustain ? { a: 3e-3, d: 0, s: 1, r: 4e-3 } : { a: 3e-3, d: Math.max(0, gate * 0.7 - 3e-3), s: 0.32, r: gate * 0.3 };
+	E.registerEnvelope(name, {
+	...spec,
+	note: "Pocket Tunnel envelope",
+	noteJa: legacy ? "\u65E7Fusion\u306E\u97F3\u9577\u6BD4\u4F8B\u306E\u6E1B\u8870\u3092\u79D2\u6307\u5B9A\u3078\u5909\u63DB" : sustain ? "3ms\u306E\u7ACB\u3061\u4E0A\u304C\u308A\u30684ms\u306E\u30EA\u30EA\u30FC\u30B9" : "\u65E7\u7248\u306E\u6E1B\u8870\u3092\u65E2\u5B58ADSR\u3067\u8FD1\u4F3C"
+});
+	ptEnvelopeCache.set(key, name);
+	return name;
 }
-function ptNativeVolume(linear){return 15*Math.pow(Math.max(0,linear)/.14,1/1.8);}
+function ptNativeVolume(linear) {
+	return 15 * Math.pow(Math.max(0, linear) / 0.14, 1 / 1.8);
+}
 const SONGS=[{"id": "original", "title": "ノーマル", "duration": 54, "file": "original.mml"}, {"id": "jazz", "title": "おしゃれアレンジ", "duration": 54.75, "file": "jazz.mml"}, {"id": "fusion-v1", "title": "チップチューン アレンジ", "duration": 56, "file": "fusion-v1.mml"}];
 function ptPrepare(song,source){
  const legacy=song.id==='fusion-v1';
@@ -161,6 +230,7 @@ window.PocketTunnel={select:id=>select(SONGS.find(s=>s.id===id)),stop,get state(
 })();
 </script>
 </body></html>
+
 
 
 
