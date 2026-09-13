@@ -6,9 +6,9 @@
 // 音色定義：ページロード時に準備。波形生成・波形登録なし。
 // 音程パートは標準pulse50、打楽器はnoise。
 // 打楽器のノイズ：標準noise。
-// registerEnvelopeでpercussiveの減衰を音長比例の秒数へ変換。
-// PSGの音程丸めを有効化。デチューン・エコー・FM音色は使用しない。
-// パート 1 — メロディ：主旋律。
+// PSGの音程丸めを有効化。
+
+// パート 1 — メロディ
 t120o5 l8 q6 v9 @{pulse50} @e{percussive}
 
 o4 v8 q5 d8 f16 a16 r8 >c8 <b16 >d16 f8 e8 d8
@@ -46,7 +46,7 @@ o5 v8 q7 e8 g8 a8 >c8 q8 v7 c2
 
 // --- channel ---
 
-// パート 2 — 伴奏：細かい刻みでリズムを補う。
+// パート 2 — 伴奏
 t120o3 l8 q4 v4 @{pulse50} @e{percussive}
 
 v4 r8 o3 f16 o3 a16 o4 c8 r8 o4 e8 o4 c16 o3 a16 r8 o3 f8
@@ -84,7 +84,7 @@ v4 o3 e8 o3 a8 o4 d8 o4 g8 r2
 
 // --- channel ---
 
-// パート 3 — ベース：低音で進行を支える。
+// パート 3 — ベース
 t120o2 l8 q6 v9 @{pulse50} @e{percussive}
 
 o2 v9 q6 d8 r16 d16 a8 r8 o3 d8 o2 a8 d8 g8
@@ -122,7 +122,7 @@ o2 v9 q8 c1
 
 // --- channel ---
 
-// パート 4 — キック：低い打音で拍を刻む。
+// パート 4 — キック
 t120o2 l8 q1 v10 @{pulse50} @e{percussive}
 
 v10 c8 r8 r8 v7 c8 v10 c8 r16 v6 c16 r8 v8 c8
@@ -160,7 +160,7 @@ v8 c8 r8 r2 r4
 
 // --- channel ---
 
-// パート 5 — スネア：裏拍とフィルを担当。
+// パート 5 — スネア
 t120o3 l8 q2 v7 @{noise} @e{percussive}
 
 r4 v7 c8 r8 r4 v8 c8 r8
@@ -198,7 +198,7 @@ r1
 
 // --- channel ---
 
-// パート 6 — ハイハット：細かい拍を刻む。
+// パート 6 — ハイハット
 t120o4 l8 q1 v3 @{noise} @e{percussive}
 
 v3 a8 v4 a8 v2 a8 v4 a8 v3 a8 v4 a8 v2 a16 v3 a16 v4 a8
@@ -236,7 +236,7 @@ v3 a8 r8 r2 r4
 
 // --- channel ---
 
-// パート 7 — 和音 1：コードの第1声部。
+// パート 7 — 和音
 t120o3 l8 q6 v6 @{pulse50} @e{percussive}
 
 v6 q6 r8 o3 f4 o3 f8 r8 o3 f4 r8
@@ -274,7 +274,7 @@ v6 q8 o3 e1
 
 // --- channel ---
 
-// パート 8 — 和音 2：コードの第2声部。
+// パート 8 — 和音
 t120o3 l8 q6 v6 @{pulse50} @e{percussive}
 
 v6 q6 r8 o3 a4 o3 a8 r8 o3 a4 r8
@@ -312,7 +312,7 @@ v6 q8 o3 a1
 
 // --- channel ---
 
-// パート 9 — 和音 3：コードの第3声部。
+// パート 9 — 和音
 t120o3 l8 q6 v6 @{pulse50} @e{percussive}
 
 v6 q6 r8 o4 c4 o4 c8 r8 o4 c4 r8
@@ -350,7 +350,7 @@ v6 q8 o4 d1
 
 // --- channel ---
 
-// パート 10 — 和音 4：コードの第4声部。
+// パート 10 — 和音
 t120o3 l8 q6 v6 @{pulse50} @e{percussive}
 
 v6 q6 r8 o4 e4 o4 e8 r8 o4 e4 r8
