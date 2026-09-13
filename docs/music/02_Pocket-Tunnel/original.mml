@@ -1,0 +1,235 @@
+// Title: Pocket Tunnel
+// Arrangement: ノーマル
+// Copyright 2026 harayoki. All rights reserved.
+// Powered by mmsxx-mml-studio (sound 0.15.0 / 6d8d1c7).
+// Duration: 54 seconds.
+// 音色定義：ページロード時に準備。波形生成・波形登録なし。
+// メロディ・ハモリは標準pulse50。伴奏・ベース・和音は譜面と編曲に応じてpulse50/saw/triangle。
+// キックは標準FMのdrop設定1種類で125Hz→45Hzへ下降（0.12秒）。
+// メロディ：標準detune=14、echo=3。終止にはエコーを追加しない。
+// スネア・ハイハット：標準noise。再生速度と発音長で鳴りを分ける。
+// registerEnvelopeで持続音／減衰音のADSRを登録。
+// このMMLは基礎譜面。イントロ・伴奏・終止と音色の割り当てはページ内JavaScriptで編曲する。
+// Pocket Tunnel — continuous arrangement, 24 bars plus original intro and coda.
+// パート 1 — メロディ：主旋律。
+t120 o4 l8 q5 v11 @{pulse50} @e{sustain}
+o3 c16 d16 e16 f16 g16 a16 b16 >c16 d16 e16 f16 g16 a16 b16 >c16 r16
+o5 v11 q6 f16 a16 >c16 r16 <a16 >c16 f8 e16 d16 c8 <a8 g8
+o5 v11 q6 g16 b16 >d16 r16 <b16 >d16 g8 f16 e16 d8 <b8 r8
+o5 v11 q6 f16 g16 >c16 r16 <g16 >c16 f8 d16 c16 <g8 f8 g8
+o5 v11 q6 e16 g16 >c16 r16 <g16 e16 d8 c4 r4
+o5 v11 q6 f16 a16 >c16 r16 <a16 >c16 f8 e16 d16 c8 <a8 r8
+o5 v11 q6 d16 f16 a16 r16 f16 a16 >d8 c16 <a16 g8 f8 e8
+o5 v11 q6 g16 b16 >d16 r16 <b16 >d16 g8 f16 e16 d8 <b8 a8
+o5 v11 q6 e16 g16 >c16 r16 <g16 e16 d8 c4 r4
+o5 v11 q6 a16 >c16 e16 r16 c16 e16 a8 g16 e16 d8 c8 <b8
+o5 v11 q6 g16 b16 >e16 r16 <b16 g16 f+8 e4 r4
+o5 v11 q6 f16 a16 >c16 r16 <a16 >c16 f8 e16 d16 c8 <a8 g8
+o5 v11 q6 g16 b16 >d16 r16 <b16 >d16 g8 f16 e16 d8 <b8 r8
+o5 v11 q6 d16 f16 a16 r16 f16 a16 >d8 c16 <a16 g8 f8 e8
+o5 v11 q6 e16 a16 >c16 r16 <a16 >c16 e8 d16 c16 <b8 a8 r8
+o5 v11 q6 f16 a16 >c16 r16 <a16 >c16 f8 e16 d16 c8 <a8 g8
+o5 v11 q6 g16 b16 >d16 r16 f16 d16 c8 <b4 r4
+o5 v11 q6 f16 a16 >c16 r16 <a16 >c16 f8 e16 d16 c8 <a8 g8
+o5 v11 q6 g16 b16 >d16 r16 <b16 >d16 g8 f16 e16 d8 <b8 r8
+o5 v11 q6 e16 g16 b16 r16 g16 b16 >e8 d16 c16 <b8 g8 f+8
+o5 v11 q6 a16 >c16 e16 r16 c16 <a16 g8 e4 r4
+o5 v11 q6 d16 f16 a16 r16 f16 a16 >d8 c16 <a16 g8 f8 e8
+o5 v11 q6 g16 b16 >d16 r16 <b16 >d16 g8 f16 e16 d8 <b8 r8
+o5 v11 q6 f16 g16 >c16 r16 <g16 >c16 f8 d16 c16 <g8 f8 g8
+o5 v11 q7 e16 g16 >c16 r16 <g16 e16 d8 c4 r4
+
+// パート 2 — 伴奏：細かい刻みでリズムを補う。
+t120 o3 l16 q5 v9 @{saw} @e{percussive}
+r1 o3
+o3 f16 o3 a16 o4 c16 o3 a16 o3 f16 o3 a16 o4 e16 o4 c16 o3 f16 o3 a16 o4 c16 o3 a16 o3 f16 o3 a16 o4 e16 o4 c16
+o3 g16 o3 b16 o4 d16 o3 b16 o3 g16 o3 b16 o4 g16 o4 d16 o3 g16 o3 b16 o4 d16 o3 b16 o3 g16 o3 b16 o4 g16 o4 d16
+o3 c16 o3 f16 o3 g16 o3 f16 o3 c16 o3 f16 o4 c16 o3 g16 o3 c16 o3 f16 o3 g16 o3 f16 o3 c16 o3 f16 o4 c16 o3 g16
+o3 c16 o3 e16 o3 g16 o3 e16 o3 c16 o3 e16 o4 c16 o3 g16 o3 c16 o3 e16 o3 g16 o3 e16 o3 c16 o3 e16 o4 c16 o3 g16
+o3 f16 o3 a16 o4 c16 o3 a16 o3 f16 o3 a16 o4 e16 o4 c16 o3 f16 o3 a16 o4 c16 o3 a16 o3 f16 o3 a16 o4 e16 o4 c16
+o3 d16 o3 f16 o3 a16 o3 f16 o3 d16 o3 f16 o4 c16 o3 a16 o3 d16 o3 f16 o3 a16 o3 f16 o3 d16 o3 f16 o4 c16 o3 a16
+o3 g16 o3 b16 o4 d16 o3 b16 o3 g16 o3 b16 o4 g16 o4 d16 o3 g16 o3 b16 o4 d16 o3 b16 o3 g16 o3 b16 o4 g16 o4 d16
+o3 c16 o3 e16 o3 g16 o3 e16 o3 c16 o3 e16 o4 c16 o3 g16 o3 c16 o3 e16 o3 g16 o3 e16 o3 c16 o3 e16 o4 c16 o3 g16
+o3 a16 o4 c16 o4 e16 o4 c16 o3 a16 o4 c16 o4 g16 o4 e16 o3 a16 o4 c16 o4 e16 o4 c16 o3 a16 o4 c16 o4 g16 o4 e16
+o3 e16 o3 g16 o3 b16 o3 g16 o3 e16 o3 g16 o4 d16 o3 b16 o3 e16 o3 g16 o3 b16 o3 g16 o3 e16 o3 g16 o4 d16 o3 b16
+o3 f16 o3 a16 o4 c16 o3 a16 o3 f16 o3 a16 o4 e16 o4 c16 o3 f16 o3 a16 o4 c16 o3 a16 o3 f16 o3 a16 o4 e16 o4 c16
+o3 g16 o3 b16 o4 d16 o3 b16 o3 g16 o3 b16 o4 g16 o4 d16 o3 g16 o3 b16 o4 d16 o3 b16 o3 g16 o3 b16 o4 g16 o4 d16
+o3 d16 o3 f16 o3 a16 o3 f16 o3 d16 o3 f16 o4 c16 o3 a16 o3 d16 o3 f16 o3 a16 o3 f16 o3 d16 o3 f16 o4 c16 o3 a16
+o3 a16 o4 c16 o4 e16 o4 c16 o3 a16 o4 c16 o4 g16 o4 e16 o3 a16 o4 c16 o4 e16 o4 c16 o3 a16 o4 c16 o4 g16 o4 e16
+o3 f16 o3 a16 o4 c16 o3 a16 o3 f16 o3 a16 o4 e16 o4 c16 o3 f16 o3 a16 o4 c16 o3 a16 o3 f16 o3 a16 o4 e16 o4 c16
+o3 g16 o3 b16 o4 d16 o3 b16 o3 g16 o3 b16 o4 f16 o4 d16 o3 g16 o3 b16 o4 d16 o3 b16 o3 g16 o3 b16 o4 f16 o4 d16
+o3 f16 o3 a16 o4 c16 o3 a16 o3 f16 o3 a16 o4 e16 o4 c16 o3 f16 o3 a16 o4 c16 o3 a16 o3 f16 o3 a16 o4 e16 o4 c16
+o3 g16 o3 b16 o4 d16 o3 b16 o3 g16 o3 b16 o4 g16 o4 d16 o3 g16 o3 b16 o4 d16 o3 b16 o3 g16 o3 b16 o4 g16 o4 d16
+o3 e16 o3 g16 o3 b16 o3 g16 o3 e16 o3 g16 o4 d16 o3 b16 o3 e16 o3 g16 o3 b16 o3 g16 o3 e16 o3 g16 o4 d16 o3 b16
+o3 a16 o4 c16 o4 e16 o4 c16 o3 a16 o4 c16 o4 g16 o4 e16 o3 a16 o4 c16 o4 e16 o4 c16 o3 a16 o4 c16 o4 g16 o4 e16
+o3 d16 o3 f16 o3 a16 o3 f16 o3 d16 o3 f16 o4 c16 o3 a16 o3 d16 o3 f16 o3 a16 o3 f16 o3 d16 o3 f16 o4 c16 o3 a16
+o3 g16 o3 b16 o4 d16 o3 b16 o3 g16 o3 b16 o4 g16 o4 d16 o3 g16 o3 b16 o4 d16 o3 b16 o3 g16 o3 b16 o4 g16 o4 d16
+o3 c16 o3 f16 o3 g16 o3 f16 o3 c16 o3 f16 o4 c16 o3 g16 o3 c16 o3 f16 o3 g16 o3 f16 o3 c16 o3 f16 o4 c16 o3 g16
+o3 c16 o3 e16 o3 g16 o3 e16 o3 c16 o3 e16 o4 c16 o3 g16 o3 c16 o3 e16 o3 g16 o3 e16 o3 c16 o3 e16 o4 c16 o3 g16
+
+// パート 3 — ベース：低音で進行を支える。
+t120 o2 l8 q6 v10 @{pulse50} @e{percussive}
+o2 c2 g2
+o2 f8 r16 o2 f16 o3 c8 o2 f16 r16 o2 a8 o3 c16 o2 a16 o3 c8 o2 f8
+o2 g8 r16 o2 g16 o3 d8 o2 g16 r16 o2 b8 o3 d16 o2 b16 o3 d8 o2 g8
+o2 c8 r16 o2 c16 o2 g8 o2 c16 r16 o2 f8 o2 g16 o2 f16 o2 g8 o2 c8
+o2 c8 r16 o2 c16 o2 g8 o2 c16 r16 o2 e8 o2 g16 o2 e16 o2 g8 o2 c8
+o2 f8 r16 o2 f16 o3 c8 o2 f16 r16 o2 a8 o3 c16 o2 a16 o3 c8 o2 f8
+o2 d8 r16 o2 d16 o2 a8 o2 d16 r16 o2 f8 o2 a16 o2 f16 o2 a8 o2 d8
+o2 g8 r16 o2 g16 o3 d8 o2 g16 r16 o2 b8 o3 d16 o2 b16 o3 d8 o2 g8
+o2 c8 r16 o2 c16 o2 g8 o2 c16 r16 o2 e8 o2 g16 o2 e16 o2 g8 o2 c8
+o2 a8 r16 o2 a16 o3 e8 o2 a16 r16 o3 c8 o3 e16 o3 c16 o3 e8 o2 a8
+o2 e8 r16 o2 e16 o2 b8 o2 e16 r16 o2 g8 o2 b16 o2 g16 o2 b8 o2 e8
+o2 f8 r16 o2 f16 o3 c8 o2 f16 r16 o2 a8 o3 c16 o2 a16 o3 c8 o2 f8
+o2 g8 r16 o2 g16 o3 d8 o2 g16 r16 o2 b8 o3 d16 o2 b16 o3 d8 o2 g8
+o2 d8 r16 o2 d16 o2 a8 o2 d16 r16 o2 f8 o2 a16 o2 f16 o2 a8 o2 d8
+o2 a8 r16 o2 a16 o3 e8 o2 a16 r16 o3 c8 o3 e16 o3 c16 o3 e8 o2 a8
+o2 f8 r16 o2 f16 o3 c8 o2 f16 r16 o2 a8 o3 c16 o2 a16 o3 c8 o2 f8
+o2 g8 r16 o2 g16 o3 d8 o2 g16 r16 o2 b8 o3 d16 o2 b16 o3 d8 o2 g8
+o2 f8 r16 o2 f16 o3 c8 o2 f16 r16 o2 a8 o3 c16 o2 a16 o3 c8 o2 f8
+o2 g8 r16 o2 g16 o3 d8 o2 g16 r16 o2 b8 o3 d16 o2 b16 o3 d8 o2 g8
+o2 e8 r16 o2 e16 o2 b8 o2 e16 r16 o2 g8 o2 b16 o2 g16 o2 b8 o2 e8
+o2 a8 r16 o2 a16 o3 e8 o2 a16 r16 o3 c8 o3 e16 o3 c16 o3 e8 o2 a8
+o2 d8 r16 o2 d16 o2 a8 o2 d16 r16 o2 f8 o2 a16 o2 f16 o2 a8 o2 d8
+o2 g8 r16 o2 g16 o3 d8 o2 g16 r16 o2 b8 o3 d16 o2 b16 o3 d8 o2 g8
+o2 c8 r16 o2 c16 o2 g8 o2 c16 r16 o2 f8 o2 g16 o2 f16 o2 g8 o2 c8
+o2 c8 r16 o2 c16 o2 g8 o2 c16 r16 o2 e8 o2 g16 o2 e16 o2 g8 o2 c8
+
+// パート 4 — キック：低い打音で拍を刻む。
+t120 o2 l8 q1 v10 @{pulse50} @e{percussive}
+r2 r2
+[
+ v10 c8 r8 c8 r16 v7 c16 v11 c8 r8 v9 c8 r8
+ v11 c8 r8 v9 c8 r8 v10 c8 r16 v7 c16 r8 v9 c8
+ v11 c8 r8 v9 c8 r16 v7 c16 v11 c8 r8 v9 c8 r8
+ v11 c8 r8 v9 c8 r8 v11 c8 r8 v9 c8 r8
+]6
+
+// パート 5 — スネア：裏拍とフィルを担当。
+t120 o3 l8 q2 v7 @{noise} @e{percussive}
+r2 r2
+[
+ [ r4 v7 c8 r8 r4 v8 c8 r8 ]3
+ r4 v8 c8 r8 r8 v3 c16 v4 c16 v7 c8 v5 c16 v8 c16
+]6
+
+// パート 6 — ハイハット：細かい拍を刻む。
+t120 o4 l8 q1 v3 @{noise} @e{percussive}
+r2 r2
+[
+ [ v3 a8 v5 a8 v2 a8 v5 a8 v3 a8 v5 a8 v2 a8 v4 a8 ]2
+ v3 a8 v5 a8 v2 a8 v5 a8 v3 a8 v5 a8 v2 a16 v3 a16 v5 a8
+ v3 a8 v5 a8 v2 a8 v5 a8 v3 a8 v4 a8 v2 a8 r8
+]6
+
+// パート 7 — 和音 1：コードの第1声部。
+t120 l2 q7 v3 @{pulse50} @e{sustain}
+r1
+o3 f2 o3 f2
+o3 g2 o3 g2
+o3 c2 o3 c2
+o3 c2 o3 c2
+o3 f2 o3 f2
+o3 d2 o3 d2
+o3 g2 o3 g2
+o3 c2 o3 c2
+o3 a2 o3 a2
+o3 e2 o3 e2
+o3 f2 o3 f2
+o3 g2 o3 g2
+o3 d2 o3 d2
+o3 a2 o3 a2
+o3 f2 o3 f2
+o3 g2 o3 g2
+o3 f2 o3 f2
+o3 g2 o3 g2
+o3 e2 o3 e2
+o3 a2 o3 a2
+o3 d2 o3 d2
+o3 g2 o3 g2
+o3 c2 o3 c2
+o3 c2 o3 c2
+
+// パート 8 — 和音 2：コードの第2声部。
+t120 l2 q7 v3 @{pulse50} @e{sustain}
+r1
+o3 a2 o3 a2
+o3 b2 o3 b2
+o3 f2 o3 f2
+o3 e2 o3 e2
+o3 a2 o3 a2
+o3 f2 o3 f2
+o3 b2 o3 b2
+o3 e2 o3 e2
+o4 c2 o4 c2
+o3 g2 o3 g2
+o3 a2 o3 a2
+o3 b2 o3 b2
+o3 f2 o3 f2
+o4 c2 o4 c2
+o3 a2 o3 a2
+o3 b2 o3 b2
+o3 a2 o3 a2
+o3 b2 o3 b2
+o3 g2 o3 g2
+o4 c2 o4 c2
+o3 f2 o3 f2
+o3 b2 o3 b2
+o3 f2 o3 f2
+o3 e2 o3 e2
+
+// パート 9 — 和音 3：コードの第3声部。
+t120 l2 q7 v3 @{pulse50} @e{sustain}
+r1
+o4 c2 o4 c2
+o4 d2 o4 d2
+o3 g2 o3 g2
+o3 g2 o3 g2
+o4 c2 o4 c2
+o3 a2 o3 a2
+o4 d2 o4 d2
+o3 g2 o3 g2
+o4 e2 o4 e2
+o3 b2 o3 b2
+o4 c2 o4 c2
+o4 d2 o4 d2
+o3 a2 o3 a2
+o4 e2 o4 e2
+o4 c2 o4 c2
+o4 d2 o4 d2
+o4 c2 o4 c2
+o4 d2 o4 d2
+o3 b2 o3 b2
+o4 e2 o4 e2
+o3 a2 o3 a2
+o4 d2 o4 d2
+o3 g2 o3 g2
+o3 g2 o3 g2
+
+// パート 10 — ハモリ：高音で旋律を補う。
+t120 l1 q8 v4 @{pulse50} @e{sustain}
+r1
+o6 c1
+o5 b1
+o6 c1
+o6 c1
+o6 c1
+o6 c1
+o5 b1
+o6 c1
+o6 c1
+o5 b1
+o6 c1
+o5 b1
+o6 c1
+o6 c1
+o6 c1
+o5 b1
+o6 c1
+o5 b1
+o5 b1
+o6 c1
+o6 c1
+o5 b1
+o6 c1
+o6 c1
