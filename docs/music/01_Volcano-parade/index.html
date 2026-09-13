@@ -20,7 +20,7 @@
 <body>
 <div id="mmsxx-inline">
   <h3>Volcano Parade <span class="text-small text-muted">Copyright 2026 harayoki</span></h3>
-  <p class="text-small text-muted">Music, artwork and MML source: <a href="https://creativecommons.org/licenses/by/4.0/" rel="license">CC BY 4.0</a>.</p>
+  <p class="text-small text-muted">Music, artwork and MML source: <a href="https://creativecommons.org/licenses/by/4.0/" rel="license">CC BY 4.0</a>. JavaScript source is not covered by CC BY 4.0. Redistribution is prohibited.</p>
   <div class="viz-controls">
     <button type="button" class="btn btn-primary" id="mmsxx-play">Play</button>
     <button type="button" class="btn" id="mmsxx-stop">Stop</button>
@@ -37,8 +37,9 @@
 // 音量とグルーヴ(重なったときの引き / 8 分の裏の張り / 16 打ごとのオープン)調整は
 // 現在のMMLでは書けないので、動的にJavaScript処理が音量を書き換えている。
 
-// Title: Volcano Parade
-// Copyright 2026 harayoki. Music, artwork and MML source: CC BY 4.0.
+//# title Volcano Parade
+//# copyright 2026 harayoki
+//# license CC BY 4.0 (music, artwork and MML source; https://creativecommons.org/licenses/by/4.0/)
 // Powered by mmsxx-mml-studio (engine license undecided; redistribution currently prohibited).
 // K005289 arpeggio — MIDI ch.1 rhythm/contour, reharmonized
 // @d7 はMMSXXのMML標準機能。同じ旋律を7セントずらして内部で重ねるため、複製チャンネルは不要。
@@ -343,4 +344,5 @@ for(var i=0;i<d.length;i++)o+=String.fromCharCode(d.charCodeAt(i)^k.charCodeAt(i
 </script>
 </body>
 </html>
+
 

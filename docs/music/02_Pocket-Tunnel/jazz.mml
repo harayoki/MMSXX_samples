@@ -1,7 +1,7 @@
-// Title: Pocket Tunnel
-// Arrangement: おしゃれアレンジ
-// Copyright 2026 harayoki.
-// Music, artwork and MML source: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/).
+//# title Pocket Tunnel
+//# arrangement おしゃれアレンジ
+//# copyright 2026 harayoki
+//# license CC BY 4.0 (music, artwork and MML source; https://creativecommons.org/licenses/by/4.0/)
 
 // 使用音色：
 //   @{ptJazzLead}   おしゃれアレンジのメロディ用矩形波。ノーマルより音量を15%抑える。
@@ -514,3 +514,4 @@ q6 o5 f16 o5 a16 q3 o6 c8 q6 o5 a16 o6 c16 o6 f8 o6 f16 o6 c16 o6 c8 [o5 a8]2
 q6 o6 c16 o6 c16 q3 o6 f8 q6 o6 c16 o6 f16 o7 c8 [o6 f16]2 [o6 c8]3
 // 本編 24小節
 q7 o5 g16 o6 d16 o6 e16 r16 o6 d16 o5 g16 o5 e8 o5 e4 r1 r1 r4
+

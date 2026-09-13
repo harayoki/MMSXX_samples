@@ -1,7 +1,7 @@
-// Title: Pocket Tunnel
-// Arrangement: チップチューン アレンジ
-// Copyright 2026 harayoki.
-// Music, artwork and MML source: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/).
+//# title Pocket Tunnel
+//# arrangement チップチューン アレンジ
+//# copyright 2026 harayoki
+//# license CC BY 4.0 (music, artwork and MML source; https://creativecommons.org/licenses/by/4.0/)
 
 // 使用音色：
 //   @{ptChipPulse}   チップチューン アレンジの矩形波。標準pulse50の音量を補正。
@@ -386,4 +386,5 @@ v6 q6 o4 g4 r8 o4 g8 r4 o4 g8 r8
 
 v6 q6 r8 o4 g4 o4 g8 r8 o4 g4 r8
 v6 q8 o4 g1
+
 

@@ -1,6 +1,6 @@
-// Title: Pocket Tunnel
-// Copyright 2026 harayoki.
-// Music, artwork and MML source: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/).
+//# title Pocket Tunnel
+//# copyright 2026 harayoki
+//# license CC BY 4.0 (music, artwork and MML source; https://creativecommons.org/licenses/by/4.0/)
 
 // 使用音色：
 //   @{ptLead}   メロディ用の矩形波。標準デチューン @d14 とエコー @s3 をMMLで指定。
@@ -591,3 +591,4 @@ o5 b16 o6 d16 q3 o6 f8 q6 o6 d16 o6 f16 o6 b8 o6 a16 o6 g16 o6 f8 q3 o6 d4
 q6 o5 a16 o5 b16 q3 o6 e8 q6 o5 b16 o6 e16 o6 a8 o6 f16 o6 e16 o5 b8 o5 a8 o5 b8
 // 本編 24小節
 q7 o5 g16 o5 b16 o6 e16 r16 o5 b16 o5 g16 o5 f8 o5 e4 r1 r1 r4
+
