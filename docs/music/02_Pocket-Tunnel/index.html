@@ -19,7 +19,7 @@
 #pocket-tunnel{display:grid;gap:12px;width:min(100%,1000px);margin-inline:auto}
 #pocket-tunnel h3{margin:0}
 #pocket-tunnel p{margin:2px}
-#pocket-tunnel .pt-cover{
+#pocket-tunnel textarea{
  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"BIZ UDGothic","Noto Sans Mono CJK JP","Source Han Mono","MS Gothic",Osaka-Mono,monospace;
  resize:vertical;color:#fff;caret-color:#fff;background-color:#181818;
  text-shadow:0 0 2px rgba(0,0,0,.95),0 0 5px rgba(0,0,0,.75),0 1px 2px rgba(0,0,0,.9);
@@ -46,7 +46,7 @@
 <p id="pt-comment" aria-live="polite">ノーマル：メニュー画面や始まりの街のBGMをイメージして作りました。</p>
 <div id="pt-editor">
 <div id="pt-mixes" role="tablist" aria-label="アレンジ選択"></div>
-<div id="pt-editor-body" role="tabpanel"><div class="form-control pt-cover" role="img" aria-label="Pocket Tunnel ジャケット"></div><textarea id="pt-src" hidden style="display:none"></textarea></div>
+<div id="pt-editor-body" role="tabpanel"><textarea class="form-control" id="pt-src" aria-label="MMLソース" rows="24" spellcheck="false"></textarea></div>
 </div>
 <p class="text-small">This <a href="https://media.githubusercontent.com/media/harayoki/MMSXX_samples/refs/heads/main/docs/music/02_Pocket-Tunnel/pocket-tunnel.png">cover art</a> was created with mmsxx-pixel-studio.</p>
 
