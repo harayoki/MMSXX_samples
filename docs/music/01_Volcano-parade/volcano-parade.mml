@@ -1,3 +1,6 @@
+// この数値を直すと本編のループ回数が変わります（1以上）。
+// イントロとエンディングは1回ずつ。全パート共通で、再生とWAVの両方に適用。
+$LOOP_END = { 2 }
 // この曲用の音色 — プリセットに無い音色でやりたい事が特殊だったのでJavaScriptで計算で作っている(mmsxx-mml-studio の addWave / registerTone)。
 //   @{vpLead}   メロディ部の矩形波。 0.30 秒遅れてビブラート(6Hz / 2%)が掛かる。
 //   @{saw}      アルペジオとハモリのパート用ののこぎり波。
@@ -57,7 +60,7 @@ t135 l16 q7 v8 @{saw} @e{flat} @d7
 [ v8 $D_to_A v8 $A_to_Bm v11 $Bm_to_G v6 $G_to_D v8 $D2_to_A v7 $A2_to_Bm v8 $Bm2_to_A v6 $A2_to_D
   v8 $B1 v7 $B2 v9 $B3 v7 $B4 v8 $B5 v7 $B6 v9 $B7 v8 $B8
   v8 $C1 v9 $C2 v7 $C3 v9 $C4 v8 $C5 v10 $C6 v9 $C7 v8 $C8
-  v4 $QUIET v6 $INTRO2 ]2
+  v4 $QUIET v6 $INTRO2 ]$LOOP_END
 // Ending: 後半で和音全体を半音ずつ駆け上がり、1オクターブ上へ到達する。
 o5 v7 @{saw} @e{flat} d2 d8 d+32 e32 f32 f+32 g32 g+32 a32 b-32 b32 >c32 c+32 d32
 
@@ -103,7 +106,7 @@ o4 v7 @{vpLead} @e{soft} a2 @{pulse50} g4 r4
 o4 v6 @{vpLead} @e{soft} e2 r2
 // イントロ2。
 o5 r1
-o5 v11 @{pulse50} @e{soft} a8. f+16 d8 e8 f+4 e8 c+8 ]2
+o5 v11 @{pulse50} @e{soft} a8. f+16 d8 e8 f+4 e8 c+8 ]$LOOP_END
 // Ending: root rises chromatically by one octave.
 o5 v9 @{vpLead} @e{soft} d2 d8 d+32 e32 f32 f+32 g32 g+32 a32 b-32 b32 >c32 c+32 d32
 
@@ -146,7 +149,7 @@ v7 o2 g1
 v8 o2 a1
 // イントロ2。
 o2 r1
-v10 o2 a8. f+16 d8 e8 f+4 e8 c+8 ]2
+v10 o2 a8. f+16 d8 e8 f+4 e8 c+8 ]$LOOP_END
 // Ending: low D rises chromatically by one octave.
 o2 v11 @{vpBass} @e{flat} d2 d8 d+32 e32 f32 f+32 g32 g+32 a32 b-32 b32 >c32 c+32 d32
 
@@ -182,7 +185,7 @@ o5 v8 e2 c+4 a4
 o4 r1 r1 r1 r1
 // I2の最後だけ低い合いの手を入れる。
 o4 r1
-o4 v11 @{vpPiano} @e{percussive} a8. f+16 d8 e8 f+4 e8 c+8 ]2
+o4 v11 @{vpPiano} @e{percussive} a8. f+16 d8 e8 f+4 e8 c+8 ]$LOOP_END
 // Ending: major third rises chromatically by one octave.
 o5 l16 q8 v7 @{pulse50} @e{soft} f+2 f+8 g32 g+32 a32 b-32 b32 >c32 c+32 d32 d+32 e32 f32 f+32
 
@@ -200,7 +203,7 @@ v9 r8 a8 >c+8 e8 <b8 a8 f+8 e8
 $REST8 $REST8 $REST4
 // I2
 r1
-o3 v8 a8. f+16 d8 e8 f+4 e8 c+8 ]2
+o3 v8 a8. f+16 d8 e8 f+4 e8 c+8 ]$LOOP_END
 // Ending: fifth rises chromatically by one octave.
 o4 l16 q8 v6 @{pulse50} @e{soft} a2 a8 b-32 b32 >c32 c+32 d32 d+32 e32 f32 f+32 g32 g+32 a32
 
@@ -250,7 +253,7 @@ v3 r8 a8 r8 a8 r8 a8 r8 a8 ]3
 r1 }
 $HAT8 = { v6 r8 a8 r8 a8 r8 a8 r8 a8 v6 r8 a8 r8 a8 r8 a8 r8 a8 v6 r8 a8 r8 a8 r8 a8 r8 a8 v5 r8 a8 r8 a8 r8 a8 r8 a8 v6 r8 a8 r8 a8 r8 a8 r8 a8 v6 r8 a8 r8 a8 r8 a8 r8 a8 v6 r8 a8 r8 a8 r8 a8 r8 a8 v5 r8 a8 r8 a8 r8 a8 r8 a8 }
 // I1 [A B C QUIET I2]2 E
-r1 [ $HAT8 $HAT8 $HAT8 r1 r1 r1 r1 r1 v5 r8 a8 r8 a8 r8 a8 r8 a8 ]2 r1
+r1 [ $HAT8 $HAT8 $HAT8 r1 r1 r1 r1 r1 v5 r8 a8 r8 a8 r8 a8 r8 a8 ]$LOOP_END r1
 
 // 合いの手の下敷き — 5 本目と同じ音・同じ長さを、丸い太鼓の音で重ねる。
 // キンキンしたピアノだけだと高さが分からないので、下から音階を支える。
@@ -264,5 +267,5 @@ r1 r1 r1
 v9 r8 a8 >c+8 e8 <b8 a8 f+8 e8
 $REST8 $REST8 $REST4
 r1
-o3 v8 a8. f+16 d8 e8 f+4 e8 c+8 ]2
+o3 v8 a8. f+16 d8 e8 f+4 e8 c+8 ]$LOOP_END
 o4 l16 q8 v6 @{vpTom} @e{percussive} a2 a8 b-32 b32 >c32 c+32 d32 d+32 e32 f32 f+32 g32 g+32 a32
