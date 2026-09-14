@@ -1,0 +1,321 @@
+//# title Windward Crossing
+//# arrangement RPG Suite — 風渡りの境界
+//# copyright 2026 harayoki
+//# license CC BY 4.0 (music, artwork and MML source; https://creativecommons.org/licenses/by/4.0/)
+// イントロ → 草原×2 → エンカウント → 有利×1 → 不利×2 → 大ピンチ×2
+// → 勝利 → 草原4小節 → エンカウント → 不利×2 → 大ピンチ×2 → 敗北
+// 3声。戦闘はベース専用、打楽器の隙間を副旋律が使う。
+// @{wcFieldLead} 草原・イントロ・敗北の三角波メロディー。
+// @{wcBattleLead} 戦闘・勝利の矩形波メロディーと副旋律。
+// @{wcBass} 草原などの短く減衰する三角波ベース。
+// @{wcBattleBass} 戦闘用の矩形波ベース。大ピンチは8分3連符（l12相当）。
+// @{wcArp} 草原などの隙間に入る矩形波アルペジオ。
+// @{wcKick} ピッチが急降下する標準FMのキック。
+// @{noise} 打楽器。@e{wcDrumEnv}で短く減衰する。
+// 音色はHTML内の標準APIで登録。@v1は標準ビブラート。
+
+// @channel 1 主旋律
+// crisis: 8小節
+$crisis = {
+  @e0 @v0 t152 @{wcBattleLead} @v1 v9 q6 o5 r8 a8 o6 d4 o5 a8 r8 f8 e8
+  @e0 @v0 t152 @{wcBattleLead} @v1 v9 q6 o5 d8. f16 a8 d8 r8 a8 f4
+  @e0 @v0 t152 @{wcBattleLead} @v1 v9 q6 o5 r8 f8 b-4 f8 r8 d8 f8
+  @e0 @v0 t152 @{wcBattleLead} @v1 v9 q6 o5 b-8. a16 f8 d8 r8 f8 b-4
+  @e0 @v0 t152 @{wcBattleLead} @v1 v9 q6 o5 r8 g8 o6 d4 o5 b-8 r8 a8 g8
+  @e0 @v0 t152 @{wcBattleLead} @v1 v9 q6 o5 e8. g16 b-8 g8 r8 e8 c+4
+  @e0 @v0 t152 @{wcBattleLead} @v1 v9 q6 o5 r8 e8 a4 g8 r8 e8 c+8
+  @e0 @v0 t152 @{wcBattleLead} @v1 v9 q6 o5 a8. g16 e8 c+8 r8 e8 a4
+}
+// intro: 2小節
+$intro = {
+  @e0 @v0 t112 @{wcFieldLead} @v1 v9 q6 o4 d8 f+8 a8 o5 d8 f+4 e8 d8
+  @e0 @v0 t112 @{wcFieldLead} @v1 v9 q6 o5 c+4 o4 a8 b8 o5 c+8 e8 a8 r8
+}
+// field: 8小節
+$field = {
+  @e0 @v0 t112 @{wcFieldLead} @v1 v9 q6 o5 f+8 a8 d4 r8 @{wcArp} v4 o4 a16 d16 f+8 r8
+  @e0 @v0 t112 @{wcFieldLead} @v1 v9 q6 o5 g8 b8 a4 f+8 e8 d4
+  @e0 @v0 t112 @{wcFieldLead} @v1 v9 q6 o5 f+8 a8 b4 a8 f+8 d8 r8
+  @e0 @v0 t112 @{wcFieldLead} @v1 v9 q6 o5 e4 c+8 e8 a4 r8 @{wcArp} v4 o4 e16 a16
+  @e0 @v0 t112 @{wcFieldLead} @v1 v9 q6 o5 a8 f+8 e8 d8 f+4 a4
+  @e0 @v0 t112 @{wcFieldLead} @v1 v9 q6 o5 b8 a8 g4 d8 e8 g4
+  @e0 @v0 t112 @{wcFieldLead} @v1 v9 q6 o5 f+4 d8 f+8 b8 a8 f+4
+  @e0 @v0 t112 @{wcFieldLead} @v1 v9 q6 o5 e8 c+8 o4 b8 a8 o5 c+8 e8 a8 r8
+}
+// encounter: 2小節
+$encounter = {
+  @e0 @v0 t152 @{wcBattleLead} @v1 v9 q6 o4 b-16 c+16 e16 g16 b-16 o5 c+16 e16 g16 b-8 g8 e8 c+8
+  @e0 @v0 t152 @{wcBattleLead} @v1 v9 q6 o5 e16 g16 a16 b-16 a8 e8 c+4 o4 a8 r8
+}
+// good: 32小節
+$good = {
+  @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o4 d8 f+16 a16 o5 d4 o4 a8 o5 d8 e8 f+8
+  @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o5 e4 c+8 o4 a8 o5 c+8 e8 a8 r8
+  @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o4 g8 b16 o5 d16 g4 f+8 e8 d4
+  @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o5 e8 c+8 o4 a4 o5 c+8 e8 a8 r8
+  @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o4 f+8 a16 o5 d16 f+4 e8 d8 o4 a4
+  @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o5 e4 c+8 o4 a8 o5 c+8 e8 a8 r8
+  @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o4 g8 b16 o5 d16 g4 d8 e8 g4
+  @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o5 e8 c+8 o4 a8 o5 c+8 e4 c+8 r8
+  @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o5 f+4 e8 d8 o4 b4 o5 d4
+  @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o5 e8 d8 o4 b8 a8 g4 b4
+  @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o4 a4 b8 o5 c+8 e4 c+4
+  @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o5 d4 o4 b8 a8 f+4 a4
+  @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o4 g8 b8 o5 d4 e8 d8 o4 b4
+  @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o5 e4 c+8 o4 a8 o5 g8 e8 c+4
+  @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o4 f+8 a8 o5 d8 e8 f+4 e8 d8
+  @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o5 c+4 o4 a8 b8 o5 c+8 e8 a8 r8
+  @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o4 b4 o5 d4 f+8 e8 d4
+  @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o5 d8 o4 b8 g4 b8 o5 d8 g4
+  @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o5 f+4 e8 d8 o4 a4 o5 d4
+  @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o5 e8 c+8 o4 a8 b8 o5 c+4 e4
+  @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o5 g4 f+8 e8 d4 o4 b4
+  @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o5 e4 g8 e8 c+4 o4 a4
+  @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o4 a8 o5 d8 f+4 e8 d8 o4 a4
+  @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o5 c+8 e8 g4 e8 c+8 o4 a8 r8
+  @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o4 d8 f+16 a16 o5 d4 o4 a8 o5 d8 e8 f+8
+  @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o5 e4 c+8 o4 a8 o5 c+8 e8 a8 r8
+  @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o4 g8 b16 o5 d16 g4 f+8 e8 d4
+  @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o5 e8 c+8 o4 a4 o5 c+8 e8 a8 r8
+  @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o4 f+8 a16 o5 d16 f+4 e8 d8 o4 a4
+  @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o5 e4 c+8 o4 a8 o5 c+8 e8 a8 r8
+  @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o4 g8 b8 o5 d4 g8 f+8 e8 d8
+  @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o5 e8 c+8 o4 a4 o5 c+8 e8 d8 r8
+}
+// bad: 8小節
+$bad = {
+  @e0 @v0 t152 @{wcBattleLead} @v1 v8 q7 o5 a4. f8 e8 f8 d4
+  @e0 @v0 t152 @{wcBattleLead} @v1 v8 q7 o5 g4. f8 e-4 g8 b-8
+  @e0 @v0 t152 @{wcBattleLead} @v1 v8 q7 o5 g4 e8 c+8 e4 g4
+  @e0 @v0 t152 @{wcBattleLead} @v1 v8 q7 o5 e4. c+8 o4 b-8 a8 o5 c+4
+  @e0 @v0 t152 @{wcBattleLead} @v1 v8 q7 o5 d4. g8 f8 d8 o4 b-4
+  @e0 @v0 t152 @{wcBattleLead} @v1 v8 q7 o5 e-4 g8 b-8 g4 e-4
+  @e0 @v0 t152 @{wcBattleLead} @v1 v8 q7 o5 e4. g8 e8 c+8 o4 b-4
+  @e0 @v0 t152 @{wcBattleLead} @v1 v8 q7 o5 c+4 e8 g8 e4 c+8 r8
+}
+// win: 4小節
+$win = {
+  @e0 @v0 t132 @{wcBattleLead} @v1 v9 q6 o5 d8 f+16 a16 o6 d4 o5 a8 b8 o6 d4
+  @e0 @v0 t132 @{wcBattleLead} @v1 v9 q6 o6 d8 o5 b8 g4 a8 b8 o6 d4
+  @e0 @v0 t132 @{wcBattleLead} @v1 v9 q6 o5 c+8 e8 a4 g8 e8 c+4
+  @e0 @v0 t132 @{wcBattleLead} @v1 v9 q6 o5 d2 r2
+}
+// lose: 4小節
+$lose = {
+  @e0 @v0 t96 @{wcFieldLead} @v1 v9 q6 o5 a4 f4 e4 d4
+  @e0 @v0 t96 @{wcFieldLead} @v1 v9 q6 o5 e-4 o4 b-4 g2
+  @e0 @v0 t96 @{wcFieldLead} @v1 v9 q6 o4 a4 o5 c+4 e4 c+4
+  @e0 @v0 t96 @{wcFieldLead} @v1 v9 q6 o4 d2 r2
+}
+$fieldShort = {
+  @e0 @v0 t112 @{wcFieldLead} @v1 v9 q6 o5 f+8 a8 d4 r8 @{wcArp} v4 o4 a16 d16 f+8 r8
+  @e0 @v0 t112 @{wcFieldLead} @v1 v9 q6 o5 g8 b8 a4 f+8 e8 d4
+  @e0 @v0 t112 @{wcFieldLead} @v1 v9 q6 o5 f+8 a8 b4 a8 f+8 d8 r8
+  @e0 @v0 t112 @{wcFieldLead} @v1 v9 q6 o5 e4 c+8 e8 a4 r8 @{wcArp} v4 o4 e16 a16
+}
+// 演奏順。角括弧は繰り返し。
+$intro [$field]2 $encounter $good [$bad]2 [$crisis]2 $win $fieldShort $encounter [$bad]2 [$crisis]2 $lose
+
+// @channel 2 ベース／草原のアルペジオ
+// crisis: 8小節
+$crisis = {
+  @e0 @v0 t152 @{wcBattleBass} q5 v12 o3 d12 v10 o4 d12 v10 o3 a12 v12 o3 d12 v10 o4 d12 v10 o3 a12 v12 o3 d12 v10 o4 d12 v10 o3 a12 v12 o4 d12 v10 o3 a12 v10 o3 d12
+  @e0 @v0 t152 @{wcBattleBass} q5 v12 o3 d12 v10 o4 d12 v10 o3 a12 v12 o3 d12 v10 o4 d12 v10 o3 a12 v12 o3 d12 v10 o4 d12 v10 o3 a12 v12 o4 d12 v10 o3 a12 v10 o3 d12
+  @e0 @v0 t152 @{wcBattleBass} q5 v12 o2 a+12 v10 o3 a+12 v10 o3 f12 v12 o2 a+12 v10 o3 a+12 v10 o3 f12 v12 o2 a+12 v10 o3 a+12 v10 o3 f12 v12 o3 a+12 v10 o3 f12 v10 o2 a+12
+  @e0 @v0 t152 @{wcBattleBass} q5 v12 o2 a+12 v10 o3 a+12 v10 o3 f12 v12 o2 a+12 v10 o3 a+12 v10 o3 f12 v12 o2 a+12 v10 o3 a+12 v10 o3 f12 v12 o3 a+12 v10 o3 f12 v10 o2 a+12
+  @e0 @v0 t152 @{wcBattleBass} q5 v12 o2 g12 v10 o3 g12 v10 o3 d12 v12 o2 g12 v10 o3 g12 v10 o3 d12 v12 o2 g12 v10 o3 g12 v10 o3 d12 v12 o3 g12 v10 o3 d12 v10 o2 g12
+  @e0 @v0 t152 @{wcBattleBass} q5 v12 o2 a+12 v10 o3 a+12 v10 o3 e12 v12 o2 a+12 v10 o3 a+12 v10 o3 e12 v12 o2 a+12 v10 o3 a+12 v10 o3 e12 v12 o3 a+12 v10 o3 e12 v10 o2 a+12
+  @e0 @v0 t152 @{wcBattleBass} q5 v12 o2 a12 v10 o3 a12 v10 o3 e12 v12 o2 a12 v10 o3 a12 v10 o3 e12 v12 o2 a12 v10 o3 a12 v10 o3 e12 v12 o3 a12 v10 o3 e12 v10 o2 a12
+  @e0 @v0 t152 @{wcBattleBass} q5 v12 o2 a12 v10 o3 a12 v10 o3 e12 v12 o2 a12 v10 o3 a12 v10 o3 e12 v12 o2 a12 v10 o3 a12 v10 o3 e12 v12 o3 a12 v10 o3 e12 v10 o2 a12
+}
+// intro: 2小節
+$intro = {
+  @e0 @v0 t112 @{wcBass} v13 q6 o2 d8 r8 @{wcArp} v5 q5 o4 d16 o4 f+16 o4 a16 o5 d16 @{wcBass} v12 q6 o2 a8 r8 @{wcArp} v5 q5 o5 d16 o4 a16 o4 f+16 o4 d16
+  @e0 @v0 t112 @{wcBass} v13 q6 o1 a8 r8 @{wcArp} v5 q5 o4 c+16 o4 e16 o4 a16 o5 c+16 @{wcBass} v12 q6 o2 e8 r8 @{wcArp} v5 q5 o5 c+16 o4 a16 o4 e16 o4 c+16
+}
+// field: 8小節
+$field = {
+  @e0 @v0 t112 @{wcBass} v13 q6 o2 d8 r8 @{wcArp} v5 q5 o4 d16 o4 f+16 o4 a16 o5 d16 @{wcBass} v12 q6 o2 a8 r8 @{wcArp} v5 q5 o5 d16 o4 a16 o4 f+16 o4 d16
+  @e0 @v0 t112 @{wcBass} v13 q6 o1 g8 r8 @{wcArp} v5 q5 o3 b16 o4 d16 o4 g16 o4 b16 @{wcBass} v12 q6 o2 d8 r8 @{wcArp} v5 q5 o4 b16 o4 g16 o4 d16 o3 b16
+  @e0 @v0 t112 @{wcBass} v13 q6 o1 b8 r8 @{wcArp} v5 q5 o3 b16 o4 d16 o4 f+16 o4 b16 @{wcBass} v12 q6 o2 f+8 r8 @{wcArp} v5 q5 o4 b16 o4 f+16 o4 d16 o3 b16
+  @e0 @v0 t112 @{wcBass} v13 q6 o1 a8 r8 @{wcArp} v5 q5 o4 c+16 o4 e16 o4 a16 o5 c+16 @{wcBass} v12 q6 o2 e8 r8 @{wcArp} v5 q5 o5 c+16 o4 a16 o4 e16 o4 c+16
+  @e0 @v0 t112 @{wcBass} v13 q6 o2 d8 r8 @{wcArp} v5 q5 o4 d16 o4 f+16 o4 a16 o5 d16 @{wcBass} v12 q6 o2 a8 r8 @{wcArp} v5 q5 o5 d16 o4 a16 o4 f+16 o4 d16
+  @e0 @v0 t112 @{wcBass} v13 q6 o1 g8 r8 @{wcArp} v5 q5 o3 b16 o4 d16 o4 g16 o4 b16 @{wcBass} v12 q6 o2 d8 r8 @{wcArp} v5 q5 o4 b16 o4 g16 o4 d16 o3 b16
+  @e0 @v0 t112 @{wcBass} v13 q6 o1 b8 r8 @{wcArp} v5 q5 o3 b16 o4 d16 o4 f+16 o4 b16 @{wcBass} v12 q6 o2 f+8 r8 @{wcArp} v5 q5 o4 b16 o4 f+16 o4 d16 o3 b16
+  @e0 @v0 t112 @{wcBass} v13 q6 o1 a8 r8 @{wcArp} v5 q5 o4 c+16 o4 e16 o4 a16 o5 c+16 @{wcBass} v12 q6 o2 e8 r8 @{wcArp} v5 q5 o5 c+16 o4 a16 o4 e16 o4 c+16
+}
+// encounter: 2小節
+$encounter = {
+  @e0 @v0 t152 @{wcBass} v13 q6 o1 a+8 r8 @{wcArp} v5 q5 o3 a+16 o4 c+16 o4 e16 o4 g16 @{wcBass} v12 q6 o2 f8 r8 @{wcArp} v5 q5 o4 g16 o4 e16 o4 c+16 o3 a+16
+  @e0 @v0 t152 @{wcBass} v13 q6 o1 a8 r8 @{wcArp} v5 q5 o4 c+16 o4 e16 o4 g16 o4 a16 @{wcBass} v12 q6 o2 e8 r8 @{wcArp} v5 q5 o4 a16 o4 g16 o4 e16 o4 c+16
+}
+// good: 32小節
+$good = {
+  @e0 @v0 t152 @{wcBattleBass} q6 v10 o3 d8 v8 o3 d8 v10 o3 d8 v8 o3 a8 v10 o3 d8 v8 o3 d8 v10 o4 d8 v8 o3 a8
+  @e0 @v0 t152 @{wcBattleBass} q6 v10 o2 a8 v8 o2 a8 v10 o2 a8 v8 o3 e8 v10 o2 a8 v8 o2 a8 v10 o3 a8 v8 o3 e8
+  @e0 @v0 t152 @{wcBattleBass} q6 v10 o2 g8 v8 o2 g8 v10 o2 g8 v8 o3 d8 v10 o2 g8 v8 o2 g8 v10 o3 g8 v8 o3 d8
+  @e0 @v0 t152 @{wcBattleBass} q6 v10 o2 a8 v8 o2 a8 v10 o2 a8 v8 o3 e8 v10 o2 a8 v8 o2 a8 v10 o3 a8 v8 o3 e8
+  @e0 @v0 t152 @{wcBattleBass} q6 v10 o3 d8 v8 o3 d8 v10 o3 d8 v8 o3 a8 v10 o3 d8 v8 o3 d8 v10 o4 d8 v8 o3 a8
+  @e0 @v0 t152 @{wcBattleBass} q6 v10 o2 a8 v8 o2 a8 v10 o2 a8 v8 o3 e8 v10 o2 a8 v8 o2 a8 v10 o3 a8 v8 o3 e8
+  @e0 @v0 t152 @{wcBattleBass} q6 v10 o2 g8 v8 o2 g8 v10 o2 g8 v8 o3 d8 v10 o2 g8 v8 o2 g8 v10 o3 g8 v8 o3 d8
+  @e0 @v0 t152 @{wcBattleBass} q6 v10 o2 a8 v8 o2 a8 v10 o2 a8 v8 o3 e8 v10 o2 a8 v8 o2 a8 v10 o3 a8 v8 o3 e8
+  @e0 @v0 t152 @{wcBattleBass} q6 v10 o2 b8 v8 o2 b8 v10 o2 b8 v8 o3 f+8 v10 o2 b8 v8 o2 b8 v10 o3 b8 v8 o3 f+8
+  @e0 @v0 t152 @{wcBattleBass} q6 v10 o2 g8 v8 o2 g8 v10 o2 g8 v8 o3 d8 v10 o2 g8 v8 o2 g8 v10 o3 g8 v8 o3 d8
+  @e0 @v0 t152 @{wcBattleBass} q6 v10 o2 a8 v8 o2 a8 v10 o2 a8 v8 o3 e8 v10 o2 a8 v8 o2 a8 v10 o3 a8 v8 o3 e8
+  @e0 @v0 t152 @{wcBattleBass} q6 v10 o2 b8 v8 o2 b8 v10 o2 b8 v8 o3 f+8 v10 o2 b8 v8 o2 b8 v10 o3 b8 v8 o3 f+8
+  @e0 @v0 t152 @{wcBattleBass} q6 v10 o2 g8 v8 o2 g8 v10 o2 g8 v8 o3 d8 v10 o2 g8 v8 o2 g8 v10 o3 g8 v8 o3 d8
+  @e0 @v0 t152 @{wcBattleBass} q6 v10 o2 a8 v8 o2 a8 v10 o2 a8 v8 o3 e8 v10 o2 a8 v8 o2 a8 v10 o3 a8 v8 o3 e8
+  @e0 @v0 t152 @{wcBattleBass} q6 v10 o3 d8 v8 o3 d8 v10 o3 d8 v8 o3 a8 v10 o3 d8 v8 o3 d8 v10 o4 d8 v8 o3 a8
+  @e0 @v0 t152 @{wcBattleBass} q6 v10 o2 a8 v8 o2 a8 v10 o2 a8 v8 o3 e8 v10 o2 a8 v8 o2 a8 v10 o3 a8 v8 o3 e8
+  @e0 @v0 t152 @{wcBattleBass} q6 v10 o2 b8 v8 o2 b8 v10 o2 b8 v8 o3 f+8 v10 o2 b8 v8 o2 b8 v10 o3 b8 v8 o3 f+8
+  @e0 @v0 t152 @{wcBattleBass} q6 v10 o2 g8 v8 o2 g8 v10 o2 g8 v8 o3 d8 v10 o2 g8 v8 o2 g8 v10 o3 g8 v8 o3 d8
+  @e0 @v0 t152 @{wcBattleBass} q6 v10 o3 d8 v8 o3 d8 v10 o3 d8 v8 o3 a8 v10 o3 d8 v8 o3 d8 v10 o4 d8 v8 o3 a8
+  @e0 @v0 t152 @{wcBattleBass} q6 v10 o2 a8 v8 o2 a8 v10 o2 a8 v8 o3 e8 v10 o2 a8 v8 o2 a8 v10 o3 a8 v8 o3 e8
+  @e0 @v0 t152 @{wcBattleBass} q6 v10 o2 g8 v8 o2 g8 v10 o2 g8 v8 o3 d8 v10 o2 g8 v8 o2 g8 v10 o3 g8 v8 o3 d8
+  @e0 @v0 t152 @{wcBattleBass} q6 v10 o2 a8 v8 o2 a8 v10 o2 a8 v8 o3 e8 v10 o2 a8 v8 o2 a8 v10 o3 a8 v8 o3 e8
+  @e0 @v0 t152 @{wcBattleBass} q6 v10 o3 d8 v8 o3 d8 v10 o3 d8 v8 o3 a8 v10 o3 d8 v8 o3 d8 v10 o4 d8 v8 o3 a8
+  @e0 @v0 t152 @{wcBattleBass} q6 v10 o2 a8 v8 o2 a8 v10 o2 a8 v8 o3 e8 v10 o2 a8 v8 o2 a8 v10 o3 a8 v8 o3 e8
+  @e0 @v0 t152 @{wcBattleBass} q6 v10 o3 d8 v8 o3 d8 v10 o3 d8 v8 o3 a8 v10 o3 d8 v8 o3 d8 v10 o4 d8 v8 o3 a8
+  @e0 @v0 t152 @{wcBattleBass} q6 v10 o2 a8 v8 o2 a8 v10 o2 a8 v8 o3 e8 v10 o2 a8 v8 o2 a8 v10 o3 a8 v8 o3 e8
+  @e0 @v0 t152 @{wcBattleBass} q6 v10 o2 g8 v8 o2 g8 v10 o2 g8 v8 o3 d8 v10 o2 g8 v8 o2 g8 v10 o3 g8 v8 o3 d8
+  @e0 @v0 t152 @{wcBattleBass} q6 v10 o2 a8 v8 o2 a8 v10 o2 a8 v8 o3 e8 v10 o2 a8 v8 o2 a8 v10 o3 a8 v8 o3 e8
+  @e0 @v0 t152 @{wcBattleBass} q6 v10 o3 d8 v8 o3 d8 v10 o3 d8 v8 o3 a8 v10 o3 d8 v8 o3 d8 v10 o4 d8 v8 o3 a8
+  @e0 @v0 t152 @{wcBattleBass} q6 v10 o2 a8 v8 o2 a8 v10 o2 a8 v8 o3 e8 v10 o2 a8 v8 o2 a8 v10 o3 a8 v8 o3 e8
+  @e0 @v0 t152 @{wcBattleBass} q6 v10 o2 g8 v8 o2 g8 v10 o2 g8 v8 o3 d8 v10 o2 g8 v8 o2 g8 v10 o3 g8 v8 o3 d8
+  @e0 @v0 t152 @{wcBattleBass} q6 v10 o2 a8 v8 o2 a8 v10 o2 a8 v8 o3 e8 v10 o2 a8 v8 o2 a8 v10 o3 a8 v8 o3 e8
+}
+// bad: 8小節
+$bad = {
+  @e0 @v0 t152 @{wcBattleBass} q6 v12 o3 d8 v10 o3 d8 v12 o3 d8 v10 o3 a8 v12 o3 d8 v10 o3 d8 v12 o4 d8 v10 o3 a8
+  @e0 @v0 t152 @{wcBattleBass} q6 v12 o3 d+8 v10 o3 d+8 v12 o3 d+8 v10 o3 a+8 v12 o3 d+8 v10 o3 d+8 v12 o4 d+8 v10 o3 a+8
+  @e0 @v0 t152 @{wcBattleBass} q6 v12 o2 a+8 v10 o2 a+8 v12 o2 a+8 v10 o3 e8 v12 o2 a+8 v10 o2 a+8 v12 o3 a+8 v10 o3 e8
+  @e0 @v0 t152 @{wcBattleBass} q6 v12 o2 a8 v10 o2 a8 v12 o2 a8 v10 o3 e8 v12 o2 a8 v10 o2 a8 v12 o3 a8 v10 o3 e8
+  @e0 @v0 t152 @{wcBattleBass} q6 v12 o2 g8 v10 o2 g8 v12 o2 g8 v10 o3 d8 v12 o2 g8 v10 o2 g8 v12 o3 g8 v10 o3 d8
+  @e0 @v0 t152 @{wcBattleBass} q6 v12 o3 d+8 v10 o3 d+8 v12 o3 d+8 v10 o3 a+8 v12 o3 d+8 v10 o3 d+8 v12 o4 d+8 v10 o3 a+8
+  @e0 @v0 t152 @{wcBattleBass} q6 v12 o2 a+8 v10 o2 a+8 v12 o2 a+8 v10 o3 e8 v12 o2 a+8 v10 o2 a+8 v12 o3 a+8 v10 o3 e8
+  @e0 @v0 t152 @{wcBattleBass} q6 v12 o2 a8 v10 o2 a8 v12 o2 a8 v10 o3 e8 v12 o2 a8 v10 o2 a8 v12 o3 a8 v10 o3 e8
+}
+// win: 4小節
+$win = {
+  @e0 @v0 t132 @{wcBass} v13 q6 o2 d8 r8 @{wcArp} v5 q5 o4 d16 o4 f+16 o4 a16 o5 d16 @{wcBass} v12 q6 o2 a8 r8 @{wcArp} v5 q5 o5 d16 o4 a16 o4 f+16 o4 d16
+  @e0 @v0 t132 @{wcBass} v13 q6 o1 g8 r8 @{wcArp} v5 q5 o3 b16 o4 d16 o4 g16 o4 b16 @{wcBass} v12 q6 o2 d8 r8 @{wcArp} v5 q5 o4 b16 o4 g16 o4 d16 o3 b16
+  @e0 @v0 t132 @{wcBass} v13 q6 o1 a8 r8 @{wcArp} v5 q5 o4 c+16 o4 e16 o4 a16 o5 c+16 @{wcBass} v12 q6 o2 e8 r8 @{wcArp} v5 q5 o5 c+16 o4 a16 o4 e16 o4 c+16
+  @e0 @v0 t132 @{wcBass} v12 q6 o2 d2 r2
+}
+// lose: 4小節
+$lose = {
+  @e0 @v0 t96 @{wcBass} v13 q6 o2 d8 r8 @{wcArp} v5 q5 o4 d16 o4 f16 o4 a16 o5 d16 @{wcBass} v12 q6 o2 a8 r8 @{wcArp} v5 q5 o5 d16 o4 a16 o4 f16 o4 d16
+  @e0 @v0 t96 @{wcBass} v13 q6 o2 d+8 r8 @{wcArp} v5 q5 o4 d+16 o4 g16 o4 a+16 o5 d+16 @{wcBass} v12 q6 o2 a+8 r8 @{wcArp} v5 q5 o5 d+16 o4 a+16 o4 g16 o4 d+16
+  @e0 @v0 t96 @{wcBass} v13 q6 o1 a8 r8 @{wcArp} v5 q5 o4 c+16 o4 e16 o4 g16 o4 a16 @{wcBass} v12 q6 o2 e8 r8 @{wcArp} v5 q5 o4 a16 o4 g16 o4 e16 o4 c+16
+  @e0 @v0 t96 @{wcBass} v12 q6 o2 d2 r2
+}
+$fieldShort = {
+  @e0 @v0 t112 @{wcBass} v13 q6 o2 d8 r8 @{wcArp} v5 q5 o4 d16 o4 f+16 o4 a16 o5 d16 @{wcBass} v12 q6 o2 a8 r8 @{wcArp} v5 q5 o5 d16 o4 a16 o4 f+16 o4 d16
+  @e0 @v0 t112 @{wcBass} v13 q6 o1 g8 r8 @{wcArp} v5 q5 o3 b16 o4 d16 o4 g16 o4 b16 @{wcBass} v12 q6 o2 d8 r8 @{wcArp} v5 q5 o4 b16 o4 g16 o4 d16 o3 b16
+  @e0 @v0 t112 @{wcBass} v13 q6 o1 b8 r8 @{wcArp} v5 q5 o3 b16 o4 d16 o4 f+16 o4 b16 @{wcBass} v12 q6 o2 f+8 r8 @{wcArp} v5 q5 o4 b16 o4 f+16 o4 d16 o3 b16
+  @e0 @v0 t112 @{wcBass} v13 q6 o1 a8 r8 @{wcArp} v5 q5 o4 c+16 o4 e16 o4 a16 o5 c+16 @{wcBass} v12 q6 o2 e8 r8 @{wcArp} v5 q5 o5 c+16 o4 a16 o4 e16 o4 c+16
+}
+// 演奏順。角括弧は繰り返し。
+$intro [$field]2 $encounter $good [$bad]2 [$crisis]2 $win $fieldShort $encounter [$bad]2 [$crisis]2 $lose
+
+// @channel 3 打楽器／戦闘の副旋律
+// crisis: 8小節
+$crisis = {
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 f16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 f16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 f16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 f16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 f16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 f16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 f16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 f16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 f16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 f16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 f16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 f16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 f16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 f16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 f16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 f16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o3 a+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 a+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o3 a+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 a+16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o3 g16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 g16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o3 g16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 g16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o3 a+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 a+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o3 a+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 a+16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o3 a16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 a16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o3 a16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 a16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o3 a16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 a16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o3 a16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 a16
+}
+// intro: 2小節
+$intro = {
+  @e0 @v0 t112 @{noise} @e{wcDrumEnv} v2 q2 o6 a8 r8 a8 r8 a8 r8 a8 r8
+  @e0 @v0 t112 @{noise} @e{wcDrumEnv} v2 q2 o6 a8 r8 a8 r8 a8 r8 a8 r8
+}
+// field: 8小節
+$field = {
+  @e0 @v0 t112 @{noise} @e{wcDrumEnv} v2 q2 o6 a8 r8 a8 r8 a8 r8 a8 r8
+  @e0 @v0 t112 @{noise} @e{wcDrumEnv} v2 q2 o6 a8 r8 a8 r8 a8 r8 a8 r8
+  @e0 @v0 t112 @{noise} @e{wcDrumEnv} v2 q2 o6 a8 r8 a8 r8 a8 r8 a8 r8
+  @e0 @v0 t112 @{noise} @e{wcDrumEnv} v2 q2 o6 a8 r8 a8 r8 a8 r8 a8 r8
+  @e0 @v0 t112 @{noise} @e{wcDrumEnv} v2 q2 o6 a8 r8 a8 r8 a8 r8 a8 r8
+  @e0 @v0 t112 @{noise} @e{wcDrumEnv} v2 q2 o6 a8 r8 a8 r8 a8 r8 a8 r8
+  @e0 @v0 t112 @{noise} @e{wcDrumEnv} v2 q2 o6 a8 r8 a8 r8 a8 r8 a8 r8
+  @e0 @v0 t112 @{noise} @e{wcDrumEnv} v2 q2 o6 a8 r8 a8 r8 a8 r8 a8 r8
+}
+// encounter: 2小節
+$encounter = {
+  @e0 @v0 t152 @{wcKick} v10 q3 o2 c8 @{noise} @e{wcDrumEnv} v3 o6 a8 v6 o4 a8 v3 o6 a8 @{wcKick} v9 o2 c8 @{noise} @e{wcDrumEnv} v3 o6 a8 v6 o4 a8 v3 o6 a8
+  @e0 @v0 t152 @{wcKick} v10 q3 o2 c8 @{noise} @e{wcDrumEnv} v3 o6 a8 v6 o4 a8 v3 o6 a8 @{wcKick} v9 o2 c8 @{noise} @e{wcDrumEnv} v3 o6 a8 v6 o4 a8 v3 o6 a8
+}
+// good: 32小節
+$good = {
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 f+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 f+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 f+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 f+16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 e16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 b16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 e16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 f+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 f+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 f+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 f+16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 e16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 b16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 e16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 b16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 b16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 e16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 b16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 b16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 e16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 f+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 f+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 f+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 f+16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 e16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 b16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 b16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 f+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 f+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 f+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 f+16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 e16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 b16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 e16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 f+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 f+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 f+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 f+16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 e16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 f+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 f+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 f+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 f+16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 e16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 b16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 e16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 f+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 f+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 f+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 f+16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 e16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 b16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 e16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16
+}
+// bad: 8小節
+$bad = {
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 f16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 f16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 f16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 f16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 d+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 d+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d+16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o3 a+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 a+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o3 a+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 a+16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o3 a+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 a+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o3 a+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 a+16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o3 a16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 a16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o3 a16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 a16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o3 a+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 a+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o3 a+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 a+16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o3 g16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 g16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o3 g16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 g16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o3 a+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 a+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o3 a+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 a+16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o3 g16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 g16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o3 g16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 g16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o3 a+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 a+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o3 a+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 a+16
+  @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 c+16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o3 a16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 a16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o3 a16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 a16
+}
+// win: 4小節
+$win = {
+  @e0 @v0 t132 @{wcKick} v10 q3 o2 c8 @{noise} @e{wcDrumEnv} v3 o6 a8 v6 o4 a8 v3 o6 a8 @{wcKick} v9 o2 c8 @{noise} @e{wcDrumEnv} v3 o6 a8 v6 o4 a8 v3 o6 a8
+  @e0 @v0 t132 @{wcKick} v10 q3 o2 c8 @{noise} @e{wcDrumEnv} v3 o6 a8 v6 o4 a8 v3 o6 a8 @{wcKick} v9 o2 c8 @{noise} @e{wcDrumEnv} v3 o6 a8 v6 o4 a8 v3 o6 a8
+  @e0 @v0 t132 @{wcKick} v10 q3 o2 c8 @{noise} @e{wcDrumEnv} v3 o6 a8 v6 o4 a8 v3 o6 a8 @{wcKick} v9 o2 c8 @{noise} @e{wcDrumEnv} v3 o6 a8 v6 o4 a8 v3 o6 a8
+  @e0 @v0 t132 @{wcKick} v8 q3 o2 c8 r8 r2.
+}
+// lose: 4小節
+$lose = {
+  @e0 @v0 t96 @{noise} @e{wcDrumEnv} v2 q2 o6 a8 r8 a8 r8 a8 r8 a8 r8
+  @e0 @v0 t96 @{noise} @e{wcDrumEnv} v2 q2 o6 a8 r8 a8 r8 a8 r8 a8 r8
+  @e0 @v0 t96 @{noise} @e{wcDrumEnv} v2 q2 o6 a8 r8 a8 r8 a8 r8 a8 r8
+  @e0 @v0 t96 @{wcKick} v8 q3 o2 c8 r8 r2.
+}
+$fieldShort = {
+  @e0 @v0 t112 @{noise} @e{wcDrumEnv} v2 q2 o6 a8 r8 a8 r8 a8 r8 a8 r8
+  @e0 @v0 t112 @{noise} @e{wcDrumEnv} v2 q2 o6 a8 r8 a8 r8 a8 r8 a8 r8
+  @e0 @v0 t112 @{noise} @e{wcDrumEnv} v2 q2 o6 a8 r8 a8 r8 a8 r8 a8 r8
+  @e0 @v0 t112 @{noise} @e{wcDrumEnv} v2 q2 o6 a8 r8 a8 r8 a8 r8 a8 r8
+}
+// 演奏順。角括弧は繰り返し。
+$intro [$field]2 $encounter $good [$bad]2 [$crisis]2 $win $fieldShort $encounter [$bad]2 [$crisis]2 $lose
