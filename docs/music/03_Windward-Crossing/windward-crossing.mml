@@ -16,7 +16,7 @@
 
 // @channel 1 主旋律
 // 音色・テンポ・音量の共通設定。音符は下のフレーズ／各曲に記述。
-$sound1 = { @e0 @v0 t112 @{wcFieldLead} @s2 @v1 v9 q6 o5 }
+$sound1 = { @e0 @v0 t112 @{wcFieldLead} @s2 @v1 v10 q6 o5 }
 $sound2 = { @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o4 }
 $sound3 = { @e0 @v0 t152 @{wcBattleLead} @v1 v7 q6 o5 }
 $sound4 = { @e0 @v0 t152 @{wcBattleLead} @v1 v9 q6 o5 }
@@ -25,10 +25,10 @@ $sound6 = { @e0 @v0 t132 @{wcBattleLead} @v1 v9 q6 o5 }
 $sound7 = { @e0 @v0 t96 @{wcFieldLead} @v1 v9 q6 o5 }
 $sound8 = { @e0 @v0 t96 @{wcFieldLead} @v1 v9 q6 o4 }
 // 複数箇所で使うフレーズ。
-$phrase1 = { $sound1 f+8 a8 d4 r8 @{wcArp} @s0 v5 o4 a16 d16 f+8 r8 }
+$phrase1 = { $sound1 f+8 a8 d4 r8 @{wcArp} @s0 v6 o4 a16 d16 f+8 r8 }
 $phrase2 = { $sound1 g8 b8 a4 f+8 e8 d4 }
 $phrase3 = { $sound1 f+8 a8 b4 a8 f+8 d8 r8 }
-$phrase4 = { $sound1 e4 c+8 e8 a4 r8 @{wcArp} @s0 v5 o4 e16 a16 }
+$phrase4 = { $sound1 e4 c+8 e8 a4 r8 @{wcArp} @s0 v6 o4 e16 a16 }
 $phrase5 = { $sound2 d8 f+16 a16 o5 d4 o4 a8 o5 d8 e8 f+8 }
 $phrase6 = { $sound3 e4 c+8 o4 a8 o5 c+8 e8 a8 r8 }
 $phrase7 = { $sound2 g8 b16 o5 d16 g4 f+8 e8 d4 }
@@ -67,7 +67,7 @@ $encounter = {
   @e0 @v0 t152 @{wcBattleLead} @v1 v9 q6 o4 b-16 c+16 e16 g16 b-16 o5 c+16 e16 g16 b-8 g8 e8 c+8
   $sound4 e16 g16 a16 b-16 a8 e8 c+4 o4 a8 r8
 }
-// good: 32小節
+// good: 24小節（中盤8小節を省略）
 $good = {
   $phrase5
   $phrase6
@@ -85,14 +85,6 @@ $good = {
   $sound3 e4 c+8 o4 a8 o5 g8 e8 c+4
   $sound2 f+8 a8 o5 d8 e8 f+4 e8 d8
   $sound3 c+4 o4 a8 b8 o5 c+8 e8 a8 r8
-  $sound2 b4 o5 d4 f+8 e8 d4
-  $sound3 d8 o4 b8 g4 b8 o5 d8 g4
-  $sound3 f+4 e8 d8 o4 a4 o5 d4
-  $sound3 e8 c+8 o4 a8 b8 o5 c+4 e4
-  $sound3 g4 f+8 e8 d4 o4 b4
-  $sound3 e4 g8 e8 c+4 o4 a4
-  $sound2 a8 o5 d8 f+4 e8 d8 o4 a4
-  $sound3 c+8 e8 g4 e8 c+8 o4 a8 r8
   $phrase5
   $phrase6
   $phrase7
@@ -139,7 +131,7 @@ $intro [$field]2 $encounter $good [$bad]2 [$crisis]2 $win $fieldShort $encounter
 
 // @channel 2 ベース／草原のアルペジオ
 // 音色・テンポ・音量の共通設定。音符は下のフレーズ／各曲に記述。
-$sound1 = { @e0 @v0 t112 @{wcBass} v14 q6 o1 }
+$sound1 = { @e0 @v0 t112 @{wcBass} v15 q6 o1 }
 $sound2 = { @e0 @v0 t152 @{wcBass} v13 q6 o1 }
 $sound3 = { @e0 @v0 t132 @{wcBass} v13 q6 o1 }
 $sound4 = { @e0 @v0 t96 @{wcBass} v13 q6 o2 }
@@ -147,10 +139,10 @@ $sound4 = { @e0 @v0 t96 @{wcBass} v13 q6 o2 }
 $phrase1 = { @e0 @v0 t152 @{wcBattleBass} q5 v12 o3 d12 v10 o4 d12 v10 o3 a12 v12 o3 d12 v10 o4 d12 v10 o3 a12 v12 o3 d12 v10 o4 d12 v10 o3 a12 v12 o4 d12 v10 o3 a12 v10 o3 d12 }
 $phrase2 = { @e0 @v0 t152 @{wcBattleBass} q5 v12 o2 a+12 v10 o3 a+12 v10 o3 f12 v12 o2 a+12 v10 o3 a+12 v10 o3 f12 v12 o2 a+12 v10 o3 a+12 v10 o3 f12 v12 o3 a+12 v10 o3 f12 v10 o2 a+12 }
 $phrase3 = { @e0 @v0 t152 @{wcBattleBass} q5 v12 o2 a12 v10 o3 a12 v10 o3 e12 v12 o2 a12 v10 o3 a12 v10 o3 e12 v12 o2 a12 v10 o3 a12 v10 o3 e12 v12 o3 a12 v10 o3 e12 v10 o2 a12 }
-$phrase4 = { @e0 @v0 t112 @{wcBass} v14 q6 o2 d8 r8 @{wcArp} v6 q5 o4 d16 o4 f+16 o4 a16 o5 d16 @{wcBass} v13 q6 o2 a8 r8 @{wcArp} v6 q5 o5 d16 o4 a16 o4 f+16 o4 d16 }
-$phrase5 = { $sound1 g8 r8 @{wcArp} v6 q5 o3 b16 o4 d16 o4 g16 o4 b16 @{wcBass} v13 q6 o2 d8 r8 @{wcArp} v6 q5 o4 b16 o4 g16 o4 d16 o3 b16 }
-$phrase6 = { $sound1 b8 r8 @{wcArp} v6 q5 o3 b16 o4 d16 o4 f+16 o4 b16 @{wcBass} v13 q6 o2 f+8 r8 @{wcArp} v6 q5 o4 b16 o4 f+16 o4 d16 o3 b16 }
-$phrase7 = { $sound1 a8 r8 @{wcArp} v6 q5 o4 c+16 o4 e16 o4 a16 o5 c+16 @{wcBass} v13 q6 o2 e8 r8 @{wcArp} v6 q5 o5 c+16 o4 a16 o4 e16 o4 c+16 }
+$phrase4 = { @e0 @v0 t112 @{wcBass} v15 q6 o2 d8 r8 @{wcArp} v7 q5 o4 d16 o4 f+16 o4 a16 o5 d16 @{wcBass} v14 q6 o2 a8 r8 @{wcArp} v7 q5 o5 d16 o4 a16 o4 f+16 o4 d16 }
+$phrase5 = { $sound1 g8 r8 @{wcArp} v7 q5 o3 b16 o4 d16 o4 g16 o4 b16 @{wcBass} v14 q6 o2 d8 r8 @{wcArp} v7 q5 o4 b16 o4 g16 o4 d16 o3 b16 }
+$phrase6 = { $sound1 b8 r8 @{wcArp} v7 q5 o3 b16 o4 d16 o4 f+16 o4 b16 @{wcBass} v14 q6 o2 f+8 r8 @{wcArp} v7 q5 o4 b16 o4 f+16 o4 d16 o3 b16 }
+$phrase7 = { $sound1 a8 r8 @{wcArp} v7 q5 o4 c+16 o4 e16 o4 a16 o5 c+16 @{wcBass} v14 q6 o2 e8 r8 @{wcArp} v7 q5 o5 c+16 o4 a16 o4 e16 o4 c+16 }
 $phrase8 = { @e0 @v0 t152 @{wcBattleBass} q6 v10 o3 d8 v8 o3 d8 v10 o3 d8 v8 o3 a8 v10 o3 d8 v8 o3 d8 v10 o4 d8 v8 o3 a8 }
 $phrase9 = { @e0 @v0 t152 @{wcBattleBass} q6 v10 o2 a8 v8 o2 a8 v10 o2 a8 v8 o3 e8 v10 o2 a8 v8 o2 a8 v10 o3 a8 v8 o3 e8 }
 $phrase10 = { @e0 @v0 t152 @{wcBattleBass} q6 v10 o2 g8 v8 o2 g8 v10 o2 g8 v8 o3 d8 v10 o2 g8 v8 o2 g8 v10 o3 g8 v8 o3 d8 }
@@ -190,7 +182,7 @@ $encounter = {
   $sound2 a+8 r8 @{wcArp} v5 q5 o3 a+16 o4 c+16 o4 e16 o4 g16 @{wcBass} v12 q6 o2 f8 r8 @{wcArp} v5 q5 o4 g16 o4 e16 o4 c+16 o3 a+16
   $sound2 a8 r8 @{wcArp} v5 q5 o4 c+16 o4 e16 o4 g16 o4 a16 @{wcBass} v12 q6 o2 e8 r8 @{wcArp} v5 q5 o4 a16 o4 g16 o4 e16 o4 c+16
 }
-// good: 32小節
+// good: 24小節（中盤8小節を省略）
 $good = {
   $phrase8
   $phrase9
@@ -204,14 +196,6 @@ $good = {
   $phrase10
   $phrase9
   $phrase11
-  $phrase10
-  $phrase9
-  $phrase8
-  $phrase9
-  $phrase11
-  $phrase10
-  $phrase8
-  $phrase9
   $phrase10
   $phrase9
   $phrase8
@@ -306,7 +290,7 @@ $encounter = {
   $phrase6
   $phrase6
 }
-// good: 32小節
+// good: 24小節（中盤8小節を省略）
 $good = {
   $phrase7
   $phrase8
@@ -320,14 +304,6 @@ $good = {
   $phrase9
   $phrase8
   $phrase9
-  $phrase9
-  $phrase8
-  $phrase7
-  $phrase8
-  $phrase9
-  $phrase9
-  $phrase7
-  $phrase8
   $phrase9
   $phrase8
   $phrase7
