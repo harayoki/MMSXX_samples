@@ -14,6 +14,41 @@
 // @{noise} 打楽器。@e{wcDrumEnv}で短く減衰する。
 // 音色はplayer.jsの標準APIで登録。@v1は標準ビブラート。
 
+// 再生設定：ここだけ編集すれば全3パートへ反映されます。
+// 回数は 0＝省略、1以上＝指定回数、*＝無限（それ以降は再生しません）。
+// 単独再生は、目的の曲以外をすべて0にしてください。
+$INTRO_COUNT = { 1 } // イントロ
+$FIELD_COUNT = { 2 } // 草原
+$ENCOUNTER_COUNT = { 1 } // エンカウント
+$GOOD_COUNT = { 1 } // 通常戦闘（有利）
+$BAD_COUNT = { 2 } // 不利
+$CRISIS_COUNT = { 2 } // 大ピンチ
+$WIN_COUNT = { 1 } // 勝利
+$FIELD_SHORT_COUNT = { 1 } // 短い草原
+$ENCOUNTER_AGAIN_COUNT = { 1 } // 2度目のエンカウント
+$BAD_AGAIN_COUNT = { 2 } // 2度目の不利
+$CRISIS_AGAIN_COUNT = { 2 } // 2度目の大ピンチ
+$LOSE_COUNT = { 1 } // 敗北
+
+// 演奏順も全パート共通。順番を変える場合はこの定義を編集します。
+$ORDER = {
+  [$intro]$INTRO_COUNT
+  [$field]$FIELD_COUNT
+  [$encounter]$ENCOUNTER_COUNT
+  [$good]$GOOD_COUNT
+  [$bad]$BAD_COUNT
+  [$crisis]$CRISIS_COUNT
+  [$win]$WIN_COUNT
+  [$fieldShort]$FIELD_SHORT_COUNT
+  [$encounter]$ENCOUNTER_AGAIN_COUNT
+  [$bad]$BAD_AGAIN_COUNT
+  [$crisis]$CRISIS_AGAIN_COUNT
+  [$lose]$LOSE_COUNT
+}
+
+// 各曲の先頭で状態を初期化。その後、曲固有の設定を指定します。
+$RESET = { o4 l4 t120 v10 q7 p3 @{pulse50} @e0 @d0 @v0 @s0 @o0 }
+
 // @channel 1 主旋律
 // 音色・テンポ・音量の共通設定。音符は下のフレーズ／各曲に記述。
 $sound1 = { @e0 @v0 t112 @{wcFieldLead} @s2 @v1 v10 q6 o5 }
@@ -36,6 +71,7 @@ $phrase8 = { $sound3 e8 c+8 o4 a4 o5 c+8 e8 a8 r8 }
 $phrase9 = { $sound2 f+8 a16 o5 d16 f+4 e8 d8 o4 a4 }
 // crisis: 8小節
 $crisis = {
+  $RESET
   $sound4 r8 a8 o6 d4 o5 a8 r8 f8 e8
   $sound4 d8. f16 a8 d8 r8 a8 f4
   $sound4 r8 f8 b-4 f8 r8 d8 f8
@@ -47,11 +83,13 @@ $crisis = {
 }
 // intro: 2小節
 $intro = {
+  $RESET
   @e0 @v0 t112 @{wcFieldLead} @v1 v9 q6 o4 d8 f+8 a8 o5 d8 f+4 e8 d8
   @e0 @v0 t112 @{wcFieldLead} @v1 v9 q6 o5 c+4 o4 a8 b8 o5 c+8 e8 a8 r8
 }
 // field: 8小節
 $field = {
+  $RESET
   $phrase1
   $phrase2
   $phrase3
@@ -64,11 +102,13 @@ $field = {
 }
 // encounter: 2小節
 $encounter = {
+  $RESET
   @e0 @v0 t152 @{wcBattleLead} @v1 v9 q6 o4 b-16 c+16 e16 g16 b-16 o5 c+16 e16 g16 b-8 g8 e8 c+8
   $sound4 e16 g16 a16 b-16 a8 e8 c+4 o4 a8 r8
 }
 // good: 16小節（休符を活用）
 $good = {
+  $RESET
   $sound2  d8 f+16 a16 o5 d4 o4 a8 o5 d8 e8 f+16 r16
   $sound3  e4 c+8 o4 a8 o5 c+8 e8 a8 r8
   $sound2  g8 b16 o5 d16 g4 f+8 e8 d8 r8
@@ -88,6 +128,7 @@ $good = {
 }
 // bad: 8小節
 $bad = {
+  $RESET
   $sound5 a4. f8 e8 f8 d4
   $sound5 g4. f8 e-4 g8 b-8
   $sound5 g4 e8 c+8 e4 g4
@@ -99,6 +140,7 @@ $bad = {
 }
 // win: 4小節
 $win = {
+  $RESET
   $sound6 d8 f+16 a16 o6 d4 o5 a8 b8 o6 d4
   @e0 @v0 t132 @{wcBattleLead} @v1 v9 q6 o6 d8 o5 b8 g4 a8 b8 o6 d4
   $sound6 c+8 e8 a4 g8 e8 c+4
@@ -106,30 +148,22 @@ $win = {
 }
 // lose: 4小節
 $lose = {
+  $RESET
   $sound7 a4 f4 e4 d4
   $sound7 e-4 o4 b-4 g2
   $sound8 a4 o5 c+4 e4 c+4
   $sound8 d2 r2
 }
 $fieldShort = {
+  $RESET
   $phrase1
   $phrase2
   $phrase3
   $phrase4
   @s0
 }
-// 単独再生：下の演奏順1行を、全3チャンネルとも同じ例に置き換える。
-// $field                  // 草原を1周
-// [$field]2               // 草原を2周
-// $good                   // 通常戦闘（有利）を1周
-// $bad                    // 不利を1周
-// $crisis                 // 大ピンチを1周
-// $intro $field           // イントロ付き草原
-// $win                    // 勝利
-// $lose                   // 敗北
-// 定義は残してよい。呼び出さないマクロは鳴らない。定義は呼び出しより後でも可。
-// 演奏順。角括弧は繰り返し。
-$intro [$field]2 $encounter $good [$bad]2 [$crisis]2 $win $fieldShort $encounter [$bad]2 [$crisis]2 $lose
+// 演奏順は冒頭の $ORDER と回数で指定します。
+$ORDER
 
 // @channel 2 ベース／草原のアルペジオ
 // 音色・テンポ・音量の共通設定。音符は下のフレーズ／各曲に記述。
@@ -154,6 +188,7 @@ $phrase13 = { @e0 @v0 t152 @{wcBattleBass} q6 v12 o2 a+8 v10 o2 a+8 v12 o2 a+8 v
 $phrase14 = { @e0 @v0 t152 @{wcBattleBass} q6 v12 o2 a8 v10 o2 a8 v12 o2 a8 v10 o3 e8 v12 o2 a8 v10 o2 a8 v12 o3 a8 v10 o3 e8 }
 // crisis: 8小節
 $crisis = {
+  $RESET
   $phrase1
   $phrase1
   $phrase2
@@ -165,11 +200,13 @@ $crisis = {
 }
 // intro: 2小節
 $intro = {
+  $RESET
   @e0 @v0 t112 @{wcBass} v13 q6 o2 d8 r8 @{wcArp} v5 q5 o4 d16 o4 f+16 o4 a16 o5 d16 @{wcBass} v12 q6 o2 a8 r8 @{wcArp} v5 q5 o5 d16 o4 a16 o4 f+16 o4 d16
   @e0 @v0 t112 @{wcBass} v13 q6 o1 a8 r8 @{wcArp} v5 q5 o4 c+16 o4 e16 o4 a16 o5 c+16 @{wcBass} v12 q6 o2 e8 r8 @{wcArp} v5 q5 o5 c+16 o4 a16 o4 e16 o4 c+16
 }
 // field: 8小節
 $field = {
+  $RESET
   $phrase4
   $phrase5
   $phrase6
@@ -181,11 +218,13 @@ $field = {
 }
 // encounter: 2小節
 $encounter = {
+  $RESET
   $sound2 a+8 r8 @{wcArp} v5 q5 o3 a+16 o4 c+16 o4 e16 o4 g16 @{wcBass} v12 q6 o2 f8 r8 @{wcArp} v5 q5 o4 g16 o4 e16 o4 c+16 o3 a+16
   $sound2 a8 r8 @{wcArp} v5 q5 o4 c+16 o4 e16 o4 g16 o4 a16 @{wcBass} v12 q6 o2 e8 r8 @{wcArp} v5 q5 o4 a16 o4 g16 o4 e16 o4 c+16
 }
 // good: 16小節（休符を活用）
 $good = {
+  $RESET
   $phrase8 
   $phrase9 
   $phrase10 
@@ -205,6 +244,7 @@ $good = {
 }
 // bad: 8小節
 $bad = {
+  $RESET
   @e0 @v0 t152 @{wcBattleBass} q6 v12 o3 d8 v10 o3 d8 v12 o3 d8 v10 o3 a8 v12 o3 d8 v10 o3 d8 v12 o4 d8 v10 o3 a8
   $phrase12
   $phrase13
@@ -216,6 +256,7 @@ $bad = {
 }
 // win: 4小節
 $win = {
+  $RESET
   @e0 @v0 t132 @{wcBass} v13 q6 o2 d8 r8 @{wcArp} v5 q5 o4 d16 o4 f+16 o4 a16 o5 d16 @{wcBass} v12 q6 o2 a8 r8 @{wcArp} v5 q5 o5 d16 o4 a16 o4 f+16 o4 d16
   $sound3 g8 r8 @{wcArp} v5 q5 o3 b16 o4 d16 o4 g16 o4 b16 @{wcBass} v12 q6 o2 d8 r8 @{wcArp} v5 q5 o4 b16 o4 g16 o4 d16 o3 b16
   $sound3 a8 r8 @{wcArp} v5 q5 o4 c+16 o4 e16 o4 a16 o5 c+16 @{wcBass} v12 q6 o2 e8 r8 @{wcArp} v5 q5 o5 c+16 o4 a16 o4 e16 o4 c+16
@@ -223,29 +264,21 @@ $win = {
 }
 // lose: 4小節
 $lose = {
+  $RESET
   $sound4 d8 r8 @{wcArp} v5 q5 o4 d16 o4 f16 o4 a16 o5 d16 @{wcBass} v12 q6 o2 a8 r8 @{wcArp} v5 q5 o5 d16 o4 a16 o4 f16 o4 d16
   $sound4 d+8 r8 @{wcArp} v5 q5 o4 d+16 o4 g16 o4 a+16 o5 d+16 @{wcBass} v12 q6 o2 a+8 r8 @{wcArp} v5 q5 o5 d+16 o4 a+16 o4 g16 o4 d+16
   @e0 @v0 t96 @{wcBass} v13 q6 o1 a8 r8 @{wcArp} v5 q5 o4 c+16 o4 e16 o4 g16 o4 a16 @{wcBass} v12 q6 o2 e8 r8 @{wcArp} v5 q5 o4 a16 o4 g16 o4 e16 o4 c+16
   @e0 @v0 t96 @{wcBass} v12 q6 o2 d2 r2
 }
 $fieldShort = {
+  $RESET
   $phrase4
   $phrase5
   $phrase6
   $phrase7
 }
-// 単独再生：下の演奏順1行を、全3チャンネルとも同じ例に置き換える。
-// $field                  // 草原を1周
-// [$field]2               // 草原を2周
-// $good                   // 通常戦闘（有利）を1周
-// $bad                    // 不利を1周
-// $crisis                 // 大ピンチを1周
-// $intro $field           // イントロ付き草原
-// $win                    // 勝利
-// $lose                   // 敗北
-// 定義は残してよい。呼び出さないマクロは鳴らない。定義は呼び出しより後でも可。
-// 演奏順。角括弧は繰り返し。
-$intro [$field]2 $encounter $good [$bad]2 [$crisis]2 $win $fieldShort $encounter [$bad]2 [$crisis]2 $lose
+// 演奏順は冒頭の $ORDER と回数で指定します。
+$ORDER
 
 // @channel 3 打楽器／戦闘の副旋律
 // 音色・テンポ・音量の共通設定。音符は下のフレーズ／各曲に記述。
@@ -264,6 +297,7 @@ $phrase10 = { @e0 @v0 t132 @{wcKick} v10 q3 o2 c8 @{noise} @e{wcDrumEnv} v3 o6 a
 $phrase11 = { @e0 @v0 t96 @{noise} @e{wcDrumEnv} v2 q2 o6 a8 r8 a8 r8 a8 r8 a8 r8 }
 // crisis: 8小節
 $crisis = {
+  $RESET
   $phrase1
   $phrase1
   $phrase1
@@ -275,11 +309,13 @@ $crisis = {
 }
 // intro: 2小節
 $intro = {
+  $RESET
   $phrase5
   $phrase5
 }
 // field: 8小節
 $field = {
+  $RESET
   $phrase5
   $phrase5
   $phrase5
@@ -291,11 +327,13 @@ $field = {
 }
 // encounter: 2小節
 $encounter = {
+  $RESET
   $phrase6
   $phrase6
 }
 // good: 16小節（休符を活用）
 $good = {
+  $RESET
   @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 f+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 r16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 f+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 r16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 r16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 r16
   @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 r16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 e16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 r16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 r16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 c+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 r16
   @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 r16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 d16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 r16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 r16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o3 b16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 r16
@@ -315,6 +353,7 @@ $good = {
 }
 // bad: 8小節
 $bad = {
+  $RESET
   $phrase1
   @e0 @v0 t152 q6 @{wcKick} v10 o2 c16 @{wcBattleLead} v4 o4 d+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o4 d+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o4 d+16 @{wcKick} v9 o2 c16 @{wcBattleLead} v4 o3 a+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 a+16 @{noise} @e{wcDrumEnv} v6 o4 a16 @{wcBattleLead} v4 o3 a+16 @{noise} @e{wcDrumEnv} v3 o6 a16 @{wcBattleLead} v4 o3 a+16
   $phrase3
@@ -326,6 +365,7 @@ $bad = {
 }
 // win: 4小節
 $win = {
+  $RESET
   $phrase10
   $phrase10
   $phrase10
@@ -333,26 +373,18 @@ $win = {
 }
 // lose: 4小節
 $lose = {
+  $RESET
   $phrase11
   $phrase11
   $phrase11
   @e0 @v0 t96 @{wcKick} v8 q3 o2 c8 r8 r2.
 }
 $fieldShort = {
+  $RESET
   $phrase5
   $phrase5
   $phrase5
   $phrase5
 }
-// 単独再生：下の演奏順1行を、全3チャンネルとも同じ例に置き換える。
-// $field                  // 草原を1周
-// [$field]2               // 草原を2周
-// $good                   // 通常戦闘（有利）を1周
-// $bad                    // 不利を1周
-// $crisis                 // 大ピンチを1周
-// $intro $field           // イントロ付き草原
-// $win                    // 勝利
-// $lose                   // 敗北
-// 定義は残してよい。呼び出さないマクロは鳴らない。定義は呼び出しより後でも可。
-// 演奏順。角括弧は繰り返し。
-$intro [$field]2 $encounter $good [$bad]2 [$crisis]2 $win $fieldShort $encounter [$bad]2 [$crisis]2 $lose
+// 演奏順は冒頭の $ORDER と回数で指定します。
+$ORDER

@@ -19,7 +19,15 @@ let ctx,engine,timer,generation=0;
 const clock=t=>`${Math.floor(t/60)}:${String(Math.floor(t%60)).padStart(2,'0')}`;
 function stop(){generation++;clearInterval(timer);engine?.stopBGM();$('play').disabled=!$('src').value;$('status').textContent='Stopped';}
 $('stop').onclick=stop;
-function compile(source){return source.split(/^\/\/ @channel[^\n]*$/m).slice(1).map((s,ch)=>({...E.compileMML(s),ch}));}
+function compile(source){
+ const parts=source.split(/^\/\/ @channel[^\n]*$/m),shared=parts.shift();
+ // Standard MML definitions before the first channel are shared verbatim.
+ // No macro expansion or MML syntax conversion is performed by the page.
+ const tracks=parts.map((part,ch)=>({...E.compileMML(shared+'\n'+part),ch}));
+ if(tracks.length!==3)throw Error('Three MML channels are required.');
+ if(!tracks.some(t=>t.events.length))throw Error('再生する曲がありません。冒頭の回数を1以上にしてください。');
+ return tracks;
+}
 $('play').onclick=async()=>{
  stop();const token=generation;$('play').disabled=true;
  try{
