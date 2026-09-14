@@ -28,8 +28,22 @@ $('play').onclick=async()=>{
   engine=new E.ChipTuneSound(ctx,{psgTune:false,spatial:'mono'});engine.psgTune=false;
   output=ctx.createGain();output.gain.value=2.25;output.connect(ctx.destination);
   const start=ctx.currentTime+.09,total=Math.max(...tracks.map(t=>t.total));
-  tracks.forEach(t=>engine._scheduleTrack(t,start,output,nodes));
-  timer=setInterval(()=>{const elapsed=Math.max(0,ctx.currentTime-start);$('status').textContent=clock(Math.min(elapsed,total))+' / '+clock(total);if(elapsed>=total+.08){stop();$('status').textContent='Finished';}},100);
+  // Reserve only a short window; constructing the whole suite at once creates
+  // thousands of Web Audio nodes and can overrun the playback start time.
+  let cursor=0;
+  const tick=()=>{
+   if(token!==generation)return;
+   const now=ctx.currentTime,elapsed=Math.max(0,now-start);
+   const to=Math.min(total,Math.max(0,now+.75-start));
+   nodes=nodes.filter(n=>n.__endTime>now);
+   if(to>cursor){
+    tracks.forEach(t=>engine._scheduleTrack(t,start,output,nodes,cursor,to));
+    cursor=to;
+   }
+   $('status').textContent=clock(Math.min(elapsed,total))+' / '+clock(total);
+   if(elapsed>=total+1){stop();$('status').textContent='Finished';}
+  };
+  tick();timer=setInterval(tick,40);
  }catch(e){stop();$('status').textContent='Playback error: '+e.message;}
 };
 fetch(MusicAssets.song('windward-crossing.mml')).then(r=>{if(!r.ok)throw Error('HTTP '+r.status);return r.text();}).then(source=>{$('src').value=source;$('src').disabled=false;$('play').disabled=false;$('status').textContent='Ready';}).catch(e=>{$('status').textContent='MML load failed: '+e.message+' — Please use an HTTP server.';});
