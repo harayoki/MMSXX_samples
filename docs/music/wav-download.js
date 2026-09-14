@@ -28,7 +28,7 @@
     return new Blob([bytes], { type: 'audio/wav' });
   }
   function loopMacro(source) {
-    const match = source.replace(/\/\/[^\n]*/g, '').match(/\$LOOP_END\s*=\s*\{\s*\](\d+)\s*\}/i);
+    const match = source.replace(/\/\/[^\n]*/g, '').match(/\$LOOP_END\s*=\s*\{\s*\]?(\d+)\s*\}/i);
     if (!match) return '';
     if (Number(match[1]) < 1) throw new Error('LOOP_END の回数は1以上にしてください');
     return match[0] + '\n';

@@ -1,6 +1,6 @@
 // この数値を直すと本編のループ回数が変わります（1以上）。
 // イントロとエンディングは1回ずつ。全パート共通で、再生とWAVの両方に適用。
-$LOOP_END = { ]1 }
+$LOOP_END = { 1 }
 
 //# title Pocket Tunnel
 //# arrangement おしゃれアレンジ
@@ -43,7 +43,7 @@ c16 q3 o6 e8 q6 o6 c16 o5 a16 o5 g8 q3 o5 e2 q6 o5 d16 o5 f16 q3 o5 a8 q6 o5 f16
 g8 o5 f8 o5 e8 o5 g16 o5 b16 q3 o6 d8 q6 o5 b16 o6 d16 o6 g8 o6 f+16 o6 e16 o6 d8 q3 o5 b4 q6 o5 f16 o5 g16 q3
 o6 c8 q6 o5 g16 o6 c16 o6 f8 o6 d16 o6 c16 o5 g8 o5 f8 o5 g8 q7 o5 e16 o5 g16 o6 c16 r16 o5 g16 o5 e16 o5 d8
 o5 c4 r4
-$LOOP_END
+]$LOOP_END
 // エンディング
 @s0 q8 o5 a10 r16 r40 o5 g10&g100 r16 r80 r400 o5 e10 r40 o5 d8&d32&d320&d1600 r16 r40 r400 o4 b10 r40 o5
 d16&d80 r20 o5 c2&c8&c20 r4 r16 r80
@@ -72,7 +72,7 @@ g8&g80&g400 r8 r25 r160 r800 o4 g5&g100 r8 r25 o4 g8&g80&g400 r25 r160 r800 o4 d
 r16 r200 o4 d5&d100 r5 r40 r400 o4 a8&a80&a400 r8 r25 r160 r800 o4 a5&a100 r8 r25 o4 a8&a80&a400 r25 r160 r800
 o4 g5&g25 r8 r100 o4 g10&g50 r8 r16 r200 o4 g5&g100 r5 r40 r400 o4 g8&g80&g400 r8 r25 r160 r800 o4 g5&g100 r8
 r25 o4 g8&g80&g400 r25 r160 r800
-$LOOP_END
+]$LOOP_END
 // エンディング
 r2 r4 r5 r400 r1 r25 r160 r800
 
@@ -111,7 +111,7 @@ r32 r320 r1600 o2 e5&e80&e400 r32 r320 r1600 o2 b5&b80&b400 r32 r320 r1600 o3 e5
 d+5&d+80&d+400 r32 r320 r1600 o2 d5&d80&d400 r32 r320 r1600 o2 a5&a80&a400 r32 r320 r1600 o3 d5&d80&d400 r32
 r320 r1600 o2 c+5&c+80&c+400 r32 r320 r1600 o2 c5&c80&c400 r32 r320 r1600 o2 g5&g80&g400 r32 r320 r1600 o3
 c5&c80&c400 r32 r320 r1600 o2 c+5&c+80&c+400 r32 r320 r1600
-$LOOP_END
+]$LOOP_END
 // エンディング
 @e{ptheld} v8 o2 d4&d10 r8 r40 o2 g4&g10 r8 r40 o2 c2&c8&c20 r4 r16 r80
 
@@ -131,7 +131,7 @@ f+25r4 r5 r100 o1 f+25r4 r5 r100 o1 f+25r4 r5 r100 o1 f+25r4 r5 r100 o1 f+25r4 r
 f+25r4 r5 r100 o1 f+25r4 r5 r100 o1 f+25r4 r5 r100 o1 f+25r4 r5 r100 o1 f+25r4 r5 r100 o1 f+25r4 r5 r100 o1
 f+25r4 r5 r100 o1 f+25r4 r5 r100 o1 f+25r4 r5 r100 o1 f+25r4 r5 r100 o1 f+25r4 r5 r100 o1 f+25r4 r5 r100 o1
 f+25r4 r5 r100 o1 f+25 r4 r5 r100
-$LOOP_END
+]$LOOP_END
 // エンディング
 v7 o1 f+20 r4 r5 o1 f+20r4 r5 o1 f+20 r2 r4 r5
 
@@ -157,7 +157,7 @@ r5 r64 r640 r3200 o4 a32&a800 r4 r5 r64 r640 r3200 o4 a32&a800 r4 r5 r64 r640 r3
 r3200 o4 a32&a800 r4 r5 r64 r640 r3200 o4 a32&a800 r4 r5 r64 r640 r3200 o4 a32&a800 r4 r5 r64 r640 r3200 o4
 a32&a800 r4 r5 r64 r640 r3200 o4 a32&a800 r4 r5 r64 r640 r3200 o4 a32&a800 r4 r5 r64 r640 r3200 o4 a32&a800 r4
 r5 r64 r640 r3200 o4 a32&a800 r4 r5 r64 r640 r3200 o4 a32&a800 r5 r64 r640 r3200
-$LOOP_END
+]$LOOP_END
 // エンディング
 r2 r4 r32 r800 r1 r5 r64 r640 r3200
 
@@ -208,7 +208,7 @@ r4000 v2 o6 a50&a400 r20 r100 r1000 v3 o6 a50&a400 r5 r40 r400 v4 o6 a50&a400 r8
 r20 r100 r1000 v3 o6 a50&a400 r5 r40 r400 v4 o6 a50&a400 r8 r64 r320 r4000 v2 o6 a50&a400 r20 r100 r1000 v3 o6
 a50&a400 r5 r40 r400 v4 o6 a50&a400 r8 r64 r320 r4000 v2 o6 a50&a400 r20 r100 r1000 v3 o6 a50&a400 r5 r40 r400
 v4 o6 a50&a400 r8 r64 r320 r4000 v2 o6 a50&a400 r20 r100 r1000
-$LOOP_END
+]$LOOP_END
 // エンディング
 r2 r4 r8 r16 r800 r6400 r12800 r64000 r1 r20 r100 r1000
 
@@ -235,7 +235,7 @@ o3 g5&g25 r8 r100 o3 g10&g50 r8 r16 r200 o3 g5&g100 r5 r40 r400 o3 a8&a80&a400 r
 r25 o3 a8&a80&a400 r25 r160 r800 o3 f5&f25 r8 r100 o3 f10&f50 r8 r16 r200 o3 f5&f100 r5 r40 r400 o3
 g8&g80&g400 r8 r25 r160 r800 o3 g5&g100 r8 r25 o3 g8&g80&g400 r25 r160 r800 o3 f5&f25 r8 r100 o3 f10&f50 r8
 r16 r200 o3 f5&f100 r5 r40 r400 o3 e8&e80&e400 r8 r25 r160 r800 o3 e5&e100 r8 r25 o3 e8&e80&e400 r25 r160 r800
-$LOOP_END
+]$LOOP_END
 // エンディング
 @e{ptheld} v10 o3 f4&f10 r8 r40 o3 f4&f10 r8 r40 o3 e2&e8&e20 r4 r16 r80
 
@@ -247,7 +247,7 @@ t120 q8 @{ptjazzchord} @e{ptdecay} v9 @d0 @s0 q8 o3 a4&a8&a20 r16 r80 o3 b4&b8&b
 // 本編
 [ t120 o3 l4 v9 q8 @{ptJazzChord} @e{ptDecay} @d0 @v0 @s0 @o0 @p{0,0,0}
 r2 r20 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r4 r5
-$LOOP_END
+]$LOOP_END
 // エンディング
 @e{ptheld} v10 o4 c4&c10 r8 r40 o3 b4&b10 r8 r40 o3 a2&a8&a20 r4 r16 r80
 
@@ -259,7 +259,7 @@ t120 q8 @{ptjazzchord} @e{ptdecay} v9 @d0 @s0 q8 o4 d4&d8&d20 r16 r80 o4 e4&e8&e
 // 本編
 [ t120 o4 l4 v9 q8 @{ptJazzChord} @e{ptDecay} @d0 @v0 @s0 @o0 @p{0,0,0}
 r2 r20 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r4 r5
-$LOOP_END
+]$LOOP_END
 // エンディング
 @e{ptheld} v10 o4 e4&e10 r8 r40 o4 e4&e10 r8 r40 o4 d2&d8&d20 r4 r16 r80
 
@@ -271,7 +271,7 @@ t120 q8 @{ptjazzchord} @e{ptdecay} v9 @d0 @s0 q8 o4 g4&g8&g20 r16 r80 o4 a4&a8&a
 // 本編
 [ t120 o4 l4 v9 q8 @{ptJazzChord} @e{ptDecay} @d0 @v0 @s0 @o0 @p{0,0,0}
 r2 r20 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r4 r5
-$LOOP_END
+]$LOOP_END
 // エンディング
 @e{ptheld} v10 o4 a4&a10 r8 r40 o4 a4&a10 r8 r40 o4 g2&g8&g20 r4 r16 r80
 
@@ -299,7 +299,7 @@ c8&c80&c400 r8 r25 r160 r800 o4 c5&c100 r8 r25 o4 c8&c80&c400 r25 r160 r800 o3 a
 r16 r200 o3 a5&a100 r5 r40 r400 o4 d8&d80&d400 r8 r25 r160 r800 o4 d5&d100 r8 r25 o4 d8&d80&d400 r25 r160 r800
 o4 c5&c25 r8 r100 o4 c10&c50 r8 r16 r200 o4 c5&c100 r5 r40 r400 o3 a8&a80&a400 r8 r25 r160 r800 o3 a5&a100 r8
 r25 o3 a8&a80&a400 r25 r160 r800
-$LOOP_END
+]$LOOP_END
 // エンディング
 r2 r4 r5 r400 r1 r25 r160 r800
 
@@ -327,7 +327,7 @@ e8&e80&e400 r8 r25 r160 r800 o4 e5&e100 r8 r25 o4 e8&e80&e400 r25 r160 r800 o4 c
 r16 r200 o4 c5&c100 r5 r40 r400 o4 f+8&f+80&f+400 r8 r25 r160 r800 o4 f+5&f+100 r8 r25 o4 f+8&f+80&f+400 r25
 r160 r800 o4 f5&f25 r8 r100 o4 f10&f50 r8 r16 r200 o4 f5&f100 r5 r40 r400 o4 d8&d80&d400 r8 r25 r160 r800 o4
 d5&d100 r8 r25 o4 d8&d80&d400 r25 r160 r800
-$LOOP_END
+]$LOOP_END
 // エンディング
 r2 r4 r5 r400 r1 r25 r160 r800
 
@@ -347,6 +347,6 @@ q6 o5 b16 o6 e16 o6 g8 o6 e16o6 e16 o6 e8 o5 b8o5 b8 o6 c16 o6 e16 q3 o6 g8 q6 o
 o5 f16 o5 a16 q3 o6 c8 q6 o5 a16 o6 c16 o6 f8 o6 f16 o6 c16 o6 c8 o5 a8o5 a8 o6 d16o6 d16 q3 o6 f+8 q6 o6 d16
 o6 f+16 o7 d8 o6 a16 o6 g16 o6 f+8 q3 o6 d4 q6 o6 c16 o6 c16 q3 o6 f8 q6 o6 c16 o6 f16 o7 c8 o6 f16o6 f16 o6
 c8o6 c8o6 c8 q7 o5 g16 o6 d16 o6 e16 r16 o6 d16 o5 g16 o5 e8 o5 e4 r4
-$LOOP_END
+]$LOOP_END
 // エンディング
 r2 r4 r1 r4

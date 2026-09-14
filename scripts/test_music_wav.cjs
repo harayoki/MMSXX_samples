@@ -38,7 +38,7 @@ const server=http.createServer((req,res)=>{const p=path.join(base,decodeURICompo
   await page.locator('#pt-stop').click();
  }
  await page.locator('#pt-tab-original').click();const original=await page.locator('#pt-src').inputValue();
- await page.locator('#pt-src').fill(original.replace('$LOOP_END = { ]1 }','$LOOP_END = { ]2 }'));
+ await page.locator('#pt-src').fill(original.replace('$LOOP_END = { 1 }','$LOOP_END = { 2 }'));
  const loops=await download('pt');assert.equal(loops.name,'pocket_tunnel_arranged.wav');assert(Math.abs(loops.duration-103)<=1/48000+1e-8);
  await page.locator('#pt-src').fill(original);assert.equal(await page.locator('#pt-wav-filename').count(),0);
  await page.locator('#pt-tab-jazz').click();assert.equal(await page.locator('#pt-wav-filename').count(),0);
@@ -51,7 +51,7 @@ const server=http.createServer((req,res)=>{const p=path.join(base,decodeURICompo
  const volcano=await download('mmsxx');
  assert((await page.locator('#mmsxx-status').textContent()).startsWith('Playing'));
  await page.locator('#mmsxx-stop').click();const vp=await page.locator('#mmsxx-src').inputValue();
- await page.locator('#mmsxx-src').fill(vp.replace('$LOOP_END = { ]2 }','$LOOP_END = { ]1 }'));
+ await page.locator('#mmsxx-src').fill(vp.replace('$LOOP_END = { 2 }','$LOOP_END = { 1 }'));
  const vpLoops=await download('mmsxx');assert.equal(vpLoops.name,'volcano_parade_arranged.wav');assert(vpLoops.duration<volcano.duration);
  await page.screenshot({path:path.join(require('os').tmpdir(),'volcano-wav-mobile.png'),fullPage:true});
  assert(await page.locator('#mmsxx-src').isVisible());assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));

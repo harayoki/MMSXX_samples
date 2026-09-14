@@ -50,3 +50,9 @@ MusicAssets.shared('wav-download.js');
 `MUSIC_TEST_CHROMIUM=/path/to/chromium node scripts/test_music_assets.cjs`
 
 ローカルと公開先を模したURLで、両曲の参照先・MML取得・通常再生・編集WAV出力を確認する。外部ネットワークを使わずHTTPレスポンスをローカルファイルに置き換える。
+
+## エンジンの取得元
+
+共通エンジンは mmsxx-mml-studio のコミット `01d1cfedcbb5f0b52586a0bfec3914521c9131ab` の `sound/` を、元コードを改変せずバンドルしたもの。マクロ展開時に空白を挿入しない更新を含む。ページ固有のMML構文変換は行わない。
+
+風渡りの境界（03）も共通ローダー・WAV UIを使用する。画像の実ファイルは未追加のまま。

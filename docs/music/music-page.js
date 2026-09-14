@@ -36,7 +36,7 @@
       await load(MusicAssets.shared('wav-download.js'));
       await load(song('player.js'));
     } catch (error) {
-      const status = document.querySelector('#mmsxx-status, #pt-status');
+      const status = document.querySelector('#mmsxx-status, #pt-status, #wc-status');
       if (status) status.textContent = error.message;
     }
   })();
