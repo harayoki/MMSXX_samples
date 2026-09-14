@@ -122,7 +122,7 @@ const ptInitial=new Map();
 (() => {
 const root=document.getElementById('pocket-tunnel'),$=id=>root.querySelector('#pt-'+id);
 const drafts=new Map();
-let current=SONGS.find(s=>s.id===new URLSearchParams(location.search).get('mix'))||SONGS[0],ctx,engine,master,nodes=[],timer,base=0,cursor=0,prepared=null,running=false,generation=0;
+let current=SONGS.find(s=>s.id===new URLSearchParams(location.search).get('mix'))||SONGS[0],ctx,engine,timer,base=0,prepared=null,running=false,generation=0;
 const wavDownload=MusicWav.attach({source:$('src'),button:$('wav'),status:$('wav-status'),key:()=>current.id,basename:()=>current.id==='original'?'pocket_tunnel':'pocket_tunnel_'+current.id.replaceAll('-','_'),render:async (snapshot,job)=>{
  const song=SONGS.find(s=>s.id===snapshot.key),program=ptPrepare(song,snapshot.source);
  const renderer=new E.ChipTuneSound(null,{psgTune:program.tune,spatial:'mono'});
@@ -134,14 +134,11 @@ const wavDownload=MusicWav.attach({source:$('src'),button:$('wav'),status:$('wav
 function warmAudio(programs){
  ctx ||= new (window.AudioContext||window.webkitAudioContext)({sampleRate:48000});
  engine ||= new E.ChipTuneSound(ctx,{psgTune:false,spatial:'mono'});
-  // 再生用の周期波形もロード時に準備。編集後に増えた音色だけ追加する。
-  const warm=new Set();function warmWave(id){if(warm.has(id))return;warm.add(id);const w=E.WAVEFORMS[id];if(w.kind==='layer'){for(const l of w.layers)warmWave(l.wave);}else if(w.kind==='wave')engine._periodicWave(w);}
-  for(const p of programs)for(const t of p.tracks)for(const e of t.events)warmWave(e.wave);
   if(!engine.noiseBuffer){const b=ctx.createBuffer(1,ctx.sampleRate,ctx.sampleRate),d=b.getChannelData(0);let seed=1;for(let i=0;i<d.length;i++){seed^=seed<<13;seed^=seed>>>17;seed^=seed<<5;d[i]=(seed>>>0)/2147483648-1;}engine.noiseBuffer=b;}
 }
 // 音を出さずに準備。AudioContextの再開はPlay操作時だけ。
 
-function stop(reset=true){generation++;running=false;clearInterval(timer);for(const n of nodes){try{n.stop(0);}catch{}try{n.disconnect();}catch{}}nodes=[];if(master)master.disconnect();master=null;$('play').disabled=!ready;if(reset){$('status').textContent='停止';}}
+function stop(reset=true){generation++;running=false;clearInterval(timer);engine?.stopBGM();$('play').disabled=!ready;if(reset){$('status').textContent='停止';}}
 let ready=false;
 function select(song){const restart=ready&&song.id!==current.id&&(running||$('play').disabled);if(!ready)return;drafts.set(current.id,$('src').value);current=song;wavDownload.update();$('comment').textContent=PT_COMMENTS[song.id];$('src').value=drafts.get(song.id)||song.source;for(const b of $('mixes').children){const active=b.dataset.mix===song.id;b.setAttribute('aria-selected',String(active));b.tabIndex=active?0:-1;if(active)$('editor-body').setAttribute('aria-labelledby',b.id);}if(!running&&!$('play').disabled)$('status').textContent=song.title+' · '+song.duration+'秒';if(restart)$('play').onclick();}
 for(const song of SONGS){const b=document.createElement('button');b.type='button';b.className='btn';b.dataset.mix=song.id;b.id='pt-tab-'+song.id;b.setAttribute('role','tab');b.setAttribute('aria-controls','pt-editor-body');b.textContent=song.title;b.onclick=()=>select(song);$('mixes').append(b);}
@@ -158,14 +155,16 @@ $('play').onclick=async()=>{
   warmAudio([prepared]);
   await resumed;if(token!==generation)return;
   if(ctx.state!=='running')throw Error('音声を開始できませんでした。もう一度再生を押してください。');
-  master=ctx.createGain();master.gain.value=.45*prepared.gain;master.connect(ctx.destination);
-  base=ctx.currentTime+.08;cursor=0;running=true;
-  const tick=()=>{if(!running)return;const now=ctx.currentTime,t=Math.max(0,now-base),to=Math.min(prepared.length,Math.max(0,now+.35-base));
-   nodes=nodes.filter(n=>n.__endTime>now);
-   if(to>cursor){for(const track of prepared.tracks)engine._scheduleTrack(track,base,master,nodes,cursor,to);cursor=to;}
+  engine.volume=.45*prepared.gain;
+  engine.bgmDefs.set('pocket',prepared.tracks);
+  engine.playBGM('pocket',false,true);
+  base=engine.bgmState.base;running=true;
+  const infinite=prepared.tracks.some(t=>t.loop);
+  // Display updates only; playBGM owns lookahead, voices and cleanup.
+  const tick=()=>{if(!running)return;const t=Math.max(0,ctx.currentTime-base);
    $('status').textContent=playingSong.title+' · '+Math.min(t,prepared.length).toFixed(1)+' / '+prepared.length+'秒';
-   if(t>=prepared.length+.1){stop(false);$('status').textContent='再生完了';}
-  };tick();timer=setInterval(tick,40);
+   if(!infinite&&t>=prepared.length+1){stop(false);$('status').textContent='再生完了';}
+  };tick();timer=setInterval(tick,100);
  }catch(error){stop();$('status').textContent='再生エラー：'+error.message;console.error(error);}
 };
 async function loadSongs(){
