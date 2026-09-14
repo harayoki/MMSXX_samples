@@ -19,7 +19,7 @@
 #pocket-tunnel{display:grid;gap:12px;width:min(100%,1000px);margin-inline:auto}
 #pocket-tunnel h3{margin:0}
 #pocket-tunnel p{margin:2px}
-#pocket-tunnel textarea{
+#pocket-tunnel .pt-cover{
  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"BIZ UDGothic","Noto Sans Mono CJK JP","Source Han Mono","MS Gothic",Osaka-Mono,monospace;
  resize:vertical;color:#fff;caret-color:#fff;background-color:#181818;
  text-shadow:0 0 2px rgba(0,0,0,.95),0 0 5px rgba(0,0,0,.75),0 1px 2px rgba(0,0,0,.9);
@@ -39,13 +39,14 @@
 </head>
 <body>
 <div id="pocket-tunnel">
+<nav aria-label="ページナビゲーション"><a href="../">MUSIC TOP</a></nav>
 <h3>Pocket Tunnel <span class="text-small text-muted">Copyright 2026 harayoki</span></h3>
 <p class="text-small text-muted">Music, artwork and MML source: <a href="https://creativecommons.org/licenses/by/4.0/" rel="license">CC BY 4.0</a>. JavaScript source is not covered by CC BY 4.0. Redistribution is prohibited.</p>
 <div class="viz-controls"><button type="button" class="btn btn-primary" id="pt-play">Play</button><button type="button" class="btn" id="pt-stop">Stop</button><span id="pt-status" class="text-small text-muted" aria-live="polite"></span></div>
-<label class="form-label" for="pt-src">MML</label>
+<p id="pt-comment" aria-live="polite">ノーマル：メニュー画面や始まりの街のBGMをイメージして作りました。</p>
 <div id="pt-editor">
 <div id="pt-mixes" role="tablist" aria-label="アレンジ選択"></div>
-<div id="pt-editor-body" role="tabpanel"><textarea class="form-control" id="pt-src" rows="24" spellcheck="false"></textarea></div>
+<div id="pt-editor-body" role="tabpanel"><div class="form-control pt-cover" role="img" aria-label="Pocket Tunnel ジャケット"></div><textarea id="pt-src" hidden style="display:none"></textarea></div>
 </div>
 <p class="text-small">This <a href="https://media.githubusercontent.com/media/harayoki/MMSXX_samples/refs/heads/main/docs/music/02_Pocket-Tunnel/pocket-tunnel.png">cover art</a> was created with mmsxx-pixel-studio.</p>
 
@@ -144,6 +145,7 @@ function ptEnv(gate, sustain, legacy) {
 function ptNativeVolume(linear) {
 	return 15 * Math.pow(Math.max(0, linear) / 0.14, 1 / 1.8);
 }
+const PT_COMMENTS={"original":"ノーマル：メニュー画面や始まりの街のBGMをイメージして作りました。","jazz":"おしゃれ：あえてテンション（不協和音）が目立つ感じで入っています。大人なゲームのBGMに。","fusion-v1":"チップチューン：８BITゲームを強調したい場合に最適。"};
 const SONGS=[{"id": "original", "title": "ノーマル", "duration": 54, "file": "original.mml"}, {"id": "jazz", "title": "おしゃれアレンジ", "duration": 54.75, "file": "jazz.mml"}, {"id": "fusion-v1", "title": "チップチューン アレンジ", "duration": 56, "file": "fusion-v1.mml"}];
 // ページ全体の音量補正。全曲約 -19 LUFS、最大ピーク -1 dBTP以下を目安。
 const PT_PLAYBACK_GAIN = {
@@ -191,7 +193,7 @@ function warmAudio(programs){
 
 function stop(reset=true){generation++;running=false;clearInterval(timer);for(const n of nodes){try{n.stop(0);}catch{}try{n.disconnect();}catch{}}nodes=[];if(master)master.disconnect();master=null;$('play').disabled=!ready;if(reset){$('status').textContent='停止';}}
 let ready=false;
-function select(song){const restart=ready&&song.id!==current.id&&(running||$('play').disabled);if(!ready)return;drafts.set(current.id,$('src').value);current=song;$('src').value=drafts.get(song.id)||song.source;for(const b of $('mixes').children){const active=b.dataset.mix===song.id;b.setAttribute('aria-selected',String(active));b.tabIndex=active?0:-1;if(active)$('editor-body').setAttribute('aria-labelledby',b.id);}if(!running&&!$('play').disabled)$('status').textContent=song.title+' · '+song.duration+'秒';if(restart)$('play').onclick();}
+function select(song){const restart=ready&&song.id!==current.id&&(running||$('play').disabled);if(!ready)return;drafts.set(current.id,$('src').value);current=song;$('comment').textContent=PT_COMMENTS[song.id];$('src').value=drafts.get(song.id)||song.source;for(const b of $('mixes').children){const active=b.dataset.mix===song.id;b.setAttribute('aria-selected',String(active));b.tabIndex=active?0:-1;if(active)$('editor-body').setAttribute('aria-labelledby',b.id);}if(!running&&!$('play').disabled)$('status').textContent=song.title+' · '+song.duration+'秒';if(restart)$('play').onclick();}
 for(const song of SONGS){const b=document.createElement('button');b.type='button';b.className='btn';b.dataset.mix=song.id;b.id='pt-tab-'+song.id;b.setAttribute('role','tab');b.setAttribute('aria-controls','pt-editor-body');b.textContent=song.title;b.onclick=()=>select(song);$('mixes').append(b);}
 $('mixes').onkeydown=event=>{const tabs=[...$('mixes').children],i=tabs.indexOf(document.activeElement);if(i<0)return;let next;if(event.key==='ArrowRight')next=(i+1)%tabs.length;else if(event.key==='ArrowLeft')next=(i+tabs.length-1)%tabs.length;else if(event.key==='Home')next=0;else if(event.key==='End')next=tabs.length-1;else return;event.preventDefault();tabs[next].click();tabs[next].focus();};
 $('play').disabled=true;$('src').disabled=true;$('status').textContent='MML読み込み中…';
