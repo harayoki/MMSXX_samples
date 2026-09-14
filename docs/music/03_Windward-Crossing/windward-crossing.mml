@@ -126,6 +126,16 @@ $fieldShort = {
   $phrase4
   @s0
 }
+// 単独再生：下の演奏順1行を、全3チャンネルとも同じ例に置き換える。
+// $field                  // 草原を1周
+// [$field]2               // 草原を2周
+// $good                   // 通常戦闘（有利）を1周
+// $bad                    // 不利を1周
+// $crisis                 // 大ピンチを1周
+// $intro $field           // イントロ付き草原
+// $win                    // 勝利
+// $lose                   // 敗北
+// 定義は残してよい。呼び出さないマクロは鳴らない。定義は呼び出しより後でも可。
 // 演奏順。角括弧は繰り返し。
 $intro [$field]2 $encounter $good [$bad]2 [$crisis]2 $win $fieldShort $encounter [$bad]2 [$crisis]2 $lose
 
@@ -240,6 +250,16 @@ $fieldShort = {
   $phrase6
   $phrase7
 }
+// 単独再生：下の演奏順1行を、全3チャンネルとも同じ例に置き換える。
+// $field                  // 草原を1周
+// [$field]2               // 草原を2周
+// $good                   // 通常戦闘（有利）を1周
+// $bad                    // 不利を1周
+// $crisis                 // 大ピンチを1周
+// $intro $field           // イントロ付き草原
+// $win                    // 勝利
+// $lose                   // 敗北
+// 定義は残してよい。呼び出さないマクロは鳴らない。定義は呼び出しより後でも可。
 // 演奏順。角括弧は繰り返し。
 $intro [$field]2 $encounter $good [$bad]2 [$crisis]2 $win $fieldShort $encounter [$bad]2 [$crisis]2 $lose
 
@@ -348,5 +368,15 @@ $fieldShort = {
   $phrase5
   $phrase5
 }
+// 単独再生：下の演奏順1行を、全3チャンネルとも同じ例に置き換える。
+// $field                  // 草原を1周
+// [$field]2               // 草原を2周
+// $good                   // 通常戦闘（有利）を1周
+// $bad                    // 不利を1周
+// $crisis                 // 大ピンチを1周
+// $intro $field           // イントロ付き草原
+// $win                    // 勝利
+// $lose                   // 敗北
+// 定義は残してよい。呼び出さないマクロは鳴らない。定義は呼び出しより後でも可。
 // 演奏順。角括弧は繰り返し。
 $intro [$field]2 $encounter $good [$bad]2 [$crisis]2 $win $fieldShort $encounter [$bad]2 [$crisis]2 $lose
