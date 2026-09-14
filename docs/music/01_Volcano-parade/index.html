@@ -19,6 +19,7 @@
 </head>
 <body>
 <div id="mmsxx-inline">
+<nav aria-label="ページナビゲーション"><a href="../">MUSIC TOP</a></nav>
   <h3>Volcano Parade <span class="text-small text-muted">Copyright 2026 harayoki</span></h3>
   <p class="text-small text-muted">Music, artwork and MML source: <a href="https://creativecommons.org/licenses/by/4.0/" rel="license">CC BY 4.0</a>. JavaScript source is not covered by CC BY 4.0. Redistribution is prohibited.</p>
   <div class="viz-controls">
@@ -26,8 +27,9 @@
     <button type="button" class="btn" id="mmsxx-stop">Stop</button>
     <span id="mmsxx-status" class="text-small text-muted" aria-live="polite"></span>
   </div>
-  <label class="form-label" for="mmsxx-src">MML</label>
-  <textarea class="form-control" id="mmsxx-src" disabled rows="24" spellcheck="false"></textarea>
+  <p>タイトルやエンディング曲などにどうでしょうか？</p>
+  <div class="form-control vp-cover" role="img" aria-label="Volcano Parade ジャケット"></div>
+  <textarea id="mmsxx-src" hidden style="display:none" disabled></textarea>
 <p>This <a href="https://media.githubusercontent.com/media/harayoki/MMSXX_samples/refs/heads/main/docs/music/01_Volcano-parade/vol_par_crt_256.png">cover art</a> was created with mmsxx-pixel-studio.</p>
 </div>
 <style>
@@ -43,7 +45,7 @@
   #mmsxx-inline p {
     margin: 2px;
   }
-  #mmsxx-inline textarea {
+  #mmsxx-inline .vp-cover {
     font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,
       "BIZ UDGothic","Noto Sans Mono CJK JP","Source Han Mono","MS Gothic",Osaka-Mono,monospace;
     resize:vertical;
