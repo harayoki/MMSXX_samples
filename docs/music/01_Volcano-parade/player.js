@@ -169,17 +169,17 @@ function adaptEnvelopes(tracks) {
       }
     }
 }
-window.renderVolcanoWav = async (source) => {
+window.renderVolcanoWav = async (source, job) => {
   const renderer = new E.ChipTuneSound(null, {
     psgTune: false,
     spatial: "mono",
   });
   registerVoices(renderer, E.registerTone);
   prepareSong(renderer, "download", source);
-  return renderer.renderBGM("download", {
+  return MusicWav.render(renderer, "download", {
     loops: 1,
     tail: 1,
     sampleRate: 48000,
     channels: 1,
-  });
+  }, job);
 };

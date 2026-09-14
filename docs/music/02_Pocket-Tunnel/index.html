@@ -49,8 +49,8 @@
 <div id="pt-editor-body" role="tabpanel"><textarea class="form-control" id="pt-src" aria-label="MMLソース" rows="24" spellcheck="false"></textarea></div>
 </div>
 <p class="text-small">This <a href="https://media.githubusercontent.com/media/harayoki/MMSXX_samples/refs/heads/main/docs/music/02_Pocket-Tunnel/pocket-tunnel.png">cover art</a> was created with mmsxx-pixel-studio.</p>
-<div class="viz-controls"><button type="button" class="btn" id="pt-wav" disabled>曲全体をWAVでダウンロード</button><span id="pt-wav-filename" class="text-small"></span></div>
-<p class="text-small">MMLの編集も適用されます。一度でも編集するとファイル名に _arranged が付きます。</p>
+<div class="viz-controls"><button type="button" class="btn" id="pt-wav" disabled>WAVとしてダウンロード</button></div>
+<p class="text-small">MMLの編集もWAVへ適用されます。</p>
 <p id="pt-wav-status" class="text-small" aria-live="polite"></p>
 
 </div>
@@ -186,13 +186,13 @@ const ptInitial=new Map();
 const root=document.getElementById('pocket-tunnel'),$=id=>root.querySelector('#pt-'+id);
 const drafts=new Map();
 let current=SONGS.find(s=>s.id===new URLSearchParams(location.search).get('mix'))||SONGS[0],ctx,engine,master,nodes=[],timer,base=0,cursor=0,prepared=null,running=false,generation=0;
-const wavDownload=MusicWav.attach({source:$('src'),button:$('wav'),filename:$('wav-filename'),status:$('wav-status'),key:()=>current.id,basename:()=>current.id==='original'?'pocket_tunnel':'pocket_tunnel_'+current.id.replaceAll('-','_'),render:async snapshot=>{
+const wavDownload=MusicWav.attach({source:$('src'),button:$('wav'),status:$('wav-status'),key:()=>current.id,basename:()=>current.id==='original'?'pocket_tunnel':'pocket_tunnel_'+current.id.replaceAll('-','_'),render:async (snapshot,job)=>{
  const song=SONGS.find(s=>s.id===snapshot.key),program=ptPrepare(song,snapshot.source);
  const renderer=new E.ChipTuneSound(null,{psgTune:program.tune,spatial:'mono'});
  renderer.psgTune=program.tune;
  renderer.volume=.45*program.gain;
  renderer.bgmDefs.set('download',program.tracks);
- return renderer.renderBGM('download',{loops:1,tail:1,sampleRate:48000,channels:1});
+ return MusicWav.render(renderer,'download',{loops:1,tail:1,sampleRate:48000,channels:1},job);
 }});
 function warmAudio(programs){
  ctx ||= new (window.AudioContext||window.webkitAudioContext)({sampleRate:48000});
