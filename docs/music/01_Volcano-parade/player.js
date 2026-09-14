@@ -1,3 +1,87 @@
+
+// Volcano Parade専用音色。標準APIで登録し、MMLから名前で呼び出す。
+var sampleCycle = (s) => Array.from({ length: 32 }, (e, t) => s(t / 32)), triangleAt = (s) => 1 - 4 * Math.abs(s - 0.5);
+function filteredSquare(s, e, t) {
+	return sampleCycle((o) => {
+		let n = 0;
+		for (let a = 1; a <= 15; a += 2) {
+			let i = a * s / e, c = 1 / Math.hypot(1 - i * i, i / t), r = -Math.atan2(i / t, 1 - i * i);
+			n += 4 / Math.PI * (1 / a) * Math.sin(2 * Math.PI * a * o + r) * c;
+		}
+		return n;
+	});
+}
+function bassCycle(s, e) {
+	let t = filteredSquare(s, Math.max(360, 900 - s * 2.5), 0.45);
+	return Array.from({ length: 32 }, (o, n) => triangleAt(n / 32) + e * t[n]);
+}
+window.registerVolcanoVoices = function(sound, registerTone) {
+	// ページ全体の音量補正。全曲約 -19 LUFS、最大ピーク -1 dBTP以下を目安。
+	sound.volume = 10 ** (12.56 / 20);
+	registerTone("vpLead", {
+		wave: "pulse50",
+		vib: {
+			depth: 5,
+			speed: 6,
+			delay: 18
+
+		},
+		overwrite: true,
+		role: "lead",
+		note: "Square lead; vibrato holds off for 18 frames, then eases in."
+
+	});
+	sound.addFM("vpPiano", {
+		ratio: 3,
+		depth: 3,
+		attack: 1e-3,
+		decay: 0.07,
+		sustain: 0.1,
+		wave: "sine"
+
+	}, {
+		overwrite: true,
+		role: "chord",
+		note: "Bright but rounded piano: odd harmonics that ring on the attack and clear fast."
+
+	});
+	sound.addFM("vpTom", {
+		ratio: 1,
+		depth: 3,
+		attack: 2e-3,
+		decay: 0.1,
+		sustain: 0.06,
+		wave: "sine",
+		drop: 0.25,
+		dropTime: 0.025
+
+	}, {
+		overwrite: true,
+		role: "chord",
+		note: "Round, tom-like body under the bright piano. Shallow pitch drop so the note is still heard."
+
+	});
+	sound.addWave("vpBass", bassCycle(120, 0.36), 8, {
+		overwrite: true,
+		role: "bass",
+		note: "Triangle with a filtered square mixed in, the way the original layered them."
+
+	});
+	sound.addWave("vpBassLow", bassCycle(92, 0.45), 8, {
+		overwrite: true,
+		role: "bass",
+		note: "Triangle with a filtered square mixed in. For the low octave."
+
+	});
+	sound.addWave("vpBassHi", bassCycle(180, 0.24), 8, {
+		overwrite: true,
+		role: "bass",
+		note: "Same shape with less square, for the octave above."
+
+	});
+};
+
+
 // Volcano Parade playback and arrangement preparation.
 // Copyright 2026 harayoki. All rights reserved.
 const E = MMSXX.sound;
@@ -183,3 +267,22 @@ window.renderVolcanoWav = async (source, job) => {
     channels: 1,
   }, job);
 };
+
+
+MusicWav.attach({source:document.getElementById('mmsxx-src'),button:document.getElementById('mmsxx-wav'),status:document.getElementById('mmsxx-wav-status'),key:()=> 'volcano',basename:()=> 'volcano_parade',render:(snapshot,job)=>window.renderVolcanoWav(snapshot.source,job)});
+(async () => {
+	const source = document.getElementById('mmsxx-src');
+	const play = document.getElementById('mmsxx-play');
+	const status = document.getElementById('mmsxx-status');
+	status.textContent = 'Loading MML…';
+	try {
+		const response = await fetch(MusicAssets.song('volcano-parade.mml'));
+		if (!response.ok) throw new Error('HTTP ' + response.status);
+		source.value = await response.text();
+		source.disabled = false;
+		play.disabled = false;
+		status.textContent = 'Ready';
+	} catch (error) {
+		status.textContent = 'MML loading error: ' + error.message;
+	}
+})();
