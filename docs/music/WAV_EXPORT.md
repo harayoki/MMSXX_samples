@@ -35,7 +35,7 @@ Pocket Tunnelは24小節の本編を反復し、イントロとエンディン�
 
 `wav-download.js` がファイル名・編集状態・ダウンロード・PCM WAV化を担当する。
 
-Pocket Tunnelは通常再生と同じ `ptPrepare` を使用する。Volcano Paradeは埋め込みプレイヤーの曲専用ラッパーから `renderVolcanoWav` を公開し、既存の音色登録と譜面準備関数を共用する。Volcano Paradeの埋め込み部分は、復号した内容を比較するとラッパーの共通マクロ対応と書き出しAPIの追加だけで、音源エンジンは同一。
+両ページは同一のエンジン単体バンドルを使用する。Volcano Paradeの旧エンジン＋プレイヤー一体型バンドルは置き換えた。Pocket Tunnelは通常再生と同じ `ptPrepare`、Volcano Paradeは外部の `player.js` で共通の譜面準備を使用する。曲専用の音色・音量補正・旧版の減衰指定から秒指定への変換・WAV操作はエンジンの外側に置き、標準APIで扱う。
 
 曲・MML・書き出したWAVのライセンスはページ記載のCC BY 4.0。JavaScriptの権利表記とは対象が異なる。`_arranged` は編集の目印であり、クレジットや変更表示を代替するものではない。
 

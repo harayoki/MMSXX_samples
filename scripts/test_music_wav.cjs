@@ -35,7 +35,11 @@ const server=http.createServer((req,res)=>{const p=path.join(base,decodeURICompo
  await page.setViewportSize({width:390,height:844});await page.screenshot({path:path.join(require('os').tmpdir(),'pocket-wav-mobile.png'),fullPage:true});
  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
  await page.goto(host+'/music/01_Volcano-parade/');await page.locator('#mmsxx-wav:not([disabled])').waitFor();
- const volcano=await download('mmsxx');const vp=await page.locator('#mmsxx-src').inputValue();
+ await page.locator('#mmsxx-play').click();
+ await page.waitForFunction(()=>document.getElementById('mmsxx-status').textContent.startsWith('Playing'));
+ const volcano=await download('mmsxx');
+ assert((await page.locator('#mmsxx-status').textContent()).startsWith('Playing'));
+ await page.locator('#mmsxx-stop').click();const vp=await page.locator('#mmsxx-src').inputValue();
  await page.locator('#mmsxx-src').fill(vp.replace('$LOOP_END = { ]2 }','$LOOP_END = { ]1 }'));
  const vpLoops=await download('mmsxx');assert.equal(vpLoops.name,'volcano_parade_arranged.wav');assert(vpLoops.duration<volcano.duration);
  await page.screenshot({path:path.join(require('os').tmpdir(),'volcano-wav-mobile.png'),fullPage:true});
