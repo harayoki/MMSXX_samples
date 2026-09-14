@@ -20,6 +20,53 @@
   for (const element of document.querySelectorAll('[data-music-background]')) {
     element.style.backgroundImage = `url("${image(element.dataset.musicBackground)}")`;
   }
+  // Native modal keeps focus inside and blocks the page beneath the artwork.
+  const coverDialog = document.createElement('dialog');
+  coverDialog.className = 'music-cover-dialog';
+  coverDialog.setAttribute('aria-label', 'Cover art');
+  coverDialog.innerHTML = '<button type="button" aria-label="Close cover art" autofocus>×</button><img alt="Cover art"><p role="status" hidden>画像を読み込めませんでした。</p>';
+  const coverStyle = document.createElement('style');
+  coverStyle.textContent = `
+    .music-cover-dialog { padding: 44px 12px 12px; border: 0; border-radius: 8px;
+      background: #171717; color: white; max-width: calc(100vw - 32px);
+      max-height: calc(100dvh - 32px); box-sizing: border-box; }
+    .music-cover-dialog::backdrop { background: rgba(0,0,0,.78); }
+    .music-cover-dialog img { display: block; max-width: 100%;
+      max-height: calc(100dvh - 100px); width: auto; height: auto; object-fit: contain; }
+    .music-cover-dialog button { position: absolute; top: 4px; right: 6px;
+      width: 36px; height: 36px; border: 0; border-radius: 4px;
+      background: #333; color: white; font-size: 26px; cursor: pointer; }
+  `;
+  document.head.append(coverStyle);
+  document.body.append(coverDialog);
+  const coverImage = coverDialog.querySelector('img');
+  const coverError = coverDialog.querySelector('p');
+  let coverTrigger, previousOverflow;
+  coverImage.onerror = () => { coverError.hidden = false; };
+  coverImage.onload = () => { coverError.hidden = true; };
+  coverDialog.querySelector('button').onclick = () => coverDialog.close();
+  coverDialog.addEventListener('click', event => {
+    const rect = coverDialog.getBoundingClientRect();
+    if (event.target === coverDialog && (event.clientX < rect.left || event.clientX > rect.right ||
+        event.clientY < rect.top || event.clientY > rect.bottom)) coverDialog.close();
+  });
+  coverDialog.addEventListener('close', () => {
+    document.documentElement.style.overflow = previousOverflow;
+    coverTrigger?.focus();
+  });
+  for (const link of document.querySelectorAll('a[data-music-image]')) {
+    link.setAttribute('aria-haspopup', 'dialog');
+    link.addEventListener('click', event => {
+      if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+      event.preventDefault();
+      coverTrigger = link;
+      coverError.hidden = true;
+      coverImage.src = link.href;
+      previousOverflow = document.documentElement.style.overflow;
+      document.documentElement.style.overflow = 'hidden';
+      coverDialog.showModal();
+    });
+  }
   function load(url) {
     return new Promise((resolve, reject) => {
       const script = document.createElement('script');
