@@ -33,14 +33,15 @@ $intro = {
 }
 // field: 8小節
 $field = {
-  @e0 @v0 t112 @{wcFieldLead} @v1 v9 q6 o5 f+8 a8 d4 r8 @{wcArp} v4 o4 a16 d16 f+8 r8
-  @e0 @v0 t112 @{wcFieldLead} @v1 v9 q6 o5 g8 b8 a4 f+8 e8 d4
-  @e0 @v0 t112 @{wcFieldLead} @v1 v9 q6 o5 f+8 a8 b4 a8 f+8 d8 r8
-  @e0 @v0 t112 @{wcFieldLead} @v1 v9 q6 o5 e4 c+8 e8 a4 r8 @{wcArp} v4 o4 e16 a16
-  @e0 @v0 t112 @{wcFieldLead} @v1 v9 q6 o5 a8 f+8 e8 d8 f+4 a4
-  @e0 @v0 t112 @{wcFieldLead} @v1 v9 q6 o5 b8 a8 g4 d8 e8 g4
-  @e0 @v0 t112 @{wcFieldLead} @v1 v9 q6 o5 f+4 d8 f+8 b8 a8 f+4
-  @e0 @v0 t112 @{wcFieldLead} @v1 v9 q6 o5 e8 c+8 o4 b8 a8 o5 c+8 e8 a8 r8
+  @e0 @v0 t112 @{wcFieldLead} @d8 @v1 v9 q6 o5 f+8 a8 d4 r8 @{wcArp} @d0 v5 o4 a16 d16 f+8 r8
+  @e0 @v0 t112 @{wcFieldLead} @d8 @v1 v9 q6 o5 g8 b8 a4 f+8 e8 d4
+  @e0 @v0 t112 @{wcFieldLead} @d8 @v1 v9 q6 o5 f+8 a8 b4 a8 f+8 d8 r8
+  @e0 @v0 t112 @{wcFieldLead} @d8 @v1 v9 q6 o5 e4 c+8 e8 a4 r8 @{wcArp} @d0 v5 o4 e16 a16
+  @e0 @v0 t112 @{wcFieldLead} @d8 @v1 v9 q6 o5 a8 f+8 e8 d8 f+4 a4
+  @e0 @v0 t112 @{wcFieldLead} @d8 @v1 v9 q6 o5 b8 a8 g4 d8 e8 g4
+  @e0 @v0 t112 @{wcFieldLead} @d8 @v1 v9 q6 o5 f+4 d8 f+8 b8 a8 f+4
+  @e0 @v0 t112 @{wcFieldLead} @d8 @v1 v9 q6 o5 e8 c+8 o4 b8 a8 o5 c+8 e8 a8 r8
+  @d0
 }
 // encounter: 2小節
 $encounter = {
@@ -108,10 +109,11 @@ $lose = {
   @e0 @v0 t96 @{wcFieldLead} @v1 v9 q6 o4 d2 r2
 }
 $fieldShort = {
-  @e0 @v0 t112 @{wcFieldLead} @v1 v9 q6 o5 f+8 a8 d4 r8 @{wcArp} v4 o4 a16 d16 f+8 r8
-  @e0 @v0 t112 @{wcFieldLead} @v1 v9 q6 o5 g8 b8 a4 f+8 e8 d4
-  @e0 @v0 t112 @{wcFieldLead} @v1 v9 q6 o5 f+8 a8 b4 a8 f+8 d8 r8
-  @e0 @v0 t112 @{wcFieldLead} @v1 v9 q6 o5 e4 c+8 e8 a4 r8 @{wcArp} v4 o4 e16 a16
+  @e0 @v0 t112 @{wcFieldLead} @d8 @v1 v9 q6 o5 f+8 a8 d4 r8 @{wcArp} @d0 v5 o4 a16 d16 f+8 r8
+  @e0 @v0 t112 @{wcFieldLead} @d8 @v1 v9 q6 o5 g8 b8 a4 f+8 e8 d4
+  @e0 @v0 t112 @{wcFieldLead} @d8 @v1 v9 q6 o5 f+8 a8 b4 a8 f+8 d8 r8
+  @e0 @v0 t112 @{wcFieldLead} @d8 @v1 v9 q6 o5 e4 c+8 e8 a4 r8 @{wcArp} @d0 v5 o4 e16 a16
+  @d0
 }
 // 演奏順。角括弧は繰り返し。
 $intro [$field]2 $encounter $good [$bad]2 [$crisis]2 $win $fieldShort $encounter [$bad]2 [$crisis]2 $lose
@@ -135,14 +137,14 @@ $intro = {
 }
 // field: 8小節
 $field = {
-  @e0 @v0 t112 @{wcBass} v13 q6 o2 d8 r8 @{wcArp} v5 q5 o4 d16 o4 f+16 o4 a16 o5 d16 @{wcBass} v12 q6 o2 a8 r8 @{wcArp} v5 q5 o5 d16 o4 a16 o4 f+16 o4 d16
-  @e0 @v0 t112 @{wcBass} v13 q6 o1 g8 r8 @{wcArp} v5 q5 o3 b16 o4 d16 o4 g16 o4 b16 @{wcBass} v12 q6 o2 d8 r8 @{wcArp} v5 q5 o4 b16 o4 g16 o4 d16 o3 b16
-  @e0 @v0 t112 @{wcBass} v13 q6 o1 b8 r8 @{wcArp} v5 q5 o3 b16 o4 d16 o4 f+16 o4 b16 @{wcBass} v12 q6 o2 f+8 r8 @{wcArp} v5 q5 o4 b16 o4 f+16 o4 d16 o3 b16
-  @e0 @v0 t112 @{wcBass} v13 q6 o1 a8 r8 @{wcArp} v5 q5 o4 c+16 o4 e16 o4 a16 o5 c+16 @{wcBass} v12 q6 o2 e8 r8 @{wcArp} v5 q5 o5 c+16 o4 a16 o4 e16 o4 c+16
-  @e0 @v0 t112 @{wcBass} v13 q6 o2 d8 r8 @{wcArp} v5 q5 o4 d16 o4 f+16 o4 a16 o5 d16 @{wcBass} v12 q6 o2 a8 r8 @{wcArp} v5 q5 o5 d16 o4 a16 o4 f+16 o4 d16
-  @e0 @v0 t112 @{wcBass} v13 q6 o1 g8 r8 @{wcArp} v5 q5 o3 b16 o4 d16 o4 g16 o4 b16 @{wcBass} v12 q6 o2 d8 r8 @{wcArp} v5 q5 o4 b16 o4 g16 o4 d16 o3 b16
-  @e0 @v0 t112 @{wcBass} v13 q6 o1 b8 r8 @{wcArp} v5 q5 o3 b16 o4 d16 o4 f+16 o4 b16 @{wcBass} v12 q6 o2 f+8 r8 @{wcArp} v5 q5 o4 b16 o4 f+16 o4 d16 o3 b16
-  @e0 @v0 t112 @{wcBass} v13 q6 o1 a8 r8 @{wcArp} v5 q5 o4 c+16 o4 e16 o4 a16 o5 c+16 @{wcBass} v12 q6 o2 e8 r8 @{wcArp} v5 q5 o5 c+16 o4 a16 o4 e16 o4 c+16
+  @e0 @v0 t112 @{wcBass} v14 q6 o2 d8 r8 @{wcArp} v6 q5 o4 d16 o4 f+16 o4 a16 o5 d16 @{wcBass} v13 q6 o2 a8 r8 @{wcArp} v6 q5 o5 d16 o4 a16 o4 f+16 o4 d16
+  @e0 @v0 t112 @{wcBass} v14 q6 o1 g8 r8 @{wcArp} v6 q5 o3 b16 o4 d16 o4 g16 o4 b16 @{wcBass} v13 q6 o2 d8 r8 @{wcArp} v6 q5 o4 b16 o4 g16 o4 d16 o3 b16
+  @e0 @v0 t112 @{wcBass} v14 q6 o1 b8 r8 @{wcArp} v6 q5 o3 b16 o4 d16 o4 f+16 o4 b16 @{wcBass} v13 q6 o2 f+8 r8 @{wcArp} v6 q5 o4 b16 o4 f+16 o4 d16 o3 b16
+  @e0 @v0 t112 @{wcBass} v14 q6 o1 a8 r8 @{wcArp} v6 q5 o4 c+16 o4 e16 o4 a16 o5 c+16 @{wcBass} v13 q6 o2 e8 r8 @{wcArp} v6 q5 o5 c+16 o4 a16 o4 e16 o4 c+16
+  @e0 @v0 t112 @{wcBass} v14 q6 o2 d8 r8 @{wcArp} v6 q5 o4 d16 o4 f+16 o4 a16 o5 d16 @{wcBass} v13 q6 o2 a8 r8 @{wcArp} v6 q5 o5 d16 o4 a16 o4 f+16 o4 d16
+  @e0 @v0 t112 @{wcBass} v14 q6 o1 g8 r8 @{wcArp} v6 q5 o3 b16 o4 d16 o4 g16 o4 b16 @{wcBass} v13 q6 o2 d8 r8 @{wcArp} v6 q5 o4 b16 o4 g16 o4 d16 o3 b16
+  @e0 @v0 t112 @{wcBass} v14 q6 o1 b8 r8 @{wcArp} v6 q5 o3 b16 o4 d16 o4 f+16 o4 b16 @{wcBass} v13 q6 o2 f+8 r8 @{wcArp} v6 q5 o4 b16 o4 f+16 o4 d16 o3 b16
+  @e0 @v0 t112 @{wcBass} v14 q6 o1 a8 r8 @{wcArp} v6 q5 o4 c+16 o4 e16 o4 a16 o5 c+16 @{wcBass} v13 q6 o2 e8 r8 @{wcArp} v6 q5 o5 c+16 o4 a16 o4 e16 o4 c+16
 }
 // encounter: 2小節
 $encounter = {
@@ -210,10 +212,10 @@ $lose = {
   @e0 @v0 t96 @{wcBass} v12 q6 o2 d2 r2
 }
 $fieldShort = {
-  @e0 @v0 t112 @{wcBass} v13 q6 o2 d8 r8 @{wcArp} v5 q5 o4 d16 o4 f+16 o4 a16 o5 d16 @{wcBass} v12 q6 o2 a8 r8 @{wcArp} v5 q5 o5 d16 o4 a16 o4 f+16 o4 d16
-  @e0 @v0 t112 @{wcBass} v13 q6 o1 g8 r8 @{wcArp} v5 q5 o3 b16 o4 d16 o4 g16 o4 b16 @{wcBass} v12 q6 o2 d8 r8 @{wcArp} v5 q5 o4 b16 o4 g16 o4 d16 o3 b16
-  @e0 @v0 t112 @{wcBass} v13 q6 o1 b8 r8 @{wcArp} v5 q5 o3 b16 o4 d16 o4 f+16 o4 b16 @{wcBass} v12 q6 o2 f+8 r8 @{wcArp} v5 q5 o4 b16 o4 f+16 o4 d16 o3 b16
-  @e0 @v0 t112 @{wcBass} v13 q6 o1 a8 r8 @{wcArp} v5 q5 o4 c+16 o4 e16 o4 a16 o5 c+16 @{wcBass} v12 q6 o2 e8 r8 @{wcArp} v5 q5 o5 c+16 o4 a16 o4 e16 o4 c+16
+  @e0 @v0 t112 @{wcBass} v14 q6 o2 d8 r8 @{wcArp} v6 q5 o4 d16 o4 f+16 o4 a16 o5 d16 @{wcBass} v13 q6 o2 a8 r8 @{wcArp} v6 q5 o5 d16 o4 a16 o4 f+16 o4 d16
+  @e0 @v0 t112 @{wcBass} v14 q6 o1 g8 r8 @{wcArp} v6 q5 o3 b16 o4 d16 o4 g16 o4 b16 @{wcBass} v13 q6 o2 d8 r8 @{wcArp} v6 q5 o4 b16 o4 g16 o4 d16 o3 b16
+  @e0 @v0 t112 @{wcBass} v14 q6 o1 b8 r8 @{wcArp} v6 q5 o3 b16 o4 d16 o4 f+16 o4 b16 @{wcBass} v13 q6 o2 f+8 r8 @{wcArp} v6 q5 o4 b16 o4 f+16 o4 d16 o3 b16
+  @e0 @v0 t112 @{wcBass} v14 q6 o1 a8 r8 @{wcArp} v6 q5 o4 c+16 o4 e16 o4 a16 o5 c+16 @{wcBass} v13 q6 o2 e8 r8 @{wcArp} v6 q5 o5 c+16 o4 a16 o4 e16 o4 c+16
 }
 // 演奏順。角括弧は繰り返し。
 $intro [$field]2 $encounter $good [$bad]2 [$crisis]2 $win $fieldShort $encounter [$bad]2 [$crisis]2 $lose
