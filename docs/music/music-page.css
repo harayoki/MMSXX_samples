@@ -30,7 +30,9 @@ body {
   display: block;
   width: 100%;
   max-width: 100%;
-  min-height: 28rem;
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 4 / 3;
   resize: vertical;
   padding: 10px;
   border: 1px solid var(--border);
@@ -48,6 +50,7 @@ body {
     0 1px 2px rgba(0,0,0,.9);
 }
 .music-status { min-height: 1.4em; }
+.music-status:empty { display: none; }
 .music-player {
   --player-blue: var(--blue);
   --ink: var(--foreground);
@@ -157,5 +160,4 @@ body {
   body { padding: 12px; }
   .music-player .track { flex-basis: 100%; order: 10; }
   .music-player [data-p="vollbl"] { margin-left: 0; }
-  .music-editor textarea { min-height: 22rem; }
 }
