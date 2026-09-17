@@ -23,8 +23,8 @@ body {
   width: min(100%, 1000px);
   margin-inline: auto;
 }
-#volcano-parade { --blue: #e51d0b; }
-#pocket-tunnel { --blue: #9c6a07; }
+#volcano-parade { --blue: #cd4b09; }
+#pocket-tunnel { --blue: #e51d0b; }
 #windward-crossing { --blue: #2424f5; }
 #grassland-trinity { --blue: #068911; }
 .music-page p { margin: 2px; }
