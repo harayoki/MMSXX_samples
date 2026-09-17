@@ -2,11 +2,11 @@
 // #about 風渡りの境界 の戦闘曲を動的に切り変え可能にしたものです。ゲームの展開に合わせて使います。
 // #arrangement Interactive Battle — 風渡りの境界
 // #tempo 152
-// #switch 1
+// #switch 2
 // #copyright 2026 harayoki
 // #license CC BY 4.0 (music, artwork and MML source; https://creativecommons.org/licenses/by/4.0/)
 // エンカウント → 戦闘曲3種をテイク選択 → 勝敗をテイク選択。
-// 切り替えの基本単位は l1。3つの戦闘曲は16小節にそろえてある。
+// 切り替えの基本単位は全音符2つ分（#switch 2）。3つの戦闘曲は16小節にそろえてある。
 // 3声。戦闘はベース専用、打楽器の隙間を副旋律が使う。
 // @{wcFieldLead} 草原・イントロ・敗北の三角波メロディー。
 // @{wcBattleLead} 戦闘・勝利の矩形波メロディーと副旋律。
