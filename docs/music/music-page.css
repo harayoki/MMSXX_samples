@@ -23,10 +23,10 @@ body {
   width: min(100%, 1000px);
   margin-inline: auto;
 }
-#volcano-parade { --blue: #f56b26; --accent-ink: #111; }
-#pocket-tunnel { --blue: #f5b026; --accent-ink: #111; }
-#windward-crossing { --blue: #2626f5; --accent-ink: #fff; }
-#grassland-trinity { --blue: #26f537; --accent-ink: #111; }
+#volcano-parade { --blue: #e51d0b; }
+#pocket-tunnel { --blue: #9c6a07; }
+#windward-crossing { --blue: #2424f5; }
+#grassland-trinity { --blue: #068911; }
 .music-page p { margin: 2px; }
 .text-small { font-size: .875rem; }
 .text-muted { opacity: .72; }
