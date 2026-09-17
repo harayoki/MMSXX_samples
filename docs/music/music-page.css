@@ -28,6 +28,8 @@ body {
 #windward-crossing { --blue: #2424f5; }
 #grassland-trinity { --blue: #068911; }
 .music-page p { margin: 2px; }
+.music-credits { display: grid; gap: 0; }
+.music-credits p { margin: 0; }
 .text-small { font-size: .875rem; }
 .text-muted { opacity: .72; }
 .music-editor { min-width: 0; }
