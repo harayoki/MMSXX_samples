@@ -13,7 +13,11 @@ const songs = [
   ['02_Pocket-Tunnel/original.mml', 12],
   ['02_Pocket-Tunnel/jazz.mml', 13],
   ['02_Pocket-Tunnel/fusion-v1.mml', 10],
-  ['03_Windward-Crossing/windward-crossing.mml', 3],
+  ['03_Windward-Crossing/windward-crossing.mml', 3, [
+    'イントロ', 'フィールド', 'エンカウント', '戦闘 A', '戦闘 B', '戦闘 C',
+    '勝利', 'フィールド（後半）', 'エンカウント（後半）',
+    '戦闘 B（後半）', '戦闘 C（後半）', '敗北',
+  ]],
   ['04_Grassland-Trinity/grassland-trinity.mml', 4],
 ];
 
@@ -29,8 +33,8 @@ function splitMML(text) {
   );
 }
 
-const sources = songs.map(([file, channels]) => ({
-  file, channels, source: fs.readFileSync(path.join(root, file), 'utf8'),
+const sources = songs.map(([file, channels, marks]) => ({
+  file, channels, marks, source: fs.readFileSync(path.join(root, file), 'utf8'),
 }));
 
 // Page-specific timbres are registered by each player.js. Placeholder voices
@@ -47,12 +51,16 @@ for (const { source } of sources) {
   }
 }
 
-for (const { file, channels, source } of sources) {
+for (const { file, channels, marks, source } of sources) {
   const audio = new E.ChipTuneSound();
   const result = audio.defineBGM('test', splitMML(source));
   assert(result.ok, file + ': ' + result.errors.map(error => error.text).join(' | '));
   const info = audio.bgmInfo('test');
   assert.equal(info.tracks.length, channels, file + ': channel count');
   assert(info.total > 0, file + ': duration');
+  if (marks) assert.deepEqual(info.marks.map(mark => mark.name), marks,
+    file + ': jump labels');
+  if (marks) assert(info.marks.every((mark, index) =>
+    index === 0 || mark.t > info.marks[index - 1].t), file + ': jump label order');
   console.log('PASS', file, channels + 'ch', info.total.toFixed(3) + 's');
 }

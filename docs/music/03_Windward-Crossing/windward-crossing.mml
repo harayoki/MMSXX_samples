@@ -1,5 +1,5 @@
-// #title Windward Crossing — RPG Suite
-// #about 風渡りの境界。フィールド、エンカウント、戦闘、勝利、敗北をつないだ組曲。
+// #title 風渡りの境界 (組曲) - Windward Crossing
+// #about 王道RPGを意識した組曲。フィールド、エンカウント、戦闘（A/B/C）、勝利、敗北を連続再生。
 // #arrangement RPG Suite — 風渡りの境界
 // #copyright 2026 harayoki
 // #license CC BY 4.0 (music, artwork and MML source; https://creativecommons.org/licenses/by/4.0/)
@@ -33,17 +33,29 @@ $LOSE_COUNT = { 1 } // 敗北
 
 // 演奏順も全パート共通。順番を変える場合はこの定義を編集します。
 $ORDER = {
+  // #label イントロ
   [$intro]$INTRO_COUNT
+  // #label フィールド
   [$field]$FIELD_COUNT
+  // #label エンカウント
   [$encounter]$ENCOUNTER_COUNT
+  // #label 戦闘 A
   [$good]$GOOD_COUNT
+  // #label 戦闘 B
   [$bad]$BAD_COUNT
+  // #label 戦闘 C
   [$crisis]$CRISIS_COUNT
+  // #label 勝利
   [$win]$WIN_COUNT
+  // #label フィールド（後半）
   [$fieldShort]$FIELD_SHORT_COUNT
+  // #label エンカウント（後半）
   [$encounter]$ENCOUNTER_AGAIN_COUNT
+  // #label 戦闘 B（後半）
   [$bad]$BAD_AGAIN_COUNT
+  // #label 戦闘 C（後半）
   [$crisis]$CRISIS_AGAIN_COUNT
+  // #label 敗北
   [$lose]$LOSE_COUNT
 }
 
