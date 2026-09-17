@@ -24,10 +24,12 @@ $LOOP_END = { 1 }
 // #role lead
 // パート 1 — メロディ。
 // イントロ
+// #label イントロ
 t120 q8 @{ptjazzlead} @e{ptheld} v11 @d0 @s0 q8 o3 c16&c400 r40 r320 r1600 o3 e20&e100 r32 r400 o3 g20&g100
 r32 r400 o3 a20&a100 r32 r400 o4 d16&d64&d640&d3200 r25 r200 o4 f20&f100 r32 r400 o4 a16&a160&a800 r20 r200 o4
 b16&b64&b640&b3200 r16 r80 r800 o5 d16&d40&d400 r16 r32 r320 r1600 o5 e16&e160&e800 r5 r25 r400
 // 本編
+// #label 本編
 [ t120 o5 l4 v11 q8 @{ptJazzLead} @e{ptHeld} @d0 @m0 @s0 @o0 @p{0,0,0}
 @s6 q6 o5 f16 o5 a16 q3 o6 c8 q6 o5 a16 o6 c16 o6 f8 o6 e16 o6 d16 o6 c8 o5 a8 o5 g8 o5 g16 o5 b16 q3 o6 d8 q6
 o5 b16 o6 d16 o6 g8 o6 f16 o6 e16 o6 d8 q3 o5 b4 q6 o5 f16 o5 g16 q3 o6 c8 q6 o5 g16 o6 c16 o6 f8 o6 d16 o6
@@ -48,6 +50,7 @@ o6 c8 q6 o5 g16 o6 c16 o6 f8 o6 d16 o6 c16 o5 g8 o5 f8 o5 g8 q7 o5 e16 o5 g16 o6
 o5 c4 r4
 ]$LOOP_END
 // エンディング
+// #label エンディング
 @s0 q8 o5 a10 r16 r40 o5 g10&g100 r16 r80 r400 o5 e10 r40 o5 d8&d32&d320&d1600 r16 r40 r400 o4 b10 r40 o5
 d16&d80 r20 o5 c2&c8&c20 r4 r16 r80
 

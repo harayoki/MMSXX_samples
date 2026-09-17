@@ -9,10 +9,11 @@ require('../docs/music/player-engine.js');
 const E = MMSXX.sound;
 const root = path.resolve(__dirname, '../docs/music');
 const songs = [
-  ['01_Volcano-parade/volcano-parade.mml', 7],
-  ['02_Pocket-Tunnel/original.mml', 12],
-  ['02_Pocket-Tunnel/jazz.mml', 13],
-  ['02_Pocket-Tunnel/fusion-v1.mml', 10],
+  ['01_Volcano-parade/volcano-parade.mml', 7,
+    ['イントロ', 'Aメロ', 'Bメロ', 'Cメロ', '静かな区間', 'イントロ2', 'エンディング']],
+  ['02_Pocket-Tunnel/original.mml', 12, ['イントロ', '本編', 'エンディング']],
+  ['02_Pocket-Tunnel/jazz.mml', 13, ['イントロ', '本編', 'エンディング']],
+  ['02_Pocket-Tunnel/fusion-v1.mml', 10, ['イントロ', '本編', 'エンディング']],
   ['03_Windward-Crossing/windward-crossing.mml', 3, [
     'イントロ', 'フィールド', 'エンカウント', '戦闘 A', '戦闘 B', '戦闘 C',
     '勝利', 'フィールド（後半）', 'エンカウント（後半）',

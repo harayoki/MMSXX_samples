@@ -59,12 +59,20 @@ $INTRO2 = { r1 o5 a8. f+16 d8 e8 f+4 e8 c+8 }
 // #role arp
 t135 l16 q7 v8 @{saw} @e{flat} @d0
 // 小節別主役: M M A F | M B M F | M B A M（M=メロディ、A=アルペジオ、B=ベース、F=合いの手）
+// #label イントロ
 [ v6 $INTRO
+// #label Aメロ
 [ v8 $D_to_A v8 $A_to_Bm v11 $Bm_to_G v6 $G_to_D v8 $D2_to_A v7 $A2_to_Bm v8 $Bm2_to_A v6 $A2_to_D
+  // #label Bメロ
   v8 $B1 v7 $B2 v9 $B3 v7 $B4 v8 $B5 v7 $B6 v9 $B7 v8 $B8
+  // #label Cメロ
   v8 $C1 v9 $C2 v7 $C3 v9 $C4 v8 $C5 v10 $C6 v9 $C7 v8 $C8
-  v4 $QUIET v6 $INTRO2 ]$LOOP_END
+  // #label 静かな区間
+  v4 $QUIET
+  // #label イントロ2
+  v6 $INTRO2 ]$LOOP_END
 // Ending: 後半で和音全体を半音ずつ駆け上がり、1オクターブ上へ到達する。
+// #label エンディング
 o5 v7 @{saw} @e{flat} d2 d8 d+32 e32 f32 f+32 g32 g+32 a32 b-32 b32 >c32 c+32 d32
 
 // #ch メロディ

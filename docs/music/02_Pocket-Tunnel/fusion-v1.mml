@@ -17,9 +17,11 @@ $LOOP_END = { 1 }
 // #role lead
 // パート 1 — メロディ
 // イントロ
+// #label イントロ
 t120o5 l8 q6 v9 @{ptchippulse} @e{percussive} o4 v8 q5 d8 f16 a16 r8 >c8 <b16 >d16 f8 e8 d8 o5 v8 q5 b8 a16
 g16 r8 f8 e16 d16 <b8 >d8 r8
 // 本編
+// #label 本編
 [ t120 o5 l8 v8 q5 @{ptChipPulse} @e{percussive} @d0 @m0 @s0 @o0 @p{0,0,0}
 o5 v9 q6 f16 a16 >c16 r16 <a16 >c16 f8 e16 d16 c8 <a8 g8 o5 v9 q6 g16 b16 >d16 r16 <b16 >d16 g8 f16 e16 d8 <b8
 r8 o5 v9 q6 f16 g16 >c16 r16 <g16 >c16 f8 d16 c16 <g8 f8 g8 o5 v9 q6 e16 g16 >c16 r16 <g16 e16 d8 c4 r4 o5 v9
@@ -35,6 +37,7 @@ f16 a16 >d8 c16 <a16 g8 f8 e8 o5 v9 q6 g16 b16 >d16 r16 <b16 >d16 g8 f16 e16 d8 
 r16 <g16 >c16 f8 d16 c16 <g8 f8 g8 o5 v9 q7 e16 g16 >c16 r16 <g16 e16 d8 c4 r4
 ]$LOOP_END
 // エンディング
+// #label エンディング
 o5 v8 q5 g8 f16 d16 r8 c8 <b8 g8 f8 r8 o5 v8 q7 e8 g8 a8 >c8 q8 v7 c2
 
 // #ch 伴奏
