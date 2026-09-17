@@ -89,10 +89,13 @@ for (const { file, channels, marks, source } of sources) {
     assert.deepEqual(info.marks.map(mark => mark.name), ['エンカウント', 'LOOP', 'OUTRO'],
       file + ': encounter / loop / outro labels');
     assert.deepEqual(info.takes.map(take => ({
-      group: take.group, now: take.now, options: take.options,
+      group: take.group, now: take.now, options: take.options, restart: take.restart,
     })), [
-      { group: '戦闘曲', now: '戦闘 A', options: ['戦闘 A', '戦闘 B', '戦闘 C'] },
-      { group: '結末', now: '勝利', options: ['勝利', '敗北'] },
+      {
+        group: '戦闘曲', now: '戦闘 A', options: ['戦闘 A', '戦闘 B', '戦闘 C'],
+        restart: true,
+      },
+      { group: '結末', now: '勝利', options: ['勝利', '敗北'], restart: false },
     ], file + ': interactive takes');
     assert(info.takes.every(take => take.boxes.every(box =>
       Math.abs(box.dur - take.boxes[0].dur) < 1e-6)), file + ': aligned take lengths');

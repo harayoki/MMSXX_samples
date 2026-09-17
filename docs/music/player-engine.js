@@ -1,4 +1,4 @@
-// MMS/XX player and audio engine, source commit bc2b585f17a8cf77c92a0b4e1a9719668988288b
+// MMS/XX player and audio engine, source commit 8984faa709f5aebfaf516892b06fc61530218099
 (() => {
   var __defProp = Object.defineProperty;
   var __export = (target, all) => {
@@ -1746,7 +1746,18 @@ ${val}`;
         if (!name) {
           throw new Error('[MMSXX] MML: \u958B\u3044\u3066\u3044\u306A\u3044 "#takes" \u3092\u9589\u3058\u3066\u3044\u307E\u3059');
         }
-        open = { kind: "takes", group: name, options: [] };
+        const [group, ...flags] = name.split(/[ \t]+/);
+        for (const f of flags) {
+          if (f.toLowerCase() !== "restart") {
+            throw new Error(`[MMSXX] MML: "#takes ${group}" \u306E "${f}" \u306F\u77E5\u3089\u306A\u3044\u6307\u5B9A\u3067\u3059(\u3044\u307E\u3042\u308B\u306E\u306F restart \u3060\u3051)`);
+          }
+        }
+        open = {
+          kind: "takes",
+          group,
+          options: [],
+          restart: flags.some((f) => f.toLowerCase() === "restart")
+        };
         continue;
       }
       const t = TAKE.exec(line);
@@ -1821,6 +1832,7 @@ ${val}`;
         group: s.group,
         at,
         dur,
+        restart: s.restart === true,
         options: opts.map((o) => ({
           name: o.name,
           events: o.events,
@@ -4530,11 +4542,18 @@ registerProcessor('mmsxx-duty', DutyBank);
     for (const track of def) {
       for (const box of track.takes || []) {
         if (!out.has(box.group)) {
-          out.set(box.group, { group: box.group, now: "", options: [], boxes: [] });
+          out.set(box.group, {
+            group: box.group,
+            now: "",
+            options: [],
+            boxes: [],
+            restart: false
+          });
         }
         const g = out.get(box.group);
         for (const o of box.options) if (!g.options.includes(o.name)) g.options.push(o.name);
         g.boxes.push({ ch: track.ch, at: box.at, dur: box.dur });
+        if (box.restart) g.restart = true;
         if (!g.now) g.now = picks[box.group] ?? box.options[0].name;
       }
     }
@@ -5023,16 +5042,27 @@ registerProcessor('mmsxx-tap', MmsxxTap);
      *
      * 待っている最中に跳んだり止めたりしたら、待たずに差し替える。
      *
+     * 囲みの頭から鳴らし直すかどうかは、曲のほうが決める。
+     * `// #takes mood restart` と書いた囲みは、押されると頭へ戻って鳴らし直す。
+     * 場面が変わったことを音でも言いたいときに要る(別の曲にする手もあるが、
+     * 共通のパートが多い曲では持ちにくいし、つなぎ目で隙間が出る)(2026-09-17)。
+     *
+     * その 1 回だけ変えたいときは `restart` を渡す。渡さなければ曲の指定どおり。
+     * 戻るときは滑らせない — 戻るのだから、鳴っているフレーズを折らない理由が無い。
+     *
      * ```js
-     * mmsxx.audio.selectTake('曲', 'mood', 'tense');
+     * mmsxx.audio.selectTake('曲', 'mood', 'tense');                    // 曲の指定どおり
+     * mmsxx.audio.selectTake('曲', 'mood', 'tense', { restart: true }); // その 1 回だけ
      * ```
      *
      * @param {string} name `defineBGM()` で登録した名前
      * @param {string} group グループの名前(`// #takes mood` の mood)
      * @param {string} take 選択肢の名前(`// #take tense` の tense)
+     * @param {{restart?:boolean}} [opts] restart = 囲みの頭へ戻して鳴らし直すか
+     *   (省くと曲の指定どおり)
      * @returns {boolean} 動いた囲みがあれば true
      */
-    selectTake(name, group, take) {
+    selectTake(name, group, take, opts = {}) {
       const def = this.bgmDefs.get(name);
       if (!Array.isArray(def)) return false;
       const picks = def.picks || (def.picks = {});
@@ -5056,6 +5086,22 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       }
       const st = this.bgmState;
       const live = st && st.name === name && !st.paused && st.cursor != null;
+      const wants = opts.restart === void 0 ? def.some((track) => (track.takes || []).some((box) => box.group === group && box.restart)) : opts.restart === true;
+      if (wants) {
+        apply();
+        if (live) {
+          const at = this.bgmPosition();
+          let head = null;
+          for (const track of def) {
+            for (const box of track.takes || []) {
+              if (box.group !== group || box.at > at + 1e-9) continue;
+              if (head == null || box.at > head) head = box.at;
+            }
+          }
+          if (head != null) this.seekBGM(head);
+        }
+        return true;
+      }
       const inside = live && def.some((track) => (track.takes || []).some(
         (box) => box.group === group && st.cursor > box.at + 1e-9 && st.cursor < box.at + box.dur - 1e-9
       ));
@@ -7707,6 +7753,12 @@ registerProcessor('mmsxx-tap', MmsxxTap);
 }
 .mmsxx-player .cuts i.grid{ opacity:.14; }
 .mmsxx-player .cuts i.bar{ opacity:.42; }
+/* \u66F2\u306E\u4F5C\u308A\u306E\u7DDA\u3002\u623B\u308B\u5148(LOOP)\u3068\u5F8C\u594F\u306E\u59CB\u307E\u308A(OUTRO)\u3002\u5207\u308C\u76EE\u3068\u306F\u5225\u306E\u8272\u306B\u3057\u3066\u3001
+   \u540C\u3058\u3068\u3053\u308D\u306B\u91CD\u306A\u3063\u3066\u3082\u898B\u5206\u3051\u3089\u308C\u308B\u3088\u3046\u306B\u3059\u308B */
+.mmsxx-player .cuts i.loop, .mmsxx-player .cuts i.outro{
+  background:var(--teal); opacity:.6; width:1px;
+}
+.mmsxx-player .cuts i.outro{ opacity:.45; }
 /* A \u304B\u3089 B \u307E\u3067\u306E\u5E2F\u3002\u62BC\u305B\u306A\u3044\u3088\u3046\u306B\u3057\u3066\u3001\u30B9\u30E9\u30A4\u30C0\u30FC\u306E\u90AA\u9B54\u3092\u3057\u306A\u3044 */
 .mmsxx-player .abspan{
   position:absolute; top:2px; bottom:2px; background:var(--teal);
@@ -7889,6 +7941,8 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       <div class="row" data-p="takerow" hidden>
         <span class="lbl">Takes</span>
         <span class="takes" data-p="takes"></span>
+        <button type="button" class="sw" data-p="rew" aria-pressed="false"
+                title="Always restart the block, whatever the tune says">From top</button>
       </div>
       <div class="row" data-p="fxrow" hidden>
         <span class="lbl">Effects</span>
@@ -7941,6 +7995,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       cuts: $("cuts"),
       fx: $("fx"),
       fxrow: $("fxrow"),
+      rew: $("rew"),
       help: $("help"),
       ver: $("ver"),
       loops: $("loops"),
@@ -8001,6 +8056,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       }
     })();
     const fxOff = {};
+    let restart = false;
     let open = opts.open === true;
     const fold = () => {
       el.fold.hidden = !open;
@@ -8017,6 +8073,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     audio.ignoreSongLoop = opts.repeatAll !== true;
     let marks = [];
     let cuts = { grid: [], bars: [] };
+    let loopAt = null, outroAt = null;
     let takes = [];
     let dragging = false;
     let from = 0;
@@ -8055,6 +8112,8 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       chans = got.tracks;
       marks = got.marks;
       cuts = got.switches || { grid: [], bars: [] };
+      loopAt = got.loop ? got.loop.from : null;
+      outroAt = got.outro ?? null;
       takes = got.takes ?? [];
       total = got.total;
       if (!got.active) {
@@ -8122,6 +8181,8 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         for (const t of cuts.grid) line(t, "grid");
       }
       for (const t of cuts.bars) line(t, "bar");
+      if (loopAt != null && loopAt > 0) line(loopAt, "loop");
+      if (outroAt != null) line(outroAt, "outro");
     }
     function drawFx() {
       const live = audio.dynamic_effects || {};
@@ -8183,7 +8244,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
           b.dataset.take = name;
           b.textContent = name;
           b.addEventListener("click", () => {
-            audio.selectTake(NAME, g.group, name);
+            audio.selectTake(NAME, g.group, name, restart ? { restart: true } : {});
             draw();
           });
           wrap.appendChild(b);
@@ -8513,6 +8574,10 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     el.rept.addEventListener("click", () => {
       audio.ignoreSongLoop = !audio.ignoreSongLoop;
       draw();
+    });
+    el.rew.addEventListener("click", () => {
+      restart = !restart;
+      el.rew.setAttribute("aria-pressed", String(restart));
     });
     el.vol.addEventListener("input", () => {
       audio.volume = Number(el.vol.value) / 100;
