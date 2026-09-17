@@ -43,17 +43,14 @@
   const songs = [
     {
       id: 'original', title: 'ノーマル', file: 'original.mml',
-      comment: 'ノーマル：メニュー画面や始まりの街のBGMをイメージして作りました。',
       gain: 10 ** (3.74 / 20), tune: false,
     },
     {
       id: 'jazz', title: 'おしゃれアレンジ', file: 'jazz.mml',
-      comment: 'おしゃれ：テンションが目立つ、大人なゲーム向けのアレンジです。',
       gain: 10 ** (5.42 / 20), tune: false,
     },
     {
       id: 'fusion-v1', title: 'チップチューン アレンジ', file: 'fusion-v1.mml',
-      comment: 'チップチューン：8BITゲーム感を強めたアレンジです。',
       gain: 10 ** (13.10 / 20), tune: true,
     },
   ];
@@ -120,7 +117,6 @@
 
   const editor = document.getElementById('pt-src');
   const tabs = document.getElementById('pt-mixes');
-  const comment = document.getElementById('pt-comment');
   const status = document.querySelector('[data-music-status]');
   const audio = new E.ChipTuneSound(null, { psgTune: false, spatial: 'mono' });
   const drafts = new Map();
@@ -132,7 +128,6 @@
     if (current?.source) drafts.set(current.id, editor.value);
     current = song;
     editor.value = drafts.get(song.id) ?? song.source;
-    comment.textContent = song.comment;
     for (const button of tabs.children) {
       const active = button.dataset.mix === song.id;
       button.setAttribute('aria-selected', String(active));
@@ -178,7 +173,6 @@
     addTabs();
     editor.disabled = false;
     editor.value = current.source;
-    comment.textContent = current.comment;
     player = E.player.mount(document.getElementById('pt-player'), {
       audio, mml: MusicPage.splitMML(current.source), loops: 3, open: true,
     });
