@@ -137,7 +137,7 @@ $fieldShort = {
 // #label エンカウント
 $encounter
 // #label LOOP
-// #takes 戦闘曲
+// #takes 戦闘曲 restart
 // #take 戦闘 A
 $good
 // #take 戦闘 B
@@ -270,7 +270,7 @@ $fieldShort = {
 // #label エンカウント
 $encounter
 // #label LOOP
-// #takes 戦闘曲
+// #takes 戦闘曲 restart
 // #take 戦闘 A
 $good
 // #take 戦闘 B
@@ -397,7 +397,7 @@ $fieldShort = {
 // #label エンカウント
 $encounter
 // #label LOOP
-// #takes 戦闘曲
+// #takes 戦闘曲 restart
 // #take 戦闘 A
 $good
 // #take 戦闘 B
