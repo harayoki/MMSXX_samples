@@ -6,6 +6,7 @@
   --muted-foreground: light-dark(#667085, #aab2c3);
   --border: light-dark(#c9d1df, #505765);
   --blue: #268df5;
+  --accent-ink: #fff;
 }
 
 * { box-sizing: border-box; }
@@ -22,6 +23,10 @@ body {
   width: min(100%, 1000px);
   margin-inline: auto;
 }
+#volcano-parade { --blue: #f56b26; --accent-ink: #111; }
+#pocket-tunnel { --blue: #f5b026; --accent-ink: #111; }
+#windward-crossing { --blue: #2626f5; --accent-ink: #fff; }
+#grassland-trinity { --blue: #26f537; --accent-ink: #111; }
 .music-page p { margin: 2px; }
 .text-small { font-size: .875rem; }
 .text-muted { opacity: .72; }
@@ -86,7 +91,7 @@ body {
 }
 .music-player button.sw { border-radius: 999px; }
 .music-player button.sw[aria-pressed="true"] {
-  color: #fff;
+  color: var(--accent-ink);
   background: var(--player-blue);
   border-color: var(--player-blue);
   font-weight: 600;
@@ -101,7 +106,7 @@ body {
 }
 .music-player button.dots:hover,
 .music-player button.dots[aria-pressed="true"] {
-  color: #fff;
+  color: var(--accent-ink);
   background: var(--player-blue);
   border: 1px solid var(--player-blue);
 }

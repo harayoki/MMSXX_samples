@@ -180,7 +180,7 @@
     editor.value = current.source;
     comment.textContent = current.comment;
     player = E.player.mount(document.getElementById('pt-player'), {
-      audio, mml: MusicPage.splitMML(current.source), loops: 3, open: false,
+      audio, mml: MusicPage.splitMML(current.source), loops: 3, open: true,
     });
     prepare(current, audio);
     select(current);

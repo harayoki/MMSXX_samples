@@ -47,8 +47,8 @@ const songs = [
       await page.goto(prefix + folder + '/');
       const player = page.locator('.mmsxx-player');
       await player.locator('[data-p="play"]').waitFor();
-      assert.equal(await player.locator('[data-p="open"]').getAttribute('aria-expanded'), 'false');
-      assert(await player.locator('[data-p="fold"]').isHidden());
+      assert.equal(await player.locator('[data-p="open"]').getAttribute('aria-expanded'), 'true');
+      assert(await player.locator('[data-p="fold"]').isVisible());
       assert((await player.locator('[data-p="title"]').textContent()).includes(title));
       assert.equal(await page.locator('#' + editorId).isEnabled(), true);
       assert.equal(
