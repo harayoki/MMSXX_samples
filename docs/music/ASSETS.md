@@ -3,7 +3,7 @@
 各楽曲ページは共通ローダー `music-page.js` と共通プレイヤー
 `player-engine.js` を使用する。共通プレイヤーは
 `harayoki/mmsxx-mml-studio` の
-`03bb0ae57db3c82193f58c837986cd480578f393` をバンドルしたもの。
+`bc2b585f17a8cf77c92a0b4e1a9719668988288b` をバンドルしたもの。
 
 ## ファイル構成
 
@@ -55,9 +55,9 @@ python3 serve.py
 - 声を重ねるデチューン・オクターブ・エコー：
   `audio.dynamic_effects[ch]`
 
-Volcano Paradeの7セント重ねと、Pocket Tunnelの14セント重ねは
-`dynamic_effects` へ移している。動的エフェクトは現行仕様ではWAV書き出しに
-含まれない。
+Volcano Paradeの7セント重ねと、Pocket Tunnel「おしゃれアレンジ」の
+14セント重ねは `dynamic_effects` へ移している。有効な動的エフェクトは
+再生だけでなくWAV書き出しにも含まれる。
 
 ## 検証
 
