@@ -32,6 +32,7 @@ const songs = [
     '戦闘 B（後半）', '戦闘 C（後半）', '敗北',
   ]],
   ['04_Grassland-Trinity/grassland-trinity.mml', 4],
+  ['05_Windward-Battle-Interactive/windward-battle-interactive.mml', 3],
 ];
 
 function splitMML(text) {
@@ -84,5 +85,22 @@ for (const { file, channels, marks, source } of sources) {
     file + ': jump labels');
   if (marks) assert(info.marks.every((mark, index) =>
     index === 0 || mark.t > info.marks[index - 1].t), file + ': jump label order');
+  if (file.startsWith('05_Windward-Battle-Interactive/')) {
+    assert.deepEqual(info.marks.map(mark => mark.name), ['エンカウント', 'LOOP', 'OUTRO'],
+      file + ': encounter / loop / outro labels');
+    assert.deepEqual(info.takes.map(take => ({
+      group: take.group, now: take.now, options: take.options,
+    })), [
+      { group: '戦闘曲', now: '戦闘 A', options: ['戦闘 A', '戦闘 B', '戦闘 C'] },
+      { group: '結末', now: '勝利', options: ['勝利', '敗北'] },
+    ], file + ': interactive takes');
+    assert(info.takes.every(take => take.boxes.every(box =>
+      Math.abs(box.dur - take.boxes[0].dur) < 1e-6)), file + ': aligned take lengths');
+    assert.equal(info.switches.bars.length, 0, file + ': no manual switch bars needed');
+    const l1Seconds = 240 / 152;
+    assert(info.switches.grid.slice(1).every((point, index) =>
+      Math.abs(point - info.switches.grid[index] - l1Seconds) < 1e-6),
+    file + ': L1 switch grid');
+  }
   console.log('PASS', file, channels + 'ch', info.total.toFixed(3) + 's');
 }
