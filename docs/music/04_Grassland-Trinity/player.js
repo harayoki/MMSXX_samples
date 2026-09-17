@@ -3,7 +3,7 @@
   const E = MMSXX.sound;
   const tones = {
     fieldLeadAttack: { wave: 'pulse:50', env: 'flat', pitch: [120, 0] },
-    fieldTriangle: { wave: 'triangle', env: 'flat' },
+    fieldTriangle: { wave: 'wtNesTriangle', env: 'flat' },
     fieldHit2x14500: { wave: 'pulse:50', env: 'flat', pitch: [-21.740748211670333] },
     fieldHit2x8200: { wave: 'pulse:50', env: 'flat', pitch: [-8.569250687891364] },
     fieldHit2x5200: { wave: 'pulse:50', env: 'flat', pitch: [2.896005539719072] },

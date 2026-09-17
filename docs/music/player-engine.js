@@ -1,4 +1,4 @@
-// MMS/XX player and audio engine, source commit 03bb0ae57db3c82193f58c837986cd480578f393
+// MMS/XX player and audio engine, source commit bc2b585f17a8cf77c92a0b4e1a9719668988288b
 (() => {
   var __defProp = Object.defineProperty;
   var __export = (target, all) => {
@@ -4313,7 +4313,7 @@ registerProcessor('mmsxx-duty', DutyBank);
   }
 
   // engine-latest/sound/version.js
-  var SOUND_VERSION = "0.19.0";
+  var SOUND_VERSION = "0.20.0";
 
   // engine-latest/sound/audio.js
   registerDefaultWaves();

@@ -7,6 +7,18 @@ global.window = global;
 require('../docs/music/player-engine.js');
 
 const E = MMSXX.sound;
+assert.equal(E.SOUND_VERSION, '0.20.0', 'bundled sound engine version');
+const nesTriangle = E.WAVEFORMS[E.findWave('wtNesTriangle')];
+assert(nesTriangle?.special?.includes('fixedvolume'),
+  'wtNesTriangle must ignore every nonzero MML volume');
+const audioProto = E.ChipTuneSound.prototype;
+assert(audioProto.renderBGM.toString().includes('this._scheduleTrack'),
+  'WAV export must use the shared track scheduler');
+assert(audioProto._scheduleTrack.toString().includes('this._extraVoices'),
+  'the shared scheduler must include dynamic effects');
+assert(audioProto._extraVoices.toString().includes('this.dynamic_effects'),
+  'dynamic effects must be read by playback and WAV export');
+
 const root = path.resolve(__dirname, '../docs/music');
 const songs = [
   ['01_Volcano-parade/volcano-parade.mml', 7,
@@ -37,6 +49,15 @@ function splitMML(text) {
 const sources = songs.map(([file, channels, marks]) => ({
   file, channels, marks, source: fs.readFileSync(path.join(root, file), 'utf8'),
 }));
+
+for (const file of [
+  '03_Windward-Crossing/player.js',
+  '04_Grassland-Trinity/player.js',
+]) {
+  const source = fs.readFileSync(path.join(root, file), 'utf8');
+  assert(source.includes("wave: 'wtNesTriangle'"), file + ': NES triangle');
+  assert(!/wave:\s*['"]triangle['"]/.test(source), file + ': no volume-sensitive triangle');
+}
 
 // Page-specific timbres are registered by each player.js. Placeholder voices
 // are enough here because this test validates notation and arrangement shape.

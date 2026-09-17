@@ -22,7 +22,7 @@
     noteJa: 'Windward Crossingの戦闘ベース用エンベロープ。',
   });
   E.registerTone('wcFieldLead', {
-    wave: 'triangle', env: 'wcLeadEnv',
+    wave: 'wtNesTriangle', env: 'wcLeadEnv',
     note: 'Field lead.', noteJa: 'フィールド用リード。',
   });
   E.registerTone('wcBattleLead', {
@@ -34,7 +34,7 @@
     note: 'Battle bass.', noteJa: '戦闘用ベース。',
   });
   E.registerTone('wcBass', {
-    wave: 'triangle', env: 'wcPluckEnv',
+    wave: 'wtNesTriangle', env: 'wcPluckEnv',
     note: 'Field bass.', noteJa: 'フィールド用ベース。',
   });
   E.registerTone('wcArp', {
