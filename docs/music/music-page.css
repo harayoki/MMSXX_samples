@@ -26,6 +26,7 @@ body {
 #volcano-parade { --blue: #cd4b09; }
 #pocket-tunnel { --blue: #e51d0b; }
 #windward-crossing { --blue: #2424f5; }
+#windward-battle-interactive { --blue: #2424f5; }
 #grassland-trinity { --blue: #068911; }
 .music-page p { margin: 2px; }
 .music-credits { display: grid; gap: 0; }

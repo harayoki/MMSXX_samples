@@ -29,6 +29,7 @@
 | Pocket Tunnel | `02_Pocket-Tunnel` |
 | Windward Crossing | `03_Windward-Crossing` |
 | 草原のトリニティ | `04_Grassland-Trinity` |
+| 風渡りの境界 戦闘曲(インタラクティブ) | `05_Windward-Battle-Interactive` |
 
 草原のトリニティの `grassland-trinity.jpg` と
 `grassland-trinity.png` は未配置。リンク切れを許容している。

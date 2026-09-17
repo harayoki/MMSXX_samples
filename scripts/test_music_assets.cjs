@@ -9,6 +9,9 @@ const songs = [
   ['02_Pocket-Tunnel', 'pt-src', 'pocket-tunnel.png', 'Pocket Tunnel'],
   ['03_Windward-Crossing', 'wc-src', 'windward-crossing.png', 'Windward Crossing'],
   ['04_Grassland-Trinity', 'gt-src', 'grassland-trinity.png', '草原のトリニティ'],
+  ['05_Windward-Battle-Interactive', 'wbi-src',
+    '../03_Windward-Crossing/windward-crossing.png',
+    '風渡りの境界 戦闘曲(インタラクティブ)', true],
 ];
 
 (async () => {
@@ -18,7 +21,7 @@ const songs = [
   });
   try {
     for (const published of [false, true]) for (const song of songs) {
-      const [folder, editorId, image, title] = song;
+      const [folder, editorId, image, title, initiallyOpen = false] = song;
       const page = await browser.newPage({ acceptDownloads: true });
       const errors = [];
       const requests = [];
@@ -47,18 +50,19 @@ const songs = [
       await page.goto(prefix + folder + '/');
       const player = page.locator('.mmsxx-player');
       await player.locator('[data-p="play"]').waitFor();
-      assert.equal(await player.locator('[data-p="open"]').getAttribute('aria-expanded'), 'false');
-      assert.equal(await player.locator('[data-p="fold"]').isVisible(), false);
-      await player.locator('[data-p="open"]').click();
+      assert.equal(await player.locator('[data-p="open"]').getAttribute('aria-expanded'),
+        String(initiallyOpen));
+      assert.equal(await player.locator('[data-p="fold"]').isVisible(), initiallyOpen);
+      if (!initiallyOpen) await player.locator('[data-p="open"]').click();
       assert.equal(await player.locator('[data-p="open"]').getAttribute('aria-expanded'), 'true');
       assert(await player.locator('[data-p="fold"]').isVisible());
-      assert.equal(await page.evaluate(() =>
+      if (!initiallyOpen) assert.equal(await page.evaluate(() =>
         localStorage.getItem('mmsxx.samples.player.open')), 'true');
       assert((await player.locator('[data-p="title"]').textContent()).includes(title));
       assert.equal(await page.locator('#' + editorId).isEnabled(), true);
       assert.equal(
         await page.locator('[data-music-image]').getAttribute('href'),
-        (published ? media : prefix) + folder + '/' + image,
+        new URL(folder + '/' + image, published ? media : prefix).href,
       );
       assert(requests.includes(prefix + 'player-engine.js'));
       assert(requests.includes(prefix + 'music-page.css'));

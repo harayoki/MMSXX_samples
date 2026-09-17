@@ -112,9 +112,13 @@
         catch { return false; }
       };
       const mountWithStoredOpen = (root, options = {}) => {
-        const player = originalMount(root, { ...options, open: readPlayerOpen() });
+        const { forceOpen = false, ...playerOptions } = options;
+        const player = originalMount(root, {
+          ...playerOptions,
+          open: forceOpen || readPlayerOpen(),
+        });
         const toggle = root.querySelector('[data-p="open"]');
-        toggle?.addEventListener('click', () => {
+        if (!forceOpen) toggle?.addEventListener('click', () => {
           try { localStorage.setItem(playerOpenKey, toggle.getAttribute('aria-expanded')); }
           catch { /* Storage may be unavailable in a restricted frame. */ }
         });
