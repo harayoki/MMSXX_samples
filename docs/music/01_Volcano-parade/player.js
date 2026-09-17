@@ -1,288 +1,186 @@
+// Volcano Parade 専用音色と、旧ミックスの音量補正。
+(() => {
+  const E = MMSXX.sound;
+  const sampleCycle = fn => Array.from({ length: 32 }, (_, i) => fn(i / 32));
+  const triangleAt = x => 1 - 4 * Math.abs(x - .5);
 
-// Volcano Parade専用音色。標準APIで登録し、MMLから名前で呼び出す。
-var sampleCycle = (s) => Array.from({ length: 32 }, (e, t) => s(t / 32)), triangleAt = (s) => 1 - 4 * Math.abs(s - 0.5);
-function filteredSquare(s, e, t) {
-	return sampleCycle((o) => {
-		let n = 0;
-		for (let a = 1; a <= 15; a += 2) {
-			let i = a * s / e, c = 1 / Math.hypot(1 - i * i, i / t), r = -Math.atan2(i / t, 1 - i * i);
-			n += 4 / Math.PI * (1 / a) * Math.sin(2 * Math.PI * a * o + r) * c;
-		}
-		return n;
-	});
-}
-function bassCycle(s, e) {
-	let t = filteredSquare(s, Math.max(360, 900 - s * 2.5), 0.45);
-	return Array.from({ length: 32 }, (o, n) => triangleAt(n / 32) + e * t[n]);
-}
-window.registerVolcanoVoices = function(sound, registerTone) {
-	// ページ全体の音量補正。全曲約 -19 LUFS、最大ピーク -1 dBTP以下を目安。
-	sound.volume = 10 ** (12.56 / 20);
-	registerTone("vpLead", {
-		wave: "pulse50",
-		vib: {
-			depth: 5,
-			speed: 6,
-			delay: 18
-
-		},
-		overwrite: true,
-		role: "lead",
-		note: "Square lead; vibrato holds off for 18 frames, then eases in."
-
-	});
-	sound.addFM("vpPiano", {
-		ratio: 3,
-		depth: 3,
-		attack: 1e-3,
-		decay: 0.07,
-		sustain: 0.1,
-		wave: "sine"
-
-	}, {
-		overwrite: true,
-		role: "chord",
-		note: "Bright but rounded piano: odd harmonics that ring on the attack and clear fast."
-
-	});
-	sound.addFM("vpTom", {
-		ratio: 1,
-		depth: 3,
-		attack: 2e-3,
-		decay: 0.1,
-		sustain: 0.06,
-		wave: "sine",
-		drop: 0.25,
-		dropTime: 0.025
-
-	}, {
-		overwrite: true,
-		role: "chord",
-		note: "Round, tom-like body under the bright piano. Shallow pitch drop so the note is still heard."
-
-	});
-	sound.addWave("vpBass", bassCycle(120, 0.36), 8, {
-		overwrite: true,
-		role: "bass",
-		note: "Triangle with a filtered square mixed in, the way the original layered them."
-
-	});
-	sound.addWave("vpBassLow", bassCycle(92, 0.45), 8, {
-		overwrite: true,
-		role: "bass",
-		note: "Triangle with a filtered square mixed in. For the low octave."
-
-	});
-	sound.addWave("vpBassHi", bassCycle(180, 0.24), 8, {
-		overwrite: true,
-		role: "bass",
-		note: "Same shape with less square, for the octave above."
-
-	});
-};
-
-
-// Volcano Parade playback and arrangement preparation.
-// Copyright 2026 harayoki. All rights reserved.
-const E = MMSXX.sound;
-const SoundEngine = E.ChipTuneSound,
-  registerTone = E.registerTone;
-var registerVoices = window.registerVolcanoVoices;
-var CHANNELS = {
-    ARP: 0,
-    MELODY: 1,
-    BASS: 2,
-    CALL: 3,
-    CALL_LOW: 4,
-    HAT: 5,
-    TOM: 6,
-  },
-  VOICE_GAINS = {
-    saw: { f: 0.065, cap: 0.24, comp: 1.078 },
-    pulse50: { f: 0.055, cap: 0.24, comp: 1.079 },
-    vpLead: { f: 0.055, cap: 0.24, comp: 1.079 },
-    vpBass: { f: 0.115, cap: 0.24, comp: 0.917 },
-    vpPiano: { f: 0.115, cap: 0.27, comp: 0.695 },
-    vpTom: { f: 0.115, cap: 0.24, comp: 1.227 },
-  },
-  DEFAULT_GAIN = { f: 0.055, cap: 0.24, comp: 1 },
-  HAT_BOOST_DB = 9;
-function legacyVolume(s) {
-  return Math.max(0, Math.min(15, 15 * Math.pow(Math.max(0, 3 * s), 1 / 1.8)));
-}
-var CHANNEL_GAINS = [0.98, 1.049, 1.233, 1.063, 1.09, 1, 1, 0.98];
-function prepareSong(s, e, t) {
-  const shared = MusicWav.loopMacro(t);
-  let o = t
-    .split(/\r?\n\s*\r?\n/)
-    .map((a) => a.trim())
-    .filter(Boolean);
-  o = o.map((part) => (/\$LOOP_END\s*=/i.test(part) ? part : shared + part));
-  s.defineBGM(e, o);
-  let n = s.bgmDefs.get(e);
-  return (
-    balanceTracks(s, n),
-    adaptEnvelopes(n),
-    { channels: o.length, seconds: Math.max(...n.map((a) => a.total), 0) }
-  );
-}
-function balanceTracks(s, e) {
-  let t = s.waveNames,
-    o = (r) => (e[r] ? e[r].events : []);
-  for (let r of e) for (let u of r.events) u.__g = 1;
-  let n = [CHANNELS.MELODY, CHANNELS.CALL, CHANNELS.CALL_LOW].flatMap(o);
-  for (let r of o(CHANNELS.ARP)) {
-    r.__g = 1.08;
-    let u = r.t + r.gate;
-    n.some((l) => l.t < u && l.t + l.gate > r.t) && (r.__g *= 0.48);
-  }
-  let a = 60 / 135;
-  for (let r of o(CHANNELS.BASS)) {
-    let u = (r.t / a) % 1;
-    r.__g *= Math.abs(u - 0.5) < 0.09 ? 1.38 : 0.84;
-  }
-  o(CHANNELS.HAT).forEach((r, u) => {
-    r.__open = u % 16 === 15;
-  });
-  let i = [0.0041, 0.0014, 0.0011, 0.0022, 0.0014, 0.0016];
-  for (let [r, u] of e.entries())
-    if (r !== CHANNELS.HAT)
-      for (let l of u.events) l.gate += i[l.env] ?? 0.0014;
-  let c = e[CHANNELS.ARP];
-  if (c) {
-    let r = Math.max(...c.events.map((u) => u.detune), 0);
-    if (r > 0) {
-      let u = Math.pow(2, r / 1200);
-      e.push({
-        ...c,
-        ch: e.length,
-        events: c.events.map((l) => ({ ...l, freq: l.freq * u, detune: 0 })),
-      });
-      for (let l of c.events) l.detune = 0;
-    }
-  }
-  for (let [r, u] of e.entries())
-    for (let l of u.events) {
-      let d = (l.vol / 15) * l.__g,
-        h;
-      if (r === CHANNELS.HAT)
-        h =
-          Math.min(l.__open ? 0.026 : 0.035, d * (l.__open ? 0.018 : 0.025)) *
-          Math.pow(10, HAT_BOOST_DB / 20);
-      else {
-        let f = VOICE_GAINS[t[l.wave]] ?? DEFAULT_GAIN;
-        h = Math.min(f.cap, d * f.f) * f.comp;
+  function filteredSquare(cutoff, resonance, mix) {
+    return sampleCycle(x => {
+      let sum = 0;
+      for (let harmonic = 1; harmonic <= 15; harmonic += 2) {
+        const n = harmonic * cutoff / resonance;
+        const gain = 1 / Math.hypot(1 - n * n, n / mix);
+        const phase = -Math.atan2(n / mix, 1 - n * n);
+        sum += 4 / Math.PI / harmonic *
+          Math.sin(2 * Math.PI * harmonic * x + phase) * gain;
       }
-      ((l.vol = legacyVolume(h) * (CHANNEL_GAINS[r] ?? 1)), delete l.__g);
-    }
-}
-var root = document.getElementById("mmsxx-inline"),
-  sourceField = root.querySelector("#mmsxx-src"),
-  playStatus = root.querySelector("#mmsxx-status"),
-  playButton = root.querySelector("#mmsxx-play"),
-  stopButton = root.querySelector("#mmsxx-stop"),
-  engine = null,
-  finishTimer = 0;
-function preparePlayback() {
-  return (
-    engine ||
-      ((engine = new SoundEngine(null, { psgTune: false, spatial: "mono" })),
-      (engine.psgTune = !1),
-      engine.unlock(),
-      registerVoices(engine, registerTone)),
-    prepareSong(engine, "volcano", sourceField.value)
-  );
-}
-function stopPlayback() {
-  (clearTimeout(finishTimer),
-    (finishTimer = 0),
-    engine && engine.stopBGM(),
-    (playStatus.textContent = "Stopped"));
-}
-function play() {
-  stopPlayback();
-  let s = 0;
-  try {
-    ((s = preparePlayback().seconds), engine.playBGM("volcano", !1, !0));
-  } catch (e) {
-    playStatus.textContent = "Error: " + e.message;
-    return;
+      return sum;
+    });
   }
-  ((playStatus.textContent = `Playing / ${s.toFixed(2)} sec`),
-    (finishTimer = setTimeout(
-      () => {
-        playStatus.textContent = "Finished";
-      },
-      s * 1e3 + 500,
-    )));
-}
-playButton.addEventListener("click", play);
-stopButton.addEventListener("click", stopPlayback);
-// Legacy envelopes used decay as a fraction of note length. Convert through
-// the public registration API; the bundled engine itself is unchanged.
-const legacyEnvelopes = [
-  { a: 0.005, d: 0, s: 1, r: 0.01 },
-  { a: 0.08, d: 0.1, s: 0.8, r: 0.15 },
-  { a: 0.002, d: 0.25, s: 0, r: 0.05 },
-  { a: 0.004, d: 0.4, s: 0.35, r: 0.12 },
-  { a: 0.25, d: 0.2, s: 0.7, r: 0.4 },
-  { a: 0.002, d: 0.12, s: 0.15, r: 0.08 },
-];
-const envelopeCache = new Map();
-function adaptEnvelopes(tracks) {
-  for (const track of tracks)
-    for (const event of track.events) {
-      // Match the former square oscillator level to the current pulse waveform.
+
+  function bassCycle(cutoff, squareMix) {
+    const square = filteredSquare(cutoff, Math.max(360, 900 - cutoff * 2.5), .45);
+    return Array.from({ length: 32 }, (_, i) =>
+      triangleAt(i / 32) + squareMix * square[i]);
+  }
+
+  function registerVoices(audio) {
+    audio.volume = 10 ** (12.56 / 20);
+    E.registerTone('vpLead', {
+      wave: 'pulse:50',
+      vib: { depth: 5, speed: 6, delay: 18 },
+      overwrite: true,
+      role: 'lead',
+      note: 'Square lead; vibrato starts after 18 frames.',
+      noteJa: '18フレーム後からビブラートが入る矩形波リード。',
+    });
+    audio.addFM('vpPiano', {
+      ratio: 3, depth: 3, attack: .001, decay: .07, sustain: .1, wave: 'sine',
+    }, {
+      overwrite: true, role: 'chord',
+      note: 'Bright, rounded short piano.',
+      noteJa: '明るく丸い短いピアノ。',
+    });
+    audio.addFM('vpTom', {
+      ratio: 1, depth: 3, attack: .002, decay: .1, sustain: .06,
+      wave: 'sine', drop: .25, dropTime: .025,
+    }, {
+      overwrite: true, role: 'perc',
+      note: 'Tom-like body with a shallow pitch drop.',
+      noteJa: '浅く音程が落ちるタム風の音。',
+    });
+    audio.addWave('vpBass', bassCycle(120, .36), 8, {
+      overwrite: true, role: 'bass',
+      note: 'Triangle and filtered pulse bass.',
+      noteJa: '三角波とフィルター矩形波を混ぜたベース。',
+    });
+    audio.addWave('vpBassLow', bassCycle(92, .45), 8, {
+      overwrite: true, role: 'bass',
+      note: 'Low triangle and filtered pulse bass.',
+      noteJa: '低域用の三角波とフィルター矩形波のベース。',
+    });
+    audio.addWave('vpBassHi', bassCycle(180, .24), 8, {
+      overwrite: true, role: 'bass',
+      note: 'High triangle and filtered pulse bass.',
+      noteJa: '高域用の三角波とフィルター矩形波のベース。',
+    });
+  }
+
+  const CHANNELS = { ARP: 0, MELODY: 1, BASS: 2, CALL: 3, CALL_LOW: 4, HAT: 5 };
+  const VOICE_GAINS = {
+    saw: { f: .065, cap: .24, comp: 1.078 },
+    'pulse:50': { f: .055, cap: .24, comp: 1.079 },
+    vpLead: { f: .055, cap: .24, comp: 1.079 },
+    vpBass: { f: .115, cap: .24, comp: .917 },
+    vpPiano: { f: .115, cap: .27, comp: .695 },
+    vpTom: { f: .115, cap: .24, comp: 1.227 },
+  };
+  const DEFAULT_GAIN = { f: .055, cap: .24, comp: 1 };
+  const CHANNEL_GAINS = [.98, 1.049, 1.233, 1.063, 1.09, 1, 1, .98];
+  const legacyEnvelopes = [
+    { a: .005, d: 0, s: 1, r: .01 },
+    { a: .08, d: .1, s: .8, r: .15 },
+    { a: .002, d: .25, s: 0, r: .05 },
+    { a: .004, d: .4, s: .35, r: .12 },
+    { a: .25, d: .2, s: .7, r: .4 },
+    { a: .002, d: .12, s: .15, r: .08 },
+  ];
+  const envelopeCache = new Map();
+
+  function legacyVolume(value) {
+    return Math.max(0, Math.min(15, 15 * Math.pow(Math.max(0, 3 * value), 1 / 1.8)));
+  }
+
+  function adaptEnvelopes(tracks) {
+    for (const track of tracks) for (const event of track.events) {
       const wave = E.WAVEFORMS[event.wave];
-      if (wave.kind === "pulse" && wave.duty === 0.5)
-        event.vol *= Math.pow(0.85, 1 / 1.8);
+      if (wave.kind === 'pulse' && wave.duty === .5) event.vol *= Math.pow(.85, 1 / 1.8);
       const spec = legacyEnvelopes[event.env];
-      if (spec) {
-        const duration = Math.max(0.02, event.gate);
-        const key = event.env + ":" + duration;
-        if (!envelopeCache.has(key)) {
-          const name = "vpLegacy" + envelopeCache.size;
-          E.registerEnvelope(name, { ...spec, d: spec.d * duration });
-          envelopeCache.set(
-            key,
-            E.ENVELOPES.findIndex((env) => env.name === name),
-          );
-        }
-        event.env = envelopeCache.get(key);
-        event.open = false;
+      if (!spec) continue;
+      const duration = Math.max(.02, event.gate);
+      const key = event.env + ':' + duration;
+      if (!envelopeCache.has(key)) {
+        const name = 'vpLegacy' + envelopeCache.size;
+        E.registerEnvelope(name, {
+          ...spec, d: spec.d * duration,
+          note: 'Converted Volcano Parade envelope.',
+          noteJa: 'Volcano Paradeの旧音長比例エンベロープを秒指定へ変換。',
+        });
+        envelopeCache.set(key, E.ENVELOPES.findIndex(env => env.name === name));
+      }
+      event.env = envelopeCache.get(key);
+      event.open = false;
+    }
+  }
+
+  function balanceTracks(tracks) {
+    const events = ch => tracks[ch]?.events ?? [];
+    for (const track of tracks) for (const event of track.events) event.__g = 1;
+    const leads = [CHANNELS.MELODY, CHANNELS.CALL, CHANNELS.CALL_LOW].flatMap(events);
+    for (const event of events(CHANNELS.ARP)) {
+      event.__g = 1.08;
+      const end = event.t + event.gate;
+      if (leads.some(other => other.t < end && other.t + other.gate > event.t)) event.__g *= .48;
+    }
+    const beat = 60 / 135;
+    for (const event of events(CHANNELS.BASS)) {
+      const phase = event.t / beat % 1;
+      event.__g *= Math.abs(phase - .5) < .09 ? 1.38 : .84;
+    }
+    events(CHANNELS.HAT).forEach((event, index) => { event.__open = index % 16 === 15; });
+    const gateTail = [.0041, .0014, .0011, .0022, .0014, .0016];
+    for (const [ch, track] of tracks.entries()) {
+      if (ch !== CHANNELS.HAT) {
+        for (const event of track.events) event.gate += gateTail[event.env] ?? .0014;
       }
     }
-}
-window.renderVolcanoWav = async (source, job) => {
-  const renderer = new E.ChipTuneSound(null, {
-    psgTune: false,
-    spatial: "mono",
-  });
-  registerVoices(renderer, E.registerTone);
-  prepareSong(renderer, "download", source);
-  return MusicWav.render(renderer, "download", {
-    loops: 1,
-    tail: 1,
-    sampleRate: 48000,
-    channels: 1,
-  }, job);
-};
+    for (const [ch, track] of tracks.entries()) for (const event of track.events) {
+      const linear = event.vol / 15 * event.__g;
+      let gain;
+      if (ch === CHANNELS.HAT) {
+        gain = Math.min(event.__open ? .026 : .035,
+          linear * (event.__open ? .018 : .025)) * Math.pow(10, 9 / 20);
+      } else {
+        const spec = VOICE_GAINS[E.WAVEFORMS[event.wave].name] ?? DEFAULT_GAIN;
+        gain = Math.min(spec.cap, linear * spec.f) * spec.comp;
+      }
+      event.vol = legacyVolume(gain) * (CHANNEL_GAINS[ch] ?? 1);
+      delete event.__g;
+    }
+  }
 
+  function prepare(audio) {
+    const tracks = audio.bgmDefs.get('__player__');
+    if (!Array.isArray(tracks)) return;
+    balanceTracks(tracks);
+    adaptEnvelopes(tracks);
+  }
 
-MusicWav.attach({source:document.getElementById('mmsxx-src'),button:document.getElementById('mmsxx-wav'),status:document.getElementById('mmsxx-wav-status'),key:()=> 'volcano',basename:()=> 'volcano_parade',render:(snapshot,job)=>window.renderVolcanoWav(snapshot.source,job)});
-(async () => {
-	const source = document.getElementById('mmsxx-src');
-	const play = document.getElementById('mmsxx-play');
-	const status = document.getElementById('mmsxx-status');
-	status.textContent = 'Loading MML…';
-	try {
-		const response = await fetch(MusicAssets.song('volcano-parade.mml'));
-		if (!response.ok) throw new Error('HTTP ' + response.status);
-		source.value = await response.text();
-		source.disabled = false;
-		play.disabled = false;
-		status.textContent = 'Ready';
-	} catch (error) {
-		status.textContent = 'MML loading error: ' + error.message;
-	}
+  const editor = document.getElementById('vp-src');
+  const status = document.querySelector('[data-music-status]');
+  const audio = new E.ChipTuneSound(null, { psgTune: false, spatial: 'mono' });
+  audio.psgTune = false;
+  registerVoices(audio);
+  // 旧版がアルペジオを複製して7セントずらしていた処理は、現行の動的エフェクトへ移動。
+  audio.dynamic_effects[CHANNELS.ARP] = { detune: 7 };
+
+  fetch(MusicAssets.song('volcano-parade.mml'))
+    .then(response => {
+      if (!response.ok) throw new Error('HTTP ' + response.status);
+      return response.text();
+    })
+    .then(source => {
+      editor.value = source;
+      editor.disabled = false;
+      const player = E.player.mount(document.getElementById('vp-player'), {
+        audio, mml: MusicPage.splitMML(source), loops: 3,
+      });
+      prepare(audio);
+      editor.addEventListener('change', () => {
+        player.setMML(MusicPage.splitMML(editor.value));
+        prepare(audio);
+      });
+      status.textContent = '';
+    })
+    .catch(error => { status.textContent = 'MML loading error: ' + error.message; });
 })();

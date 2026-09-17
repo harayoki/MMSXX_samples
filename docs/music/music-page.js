@@ -14,6 +14,24 @@
   window.MusicAssets = Object.freeze({
     song, image, shared: path => new URL(path, root).href
   });
+  /**
+   * 現行の `// #ch` でチャンネルを分ける。
+   * サンプル曲は先頭に共通マクロを置くため、エンジン標準の splitVoices と違い、
+   * 最初の #ch より前を各チャンネルへそのまま渡す。
+   */
+  function splitMML(text) {
+    const lines = String(text ?? '').split(/\r?\n/);
+    const marks = lines.map((line, index) =>
+      /^\s*\/\/\s*#\s*ch(?:\s|$)/i.test(line) ? index : -1
+    ).filter(index => index >= 0);
+    if (!marks.length) return String(text ?? '').trim() ? [String(text)] : [];
+    const head = lines.slice(0, marks[0]);
+    return marks.map((at, index) =>
+      [...head, ...lines.slice(at, marks[index + 1] ?? lines.length)]
+        .join('\n').trim()
+    ).filter(Boolean);
+  }
+  window.MusicPage = Object.freeze({ splitMML });
   for (const element of document.querySelectorAll('[data-music-image]')) {
     element.setAttribute(element.tagName === 'A' ? 'href' : 'src', image(element.dataset.musicImage));
   }
@@ -79,11 +97,49 @@
   (async () => {
     try {
       // Preserve script execution order without depending on download timing.
-      await load(MusicAssets.shared('sound-engine.js'));
-      await load(MusicAssets.shared('wav-download.js'));
+      await load(MusicAssets.shared('player-engine.js'));
+      const style = document.createElement('style');
+      style.textContent = MMSXX.sound.player.CSS;
+      // Keep the shared page stylesheet later in cascade order so each sample
+      // can retain the established blue rounded-button appearance.
+      document.head.prepend(style);
+      // Share the details-panel state across every music page. With no saved
+      // preference the player starts closed.
+      const playerOpenKey = 'mmsxx.samples.player.open';
+      const originalMount = MMSXX.sound.player.mount;
+      const readPlayerOpen = () => {
+        try { return localStorage.getItem(playerOpenKey) === 'true'; }
+        catch { return false; }
+      };
+      const mountWithStoredOpen = (root, options = {}) => {
+        const player = originalMount(root, { ...options, open: readPlayerOpen() });
+        const toggle = root.querySelector('[data-p="open"]');
+        toggle?.addEventListener('click', () => {
+          try { localStorage.setItem(playerOpenKey, toggle.getAttribute('aria-expanded')); }
+          catch { /* Storage may be unavailable in a restricted frame. */ }
+        });
+        return player;
+      };
+      MMSXX.sound.player.mount = mountWithStoredOpen;
+      MMSXX.sound.mountPlayer = mountWithStoredOpen;
       await load(song('player.js'));
+      // The player title is created after each page fetches its MML. Dock the
+      // MUSIC TOP icon beside it as soon as that title appears.
+      const dockMusicTop = () => {
+        const nav = document.querySelector('.music-top-nav');
+        const title = document.querySelector('.music-player .about [data-p="title"]');
+        if (!nav || !title) return false;
+        title.after(nav);
+        return true;
+      };
+      if (!dockMusicTop()) {
+        const observer = new MutationObserver(() => {
+          if (dockMusicTop()) observer.disconnect();
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+      }
     } catch (error) {
-      const status = document.querySelector('#mmsxx-status, #pt-status, #wc-status');
+      const status = document.querySelector('[data-music-status]');
       if (status) status.textContent = error.message;
     }
   })();
