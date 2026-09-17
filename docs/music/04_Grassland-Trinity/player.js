@@ -50,7 +50,7 @@
       editor.value = source;
       editor.disabled = false;
       const player = E.player.mount(document.getElementById('gt-player'), {
-        audio, mml: source, loops: 2, open: true,
+        audio, mml: source, loops: 2,
       });
       editor.addEventListener('change', () => player.setMML(editor.value));
       status.textContent = '';

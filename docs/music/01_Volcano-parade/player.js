@@ -173,7 +173,7 @@
       editor.value = source;
       editor.disabled = false;
       const player = E.player.mount(document.getElementById('vp-player'), {
-        audio, mml: MusicPage.splitMML(source), loops: 3, open: true,
+        audio, mml: MusicPage.splitMML(source), loops: 3,
       });
       prepare(audio);
       editor.addEventListener('change', () => {

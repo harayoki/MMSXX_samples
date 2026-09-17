@@ -103,6 +103,25 @@
       // Keep the shared page stylesheet later in cascade order so each sample
       // can retain the established blue rounded-button appearance.
       document.head.prepend(style);
+      // Share the details-panel state across every music page. With no saved
+      // preference the player starts closed.
+      const playerOpenKey = 'mmsxx.samples.player.open';
+      const originalMount = MMSXX.sound.player.mount;
+      const readPlayerOpen = () => {
+        try { return localStorage.getItem(playerOpenKey) === 'true'; }
+        catch { return false; }
+      };
+      const mountWithStoredOpen = (root, options = {}) => {
+        const player = originalMount(root, { ...options, open: readPlayerOpen() });
+        const toggle = root.querySelector('[data-p="open"]');
+        toggle?.addEventListener('click', () => {
+          try { localStorage.setItem(playerOpenKey, toggle.getAttribute('aria-expanded')); }
+          catch { /* Storage may be unavailable in a restricted frame. */ }
+        });
+        return player;
+      };
+      MMSXX.sound.player.mount = mountWithStoredOpen;
+      MMSXX.sound.mountPlayer = mountWithStoredOpen;
       await load(song('player.js'));
       // The player title is created after each page fetches its MML. Dock the
       // MUSIC TOP icon beside it as soon as that title appears.

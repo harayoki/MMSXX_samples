@@ -120,6 +120,13 @@ body {
   color: var(--foreground);
   background: var(--muted);
 }
+.music-player .marks button.now,
+.music-player .marks button[aria-current="true"] {
+  color: var(--player-blue);
+  border-color: var(--player-blue);
+  box-shadow: inset 0 0 0 1px var(--player-blue);
+  font-weight: 600;
+}
 .music-player button.sw { border-radius: 999px; }
 .music-player button.sw[aria-pressed="true"] {
   color: var(--accent-ink);

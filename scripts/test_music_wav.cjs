@@ -36,7 +36,8 @@ const server = http.createServer((request, response) => {
     await page.goto(host + '/music/04_Grassland-Trinity/');
     const player = page.locator('.mmsxx-player');
     await player.locator('[data-p="wav"]:not([disabled])').waitFor();
-    assert.equal(await player.locator('[data-p="open"]').getAttribute('aria-expanded'), 'true');
+    assert.equal(await player.locator('[data-p="open"]').getAttribute('aria-expanded'), 'false');
+    await player.locator('[data-p="open"]').click();
 
     const shortMML =
       '// #title WAV Test\n// #ch Tone\nt120 @{pulse:25} @e{flat} o4 c8 r8';

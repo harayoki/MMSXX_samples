@@ -174,7 +174,7 @@
     editor.disabled = false;
     editor.value = current.source;
     player = E.player.mount(document.getElementById('pt-player'), {
-      audio, mml: MusicPage.splitMML(current.source), loops: 3, open: true,
+      audio, mml: MusicPage.splitMML(current.source), loops: 3,
     });
     prepare(current, audio);
     select(current);
