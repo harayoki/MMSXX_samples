@@ -3,7 +3,7 @@
 各楽曲ページは共通ローダー `music-page.js` と共通プレイヤー
 `player-engine.js` を使用する。共通プレイヤーは
 `harayoki/mmsxx-mml-studio` の
-`76adcf5700a6877164f1f04ffac4e36d4437542c` をバンドルしたもの。
+`03bb0ae57db3c82193f58c837986cd480578f393` をバンドルしたもの。
 
 ## ファイル構成
 

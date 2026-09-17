@@ -104,6 +104,21 @@
       // can retain the established blue rounded-button appearance.
       document.head.prepend(style);
       await load(song('player.js'));
+      // The player title is created after each page fetches its MML. Dock the
+      // MUSIC TOP icon beside it as soon as that title appears.
+      const dockMusicTop = () => {
+        const nav = document.querySelector('.music-top-nav');
+        const title = document.querySelector('.music-player .about [data-p="title"]');
+        if (!nav || !title) return false;
+        title.after(nav);
+        return true;
+      };
+      if (!dockMusicTop()) {
+        const observer = new MutationObserver(() => {
+          if (dockMusicTop()) observer.disconnect();
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+      }
     } catch (error) {
       const status = document.querySelector('[data-music-status]');
       if (status) status.textContent = error.message;

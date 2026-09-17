@@ -1,4 +1,4 @@
-// MMS/XX player and audio engine, source commit 76adcf5700a6877164f1f04ffac4e36d4437542c
+// MMS/XX player and audio engine, source commit 03bb0ae57db3c82193f58c837986cd480578f393
 (() => {
   var __defProp = Object.defineProperty;
   var __export = (target, all) => {
@@ -6,7 +6,7 @@
       __defProp(target, name, { get: all[name], enumerable: true });
   };
 
-  // sound/audio.js
+  // engine-latest/sound/audio.js
   var audio_exports = {};
   __export(audio_exports, {
     ChipTuneSound: () => ChipTuneSound,
@@ -16,7 +16,7 @@
     psgDiv: () => psgDiv
   });
 
-  // sound/mml.js
+  // engine-latest/sound/mml.js
   var mml_exports = {};
   __export(mml_exports, {
     DEFAULT_ENV: () => DEFAULT_ENV,
@@ -53,7 +53,7 @@
     waveRole: () => waveRole
   });
 
-  // sound/gm.js
+  // engine-latest/sound/gm.js
   var GM_NAMES = [
     "Acoustic Grand Piano",
     "Bright Acoustic Piano",
@@ -199,7 +199,7 @@
     return GM_NAMES.filter((n) => key(n).startsWith(head)).slice(0, limit);
   }
 
-  // sound/mml.js
+  // engine-latest/sound/mml.js
   var SEMI = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 };
   function beepFreq(n, us) {
     return 1e6 / (2 * Math.max(1, n) * Math.max(1, us));
@@ -1947,7 +1947,7 @@ ${val}`;
     return { ok: errors.length === 0, errors, warnings, channels, total };
   }
 
-  // sound/wavetables.js
+  // engine-latest/sound/wavetables.js
   var N = 32;
   var build = (f) => Array.from({ length: N }, (_, i) => f(i / N, i));
   var norm = (w) => {
@@ -2093,7 +2093,7 @@ ${val}`;
     );
   }
 
-  // sound/fmpresets.js
+  // engine-latest/sound/fmpresets.js
   var FM_PRESETS = {
     // 1 バイオリン。弓のこすれを出すため、比を少しずらして倍音を残す
     fm2Violin: {
@@ -2436,7 +2436,7 @@ ${val}`;
     }
   }
 
-  // sound/beeppresets.js
+  // engine-latest/sound/beeppresets.js
   var BEEP_PRESETS = {
     // ---- 搬送波を刻む型。**音程を変える回路が無い機械** ----
     // 2.4kHz が鳴りっぱなしで、ソフトはそれを On/Off するだけ。
@@ -2617,7 +2617,7 @@ ${val}`;
     }
   }
 
-  // sound/fdspresets.js
+  // engine-latest/sound/fdspresets.js
   var FDS_LEN = 64;
   var FDS_BITS = 6;
   var build2 = (fn) => Array.from({ length: FDS_LEN }, (_, i) => fn(i / FDS_LEN));
@@ -2734,7 +2734,7 @@ ${val}`;
     }
   }
 
-  // sound/fm4.js
+  // engine-latest/sound/fm4.js
   var ALGORITHMS = [
     {
       mod: [[], [0], [1], [2]],
@@ -2970,7 +2970,7 @@ registerProcessor('mmsxx-fm4', Fm4Bank);
     };
   }
 
-  // sound/fm4presets.js
+  // engine-latest/sound/fm4presets.js
   var FM4_PRESETS = {
     "fm4Brass": {
       noteJa: "4 \u30AA\u30DA\u306E\u91D1\u7BA1\u3002\u30AA\u30DA\u30EC\u30FC\u30BF\u304C\u5897\u3048\u305F\u3076\u3093\u3001\u4F38\u3070\u3057\u3066\u3044\u308B\u3042\u3044\u3060\u306B\u500D\u97F3\u304C\u80B2\u3064\u3002\u672C\u7269\u306E\u91D1\u7BA1\u3068\u540C\u3058\u52D5\u304D\u3067\u30012 \u30AA\u30DA\u306B\u306F\u3067\u304D\u306A\u3044",
@@ -3101,7 +3101,7 @@ registerProcessor('mmsxx-fm4', Fm4Bank);
     });
   }
 
-  // sound/extrawaves.js
+  // engine-latest/sound/extrawaves.js
   var EXTRA_LEN = 32;
   var build3 = (fn) => Array.from({ length: EXTRA_LEN }, (_, i) => fn(i / EXTRA_LEN));
   var pulse = (n) => build3((p) => p < n / 16 ? 1 : -1);
@@ -3191,7 +3191,7 @@ registerProcessor('mmsxx-fm4', Fm4Bank);
     }
   }
 
-  // sound/tones.js
+  // engine-latest/sound/tones.js
   var tones_exports = {};
   __export(tones_exports, {
     TONE_FRAME: () => TONE_FRAME,
@@ -3747,7 +3747,7 @@ registerProcessor('mmsxx-fm4', Fm4Bank);
     }
   }
 
-  // sound/pcmbake.js
+  // engine-latest/sound/pcmbake.js
   var MIN_LOOP = 1024;
   function periodMultiple(ratios, maxM = 8) {
     for (let m = 1; m <= maxM; m++) {
@@ -3829,7 +3829,7 @@ registerProcessor('mmsxx-fm4', Fm4Bank);
     };
   }
 
-  // sound/duty.js
+  // engine-latest/sound/duty.js
   var DUTY_CODE = `
 const FRAME = ${TONE_FRAME};
 
@@ -3961,7 +3961,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     return Math.min(0.98, Math.max(0.02, x));
   };
 
-  // sound/demotunes.js
+  // engine-latest/sound/demotunes.js
   var SE_SYS_PAUSE = "sys.pause";
   var SYSTEM_SE = {
     [SE_SYS_PAUSE]: [
@@ -4032,7 +4032,7 @@ registerProcessor('mmsxx-duty', DutyBank);
   var BEAT_BLIP_A = "r16 c16 r16 c16 r16 c16 r16 c16 r16 c16 r16 c16 r16 c16 r16 c16";
   var BEAT_BLIP = new Array(8).fill(BEAT_BLIP_A).join(" ");
 
-  // sound/se.js
+  // engine-latest/sound/se.js
   var SE_FRAME = 1 / 60;
   var SE_WHOLE = 64;
   var SE_TEMPO = Math.round(240 / (SE_WHOLE * SE_FRAME));
@@ -4181,7 +4181,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     }
   };
 
-  // sound/layerpresets.js
+  // engine-latest/sound/layerpresets.js
   var DETUNE_STEPS = [
     { key: "", c: 0 },
     {
@@ -4312,10 +4312,10 @@ registerProcessor('mmsxx-duty', DutyBank);
     }
   }
 
-  // sound/version.js
+  // engine-latest/sound/version.js
   var SOUND_VERSION = "0.19.0";
 
-  // sound/audio.js
+  // engine-latest/sound/audio.js
   registerDefaultWaves();
   registerDefaultFM();
   registerDefaultBeeps();
@@ -7515,10 +7515,10 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out;
   }
 
-  // tool/ui/version.js
+  // engine-latest/tool/ui/version.js
   var PLAYER_VERSION = "1.0.0";
 
-  // tool/core/tomml.js
+  // engine-latest/tool/core/tomml.js
   var NAMES = ["c", "c+", "d", "d+", "e", "f", "f+", "g", "g+", "a", "a+", "b"];
   var LENS = [
     [16, "1"],
@@ -7598,7 +7598,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out.join("\n\n");
   }
 
-  // tool/core/wav.js
+  // engine-latest/tool/core/wav.js
   function writeWAV(samples, rate = 44100) {
     const n = samples.length;
     const out = new Uint8Array(44 + n * 2);
@@ -7626,7 +7626,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out;
   }
 
-  // tool/ui/player.js
+  // engine-latest/tool/ui/player.js
   var COPYRIGHT = "2026 harayoki";
   var PLAYER_CSS = `
 .mmsxx-player{ font-family:var(--mono); font-size:13px; line-height:1.55; color:var(--ink); }
@@ -7767,6 +7767,9 @@ registerProcessor('mmsxx-tap', MmsxxTap);
 .mmsxx-player button:disabled:hover{ border-color:var(--dim); color:var(--ink); }
 .mmsxx-player button:focus-visible{ outline:2px solid var(--amber); outline-offset:1px; }
 .mmsxx-player button.sw{ border-radius:999px; padding:5px 11px; border-color:var(--line-hi); }
+/* \u3044\u307E\u9CF4\u3063\u3066\u3044\u308B\u3068\u3053\u308D\u306E\u672D(\u8DF3\u3076\u5148\u306E\u4E00\u89A7)\u3002\u62BC\u3057\u3066\u3042\u308B\u304B\u3069\u3046\u304B\u3068\u306F\u5225\u306E\u8A71\u306A\u306E\u3067\u3001
+   \u5730\u3092\u53CD\u8EE2\u3055\u305B\u305A\u3001\u8272\u3068\u67A0\u3060\u3051\u3067\u8A00\u3046 */
+.mmsxx-player .marks button.now{ border-color:var(--amber); color:var(--amber); }
 .mmsxx-player button.sw[aria-pressed="true"]{
   background:var(--ink); color:var(--panel); border-color:var(--ink);
 }
@@ -7887,6 +7890,10 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         <span class="lbl">Takes</span>
         <span class="takes" data-p="takes"></span>
       </div>
+      <div class="row" data-p="fxrow" hidden>
+        <span class="lbl">Effects</span>
+        <span class="marks" data-p="fx"></span>
+      </div>
       <div class="row" data-p="chsrow">
         <span class="lbl" data-p="chslbl">Channels</span>
         <span class="chs" data-p="chs"></span>
@@ -7932,6 +7939,8 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       fold: $("fold"),
       chsrow: $("chsrow"),
       cuts: $("cuts"),
+      fx: $("fx"),
+      fxrow: $("fxrow"),
       help: $("help"),
       ver: $("ver"),
       loops: $("loops"),
@@ -7991,9 +8000,12 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         return true;
       }
     })();
+    const fxOff = {};
     let open = opts.open === true;
     const fold = () => {
       el.fold.hidden = !open;
+      if (open) drawFx();
+      sayCount();
       if (!open) {
         el.out.hidden = true;
         dropWAV();
@@ -8001,7 +8013,6 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       el.open.setAttribute("aria-pressed", String(open));
       el.open.setAttribute("aria-expanded", String(open));
     };
-    fold();
     audio.loopTimes = opts.loops ?? 3;
     audio.ignoreSongLoop = opts.repeatAll !== true;
     let marks = [];
@@ -8018,6 +8029,11 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     const say = (text, bad) => {
       el.note.textContent = text || "";
       el.note.className = bad ? "note bad" : "note";
+    };
+    let chNote = "";
+    const sayCount = () => {
+      if (el.note.classList.contains("bad")) return;
+      say(open ? "" : chNote);
     };
     function read() {
       voices = Array.isArray(mml) ? mml.map((v) => String(v ?? "")).filter((v) => v.trim() !== "") : splitVoices(mml);
@@ -8050,7 +8066,8 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       el.abouttext.textContent = meta.about || "";
       el.abouttext.hidden = !meta.about;
       el.about.hidden = !showAbout || !(meta.title || meta.about);
-      say(`${chans.length} channels`);
+      chNote = `${chans.length} channels`;
+      sayCount();
       return true;
     }
     function drawChannels() {
@@ -8106,6 +8123,34 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       }
       for (const t of cuts.bars) line(t, "bar");
     }
+    function drawFx() {
+      const live = audio.dynamic_effects || {};
+      const chs = [.../* @__PURE__ */ new Set([...Object.keys(live), ...Object.keys(fxOff)])].map((n) => Number(n)).filter((n) => Number.isInteger(n)).sort((a, b) => a - b);
+      el.fx.textContent = "";
+      el.fxrow.hidden = chs.length === 0;
+      for (const ch of chs) {
+        const on = !!live[ch];
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "sw";
+        b.setAttribute("aria-pressed", String(on));
+        const t = chans[ch];
+        const kinds = Object.entries(live[ch] || fxOff[ch] || {}).filter(([, v]) => v).map(([k]) => k).join(" ");
+        b.textContent = `${t && t.name ? t.name : `ch${ch + 1}`}${kinds ? ` ${kinds}` : ""}`;
+        b.addEventListener("click", () => {
+          if (live[ch]) {
+            fxOff[ch] = live[ch];
+            delete live[ch];
+          } else if (fxOff[ch]) {
+            live[ch] = fxOff[ch];
+            delete fxOff[ch];
+          }
+          if (audio.bgmActive(NAME)) audio.seekBGM(audio.bgmPosition());
+          drawFx();
+        });
+        el.fx.appendChild(b);
+      }
+    }
     function drawMarks() {
       el.marks.textContent = "";
       el.markrow.hidden = marks.length === 0;
@@ -8113,6 +8158,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         const b = document.createElement("button");
         b.type = "button";
         b.textContent = m.name;
+        b.dataset.t = String(m.t);
         b.addEventListener("click", () => {
           goTo(m.t);
         });
@@ -8188,6 +8234,16 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         const at = on ? audio.bgmPosition() : from;
         el.now.textContent = clock(at);
         el.seek.value = String(len > 0 ? Math.round(at / len * 1e3) : 0);
+        const here = marks.reduce(
+          (best, m) => m.t <= at + 1e-6 && (!best || m.t >= best.t) ? m : best,
+          null
+        );
+        for (const b of el.marks.querySelectorAll("button")) {
+          const mine = here && Math.abs(Number(b.dataset.t) - here.t) < 1e-6;
+          b.classList.toggle("now", !!mine);
+          if (mine) b.setAttribute("aria-current", "true");
+          else b.removeAttribute("aria-current");
+        }
       }
     }
     async function play() {
@@ -8519,6 +8575,8 @@ ChipTuneSound ${SOUND_VERSION}
     drawChannels();
     drawMarks();
     drawTakes();
+    fold();
+    drawFx();
     drawCuts();
     draw();
     const onSize = () => drawCuts();
@@ -8614,6 +8672,7 @@ ChipTuneSound ${SOUND_VERSION}
         drawChannels();
         drawMarks();
         drawTakes();
+        drawFx();
         drawCuts();
         draw();
       },
@@ -8639,7 +8698,7 @@ ChipTuneSound ${SOUND_VERSION}
     };
   }
 
-  // browser-entry.js
+  // engine-latest/browser-entry.js
   var sound = {
     ...audio_exports,
     ...mml_exports,
