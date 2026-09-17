@@ -81,7 +81,14 @@
     return 15 * Math.pow(Math.max(0, linear) / .14, 1 / 1.8);
   }
 
+  function configureDynamicEffects(song, audio) {
+    audio.dynamic_effects = {};
+    // 旧 @d14 の複製声は「おしゃれアレンジ」だけで使う。
+    if (song.id === 'jazz') audio.dynamic_effects[0] = { detune: 14 };
+  }
+
   function prepare(song, audio) {
+    configureDynamicEffects(song, audio);
     const tracks = audio.bgmDefs.get('__player__');
     if (!Array.isArray(tracks)) return;
     const legacy = song.id === 'fusion-v1';
@@ -110,9 +117,6 @@
     }
     audio.psgTune = song.tune;
     audio.volume = .45 * (legacy ? 1 / .45 : .24) * song.gain;
-    audio.dynamic_effects = {};
-    // 旧 @d14 は「元音＋14セントの複製」だったため、現行の動的エフェクトへ移動。
-    if (!legacy) audio.dynamic_effects[0] = { detune: 14 };
   }
 
   const editor = document.getElementById('pt-src');
@@ -134,6 +138,7 @@
       button.tabIndex = active ? 0 : -1;
     }
     if (player) {
+      configureDynamicEffects(song, audio);
       player.setMML(MusicPage.splitMML(editor.value));
       prepare(song, audio);
     }
@@ -173,6 +178,7 @@
     addTabs();
     editor.disabled = false;
     editor.value = current.source;
+    configureDynamicEffects(current, audio);
     player = E.player.mount(document.getElementById('pt-player'), {
       audio, mml: MusicPage.splitMML(current.source), loops: 3,
     });
