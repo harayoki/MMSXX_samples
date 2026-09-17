@@ -49,7 +49,7 @@
     .then(source => {
       editor.value = source;
       editor.disabled = false;
-      const player = E.mountPlayer(document.getElementById('gt-player'), {
+      const player = E.player.mount(document.getElementById('gt-player'), {
         audio, mml: source, loops: 2, open: false,
       });
       editor.addEventListener('change', () => player.setMML(editor.value));

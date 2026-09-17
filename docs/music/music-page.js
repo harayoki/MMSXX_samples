@@ -99,7 +99,7 @@
       // Preserve script execution order without depending on download timing.
       await load(MusicAssets.shared('player-engine.js'));
       const style = document.createElement('style');
-      style.textContent = MMSXX.sound.PLAYER_CSS;
+      style.textContent = MMSXX.sound.player.CSS;
       // Keep the shared page stylesheet later in cascade order so each sample
       // can retain the established blue rounded-button appearance.
       document.head.prepend(style);

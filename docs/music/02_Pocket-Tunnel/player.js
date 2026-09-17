@@ -179,7 +179,7 @@
     editor.disabled = false;
     editor.value = current.source;
     comment.textContent = current.comment;
-    player = E.mountPlayer(document.getElementById('pt-player'), {
+    player = E.player.mount(document.getElementById('pt-player'), {
       audio, mml: MusicPage.splitMML(current.source), loops: 3, open: false,
     });
     prepare(current, audio);

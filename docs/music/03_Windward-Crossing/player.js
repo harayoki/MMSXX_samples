@@ -64,7 +64,7 @@
     .then(source => {
       editor.value = source;
       editor.disabled = false;
-      const player = E.mountPlayer(document.getElementById('wc-player'), {
+      const player = E.player.mount(document.getElementById('wc-player'), {
         audio, mml: MusicPage.splitMML(source), loops: 3, open: false,
       });
       editor.addEventListener('change', () =>
