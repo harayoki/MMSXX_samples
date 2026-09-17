@@ -2,10 +2,11 @@
 // イントロとエンディングは1回ずつ。全パート共通で、再生とWAVの両方に適用。
 $LOOP_END = { 1 }
 
-//# title Pocket Tunnel
-//# arrangement おしゃれアレンジ
-//# copyright 2026 harayoki
-//# license CC BY 4.0 (music, artwork and MML source; https://creativecommons.org/licenses/by/4.0/)
+// #title Pocket Tunnel
+// #about おしゃれアレンジ · テンションを強調した大人向けのゲームBGM
+// #arrangement おしゃれアレンジ
+// #copyright 2026 harayoki
+// #license CC BY 4.0 (music, artwork and MML source; https://creativecommons.org/licenses/by/4.0/)
 
 // 使用音色：
 // 本編メロディは標準エコー @s6。イントロと終止は @s0。
@@ -15,17 +16,19 @@ $LOOP_END = { 1 }
 //   @{ptJazzAnswer}   おしゃれアレンジの合いの手。三角波による和音の上声。
 //   @{ptHarmony}   メロディに重ねるハモリ用矩形波。エコーなし。
 //   @{ptKick}   キック用2オペFM。125Hzから45Hzへ0.12秒で下降。
-//   @{noise}   スネアとハイハット用の標準ノイズ。a4／a6と発音長で鳴りを分ける。
+//   @{noise:white}   スネアとハイハット用の標準ノイズ。a4／a6と発音長で鳴りを分ける。
 // @e{ptHeld} は持続、@e{ptDecay} は音長に応じた減衰。
 // 音量の換算とADSRの秒数調整だけを共通JS処理で行う。
 
+// #ch メロディ
+// #role lead
 // パート 1 — メロディ。
 // イントロ
-t120 q8 @{ptjazzlead} @e{ptheld} v11 @d14 @s0 q8 o3 c16&c400 r40 r320 r1600 o3 e20&e100 r32 r400 o3 g20&g100
+t120 q8 @{ptjazzlead} @e{ptheld} v11 @d0 @s0 q8 o3 c16&c400 r40 r320 r1600 o3 e20&e100 r32 r400 o3 g20&g100
 r32 r400 o3 a20&a100 r32 r400 o4 d16&d64&d640&d3200 r25 r200 o4 f20&f100 r32 r400 o4 a16&a160&a800 r20 r200 o4
 b16&b64&b640&b3200 r16 r80 r800 o5 d16&d40&d400 r16 r32 r320 r1600 o5 e16&e160&e800 r5 r25 r400
 // 本編
-[ t120 o5 l4 v11 q8 @{ptJazzLead} @e{ptHeld} @d14 @v0 @s0 @o0 @p{0,0,0}
+[ t120 o5 l4 v11 q8 @{ptJazzLead} @e{ptHeld} @d0 @m0 @s0 @o0 @p{0,0,0}
 @s6 q6 o5 f16 o5 a16 q3 o6 c8 q6 o5 a16 o6 c16 o6 f8 o6 e16 o6 d16 o6 c8 o5 a8 o5 g8 o5 g16 o5 b16 q3 o6 d8 q6
 o5 b16 o6 d16 o6 g8 o6 f16 o6 e16 o6 d8 q3 o5 b4 q6 o5 f16 o5 g16 q3 o6 c8 q6 o5 g16 o6 c16 o6 f8 o6 d16 o6
 c16 o5 g8 o5 f8 o5 g8 o5 e16 o5 g16 q3 o6 c8 q6 o5 g16 o5 e16 o5 d8 q3 o5 c2 q6 o5 f16 o5 a16 q3 o6 c8 q6 o5
@@ -48,13 +51,13 @@ o5 c4 r4
 @s0 q8 o5 a10 r16 r40 o5 g10&g100 r16 r80 r400 o5 e10 r40 o5 d8&d32&d320&d1600 r16 r40 r400 o4 b10 r40 o5
 d16&d80 r20 o5 c2&c8&c20 r4 r16 r80
 
-// --- channel ---
-
+// #ch アルペジオ／合いの手
+// #role arp
 // パート 2 — アルペジオ／合いの手。
 // イントロ
 t120 q8 r1 r4 r8
 // 本編
-[ t120 o4 l4 v10 q8 @{pulse50} @e{flat} @d0 @v0 @s0 @o0 @p{0,0,0}
+[ t120 o4 l4 v10 q8 @{pulse:50} @e{flat} @d0 @m0 @s0 @o0 @p{0,0,0}
 @{ptjazzanswer} @e{ptdecay} v7 @d0 @s0 q8 o4 a5&a25 r8 r100 o4 a10&a50 r8 r16 r200 o4 a5&a100 r5 r40 r400 o4
 a8&a80&a400 r8 r25 r160 r800 o4 a5&a100 r8 r25 o4 a8&a80&a400 r25 r160 r800 o5 c5&c25 r8 r100 o5 c10&c50 r8
 r16 r200 o5 c5&c100 r5 r40 r400 o4 a+8&a+80&a+400 r8 r25 r160 r800 o4 a+5&a+100 r8 r25 o4 a+8&a+80&a+400 r25
@@ -76,13 +79,13 @@ r25 o4 g8&g80&g400 r25 r160 r800
 // エンディング
 r2 r4 r5 r400 r1 r25 r160 r800
 
-// --- channel ---
-
+// #ch ベース
+// #role bass
 // パート 3 — ベース。
 // イントロ
 t120 q8 @{ptjazzbass} @e{ptdecay} v8 @d0 @s0 q8 o2 c4&c8&c20 r16 r80 o2 g4&g8&g20 r4 r5
 // 本編
-[ t120 o2 l4 v8 q8 @{ptJazzBass} @e{ptDecay} @d0 @v0 @s0 @o0 @p{0,0,0}
+[ t120 o2 l4 v8 q8 @{ptJazzBass} @e{ptDecay} @d0 @m0 @s0 @o0 @p{0,0,0}
 v10 o2 d5&d80&d400 r32 r320 r1600 o2 a5&a80&a400 r32 r320 r1600 o3 d5&d80&d400 r32 r320 r1600 o2
 f+5&f+80&f+400 r32 r320 r1600 o2 g5&g80&g400 r32 r320 r1600 o3 d5&d80&d400 r32 r320 r1600 o3 g5&g80&g400 r32
 r320 r1600 o2 e5&e80&e400 r32 r320 r1600 o2 d+5&d+80&d+400 r32 r320 r1600 o2 a+5&a+80&a+400 r32 r320 r1600 o3
@@ -115,13 +118,13 @@ c5&c80&c400 r32 r320 r1600 o2 c+5&c+80&c+400 r32 r320 r1600
 // エンディング
 @e{ptheld} v8 o2 d4&d10 r8 r40 o2 g4&g10 r8 r40 o2 c2&c8&c20 r4 r16 r80
 
-// --- channel ---
-
+// #ch キック
+// #role perc
 // パート 4 — キック。
 // イントロ
 t120 q8 r1 r4 r8
 // 本編
-[ t120 o4 l4 v10 q8 @{pulse50} @e{flat} @d0 @v0 @s0 @o0 @p{0,0,0}
+[ t120 o4 l4 v10 q8 @{pulse:50} @e{flat} @d0 @m0 @s0 @o0 @p{0,0,0}
 @{ptkick} @e{ptdecay} v4 @d0 @s0 q8 o1 f+25 r4 r5 r100 o1 f+25r4 r5 r100 o1 f+25r4 r5 r100 o1 f+25r4 r5 r100
 o1 f+25r4 r5 r100 o1 f+25r4 r5 r100 o1 f+25r4 r5 r100 o1 f+25r4 r5 r100 o1 f+25r4 r5 r100 o1 f+25r4 r5 r100 o1
 f+25r4 r5 r100 o1 f+25r4 r5 r100 o1 f+25r4 r5 r100 o1 f+25r4 r5 r100 o1 f+25r4 r5 r100 o1 f+25r4 r5 r100 o1
@@ -135,14 +138,14 @@ f+25r4 r5 r100 o1 f+25 r4 r5 r100
 // エンディング
 v7 o1 f+20 r4 r5 o1 f+20r4 r5 o1 f+20 r2 r4 r5
 
-// --- channel ---
-
+// #ch スネア
+// #role perc
 // パート 5 — スネア。
 // イントロ
 t120 q8 r1 r4 r8
 // 本編
-[ t120 o4 l4 v10 q8 @{pulse50} @e{flat} @d0 @v0 @s0 @o0 @p{0,0,0}
-r8 r8 @{noise} @e{ptdecay} v3 @d0 @s0 q8 o4 a32&a800 r4 r5 r64 r640 r3200 o4 a32&a800 r4 r5 r64 r640 r3200 o4
+[ t120 o4 l4 v10 q8 @{pulse:50} @e{flat} @d0 @m0 @s0 @o0 @p{0,0,0}
+r8 r8 @{noise:white} @e{ptdecay} v3 @d0 @s0 q8 o4 a32&a800 r4 r5 r64 r640 r3200 o4 a32&a800 r4 r5 r64 r640 r3200 o4
 a32&a800 r4 r5 r64 r640 r3200 o4 a32&a800 r4 r5 r64 r640 r3200 o4 a32&a800 r4 r5 r64 r640 r3200 o4 a32&a800 r4
 r5 r64 r640 r3200 o4 a32&a800 r4 r5 r64 r640 r3200 o4 a32&a800 r4 r5 r64 r640 r3200 o4 a32&a800 r4 r5 r64 r640
 r3200 o4 a32&a800 r4 r5 r64 r640 r3200 o4 a32&a800 r4 r5 r64 r640 r3200 o4 a32&a800 r4 r5 r64 r640 r3200 o4
@@ -161,14 +164,14 @@ r5 r64 r640 r3200 o4 a32&a800 r4 r5 r64 r640 r3200 o4 a32&a800 r5 r64 r640 r3200
 // エンディング
 r2 r4 r32 r800 r1 r5 r64 r640 r3200
 
-// --- channel ---
-
+// #ch ハイハット
+// #role perc
 // パート 6 — ハイハット。
 // イントロ
 t120 q8 r1 r4 r8
 // 本編
-[ t120 o4 l4 v10 q8 @{pulse50} @e{flat} @d0 @v0 @s0 @o0 @p{0,0,0}
-@{noise} @e{ptdecay} v3 @d0 @s0 q8 o6 a50&a400 r5 r40 r400 v4 o6 a50&a400 r8 r64 r320 r4000 v2 o6 a50&a400 r20
+[ t120 o4 l4 v10 q8 @{pulse:50} @e{flat} @d0 @m0 @s0 @o0 @p{0,0,0}
+@{noise:white} @e{ptdecay} v3 @d0 @s0 q8 o6 a50&a400 r5 r40 r400 v4 o6 a50&a400 r8 r64 r320 r4000 v2 o6 a50&a400 r20
 r100 r1000 v3 o6 a50&a400 r5 r40 r400 v4 o6 a50&a400 r8 r64 r320 r4000 v2 o6 a50&a400 r20 r100 r1000 v3 o6
 a50&a400 r5 r40 r400 v4 o6 a50&a400 r8 r64 r320 r4000 v2 o6 a50&a400 r20 r100 r1000 v3 o6 a50&a400 r5 r40 r400
 v4 o6 a50&a400 r8 r64 r320 r4000 v2 o6 a50&a400 r20 r100 r1000 v3 o6 a50&a400 r5 r40 r400 v4 o6 a50&a400 r8
@@ -212,13 +215,13 @@ v4 o6 a50&a400 r8 r64 r320 r4000 v2 o6 a50&a400 r20 r100 r1000
 // エンディング
 r2 r4 r8 r16 r800 r6400 r12800 r64000 r1 r20 r100 r1000
 
-// --- channel ---
-
+// #ch 和音 1
+// #role chord
 // パート 7 — 和音 1。
 // イントロ
 t120 q8 @{ptjazzchord} @e{ptdecay} v9 @d0 @s0 q8 o3 e4&e8&e20 r16 r80 o3 f4&f8&f20 r4 r5
 // 本編
-[ t120 o3 l4 v9 q8 @{ptJazzChord} @e{ptDecay} @d0 @v0 @s0 @o0 @p{0,0,0}
+[ t120 o3 l4 v9 q8 @{ptJazzChord} @e{ptDecay} @d0 @m0 @s0 @o0 @p{0,0,0}
 v11 o3 f5&f25 r8 r100 o3 f10&f50 r8 r16 r200 o3 f5&f100 r5 r40 r400 o3 f8&f80&f400 r8 r25 r160 r800 o3 f5&f100
 r8 r25 o3 f8&f80&f400 r25 r160 r800 o3 g5&g25 r8 r100 o3 g10&g50 r8 r16 r200 o3 g5&g100 r5 r40 r400 o3
 g8&g80&g400 r8 r25 r160 r800 o3 g5&g100 r8 r25 o3 g8&g80&g400 r25 r160 r800 o3 f5&f25 r8 r100 o3 f10&f50 r8
@@ -239,49 +242,49 @@ r16 r200 o3 f5&f100 r5 r40 r400 o3 e8&e80&e400 r8 r25 r160 r800 o3 e5&e100 r8 r2
 // エンディング
 @e{ptheld} v10 o3 f4&f10 r8 r40 o3 f4&f10 r8 r40 o3 e2&e8&e20 r4 r16 r80
 
-// --- channel ---
-
+// #ch 和音 1 上声
+// #role chord
 // パート 7 — 和音 1（同時発音の追加声部 1）。
 // イントロ
 t120 q8 @{ptjazzchord} @e{ptdecay} v9 @d0 @s0 q8 o3 a4&a8&a20 r16 r80 o3 b4&b8&b20 r4 r5
 // 本編
-[ t120 o3 l4 v9 q8 @{ptJazzChord} @e{ptDecay} @d0 @v0 @s0 @o0 @p{0,0,0}
+[ t120 o3 l4 v9 q8 @{ptJazzChord} @e{ptDecay} @d0 @m0 @s0 @o0 @p{0,0,0}
 r2 r20 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r4 r5
 ]$LOOP_END
 // エンディング
 @e{ptheld} v10 o4 c4&c10 r8 r40 o3 b4&b10 r8 r40 o3 a2&a8&a20 r4 r16 r80
 
-// --- channel ---
-
+// #ch 和音 1 中声
+// #role chord
 // パート 7 — 和音 1（同時発音の追加声部 2）。
 // イントロ
 t120 q8 @{ptjazzchord} @e{ptdecay} v9 @d0 @s0 q8 o4 d4&d8&d20 r16 r80 o4 e4&e8&e20 r4 r5
 // 本編
-[ t120 o4 l4 v9 q8 @{ptJazzChord} @e{ptDecay} @d0 @v0 @s0 @o0 @p{0,0,0}
+[ t120 o4 l4 v9 q8 @{ptJazzChord} @e{ptDecay} @d0 @m0 @s0 @o0 @p{0,0,0}
 r2 r20 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r4 r5
 ]$LOOP_END
 // エンディング
 @e{ptheld} v10 o4 e4&e10 r8 r40 o4 e4&e10 r8 r40 o4 d2&d8&d20 r4 r16 r80
 
-// --- channel ---
-
+// #ch 和音 1 最高声
+// #role chord
 // パート 7 — 和音 1（同時発音の追加声部 3）。
 // イントロ
 t120 q8 @{ptjazzchord} @e{ptdecay} v9 @d0 @s0 q8 o4 g4&g8&g20 r16 r80 o4 a4&a8&a20 r4 r5
 // 本編
-[ t120 o4 l4 v9 q8 @{ptJazzChord} @e{ptDecay} @d0 @v0 @s0 @o0 @p{0,0,0}
+[ t120 o4 l4 v9 q8 @{ptJazzChord} @e{ptDecay} @d0 @m0 @s0 @o0 @p{0,0,0}
 r2 r20 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r4 r5
 ]$LOOP_END
 // エンディング
 @e{ptheld} v10 o4 a4&a10 r8 r40 o4 a4&a10 r8 r40 o4 g2&g8&g20 r4 r16 r80
 
-// --- channel ---
-
+// #ch 和音 2
+// #role chord
 // パート 8 — 和音 2。
 // イントロ
 t120 q8 r1 r4 r8
 // 本編
-[ t120 o4 l4 v10 q8 @{pulse50} @e{flat} @d0 @v0 @s0 @o0 @p{0,0,0}
+[ t120 o4 l4 v10 q8 @{pulse:50} @e{flat} @d0 @m0 @s0 @o0 @p{0,0,0}
 @{ptjazzchord} @e{ptdecay} v11 @d0 @s0 q8 o4 c5&c25 r8 r100 o4 c10&c50 r8 r16 r200 o4 c5&c100 r5 r40 r400 o3
 b8&b80&b400 r8 r25 r160 r800 o3 b5&b100 r8 r25 o3 b8&b80&b400 r25 r160 r800 o4 d5&d25 r8 r100 o4 d10&d50 r8
 r16 r200 o4 d5&d100 r5 r40 r400 o4 c8&c80&c400 r8 r25 r160 r800 o4 c5&c100 r8 r25 o4 c8&c80&c400 r25 r160 r800
@@ -303,13 +306,13 @@ r25 o3 a8&a80&a400 r25 r160 r800
 // エンディング
 r2 r4 r5 r400 r1 r25 r160 r800
 
-// --- channel ---
-
+// #ch 和音 3
+// #role chord
 // パート 9 — 和音 3。
 // イントロ
 t120 q8 r1 r4 r8
 // 本編
-[ t120 o4 l4 v10 q8 @{pulse50} @e{flat} @d0 @v0 @s0 @o0 @p{0,0,0}
+[ t120 o4 l4 v10 q8 @{pulse:50} @e{flat} @d0 @m0 @s0 @o0 @p{0,0,0}
 @{ptjazzchord} @e{ptdecay} v11 @d0 @s0 q8 o4 e5&e25 r8 r100 o4 e10&e50 r8 r16 r200 o4 e5&e100 r5 r40 r400 o4
 e8&e80&e400 r8 r25 r160 r800 o4 e5&e100 r8 r25 o4 e8&e80&e400 r25 r160 r800 o4 f5&f25 r8 r100 o4 f10&f50 r8
 r16 r200 o4 f5&f100 r5 r40 r400 o4 e8&e80&e400 r8 r25 r160 r800 o4 e5&e100 r8 r25 o4 e8&e80&e400 r25 r160 r800
@@ -331,13 +334,13 @@ d5&d100 r8 r25 o4 d8&d80&d400 r25 r160 r800
 // エンディング
 r2 r4 r5 r400 r1 r25 r160 r800
 
-// --- channel ---
-
+// #ch ハモリ
+// #role harmony
 // パート 10 — ハモリ。
 // イントロ
 t120 q8 r1 r4 r8
 // 本編
-[ t120 o4 l4 v10 q8 @{pulse50} @e{flat} @d0 @v0 @s0 @o0 @p{0,0,0}
+[ t120 o4 l4 v10 q8 @{pulse:50} @e{flat} @d0 @m0 @s0 @o0 @p{0,0,0}
 r2 r8 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r4 r8 @{ptharmony} @e{ptheld} v3 @d0 @s0 q6 o5 f16 o5 a16 q3 o6 e8 q6
 o5 a16 o6 e16 o6 f8 o6 e16o6 e16 o5 a+8 o5 a8o5 a8 o5 g16 o5 b16 q3 o6 e8 q6 o5 b16 o6 e16 o6 g8 o6 e16o6 e16
 o6 e8 q3 o5 b4 q6 o5 a16 o6 c16 q3 o6 e8 q6 o6 c16 o6 e16 o6 a8 o6 g16 o6 e16 o6 e8 o6 c8o6 c8 o5 b16 o6 d+16

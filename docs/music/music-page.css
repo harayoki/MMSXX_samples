@@ -1,0 +1,161 @@
+:root {
+  color-scheme: light dark;
+  --background: light-dark(#fff, #181818);
+  --foreground: light-dark(#172033, #f5f7fb);
+  --muted: light-dark(#f3f6fb, #252831);
+  --muted-foreground: light-dark(#667085, #aab2c3);
+  --border: light-dark(#c9d1df, #505765);
+  --blue: #268df5;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 16px;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: system-ui, sans-serif;
+}
+.music-page {
+  display: grid;
+  gap: 12px;
+  width: min(100%, 1000px);
+  margin-inline: auto;
+}
+.music-page p { margin: 2px; }
+.text-small { font-size: .875rem; }
+.text-muted { opacity: .72; }
+.music-editor { min-width: 0; }
+.music-editor textarea {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-height: 28rem;
+  resize: vertical;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: #fff;
+  caret-color: #fff;
+  background-color: #181818;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas,
+    "BIZ UDGothic", "Noto Sans Mono CJK JP", "Source Han Mono", "MS Gothic",
+    Osaka-Mono, monospace;
+  text-shadow: 0 0 2px rgba(0,0,0,.95), 0 0 5px rgba(0,0,0,.75),
+    0 1px 2px rgba(0,0,0,.9);
+}
+.music-status { min-height: 1.4em; }
+.music-player {
+  --player-blue: var(--blue);
+  --ink: var(--foreground);
+  --dim: var(--muted-foreground);
+  --panel: var(--background);
+  --sunk: var(--muted);
+  --line: var(--border);
+  --line-hi: var(--border);
+  --amber: var(--player-blue);
+  --teal: var(--player-blue);
+  --mono: inherit;
+}
+.music-player .deck { padding: 0; border: 0; background: transparent; }
+.music-player .row { gap: 10px; margin: 10px 0; }
+.music-player .track { padding-block: 4px; }
+.music-player .role { display: none; }
+.music-player [data-p="title"] {
+  display: block;
+  font-size: 1.35rem;
+  line-height: 1.3;
+}
+.music-player .about p { font-size: .875rem; color: var(--muted-foreground); }
+.music-player button:not(.dots):not(.help) {
+  color: var(--foreground);
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 6px 10px;
+}
+.music-player button:not(.dots):not(.help):hover {
+  color: var(--foreground);
+  background: var(--muted);
+}
+.music-player button.sw { border-radius: 999px; }
+.music-player button.sw[aria-pressed="true"] {
+  color: #fff;
+  background: var(--player-blue);
+  border-color: var(--player-blue);
+  font-weight: 600;
+}
+.music-player button.dots {
+  margin-left: auto;
+  padding: 3px 10px 7px;
+  color: var(--player-blue);
+  background: transparent;
+  border: 1px solid var(--player-blue);
+  border-radius: 10px;
+}
+.music-player button.dots:hover,
+.music-player button.dots[aria-pressed="true"] {
+  color: #fff;
+  background: var(--player-blue);
+  border: 1px solid var(--player-blue);
+}
+.music-player button.help {
+  color: var(--player-blue);
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+.music-player input[type="checkbox"] { accent-color: var(--player-blue); }
+.music-player input[type="number"] {
+  width: 100%;
+  flex-basis: 100%;
+  padding: 6px 9px;
+  color: var(--foreground);
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.music-player .ab { top: 4px; bottom: 4px; width: 14px; margin-left: -7px; }
+.music-player .ab::before {
+  left: 6px;
+  width: 2px;
+  background: var(--foreground);
+}
+.music-player .ab::after { left: 8px; color: var(--foreground); }
+.music-player .abspan {
+  top: 4px;
+  bottom: 4px;
+  background: var(--foreground);
+  opacity: .1;
+}
+.mix-tabs { display: flex; gap: 0; align-items: stretch; }
+.mix-tabs button {
+  flex: 1;
+  min-width: 0;
+  margin: 0 0 -1px;
+  padding: 8px 10px;
+  color: var(--foreground);
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  cursor: pointer;
+}
+.mix-tabs button + button { border-left: 0; }
+.mix-tabs button:first-child { border-radius: 8px 0 0; }
+.mix-tabs button:last-child { border-radius: 0 8px 0 0; }
+.mix-tabs button[aria-selected="true"] {
+  color: #fff;
+  background: var(--blue);
+  border-color: var(--blue);
+}
+.mix-tabs + textarea { border-radius: 0 0 8px 8px; }
+
+@media (max-width: 640px) {
+  body { padding: 12px; }
+  .music-player .track { flex-basis: 100%; order: 10; }
+  .music-player [data-p="vollbl"] { margin-left: 0; }
+  .music-editor textarea { min-height: 22rem; }
+}

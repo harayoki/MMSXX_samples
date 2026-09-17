@@ -4,72 +4,24 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Volcano Parade</title>
-  <style>
-    :root { color-scheme: light dark; --background: light-dark(#fff,#181818); --foreground: light-dark(#1a1c1f,#fff); }
-    * { box-sizing: border-box; }
-    body { margin: 0; padding: 16px; background: var(--background); color: var(--foreground); font-family: system-ui,sans-serif; }
-    .viz-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .btn { appearance: none; border: 1px solid currentColor; border-radius: 6px; padding: 8px 14px; color: inherit; background: transparent; cursor: pointer; }
-    .btn-primary { background: var(--foreground); color: var(--background); }
-    .form-label { display: block; }
-    .form-control { display: block; max-width: 100%; border: 1px solid currentColor; border-radius: 6px; padding: 10px; }
-    .text-small { font-size: .875rem; }
-    .text-muted { opacity: .72; }
-  </style>
+  <link rel="stylesheet" href="../music-page.css">
 </head>
 <body>
-<div id="mmsxx-inline">
-<nav aria-label="ページナビゲーション"><a href="../">MUSIC TOP</a></nav>
-  <h3>Volcano Parade <span class="text-small text-muted">Copyright 2026 harayoki</span></h3>
-  <p class="text-small text-muted">Music, artwork, MML source and exported WAV: <a href="https://creativecommons.org/licenses/by/4.0/" rel="license">CC BY 4.0</a>. JavaScript source is not covered by CC BY 4.0. Redistribution is prohibited.</p>
-  <div class="viz-controls">
-    <button type="button" class="btn btn-primary" id="mmsxx-play" disabled>Play</button>
-    <button type="button" class="btn" id="mmsxx-stop">Stop</button>
-    <span id="mmsxx-status" class="text-small text-muted" aria-live="polite"></span>
+<main class="music-page" id="volcano-parade">
+  <nav aria-label="ページナビゲーション"><a href="../">MUSIC TOP</a></nav>
+  <div class="music-player" id="vp-player"></div>
+  <p class="music-status text-small text-muted" data-music-status aria-live="polite"></p>
+  <p class="text-small text-muted">Music, artwork, MML source and exported WAV:
+    <a href="https://creativecommons.org/licenses/by/4.0/" rel="license">CC BY 4.0</a>.
+    JavaScript source is not covered by CC BY 4.0. Redistribution is prohibited.</p>
+  <div class="music-editor">
+    <textarea placeholder="LOADING" data-music-background="vol_par_crt.jpg"
+      id="vp-src" aria-label="MMLソース" rows="24" spellcheck="false" disabled></textarea>
   </div>
-  <p>タイトルやエンディング曲などにどうでしょうか？</p>
-  <textarea placeholder="LOADING" data-music-background="vol_par_crt.jpg" class="form-control" id="mmsxx-src" aria-label="MMLソース" disabled rows="24" spellcheck="false"></textarea>
-<p>This <a href="./vol_par_crt_256.png" data-music-image="vol_par_crt_256.png">cover art</a> was created with mmsxx-pixel-studio.</p>
-<div class="viz-controls music-wav-row"><button type="button" class="btn" id="mmsxx-wav" disabled>WAVのダウンロード</button><span class="text-small">MMLは編集できます。 WAV出力にも反映されます。</span></div>
-<p id="mmsxx-wav-status" class="text-small" aria-live="polite"></p>
-</div>
-<style>
-  #mmsxx-inline {
-    display:grid;
-    gap:12px;
-    width:min(100%, 1000px);
-    margin-inline:auto;
-  }
-  #mmsxx-inline h3 {
-    margin: 0 0 0;
-  }
-  #mmsxx-inline p {
-    margin: 2px;
-  }
-  #mmsxx-inline textarea {
-    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,
-      "BIZ UDGothic","Noto Sans Mono CJK JP","Source Han Mono","MS Gothic",Osaka-Mono,monospace;
-    resize:vertical;
-    color:#fff;
-    caret-color:#fff;
-    text-shadow:
-      0 0 2px rgba(0,0,0,.95),
-      0 0 5px rgba(0,0,0,.75),
-      0 1px 2px rgba(0,0,0,.9);
-    width:100%;
-    height:auto;
-    aspect-ratio:1867 / 1375;
-    background-size-:100%;
-    background-position:center center;
-    background-repeat:no-repeat;
-    background-attachment:scroll;
-  }
-</style>
-<!-- Music, artwork, MML source and exported WAV: CC BY 4.0.
-JavaScript playback engine: license undecided; redistribution is currently prohibited.
-JS再生エンジン：ライセンス未定。現在、再配布不可。CC BY 4.0の対象外。 -->
-
+  <p class="text-small">This
+    <a href="./vol_par_crt_256.png" data-music-image="vol_par_crt_256.png">cover art</a>
+    was created with mmsxx-pixel-studio. MMLの編集は、フォーカスを外すと再生へ反映されます。</p>
+</main>
 <script src="../music-page.js" data-song="01_Volcano-parade"></script>
 </body>
 </html>
-

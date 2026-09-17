@@ -1,64 +1,29 @@
 <!doctype html>
 <html lang="ja">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Pocket Tunnel</title>
-<style>
-    :root { color-scheme: light dark; --background: light-dark(#fff,#181818); --foreground: light-dark(#1a1c1f,#fff); }
-    * { box-sizing: border-box; }
-    body { margin: 0; padding: 16px; background: var(--background); color: var(--foreground); font-family: system-ui,sans-serif; }
-    .viz-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .btn { appearance: none; border: 1px solid currentColor; border-radius: 6px; padding: 8px 14px; color: inherit; background: transparent; cursor: pointer; }
-    .btn-primary { background: var(--foreground); color: var(--background); }
-    .form-label { display: block; }
-    .form-control { display: block; max-width: 100%; border: 1px solid currentColor; border-radius: 6px; padding: 10px; }
-    .text-small { font-size: .875rem; }
-    .text-muted { opacity: .72; }
-  
-
-#pocket-tunnel{display:grid;gap:12px;width:min(100%,1000px);margin-inline:auto}
-#pocket-tunnel h3{margin:0}
-#pocket-tunnel p{margin:2px}
-#pocket-tunnel textarea{
- font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"BIZ UDGothic","Noto Sans Mono CJK JP","Source Han Mono","MS Gothic",Osaka-Mono,monospace;
- resize:vertical;color:#fff;caret-color:#fff;background-color:#181818;
- text-shadow:0 0 2px rgba(0,0,0,.95),0 0 5px rgba(0,0,0,.75),0 1px 2px rgba(0,0,0,.9);
- width:100%;height:auto;aspect-ratio:1867 / 1375;
- background-size:cover;background-position:center center;background-repeat:no-repeat;background-attachment:scroll;
- border-radius:0 0 6px 6px;margin:0;
-}
-#pt-editor{min-width:0}
-#pt-mixes{display:flex;gap:0;align-items:stretch}
-#pt-mixes .btn{flex:1;min-width:0;margin:0 0 -1px;border-radius:0;position:relative;white-space:normal}
-#pt-mixes .btn+.btn{border-left:0}
-#pt-mixes .btn:first-child{border-top-left-radius:6px}
-#pt-mixes .btn:last-child{border-top-right-radius:6px}
-#pt-mixes .btn[aria-selected=true]{background:#181818;color:#fff;border-bottom-color:#181818;z-index:1}
-#pt-editor-body{min-width:0}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Pocket Tunnel</title>
+  <link rel="stylesheet" href="../music-page.css">
 </head>
 <body>
-<div id="pocket-tunnel">
-<nav aria-label="ページナビゲーション"><a href="../">MUSIC TOP</a></nav>
-<h3>Pocket Tunnel <span class="text-small text-muted">Copyright 2026 harayoki</span></h3>
-<p class="text-small text-muted">Music, artwork, MML source and exported WAV: <a href="https://creativecommons.org/licenses/by/4.0/" rel="license">CC BY 4.0</a>. JavaScript source is not covered by CC BY 4.0. Redistribution is prohibited.</p>
-<div class="viz-controls"><button type="button" class="btn btn-primary" id="pt-play">Play</button><button type="button" class="btn" id="pt-stop">Stop</button><span id="pt-status" class="text-small text-muted" aria-live="polite"></span></div>
-<p id="pt-comment" aria-live="polite">ノーマル：メニュー画面や始まりの街のBGMをイメージして作りました。</p>
-<div id="pt-editor">
-<div id="pt-mixes" role="tablist" aria-label="アレンジ選択"></div>
-<div id="pt-editor-body" role="tabpanel"><textarea placeholder="LOADING" data-music-background="pocket-tunnel.jpg" class="form-control" id="pt-src" aria-label="MMLソース" rows="24" spellcheck="false"></textarea></div>
-</div>
-<p class="text-small">This <a href="./pocket-tunnel.png" data-music-image="pocket-tunnel.png">cover art</a> was created with mmsxx-pixel-studio.</p>
-<div class="viz-controls music-wav-row"><button type="button" class="btn" id="pt-wav" disabled>WAVのダウンロード</button><span class="text-small">MMLは編集できます。 WAV出力にも反映されます。</span></div>
-<p id="pt-wav-status" class="text-small" aria-live="polite"></p>
-
-</div>
-<!-- 同じフォルダに1024×1024のpocket-tunnel.jpg（背景）とpocket-tunnel.png（原画）を配置。画像は別途管理。 -->
-<!-- Music, artwork, MML source and exported WAV: CC BY 4.0.
-JavaScript playback engine: license undecided; redistribution is currently prohibited.
-
-JS再生エンジン：ライセンス未定。現在、再配布不可。CC BY 4.0の対象外。 -->
-
+<main class="music-page" id="pocket-tunnel">
+  <nav aria-label="ページナビゲーション"><a href="../">MUSIC TOP</a></nav>
+  <div class="music-player" id="pt-player"></div>
+  <p class="music-status text-small text-muted" data-music-status aria-live="polite"></p>
+  <p class="text-small text-muted">Music, artwork, MML source and exported WAV:
+    <a href="https://creativecommons.org/licenses/by/4.0/" rel="license">CC BY 4.0</a>.
+    JavaScript source is not covered by CC BY 4.0. Redistribution is prohibited.</p>
+  <p id="pt-comment" aria-live="polite"></p>
+  <div class="music-editor">
+    <div class="mix-tabs" id="pt-mixes" role="tablist" aria-label="アレンジ選択"></div>
+    <textarea placeholder="LOADING" data-music-background="pocket-tunnel.jpg"
+      id="pt-src" aria-label="MMLソース" rows="24" spellcheck="false" disabled></textarea>
+  </div>
+  <p class="text-small">This
+    <a href="./pocket-tunnel.png" data-music-image="pocket-tunnel.png">cover art</a>
+    was created with mmsxx-pixel-studio. MMLの編集は、フォーカスを外すと再生へ反映されます。</p>
+</main>
 <script src="../music-page.js" data-song="02_Pocket-Tunnel"></script>
-</body></html>
-
+</body>
+</html>
