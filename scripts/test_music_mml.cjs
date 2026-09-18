@@ -128,11 +128,25 @@ for (const { file, channels, marks, source } of sources) {
     ], file + ': interactive takes');
     assert(info.takes.every(take => take.boxes.every(box =>
       Math.abs(box.dur - take.boxes[0].dur) < 1e-6)), file + ': aligned take lengths');
-    assert.equal(info.switches.bars.length, 0, file + ': no manual switch bars needed');
+    assert.equal((source.match(/\/\/\s*#switch 0\s*\n\/\/\s*#takes 結末/g) || []).length,
+      channels, file + ': #switch 0 immediately before every outcome takes block');
+    assert.equal(info.switches.grid.length, 0, file + ': #switch 0 disables the grid');
     const switchSeconds = 2 * 240 / 152;
-    assert(info.switches.grid.slice(1).every((point, index) =>
-      Math.abs(point - info.switches.grid[index] - switchSeconds) < 1e-6),
-    file + ': #switch 2 grid');
+    const battleCuts = info.switches.bars.filter(point => point <= info.outro + 1e-6);
+    assert(battleCuts.slice(1).every((point, index) =>
+      Math.abs(point - battleCuts[index] - switchSeconds) < 1e-6),
+    file + ': manual two-bar battle cuts');
+    for (const battle of ['戦闘 A', '戦闘 B', '戦闘 C']) {
+      audio.selectTake('test', '戦闘曲', battle);
+      for (const outcome of ['勝利', '敗北']) {
+        audio.selectTake('test', '結末', outcome);
+        const current = audio.bgmInfo('test');
+        const outcomeCuts = current.switches.bars.filter(point => point > current.outro + 1e-6);
+        assert.equal(outcomeCuts.length, 1, file + `: ${outcome} has only its end cut`);
+        assert(Math.abs(outcomeCuts[0] - current.total) < 1e-6,
+          file + `: ${outcome} cannot switch before its end`);
+      }
+    }
   }
   console.log('PASS', file, channels + 'ch', info.total.toFixed(3) + 's');
 }
