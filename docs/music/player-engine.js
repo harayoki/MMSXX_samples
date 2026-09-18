@@ -1,4 +1,4 @@
-// MMS/XX player and audio engine, source commit 2fbf879dc2af855068e40378e4373b49593cdfa9
+// MMS/XX player and audio engine, source commit d2fe119cb958442ad5377bf05d6755769e899b69
 (() => {
   var __defProp = Object.defineProperty;
   var __export = (target, all) => {
@@ -1207,13 +1207,50 @@ ${val}`;
     }
     return out;
   }
+  function readCueNames(src) {
+    const table = /* @__PURE__ */ new Map();
+    let body = "";
+    let i = 0;
+    while (i < src.length) {
+      if (src[i] !== "!") {
+        body += src[i++];
+        continue;
+      }
+      const at = i++;
+      let name = "";
+      while (i < src.length && isNameChar(src[i])) name += src[i++];
+      let j = i;
+      while (j < src.length && " \n	\r".includes(src[j])) j++;
+      if (!name || src[j] !== "=") {
+        body += src.slice(at, i);
+        continue;
+      }
+      j++;
+      while (j < src.length && " \n	\r".includes(src[j])) j++;
+      if (src[j] !== "{") {
+        throw new Error(`[MMSXX] MML: \u5408\u56F3 "!${name}" \u306E\u4E2D\u8EAB\u304C { } \u3067\u56F2\u307E\u308C\u3066\u3044\u307E\u305B\u3093`);
+      }
+      const k = src.indexOf("}", j);
+      if (k < 0) throw new Error(`[MMSXX] MML: \u5408\u56F3 "!${name}" \u306E } \u304C\u3042\u308A\u307E\u305B\u3093`);
+      const [word, ...rest] = src.slice(j + 1, k).trim().split(/\s+/);
+      if (!word) throw new Error(`[MMSXX] MML: \u5408\u56F3 "!${name}" \u306E\u4E2D\u8EAB\u304C\u7A7A\u3067\u3059`);
+      if (word === name) {
+        throw new Error(`[MMSXX] MML: \u5408\u56F3 "!${name}" \u3092\u540C\u3058\u540D\u524D\u3078\u767B\u9332\u3057\u3066\u3044\u307E\u3059(\u77ED\u3044\u540D\u524D\u3092\u4ED8\u3051\u308B\u305F\u3081\u306E\u66F8\u304D\u65B9\u3067\u3059)`);
+      }
+      const num = Number(rest[0]);
+      table.set(name, { name: word, arg: Number.isFinite(num) ? num : 0 });
+      i = k + 1;
+    }
+    return { body, table };
+  }
   function compileOne(mml) {
     const meta = readDirectives(mml);
     const markNames = [];
     const cueNames = [];
-    const src = expandLoops(expandMacros(
+    const expanded = expandLoops(expandMacros(
       stripComments(String(mml), markNames, cueNames).toLowerCase()
     ));
+    const { body: src, table: cueTable } = readCueNames(expanded);
     let pos = 0;
     let octave = 4, defLen = 4, tempo = 120, vol = 10, gate = 7;
     let wave = findWave(DEFAULT_WAVE), env = 0, vibrato = 0;
@@ -1441,6 +1478,12 @@ ${val}`;
           const num = Number(rest[0]);
           cues.push({ name: word, arg: Number.isFinite(num) ? num : 0, t: time });
         }
+      } else if (ch === "!") {
+        let word = "";
+        while (pos < src.length && isNameChar(src[pos])) word += src[pos++];
+        if (!word) throw new Error('[MMSXX] MML: "!" \u306E\u3046\u3057\u308D\u306B\u5408\u56F3\u306E\u540D\u524D\u304C\u3042\u308A\u307E\u305B\u3093');
+        const known = cueTable.get(word);
+        cues.push({ name: known ? known.name : word, arg: known ? known.arg : 0, t: time });
       } else if (ch === "r") {
         time += readDuration();
       } else if (ch === "&") {
@@ -1763,6 +1806,9 @@ ${val}`;
         };
         continue;
       }
+      if (open && /^[ \t]*\/\/[ \t]*#[ \t]*switch\b/i.test(line)) {
+        throw new Error(`[MMSXX] MML: "#switch" \u306F "#takes ${open.group}" \u306E\u4E2D\u3067\u306F\u66F8\u3051\u307E\u305B\u3093(\u7DB2\u306E\u76EE\u306F\u66F2\u305C\u3093\u3076\u3067 1 \u3064\u3067\u3059)`);
+      }
       const t = TAKE.exec(line);
       if (t) {
         if (!open) {
@@ -1841,6 +1887,7 @@ ${val}`;
           name: o.name,
           events: o.events,
           cues: o.cues,
+          bars: o.bars,
           total: o.total
         }))
       });
@@ -4475,9 +4522,10 @@ registerProcessor('mmsxx-duty', DutyBank);
       meta,
       takes,
       bars,
-      // 合図も選択肢で入れ替わるので、素の並びを取っておく
+      // 合図と切れ目も選択肢で入れ替わるので、素の並びを取っておく
       cues: cues ?? [],
       baseCues: cues ?? [],
+      baseBars: bars ?? [],
       name: meta.name ?? meta.ch ?? null,
       role: meta.role ?? null
     };
@@ -4533,11 +4581,7 @@ registerProcessor('mmsxx-duty', DutyBank);
       const step = every * (240 / tempo);
       for (let t = from; t <= span + 1e-9; t += step) grid.push(t);
     }
-    const out = [];
-    const mine = tracks.map((t) => t.bars || []);
-    for (const t of mine[0] || []) {
-      if (mine.every((list) => list.some((x) => Math.abs(x - t) < 1e-6))) out.push(t);
-    }
+    const out = tracks.flatMap((t) => t.bars || []);
     return { grid: tidy(grid), bars: tidy(out) };
   }
   function takesInfo(def) {
@@ -5106,16 +5150,15 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         return true;
       }
       const headFor = (at) => {
-        let head = null, first = null;
+        let head = null;
         for (const track of def) {
           for (const box of track.takes || []) {
             if (box.group !== group) continue;
-            if (first == null || box.at < first) first = box.at;
-            if (box.at > at + 1e-9) continue;
+            if (at < box.at - 1e-9 || at >= box.at + box.dur - 1e-9) continue;
             if (head == null || box.at > head) head = box.at;
           }
         }
-        return head ?? first;
+        return head;
       };
       const again = () => {
         const head = headFor(this.bgmPosition());
@@ -5254,16 +5297,20 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       const inBox = (t) => track.takes.some((b) => t >= b.at - 1e-9 && t < b.at + b.dur - 1e-9);
       const out = track.base.filter((e) => !inBox(e.t));
       const cues = (track.baseCues || []).filter((c) => !inBox(c.t));
+      const bars = (track.baseBars || []).filter((b) => !inBox(b));
       for (const box of track.takes) {
         const want = picks[box.group];
         const opt = box.options.find((o) => o.name === want) || box.options[0];
         for (const e of opt.events) out.push({ ...e, t: e.t + box.at });
         for (const c of opt.cues || []) cues.push({ ...c, t: c.t + box.at });
+        for (const b of opt.bars || []) bars.push(b + box.at);
       }
       out.sort((a, b) => a.t - b.t);
       cues.sort((a, b) => a.t - b.t);
+      bars.sort((a, b) => a - b);
       track.events = addEchoes(out, track.total);
       track.cues = cues;
+      track.bars = bars;
     }
     /**
      * 登録してある曲について、鳴らす前に分かることを返す。
@@ -7862,6 +7909,28 @@ registerProcessor('mmsxx-tap', MmsxxTap);
 .mmsxx-player button:disabled:hover{ border-color:var(--dim); color:var(--ink); }
 .mmsxx-player button:focus-visible{ outline:2px solid var(--amber); outline-offset:1px; }
 .mmsxx-player button.sw{ border-radius:999px; padding:5px 11px; border-color:var(--line-hi); }
+/* \u5408\u56F3\u306E\u30E9\u30F3\u30D7\u3002\u66F2\u306B\u7F6E\u3044\u305F\u5408\u56F3\u3092\u901A\u308B\u3068\u5149\u308B\u3002\u62BC\u3059\u3082\u306E\u3067\u306F\u306A\u3044\u306E\u3067\u3001
+   \u30DC\u30BF\u30F3\u306E\u5F62\u306B\u3057\u306A\u3044\u3002\u70B9\u304F\u306E\u3082\u6D88\u3048\u308B\u306E\u3082\u4E00\u77AC\u306B\u3059\u308B\u3002\u3058\u308F\u3063\u3068\u6D88\u3059\u3068\u3001
+   \u3044\u3064\u5C4A\u3044\u305F\u306E\u304B\u304C\u8AAD\u3081\u306A\u3044(2026-09-18) */
+.mmsxx-player .leds{ display:flex; flex-wrap:wrap; gap:9px; align-items:center; }
+.mmsxx-player .led{
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:10.5px; color:var(--dim); white-space:nowrap;
+}
+.mmsxx-player .led::before{
+  content:""; width:7px; height:7px; border-radius:50%;
+  border:1px solid var(--line-hi); background:var(--panel);
+}
+/* \u5C4A\u3044\u305F\u3082\u306E\u306E\u63A7\u3048\u3002\u7573\u3093\u3067\u304A\u304F\u3002\u756A\u53F7\u306F\u3053\u3053\u3067\u3060\u3051\u51FA\u3059(\u30E9\u30F3\u30D7\u306F\u540D\u524D\u3060\u3051) */
+.mmsxx-player .cuelog{
+  width:100%; max-height:92px; overflow:auto; margin-top:2px;
+  background:var(--sunk); border:1px solid var(--line);
+  padding:5px 8px; font-size:10.5px; color:var(--dim); line-height:1.5;
+}
+.mmsxx-player .cuelog div{ white-space:pre; }
+.mmsxx-player .led.on::before{
+  background:var(--amber); border-color:var(--amber);
+}
 /* \u3044\u307E\u9CF4\u3063\u3066\u3044\u308B\u3068\u3053\u308D\u306E\u672D(\u8DF3\u3076\u5148\u306E\u4E00\u89A7)\u3002\u62BC\u3057\u3066\u3042\u308B\u304B\u3069\u3046\u304B\u3068\u306F\u5225\u306E\u8A71\u306A\u306E\u3067\u3001
    \u5730\u3092\u53CD\u8EE2\u3055\u305B\u305A\u3001\u8272\u3068\u67A0\u3060\u3051\u3067\u8A00\u3046 */
 .mmsxx-player .marks button.now{ border-color:var(--amber); color:var(--amber); }
@@ -7995,6 +8064,16 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         <span class="lbl" data-p="chslbl">Channels</span>
         <span class="chs" data-p="chs"></span>
       </div>
+      <div class="row" data-p="cuerow" hidden>
+        <span class="lbl">Cues</span>
+        <span class="leds" data-p="leds"></span>
+        <button type="button" class="sw" data-p="logsw" aria-pressed="false"
+                aria-expanded="false">Log</button>
+      </div>
+      <div class="row" data-p="logrow" hidden>
+        <span class="lbl"></span>
+        <div class="cuelog" data-p="cuelog"></div>
+      </div>
       <div class="row" data-p="abrow">
         <label class="sw"><input type="checkbox" data-p="abOn"> A &ndash; B</label>
         <input type="number" data-p="abFrom" aria-label="Repeat from"
@@ -8039,6 +8118,11 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       fx: $("fx"),
       fxrow: $("fxrow"),
       rew: $("rew"),
+      leds: $("leds"),
+      cuerow: $("cuerow"),
+      logsw: $("logsw"),
+      logrow: $("logrow"),
+      cuelog: $("cuelog"),
       help: $("help"),
       ver: $("ver"),
       loops: $("loops"),
@@ -8117,6 +8201,9 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     let marks = [];
     let cuts = { grid: [], bars: [] };
     let loopAt = null, outroAt = null;
+    let cues = [];
+    const leds = /* @__PURE__ */ new Map();
+    let lastPos = 0;
     let takes = [];
     let dragging = false;
     let from = 0;
@@ -8157,6 +8244,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       cuts = got.switches || { grid: [], bars: [] };
       loopAt = got.loop ? got.loop.from : null;
       outroAt = got.outro ?? null;
+      cues = got.cues ?? [];
       takes = got.takes ?? [];
       total = got.total;
       if (!got.active) {
@@ -8255,6 +8343,52 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         el.fx.appendChild(b);
       }
     }
+    function drawLeds() {
+      el.leds.textContent = "";
+      el.cuelog.textContent = "";
+      leds.clear();
+      const names = [...new Set(cues.map((c) => c.name))];
+      el.cuerow.hidden = names.length === 0;
+      for (const name of names) {
+        const led = document.createElement("span");
+        led.className = "led";
+        led.dataset.name = name;
+        led.textContent = name;
+        el.leds.appendChild(led);
+        leds.set(name, led);
+      }
+    }
+    function logCue(c) {
+      const line = document.createElement("div");
+      line.textContent = `${c.t.toFixed(2)}s  ch${c.ch + 1}  ${c.name}` + (c.arg ? ` ${c.arg}` : "");
+      el.cuelog.prepend(line);
+      while (el.cuelog.children.length > 16) el.cuelog.lastChild.remove();
+    }
+    function blink(name) {
+      const led = leds.get(name);
+      if (!led) return;
+      led.classList.add("on");
+      clearTimeout(led._off);
+      led._off = setTimeout(() => led.classList.remove("on"), 120);
+    }
+    function passedCues(at) {
+      if (!cues.length) return;
+      const len = audio.bgmLength() || total;
+      const hit = (from2, to) => {
+        for (const c of cues) {
+          if (c.t <= from2 || c.t > to) continue;
+          if (audio.cuesMuted(c.ch)) continue;
+          blink(c.name);
+          logCue(c);
+        }
+      };
+      if (at >= lastPos) hit(lastPos, at);
+      else {
+        hit(lastPos, len);
+        hit(-1, at);
+      }
+      lastPos = at;
+    }
     function drawMarks() {
       el.marks.textContent = "";
       el.markrow.hidden = marks.length === 0;
@@ -8336,6 +8470,8 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       el.len.textContent = clock(len);
       if (!dragging) {
         const at = on ? audio.bgmPosition() : from;
+        if (on && !s.paused) passedCues(at);
+        else lastPos = at;
         el.now.textContent = clock(at);
         el.seek.value = String(len > 0 ? Math.round(at / len * 1e3) : 0);
         const here = marks.reduce(
@@ -8618,6 +8754,12 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       audio.ignoreSongLoop = !audio.ignoreSongLoop;
       draw();
     });
+    el.logsw.addEventListener("click", () => {
+      const on = el.logrow.hidden;
+      el.logrow.hidden = !on;
+      el.logsw.setAttribute("aria-pressed", String(on));
+      el.logsw.setAttribute("aria-expanded", String(on));
+    });
     el.rew.addEventListener("click", () => {
       restart = !restart;
       el.rew.setAttribute("aria-pressed", String(restart));
@@ -8687,6 +8829,7 @@ ChipTuneSound ${SOUND_VERSION}
     drawTakes();
     fold();
     drawFx();
+    drawLeds();
     drawCuts();
     draw();
     const onSize = () => drawCuts();
@@ -8783,6 +8926,7 @@ ChipTuneSound ${SOUND_VERSION}
         drawMarks();
         drawTakes();
         drawFx();
+        drawLeds();
         drawCuts();
         draw();
       },

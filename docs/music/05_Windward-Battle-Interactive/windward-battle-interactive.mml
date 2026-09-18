@@ -6,7 +6,8 @@
 // #copyright 2026 harayoki
 // #license CC BY 4.0 (music, artwork and MML source; https://creativecommons.org/licenses/by/4.0/)
 // エンカウント → 戦闘曲3種をテイク選択 → 勝敗をテイク選択。
-// 切り替えの基本単位は全音符2つ分（#switch 2）。3つの戦闘曲は16小節にそろえてある。
+// 戦闘中は2小節ごとの | で切り替え、結末直前の #switch 0 で自動網目を止める。
+// 勝利・敗退は末尾の | まで切り替えない。3つの戦闘曲は16小節にそろえてある。
 // 3声。戦闘はベース専用、打楽器の隙間を副旋律が使う。
 // @{wcFieldLead} 草原・イントロ・敗北の三角波メロディー。
 // @{wcBattleLead} 戦闘・勝利の矩形波メロディーと副旋律。
@@ -46,12 +47,16 @@ $crisis = {
   $RESET
   $sound4 r8 a8 o6 d4 o5 a8 r8 f8 e8
   $sound4 d8. f16 a8 d8 r8 a8 f4
+  |
   $sound4 r8 f8 b-4 f8 r8 d8 f8
   $sound4 b-8. a16 f8 d8 r8 f8 b-4
+  |
   $sound4 r8 g8 o6 d4 o5 b-8 r8 a8 g8
   $sound4 e8. g16 b-8 g8 r8 e8 c+4
+  |
   $sound4 r8 e8 a4 g8 r8 e8 c+8
   $sound4 a8. g16 e8 c+8 r8 e8 a4
+  |
 }
 // intro: 2小節
 $intro = {
@@ -83,32 +88,44 @@ $good = {
   $RESET
   $sound2  d8 f+16 a16 o5 d4 o4 a8 o5 d8 e8 f+16 r16
   $sound3  e4 c+8 o4 a8 o5 c+8 e8 a8 r8
+  |
   $sound2  g8 b16 o5 d16 g4 f+8 e8 d8 r8
   $sound3  e8 c+8 o4 a4 o5 c+8 e8 a8 r8
+  |
   $sound2  f+8 a16 o5 d16 f+4 e8 d8 o4 a8 r8
   $sound3  e4 c+8 o4 a8 o5 c+8 e8 a8 r8
+  |
   $sound2  g8 b16 o5 d16 g4 d8 e8 g8 r8
   $sound3  e8 c+8 o4 a8 o5 c+8 e4 c+8 r8
+  |
   $sound3  f+4 e8 d8 o4 b4 o5 d8 r8
   $sound3  e8 d8 o4 b8 a8 g4 b4
+  |
   $sound2  a4 b8 o5 c+8 e4 c+8 r8
   $sound3  d4 o4 b8 a8 f+4 a4
+  |
   $sound2  g8 b8 o5 d4 e8 d8 o4 b8 r8
   $sound3  e4 c+8 o4 a8 o5 g8 e8 c+4
+  |
   $sound2  f+8 a8 o5 d8 e8 f+4 e8 d16 r16
   $sound3  f+8 e8 d4 o4 a4 o5 d8 r8
+  |
 }
 // bad: 8小節
 $bad = {
   $RESET
   $sound5 a4. f8 e8 f8 d4
   $sound5 g4. f8 e-4 g8 b-8
+  |
   $sound5 g4 e8 c+8 e4 g4
   $sound5 e4. c+8 o4 b-8 a8 o5 c+4
+  |
   $sound5 d4. g8 f8 d8 o4 b-4
   $sound5 e-4 g8 b-8 g4 e-4
+  |
   $sound5 e4. g8 e8 c+8 o4 b-4
   $sound5 c+4 e8 g8 e4 c+8 r8
+  |
 }
 // win: 4小節
 $win = {
@@ -125,6 +142,7 @@ $lose = {
   $sound7 e-4 o4 b-4 g2
   $sound8 a4 o5 c+4 e4 c+4
   $sound8 d2 r2
+  |
 }
 $fieldShort = {
   $RESET
@@ -146,10 +164,12 @@ $good
 [$crisis]2
 // #takes
 // #label OUTRO
+// #switch 0
 // #takes 結末
 // #take 勝利
 $win
 t132 r1 r2
+|
 // #take 敗北
 $lose
 // #takes
@@ -279,10 +299,12 @@ $good
 [$crisis]2
 // #takes
 // #label OUTRO
+// #switch 0
 // #takes 結末
 // #take 勝利
 $win
 t132 r1 r2
+|
 // #take 敗北
 $lose
 // #takes
@@ -406,10 +428,12 @@ $good
 [$crisis]2
 // #takes
 // #label OUTRO
+// #switch 0
 // #takes 結末
 // #take 勝利
 $win
 t132 r1 r2
+|
 // #take 敗北
 $lose
 // #takes
