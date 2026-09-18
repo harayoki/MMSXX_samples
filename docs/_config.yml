@@ -1,3 +1,7 @@
 heme: "jekyll/minima"
 baseurl: "/MMSXX_samples"
 lfs_media_base: "https://media.githubusercontent.com/media/harayoki/MMSXX_samples/main/docs"
+
+# Temporarily keep the interactive battle prototype out of the published site.
+exclude:
+  - music/05_Windward-Battle-Interactive
