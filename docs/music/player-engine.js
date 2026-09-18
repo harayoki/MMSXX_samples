@@ -1,4 +1,4 @@
-// MMS/XX player and audio engine, source commit d2fe119cb958442ad5377bf05d6755769e899b69
+// MMS/XX player and audio engine, source commit 4c4bd8cd97274d8642e9744bb7153340b22a2c74
 (() => {
   var __defProp = Object.defineProperty;
   var __export = (target, all) => {
@@ -35,7 +35,10 @@
     listEnvelopes: () => listEnvelopes,
     listVoices: () => listVoices,
     metaOf: () => metaOf,
+    readBundles: () => readBundles,
+    readChordSets: () => readChordSets,
     readDirectives: () => readDirectives,
+    readDrums: () => readDrums,
     registerBaked: () => registerBaked,
     registerBeep: () => registerBeep,
     registerEnvelope: () => registerEnvelope,
@@ -46,6 +49,7 @@
     registerWave: () => registerWave,
     roleOf: () => roleOf,
     sealPresets: () => sealPresets,
+    shareBundles: () => shareBundles,
     splitVoices: () => splitVoices,
     toneOf: () => toneOf,
     validateMML: () => validateMML,
@@ -947,6 +951,29 @@
     }
     return null;
   };
+  var REPORT = null;
+  var LooseStop = class extends Error {
+  };
+  function modeOf(name) {
+    const key2 = String(name ?? "normal").toLowerCase();
+    return key2 === "strict" || key2 === "loose" ? key2 : "normal";
+  }
+  function keep(level, text) {
+    if (!REPORT) return;
+    REPORT.problems.push({ level, text: String(text).replace(/^\[MMSXX\]\s*/, "") });
+  }
+  function warn(text) {
+    keep("warn", text);
+    const mode = REPORT ? REPORT.mode : "normal";
+    if (mode === "strict") throw new Error(text);
+    if (mode === "loose") return;
+    console.warn(text);
+  }
+  function bad(text) {
+    keep("error", text);
+    if (REPORT && REPORT.mode === "loose") throw new LooseStop(text);
+    throw new Error(text);
+  }
   var SECTION_OF = {};
   for (const [name, set] of Object.entries(SECTIONS)) {
     for (const c of set.chars) SECTION_OF[c] = name;
@@ -956,7 +983,7 @@
   function needSection(what, now) {
     const name = SECTION_OF[what];
     if (!name || now === name) return;
-    throw new Error(`[MMSXX] MML: "${what}" \u306F ${howOpen(name)} \u306E\u4E2D\u3060\u3051\u3067\u66F8\u3051\u307E\u3059(\u5916\u306B\u66F8\u304F\u3068\u3001\u3069\u3061\u3089\u306E\u66F8\u304D\u65B9\u3067\u8AAD\u3080\u306E\u304B\u5206\u304B\u3089\u306A\u304F\u306A\u308A\u307E\u3059)`);
+    bad(`[MMSXX] MML: "${what}" \u306F ${howOpen(name)} \u306E\u4E2D\u3060\u3051\u3067\u66F8\u3051\u307E\u3059(\u5916\u306B\u66F8\u304F\u3068\u3001\u3069\u3061\u3089\u306E\u66F8\u304D\u65B9\u3067\u8AAD\u3080\u306E\u304B\u5206\u304B\u3089\u306A\u304F\u306A\u308A\u307E\u3059)`);
   }
   var LOOP_MAX_CHARS = 1 << 20;
   var isNameChar = (c) => c >= "a" && c <= "z" || c >= "0" && c <= "9" || c === "_" || c.charCodeAt(0) > 127;
@@ -982,7 +1009,7 @@
       j++;
       while (j < src.length && " \n	\r".includes(src[j])) j++;
       if (src[j] !== "{") {
-        console.warn(`[MMSXX] MML: \u30DE\u30AF\u30ED "${name}" \u306E\u4E2D\u8EAB\u304C { } \u3067\u56F2\u307E\u308C\u3066\u3044\u307E\u305B\u3093`);
+        warn(`[MMSXX] MML: \u30DE\u30AF\u30ED "${name}" \u306E\u4E2D\u8EAB\u304C { } \u3067\u56F2\u307E\u308C\u3066\u3044\u307E\u305B\u3093`);
         body += src.slice(at, i);
         continue;
       }
@@ -992,14 +1019,14 @@
         else if (src[k] === "}" && --depth === 0) break;
       }
       if (k >= src.length) {
-        console.warn(`[MMSXX] MML: \u30DE\u30AF\u30ED "${name}" \u306E } \u304C\u3042\u308A\u307E\u305B\u3093`);
+        warn(`[MMSXX] MML: \u30DE\u30AF\u30ED "${name}" \u306E } \u304C\u3042\u308A\u307E\u305B\u3093`);
         i = src.length;
         continue;
       }
-      if (table.has(name)) console.warn(`[MMSXX] MML: \u30DE\u30AF\u30ED "${name}" \u304C\u4E8C\u91CD\u306B\u767B\u9332\u3055\u308C\u3066\u3044\u307E\u3059(\u5F8C\u306E\u307B\u3046\u3092\u4F7F\u3044\u307E\u3059)`);
+      if (table.has(name)) warn(`[MMSXX] MML: \u30DE\u30AF\u30ED "${name}" \u304C\u4E8C\u91CD\u306B\u767B\u9332\u3055\u308C\u3066\u3044\u307E\u3059(\u5F8C\u306E\u307B\u3046\u3092\u4F7F\u3044\u307E\u3059)`);
       if (!wide.has(name) && [...name].some((c) => c.codePointAt(0) > 127)) {
         wide.add(name);
-        console.warn(`[MMSXX] MML: \u30DE\u30AF\u30ED "${name}" \u306E\u540D\u524D\u306B\u82F1\u6570\u5B57\u3067\u306A\u3044\u5B57\u304C\u5165\u3063\u3066\u3044\u307E\u3059(\u3044\u307E\u306F\u52D5\u304D\u307E\u3059\u304C\u3001\u3053\u308C\u304B\u3089\u5148\u306F a-z 0-9 _ \u3067\u66F8\u3044\u3066\u304F\u3060\u3055\u3044)`);
+        warn(`[MMSXX] MML: \u30DE\u30AF\u30ED "${name}" \u306E\u540D\u524D\u306B\u82F1\u6570\u5B57\u3067\u306A\u3044\u5B57\u304C\u5165\u3063\u3066\u3044\u307E\u3059(\u3044\u307E\u306F\u52D5\u304D\u307E\u3059\u304C\u3001\u3053\u308C\u304B\u3089\u5148\u306F a-z 0-9 _ \u3067\u66F8\u3044\u3066\u304F\u3060\u3055\u3044)`);
       }
       table.set(name, src.slice(j + 1, k).trim());
       i = k + 1;
@@ -1021,7 +1048,7 @@
       if (st === 1) {
         const from = path.indexOf(name);
         const ring = [...path.slice(from < 0 ? 0 : from), name].map((n) => `$${n}`).join(" \u2192 ");
-        throw new Error(`[MMSXX] MML: \u30DE\u30AF\u30ED "${name}" \u304C\u5FAA\u74B0\u53C2\u7167\u3057\u3066\u3044\u307E\u3059(${ring})\u3002\u5C55\u958B\u3057\u3066\u3082\u7D42\u308F\u3089\u306A\u3044\u306E\u3067\u3001\u3053\u3053\u3067\u6B62\u3081\u307E\u3059`);
+        bad(`[MMSXX] MML: \u30DE\u30AF\u30ED "${name}" \u304C\u5FAA\u74B0\u53C2\u7167\u3057\u3066\u3044\u307E\u3059(${ring})\u3002\u5C55\u958B\u3057\u3066\u3082\u7D42\u308F\u3089\u306A\u3044\u306E\u3067\u3001\u3053\u3053\u3067\u6B62\u3081\u307E\u3059`);
       }
       if (st === 2) return;
       state.set(name, 1);
@@ -1042,14 +1069,14 @@
       if (hit === void 0) {
         if (name && !missing.has(name)) {
           missing.add(name);
-          console.warn(`[MMSXX] MML: \u30DE\u30AF\u30ED "${name}" \u306F\u767B\u9332\u3055\u308C\u3066\u3044\u307E\u305B\u3093(\u3042\u308B\u306E\u306F ${[...table.keys()].join(" / ")})`);
+          warn(`[MMSXX] MML: \u30DE\u30AF\u30ED "${name}" \u306F\u767B\u9332\u3055\u308C\u3066\u3044\u307E\u305B\u3093(\u3042\u308B\u306E\u306F ${[...table.keys()].join(" / ")})`);
         }
         body = body.slice(0, at) + body.slice(e);
         continue;
       }
       const next = body.slice(0, at) + hit + body.slice(e);
       if (next.length > LOOP_MAX_CHARS) {
-        throw new Error(`[MMSXX] MML: \u30DE\u30AF\u30ED "${name}" \u304C\u5927\u304D\u3059\u304E\u307E\u3059(\u5E83\u3052\u308B\u3068 ${next.length} \u6587\u5B57\u3002\u4E0A\u9650\u306F ${LOOP_MAX_CHARS} \u6587\u5B57)`);
+        bad(`[MMSXX] MML: \u30DE\u30AF\u30ED "${name}" \u304C\u5927\u304D\u3059\u304E\u307E\u3059(\u5E83\u3052\u308B\u3068 ${next.length} \u6587\u5B57\u3002\u4E0A\u9650\u306F ${LOOP_MAX_CHARS} \u6587\u5B57)`);
       }
       body = next;
     }
@@ -1070,7 +1097,7 @@
     if (low !== OLD_OUTRO_LABEL) return false;
     if (!saidOldOutro) {
       saidOldOutro = true;
-      console.warn('[MMSXX] MML: \u30E9\u30D9\u30EB "ENDING" \u306F\u53E4\u3044\u540D\u524D\u3067\u3059\u3002\u3053\u308C\u304B\u3089\u306F "OUTRO" \u3068\u66F8\u304D\u307E\u3059(intro \u306E\u5BFE\u8A9E)\u3002\u3044\u307E\u306E\u3068\u3053\u308D ENDING \u3082\u305D\u306E\u307E\u307E\u8AAD\u307F\u307E\u3059');
+      warn('[MMSXX] MML: \u30E9\u30D9\u30EB "ENDING" \u306F\u53E4\u3044\u540D\u524D\u3067\u3059\u3002\u3053\u308C\u304B\u3089\u306F "OUTRO" \u3068\u66F8\u304D\u307E\u3059(intro \u306E\u5BFE\u8A9E)\u3002\u3044\u307E\u306E\u3068\u3053\u308D ENDING \u3082\u305D\u306E\u307E\u307E\u8AAD\u307F\u307E\u3059');
     }
     return true;
   }
@@ -1092,7 +1119,7 @@
       }
       const body = src.slice(open + 1, close);
       if (src[close + 1] === "*") {
-        console.warn('[MMSXX] MML: "]*" \u306F\u4F7F\u3048\u307E\u305B\u3093\u3002\u304F\u308A\u8FD4\u3059\u3068\u304D\u306B\u623B\u308B\u5148\u306F "// #label LOOP" \u3067\u66F8\u304D\u307E\u3059(\u3053\u3053\u306F 1 \u56DE\u3060\u3051\u9CF4\u308A\u307E\u3059)');
+        warn('[MMSXX] MML: "]*" \u306F\u4F7F\u3048\u307E\u305B\u3093\u3002\u304F\u308A\u8FD4\u3059\u3068\u304D\u306B\u623B\u308B\u5148\u306F "// #label LOOP" \u3067\u66F8\u304D\u307E\u3059(\u3053\u3053\u306F 1 \u56DE\u3060\u3051\u9CF4\u308A\u307E\u3059)');
         src = src.slice(0, open) + body + src.slice(close + 2);
         continue;
       }
@@ -1105,7 +1132,7 @@
       }
       const next = src.slice(0, open) + body.repeat(Math.max(0, count)) + src.slice(numEnd);
       if (next.length > LOOP_MAX_CHARS) {
-        throw new Error(`[MMSXX] MML: \u304F\u308A\u8FD4\u3057\u304C\u5927\u304D\u3059\u304E\u307E\u3059(\u5E83\u3052\u308B\u3068 ${next.length} \u6587\u5B57\u3002\u4E0A\u9650\u306F ${LOOP_MAX_CHARS} \u6587\u5B57)`);
+        bad(`[MMSXX] MML: \u304F\u308A\u8FD4\u3057\u304C\u5927\u304D\u3059\u304E\u307E\u3059(\u5E83\u3052\u308B\u3068 ${next.length} \u6587\u5B57\u3002\u4E0A\u9650\u306F ${LOOP_MAX_CHARS} \u6587\u5B57)`);
       }
       src = next;
     }
@@ -1124,6 +1151,7 @@
         const bar = Number(sp < 0 ? val : val.slice(0, sp));
         if (Number.isFinite(bar)) sections.push({ bar, name: sp < 0 ? "" : val.slice(sp).trim() });
       } else if (key2 === "takes" || key2 === "take") {
+      } else if (key2 === "bundle" || key2 === "chord") {
       } else if (key2 === "tempo") {
         const n = Number(val);
         if (Number.isFinite(n) && n > 0) meta.tempo = n;
@@ -1137,6 +1165,334 @@ ${val}`;
     return meta;
   }
   var DIRECTIVE = /^[ \t*]*#[ \t]*([A-Za-z][\w-]*)[ \t]*(.*)$/;
+  function readBundles(mml) {
+    const out = /* @__PURE__ */ new Map();
+    const seenText = /* @__PURE__ */ new Map();
+    for (const line of commentLines(String(mml ?? ""))) {
+      const m = BUNDLE_LINE.exec(line);
+      if (!m) continue;
+      const name = m[1].trim().toLowerCase();
+      if (findWave(name) >= 0) {
+        bad(`[MMSXX] MML: \u30D0\u30F3\u30C9\u30EB\u97F3\u8272 "${name}" \u306F\u97F3\u8272\u306E\u540D\u524D\u3068\u540C\u3058\u3067\u3059(\u5225\u306E\u540D\u524D\u306B\u3057\u3066\u304F\u3060\u3055\u3044)`);
+      }
+      const raw = m[2].trim();
+      if (out.has(name) && seenText.get(name) !== raw) {
+        warn(`[MMSXX] MML: \u30D0\u30F3\u30C9\u30EB\u97F3\u8272 "${name}" \u3092 2 \u5EA6\u66F8\u3044\u3066\u3044\u307E\u3059(\u5F8C\u306E\u307B\u3046\u3092\u4F7F\u3044\u307E\u3059)`);
+      }
+      seenText.set(name, raw);
+      const parts = splitParts(m[2]);
+      if (!parts.length) {
+        bad(`[MMSXX] MML: \u30D0\u30F3\u30C9\u30EB\u97F3\u8272 "${name}" \u306E\u4E2D\u8EAB\u304C\u3042\u308A\u307E\u305B\u3093`);
+      }
+      out.set(name, parts.map((t) => readBundlePart(name, t, out)));
+    }
+    return out;
+  }
+  var BUNDLE_LINE = /^[ \t*]*#[ \t]*bundle[ \t]+([A-Za-z][\w-]*)[ \t]*=[ \t]*(.*)$/i;
+  var CHORD_LINE = /^[ \t*]*#[ \t]*chord[ \t]+([A-Za-z][\w-]*)[ \t]*=[ \t]*(.*)$/i;
+  function readChordSets(mml, bundles = readBundles(mml)) {
+    const out = /* @__PURE__ */ new Map();
+    const seenText = /* @__PURE__ */ new Map();
+    for (const line of commentLines(String(mml ?? ""))) {
+      const m = CHORD_LINE.exec(line);
+      if (!m) continue;
+      const name = m[1].trim().toLowerCase();
+      if (findWave(name) >= 0 || bundles.has(name)) {
+        bad(`[MMSXX] MML: \u548C\u97F3\u306E\u697D\u5668 "${name}" \u306F\u97F3\u8272\u306E\u540D\u524D\u3068\u540C\u3058\u3067\u3059(\u5225\u306E\u540D\u524D\u306B\u3057\u3066\u304F\u3060\u3055\u3044)`);
+      }
+      const raw = m[2].trim();
+      if (out.has(name) && seenText.get(name) !== raw) {
+        warn(`[MMSXX] MML: \u548C\u97F3\u306E\u697D\u5668 "${name}" \u3092 2 \u5EA6\u66F8\u3044\u3066\u3044\u307E\u3059(\u5F8C\u306E\u307B\u3046\u3092\u4F7F\u3044\u307E\u3059)`);
+      }
+      seenText.set(name, raw);
+      const parts = splitParts(m[2]);
+      if (!parts.length) bad(`[MMSXX] MML: \u548C\u97F3\u306E\u697D\u5668 "${name}" \u306E\u4E2D\u8EAB\u304C\u3042\u308A\u307E\u305B\u3093`);
+      out.set(name, parts.map((t) => readChordVoice(name, t, bundles)));
+    }
+    return out;
+  }
+  function readChordVoice(name, text, bundles) {
+    const m = /^@\{([^}]*)\}[ \t]*(.*)$/.exec(text.trim());
+    if (!m) {
+      bad(`[MMSXX] MML: \u548C\u97F3\u306E\u697D\u5668 "${name}" \u306E "${text.trim()}" \u306F\u8AAD\u3081\u307E\u305B\u3093(\u66F8\u3051\u308B\u306E\u306F @{\u540D\u524D} \u3068\u547C\u3073\u540D\u3060\u3051\u3067\u3059\u3002\u97F3\u91CF\u3084\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u306F\u3001\u305D\u306E\u97F3\u8272\u306E\u5074\u306B\u6301\u305F\u305B\u307E\u3059)`);
+    }
+    const key2 = m[1].trim().toLowerCase();
+    const lane = m[1].trim();
+    const label = looksLikeSetting(m[2].trim()) ? bad(`[MMSXX] MML: \u548C\u97F3\u306E\u697D\u5668 "${name}" \u306E "${m[2].trim()}" \u306F\u8AAD\u3081\u307E\u305B\u3093(\u97F3\u91CF\u3084\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u306F\u3001\u305D\u306E\u97F3\u8272\u306E\u5074\u306B\u6301\u305F\u305B\u307E\u3059\u3002\u3046\u3057\u308D\u306B\u66F8\u3051\u308B\u306E\u306F\u547C\u3073\u540D\u3060\u3051\u3067\u3059)`) : m[2].trim() || lane;
+    if (bundles.has(key2)) return { parts: bundles.get(key2), lane, label };
+    const w = findWave(key2);
+    if (w < 0) {
+      bad(`[MMSXX] MML: \u548C\u97F3\u306E\u697D\u5668 "${name}" \u306E "${m[1].trim()}" \u306F\u77E5\u3089\u306A\u3044\u540D\u524D\u3067\u3059`);
+    }
+    return { parts: [{
+      wave: w,
+      vol: null,
+      gate: null,
+      env: null,
+      octave: 0,
+      detune: 0,
+      echo: void 0
+    }], lane, label };
+  }
+  function looksLikeSetting(text) {
+    return /^@/.test(text) || /^[A-Za-z][+-]?\d/.test(text);
+  }
+  var DRUM_LINE = /^[ \t*]*#[ \t]*drum[ \t]+([A-Za-z][A-Za-z0-9]*)[ \t]*=[ \t]*(.*)$/i;
+  var DRUM_OPEN = /@\{[ \t]*drums\b([^}]*)\}[ \t]*\{/i;
+  var DRUM_MIDI = 60;
+  function envRunLen(env, fallback) {
+    const e = ENVELOPES[env];
+    if (!e) return fallback;
+    if (Array.isArray(e.table)) {
+      return e.loop === null || e.loop === void 0 ? Math.max(fallback, e.table.length / 60) : fallback;
+    }
+    if (!(e.s === 0)) return fallback;
+    return Math.max(fallback, (e.a ?? 0) + (e.d ?? 0) + (e.r ?? 0));
+  }
+  function readDrums(mml, bundles = readBundles(mml)) {
+    const outer = /* @__PURE__ */ new Map();
+    const scopes = [];
+    let depth = 0;
+    for (const raw of String(mml ?? "").split("\n")) {
+      const cut = raw.indexOf("//");
+      const code = cut < 0 ? raw : raw.slice(0, cut);
+      const note = cut < 0 ? "" : raw.slice(cut + 2);
+      const m = DRUM_LINE.exec(note);
+      if (m) {
+        const name = m[1].trim();
+        const into = depth > 0 ? scopes[scopes.length - 1] : outer;
+        into.set(name, readDrumPart(name, m[2], bundles));
+      }
+      let i = 0;
+      while (i < code.length) {
+        if (depth === 0) {
+          const om = DRUM_OPEN.exec(code.slice(i));
+          if (!om) break;
+          i += om.index + om[0].length;
+          depth = 1;
+          scopes.push(/* @__PURE__ */ new Map());
+        } else {
+          const c = code[i++];
+          if (c === "{") depth++;
+          else if (c === "}") depth--;
+        }
+      }
+    }
+    return { outer, scopes };
+  }
+  function readDrumPart(name, text, bundles) {
+    const t = String(text).trim();
+    const m = /^@\{([^}]*)\}[ \t]*(?:v[ \t]*(\d+)\b)?[ \t]*(.*)$/.exec(t);
+    if (!m) {
+      bad(`[MMSXX] MML: \u30C9\u30E9\u30E0 "${name}" \u306E "${t}" \u306F\u8AAD\u3081\u307E\u305B\u3093(\u66F8\u3051\u308B\u306E\u306F @{\u540D\u524D} \u3068 v \u3068\u547C\u3073\u540D\u3060\u3051\u3067\u3059\u3002\u9577\u3055\u3068\u9AD8\u3055\u306F\u66F8\u304D\u307E\u305B\u3093)`);
+    }
+    const key2 = m[1].trim().toLowerCase();
+    const vol = m[2] === void 0 ? null : clamp(parseInt(m[2], 10), 0, 15);
+    const label = looksLikeSetting(m[3].trim()) ? bad(`[MMSXX] MML: \u30C9\u30E9\u30E0 "${name}" \u306E "${m[3].trim()}" \u306F\u8AAD\u3081\u307E\u305B\u3093(\u9577\u3055\u3068\u9AD8\u3055\u306F\u66F8\u304D\u307E\u305B\u3093\u3002\u3046\u3057\u308D\u306B\u66F8\u3051\u308B\u306E\u306F\u547C\u3073\u540D\u3060\u3051\u3067\u3059)`) : m[3].trim() || m[1].trim();
+    if (bundles.has(key2)) return { parts: bundles.get(key2), vol, label };
+    const w = findWave(key2);
+    if (w < 0) {
+      bad(`[MMSXX] MML: \u30C9\u30E9\u30E0 "${name}" \u306E "${m[1].trim()}" \u306F\u77E5\u3089\u306A\u3044\u540D\u524D\u3067\u3059`);
+    }
+    return { parts: [{
+      wave: w,
+      vol: null,
+      gate: null,
+      env: null,
+      octave: 0,
+      detune: 0,
+      echo: void 0
+    }], vol, label };
+  }
+  function lowerOutsideDrums(src) {
+    const text = String(src);
+    const keep2 = drumRanges(text);
+    if (!keep2.length) return text.toLowerCase();
+    keep2.sort((a, b) => a[0] - b[0]);
+    let out = "", at = 0;
+    for (const [s, e] of keep2) {
+      if (s < at) continue;
+      out += text.slice(at, s).toLowerCase() + text.slice(s, e);
+      at = e;
+    }
+    return out + text.slice(at).toLowerCase();
+  }
+  function drumRanges(text) {
+    const out = [];
+    const macros = macroBodies(text);
+    const want = /* @__PURE__ */ new Set();
+    const re = new RegExp(DRUM_OPEN.source, "gi");
+    let m;
+    while ((m = re.exec(text)) !== null) {
+      const from = m.index + m[0].length;
+      let depth = 1, i = from;
+      for (; i < text.length && depth > 0; i++) {
+        if (text[i] === "{") depth++;
+        else if (text[i] === "}") depth--;
+      }
+      out.push([from, i - 1]);
+      for (const name of text.slice(from, i - 1).match(/\$[A-Za-z_][\w]*/g) || []) {
+        want.add(name.slice(1));
+      }
+      re.lastIndex = i;
+    }
+    const seen = /* @__PURE__ */ new Set();
+    while (want.size) {
+      const name = want.values().next().value;
+      want.delete(name);
+      if (seen.has(name) || !macros.has(name)) continue;
+      seen.add(name);
+      const [s, e] = macros.get(name);
+      out.push([s, e]);
+      for (const n of text.slice(s, e).match(/\$[A-Za-z_][\w]*/g) || []) want.add(n.slice(1));
+    }
+    return out;
+  }
+  function outerDrumLines(text) {
+    const out = [];
+    let depth = 0;
+    for (const raw of String(text ?? "").split("\n")) {
+      const cut = raw.indexOf("//");
+      const code = cut < 0 ? raw : raw.slice(0, cut);
+      const note = cut < 0 ? "" : raw.slice(cut + 2);
+      if (depth === 0 && DRUM_LINE.test(note)) out.push(note);
+      let i = 0;
+      while (i < code.length) {
+        if (depth === 0) {
+          const om = DRUM_OPEN.exec(code.slice(i));
+          if (!om) break;
+          i += om.index + om[0].length;
+          depth = 1;
+        } else {
+          const c = code[i++];
+          if (c === "{") depth++;
+          else if (c === "}") depth--;
+        }
+      }
+    }
+    return out;
+  }
+  function macroBodies(text) {
+    const out = /* @__PURE__ */ new Map();
+    const re = /\$([A-Za-z_][\w]*)[ \t\n\r]*=[ \t\n\r]*\{/g;
+    let m;
+    while ((m = re.exec(text)) !== null) {
+      const from = m.index + m[0].length;
+      let depth = 1, i = from;
+      for (; i < text.length && depth > 0; i++) {
+        if (text[i] === "{") depth++;
+        else if (text[i] === "}") depth--;
+      }
+      out.set(m[1], [from, i - 1]);
+      re.lastIndex = i;
+    }
+    return out;
+  }
+  function shareBundles(voices) {
+    const lines = [];
+    for (const v of voices) {
+      for (const line of commentLines(String(v ?? ""))) {
+        if (BUNDLE_LINE.test(line)) lines.push("//" + line);
+      }
+      for (const line of outerDrumLines(String(v ?? ""))) lines.push("//" + line);
+    }
+    if (!lines.length) return voices;
+    const head = lines.join("\n") + "\n";
+    return voices.map((v) => head + String(v ?? ""));
+  }
+  function splitParts(text) {
+    const out = [];
+    let buf = "", depth = 0;
+    for (const c of String(text)) {
+      if (c === "{") depth++;
+      else if (c === "}") depth = Math.max(0, depth - 1);
+      if (c === "," && depth === 0) {
+        out.push(buf);
+        buf = "";
+        continue;
+      }
+      buf += c;
+    }
+    out.push(buf);
+    return out.map((t) => t.trim()).filter(Boolean);
+  }
+  function readBundlePart(name, text, seen) {
+    const part = {
+      wave: -1,
+      vol: null,
+      gate: null,
+      env: null,
+      octave: 0,
+      detune: 0,
+      echo: void 0
+    };
+    let at = 0;
+    while (at < text.length) {
+      BUNDLE_PART.lastIndex = at;
+      const m = BUNDLE_PART.exec(text);
+      if (!m) {
+        bad(`[MMSXX] MML: \u30D0\u30F3\u30C9\u30EB\u97F3\u8272 "${name}" \u306E "${text.slice(at)}" \u306F\u8AAD\u3081\u307E\u305B\u3093(\u66F8\u3051\u308B\u306E\u306F @{\u97F3\u8272} @e{\u5F62} v q @o @d @s \u3060\u3051\u3067\u3059)`);
+      }
+      at = BUNDLE_PART.lastIndex;
+      const g = m.groups;
+      const echoLen = g.echoLen ?? g.echoLen2;
+      if (echoLen !== void 0) {
+        const len = Number(echoLen);
+        part.echo = len > 0 ? { len, depth: g.echoDepth ? clamp(Number(g.echoDepth), 1, 9) : 5 } : null;
+        continue;
+      }
+      if (g.env !== void 0) {
+        part.env = envIndex(g.env.trim());
+        continue;
+      }
+      if (g.wave !== void 0) {
+        const key2 = g.wave.trim().toLowerCase();
+        if (seen.has(key2)) {
+          bad(`[MMSXX] MML: \u30D0\u30F3\u30C9\u30EB\u97F3\u8272 "${name}" \u306B\u30D0\u30F3\u30C9\u30EB\u97F3\u8272 "${key2}" \u306F\u5165\u308C\u3089\u308C\u307E\u305B\u3093`);
+        }
+        const w = findWave(key2);
+        if (w < 0) {
+          bad(`[MMSXX] MML: \u30D0\u30F3\u30C9\u30EB\u97F3\u8272 "${name}" \u306E\u97F3\u8272 "${g.wave.trim()}" \u306F\u77E5\u3089\u306A\u3044\u540D\u524D\u3067\u3059`);
+        }
+        if (WAVEFORMS[w].kind === "layer") {
+          bad(`[MMSXX] MML: \u30D0\u30F3\u30C9\u30EB\u97F3\u8272 "${name}" \u306B\u5408\u6210\u97F3\u8272 "${WAVEFORMS[w].name}" \u306F\u5165\u308C\u3089\u308C\u307E\u305B\u3093(\u5408\u6210\u97F3\u8272\u306F\u305D\u306E\u307E\u307E\u4F7F\u3063\u3066\u304F\u3060\u3055\u3044)`);
+        }
+        part.wave = w;
+        continue;
+      }
+      if (g.octave !== void 0) {
+        part.octave = clamp(Number(g.octave), -4, 4);
+        continue;
+      }
+      if (g.detune !== void 0) {
+        part.detune = clamp(Number(g.detune), -2400, 2400);
+        continue;
+      }
+      if (g.vol !== void 0) {
+        part.vol = clamp(Number(g.vol), 0, 15);
+        continue;
+      }
+      if (g.gate !== void 0) {
+        part.gate = clamp(Number(g.gate), 0, 8);
+        continue;
+      }
+    }
+    if (part.wave < 0) {
+      bad(`[MMSXX] MML: \u30D0\u30F3\u30C9\u30EB\u97F3\u8272 "${name}" \u306E "${text}" \u306B\u97F3\u8272\u304C\u3042\u308A\u307E\u305B\u3093(@{\u540D\u524D} \u3092\u66F8\u3044\u3066\u304F\u3060\u3055\u3044)`);
+    }
+    return part;
+  }
+  var BUNDLE_PART = new RegExp([
+    "@\\{(?<wave>[^}]*)\\}",
+    "@e\\{(?<env>[^}]*)\\}",
+    "@s\\{(?<echoLen>\\d+)(?:,(?<echoDepth>\\d+))?\\}",
+    "@s(?<echoLen2>\\d+)",
+    "@o(?<octave>[+-]?\\d+)",
+    "@d(?<detune>[+-]?\\d+)",
+    "v(?<vol>\\d+)",
+    "q(?<gate>\\d+)",
+    "\\s+"
+  ].join("|"), "giy");
   var SONG_WIDE = ["title", "tempo", "meter", "about"];
   var STACKED = ["about"];
   function splitVoices(text) {
@@ -1184,12 +1540,12 @@ ${val}`;
           names.push(m[1].trim());
           out += `${MARK_AT}${names.length - 1}${MARK_AT}`;
         } else if (m) {
-          console.warn(`[MMSXX] MML: \u30E9\u30D9\u30EB "${m[1].trim()}" \u306F\u884C\u982D\u306B\u66F8\u304D\u307E\u3059 (\u97F3\u7B26\u306E\u5F8C\u308D\u306B\u66F8\u3044\u305F\u3082\u306E\u306F\u52B9\u304D\u307E\u305B\u3093)`);
+          warn(`[MMSXX] MML: \u30E9\u30D9\u30EB "${m[1].trim()}" \u306F\u884C\u982D\u306B\u66F8\u304D\u307E\u3059 (\u97F3\u7B26\u306E\u5F8C\u308D\u306B\u66F8\u3044\u305F\u3082\u306E\u306F\u52B9\u304D\u307E\u305B\u3093)`);
         } else if (c && headOfLine) {
           cues.push(c[1].trim());
           out += `${CUE_AT}${cues.length - 1}${CUE_AT}`;
         } else if (c) {
-          console.warn(`[MMSXX] MML: \u5408\u56F3 "${c[1].trim()}" \u306F\u884C\u982D\u306B\u66F8\u304D\u307E\u3059 (\u97F3\u7B26\u306E\u5F8C\u308D\u306B\u66F8\u3044\u305F\u3082\u306E\u306F\u52B9\u304D\u307E\u305B\u3093)`);
+          warn(`[MMSXX] MML: \u5408\u56F3 "${c[1].trim()}" \u306F\u884C\u982D\u306B\u66F8\u304D\u307E\u3059 (\u97F3\u7B26\u306E\u5F8C\u308D\u306B\u66F8\u3044\u305F\u3082\u306E\u306F\u52B9\u304D\u307E\u305B\u3093)`);
         }
         i = j - 1;
         out += "\n";
@@ -1228,14 +1584,14 @@ ${val}`;
       j++;
       while (j < src.length && " \n	\r".includes(src[j])) j++;
       if (src[j] !== "{") {
-        throw new Error(`[MMSXX] MML: \u5408\u56F3 "!${name}" \u306E\u4E2D\u8EAB\u304C { } \u3067\u56F2\u307E\u308C\u3066\u3044\u307E\u305B\u3093`);
+        bad(`[MMSXX] MML: \u5408\u56F3 "!${name}" \u306E\u4E2D\u8EAB\u304C { } \u3067\u56F2\u307E\u308C\u3066\u3044\u307E\u305B\u3093`);
       }
       const k = src.indexOf("}", j);
-      if (k < 0) throw new Error(`[MMSXX] MML: \u5408\u56F3 "!${name}" \u306E } \u304C\u3042\u308A\u307E\u305B\u3093`);
+      if (k < 0) bad(`[MMSXX] MML: \u5408\u56F3 "!${name}" \u306E } \u304C\u3042\u308A\u307E\u305B\u3093`);
       const [word, ...rest] = src.slice(j + 1, k).trim().split(/\s+/);
-      if (!word) throw new Error(`[MMSXX] MML: \u5408\u56F3 "!${name}" \u306E\u4E2D\u8EAB\u304C\u7A7A\u3067\u3059`);
+      if (!word) bad(`[MMSXX] MML: \u5408\u56F3 "!${name}" \u306E\u4E2D\u8EAB\u304C\u7A7A\u3067\u3059`);
       if (word === name) {
-        throw new Error(`[MMSXX] MML: \u5408\u56F3 "!${name}" \u3092\u540C\u3058\u540D\u524D\u3078\u767B\u9332\u3057\u3066\u3044\u307E\u3059(\u77ED\u3044\u540D\u524D\u3092\u4ED8\u3051\u308B\u305F\u3081\u306E\u66F8\u304D\u65B9\u3067\u3059)`);
+        bad(`[MMSXX] MML: \u5408\u56F3 "!${name}" \u3092\u540C\u3058\u540D\u524D\u3078\u767B\u9332\u3057\u3066\u3044\u307E\u3059(\u77ED\u3044\u540D\u524D\u3092\u4ED8\u3051\u308B\u305F\u3081\u306E\u66F8\u304D\u65B9\u3067\u3059)`);
       }
       const num = Number(rest[0]);
       table.set(name, { name: word, arg: Number.isFinite(num) ? num : 0 });
@@ -1245,10 +1601,13 @@ ${val}`;
   }
   function compileOne(mml) {
     const meta = readDirectives(mml);
+    const bundles = readBundles(mml);
+    const chordSets = readChordSets(mml, bundles);
+    const drums = readDrums(mml, bundles);
     const markNames = [];
     const cueNames = [];
     const expanded = expandLoops(expandMacros(
-      stripComments(String(mml), markNames, cueNames).toLowerCase()
+      lowerOutsideDrums(stripComments(String(mml), markNames, cueNames))
     ));
     const { body: src, table: cueTable } = readCueNames(expanded);
     let pos = 0;
@@ -1257,6 +1616,10 @@ ${val}`;
     let detune = 0, octShift = 0;
     let echo = null;
     let px = 0, py = 0, pz = 0, muted = 0;
+    let bundle = null;
+    let chordSet = null;
+    let lane = null;
+    let bundleSeq = 0;
     let tapeSeq = 0;
     let section = null;
     let sec = {};
@@ -1266,24 +1629,170 @@ ${val}`;
     const bars = [];
     const cues = [];
     const pushNote = (dur, freq, extra) => {
-      const shift = Math.pow(2, octShift + detune / 1200);
-      events.push({
+      if (!bundle) {
+        events.push(oneNote(dur, freq, null, extra));
+        return;
+      }
+      const id = bundleSeq++;
+      bundle.forEach((m, i) => {
+        events.push(oneNote(dur, freq, m, { bundle: id, part: i, ...extra }));
+      });
+    };
+    const oneNote = (dur, freq, m, extra) => {
+      const oct = octShift + (m ? m.octave : 0);
+      const cent = detune + (m ? m.detune : 0);
+      const shift = Math.pow(2, oct + cent / 1200);
+      const g = m && m.gate !== null ? m.gate : gate;
+      const v = m && m.vol !== null ? m.vol : vol;
+      const ev = m && m.env !== null ? m.env : env;
+      const hold = inDrums ? envRunLen(ev, dur * g / 8) : dur * g / 8;
+      const ec = m && m.echo !== void 0 ? m.echo && { delay: 240 / tempo / m.echo.len, depth: m.echo.depth } : echo;
+      return {
         t: time,
         dur,
-        gate: dur * gate / 8,
+        gate: hold,
         freq: freq * shift,
-        vol: muted ? 0 : vol,
-        wave,
-        env,
+        vol: muted ? 0 : v,
+        wave: m ? m.wave : wave,
+        env: ev,
         vibrato,
-        echo,
+        echo: ec,
         // 定位。着せるものの 1 つなので、音色と同じく音符ごとに写す
         pos: [px, py, pz],
+        // 層の名前。付いていないものは付けない(基準の指紋を動かさないため)
+        ...lane ? { lane } : {},
         ...extra
-      });
+      };
+    };
+    const takeVoice = () => {
+      let j = pos;
+      while (j < src.length && src[j] !== "}") j++;
+      const key2 = src.slice(pos, j).trim();
+      const set = bundles.get(key2) || chordSets.get(key2);
+      if (set) {
+        pos = j + 1;
+        const isChord = chordSets.has(key2);
+        bundle = isChord ? set[0].parts : set;
+        chordSet = isChord ? set : null;
+        lane = isChord ? set[0].lane : null;
+        if (isChord) for (const v of set) laneLabels.set(v.lane, v.label);
+        const de = (WAVEFORMS[bundle[0].wave] || {}).defaultEnv;
+        env = de !== void 0 ? de : envIndex(DEFAULT_ENV);
+        return true;
+      }
+      bundle = null;
+      chordSet = null;
+      lane = null;
+      wave = readName(WAVEFORMS, "\u6CE2\u5F62", wave);
+      return false;
     };
     const freqOf = (midi) => 440 * Math.pow(2, (midi - 69) / 12);
     let chordSeq = 0;
+    let drumSeq = 0;
+    let inDrums = false;
+    const laneLabels = /* @__PURE__ */ new Map();
+    const playDrums = () => {
+      const back2 = pos;
+      let j = pos;
+      while (j < src.length && src[j] !== "}") j++;
+      const head = /^[ \t]*drums\b([^}]*)$/.exec(src.slice(pos, j));
+      if (!head) return false;
+      let k = j + 1;
+      while (k < src.length && " \n	\r".includes(src[k])) k++;
+      if (src[k] !== "{") {
+        pos = back2;
+        return false;
+      }
+      pos = k + 1;
+      const len = parseInt(String(head[1]).trim(), 10);
+      const step = 240 / tempo / (Number.isFinite(len) && len > 0 ? len : defLen);
+      const table = new Map([...drums.outer, ...drums.scopes[drumSeq++] || /* @__PURE__ */ new Map()]);
+      const keep2 = { wave, bundle, chordSet, vol, env, octave, lane };
+      inDrums = true;
+      let base = vol;
+      let names = [];
+      const hit = () => {
+        if (!names.length) return;
+        const id = names.length > 1 ? chordSeq++ : null;
+        for (const nm of names) {
+          const d = table.get(nm);
+          if (!d) {
+            warn(`[MMSXX] MML: \u30C9\u30E9\u30E0 "${nm}" \u306F\u5272\u308A\u5F53\u3066\u304C\u3042\u308A\u307E\u305B\u3093(// #drum ` + nm + " = @{\u97F3\u8272} \u3068\u66F8\u304D\u307E\u3059)");
+            continue;
+          }
+          bundle = d.parts;
+          lane = nm;
+          if (d.label) laneLabels.set(nm, d.label);
+          vol = d.vol === null ? base : Math.round(base * d.vol / 15);
+          pushNote(step, freqOf(DRUM_MIDI), id === null ? void 0 : { chord: id });
+        }
+        time += step;
+        names = [];
+      };
+      let depth = 1;
+      while (pos < src.length) {
+        const c = src[pos];
+        if (c === "}") {
+          depth--;
+          pos++;
+          if (!depth) break;
+          continue;
+        }
+        if (" \n	\r".includes(c)) {
+          hit();
+          pos++;
+          continue;
+        }
+        if (c === "|") {
+          hit();
+          pos++;
+          if (!bars.some((b) => Math.abs(b - time) < 1e-9)) bars.push(time);
+          continue;
+        }
+        if (c === ".") {
+          hit();
+          pos++;
+          time += step;
+          continue;
+        }
+        if (c === "v" || c === "V") {
+          hit();
+          pos++;
+          base = clamp(readNumber() ?? base, 0, 15);
+          continue;
+        }
+        if (c === "{") {
+          depth++;
+          pos++;
+          let s = "";
+          while (pos < src.length && src[pos] !== "}") s += src[pos++];
+          pos++;
+          depth--;
+          names.push(s.trim());
+          continue;
+        }
+        if (/[A-Za-z]/.test(c)) {
+          names.push(c);
+          pos++;
+          continue;
+        }
+        if (c >= "0" && c <= "9") {
+          bad(`[MMSXX] MML: \u30C9\u30E9\u30E0\u306E\u56F2\u307F\u306E\u4E2D\u306B\u6570\u5B57 "${c}" \u306F\u66F8\u3051\u307E\u305B\u3093(\u9577\u3055\u306F\u56F2\u307F\u304C\u6301\u3061\u307E\u3059\u3002\u97F3\u91CF\u306F v \u306E\u3046\u3057\u308D\u3060\u3051\u3067\u3059)`);
+        }
+        warn(`[MMSXX] MML: \u30C9\u30E9\u30E0\u306E\u56F2\u307F\u306E\u4E2D\u306B "${c}" \u306F\u66F8\u3051\u307E\u305B\u3093(\u697D\u5668\u306E\u5B57\u3068 . \u3068 v \u3068 [ ] | \u3060\u3051\u3067\u3059)`);
+        pos++;
+      }
+      hit();
+      inDrums = false;
+      wave = keep2.wave;
+      bundle = keep2.bundle;
+      chordSet = keep2.chordSet;
+      vol = keep2.vol;
+      env = keep2.env;
+      octave = keep2.octave;
+      lane = keep2.lane;
+      return true;
+    };
     const peek = () => src[pos];
     const readNumber = () => {
       let n = "";
@@ -1319,7 +1828,7 @@ ${val}`;
         hit = table.findIndex((e) => (e.alias || []).some((a) => String(a).toLowerCase() === key2));
       }
       if (hit >= 0) return hit;
-      console.warn(`[MMSXX] MML: ${what} "${s}" \u306F\u77E5\u3089\u306A\u3044\u540D\u524D\u3067\u3059 (\u4F7F\u3048\u308B\u306E\u306F ${table.map((e) => e.name).join(" / ")})`);
+      warn(`[MMSXX] MML: ${what} "${s}" \u306F\u77E5\u3089\u306A\u3044\u540D\u524D\u3067\u3059 (\u4F7F\u3048\u308B\u306E\u306F ${table.map((e) => e.name).join(" / ")})`);
       return now;
     };
     const readPlace = () => {
@@ -1368,59 +1877,199 @@ ${val}`;
     const skipSpace = () => {
       while (pos < src.length && " \n	\r|".includes(src[pos])) pos++;
     };
-    while (pos < src.length) {
-      const ch = src[pos++];
-      if (ch === "|") {
-        if (!bars.some((b) => Math.abs(b - time) < 1e-9)) bars.push(time);
-        continue;
-      }
-      if (" \n	\r".includes(ch)) continue;
-      if (section && ch !== MARK_AT && ch !== CUE_AT && ch !== "@" && !SEC_COMMON.includes(ch) && !SECTIONS[section].chars.includes(ch) && !(SECTIONS[section].digits && ch >= "0" && ch <= "9")) {
-        const ok = [
-          ...SECTIONS[section].chars,
-          ...SECTIONS[section].digits ? ["\u6570\u5B57"] : [],
-          ...SEC_COMMON.filter((c) => c !== "}")
-        ];
-        throw new Error(`[MMSXX] MML: "${ch}" \u306F ${howOpen(section)} \u306E\u4E2D\u3067\u306F\u66F8\u3051\u307E\u305B\u3093(\u4E2D\u3067\u66F8\u3051\u308B\u306E\u306F ${ok.join(" ")} \u3068 @\u8A2D\u5B9A)`);
-      }
-      if (SEMI[ch] !== void 0) {
-        let semi = SEMI[ch];
-        while (peek() === "+" || peek() === "#") {
-          semi++;
-          pos++;
+    try {
+      while (pos < src.length) {
+        const ch = src[pos++];
+        if (ch === "|") {
+          if (!bars.some((b) => Math.abs(b - time) < 1e-9)) bars.push(time);
+          continue;
         }
-        while (peek() === "-") {
-          semi--;
-          pos++;
+        if (" \n	\r".includes(ch)) continue;
+        if (section && ch !== MARK_AT && ch !== CUE_AT && ch !== "@" && !SEC_COMMON.includes(ch) && !SECTIONS[section].chars.includes(ch) && !(SECTIONS[section].digits && ch >= "0" && ch <= "9")) {
+          const ok = [
+            ...SECTIONS[section].chars,
+            ...SECTIONS[section].digits ? ["\u6570\u5B57"] : [],
+            ...SEC_COMMON.filter((c) => c !== "}")
+          ];
+          bad(`[MMSXX] MML: "${ch}" \u306F ${howOpen(section)} \u306E\u4E2D\u3067\u306F\u66F8\u3051\u307E\u305B\u3093(\u4E2D\u3067\u66F8\u3051\u308B\u306E\u306F ${ok.join(" ")} \u3068 @\u8A2D\u5B9A)`);
         }
-        const dur = readDuration();
-        pushNote(dur, freqOf((octave + 1) * 12 + semi));
-        time += dur;
-      } else if (ch === CHORD_QUOTE) {
-        const keepOctave = octave;
-        const notes = [];
-        let mark = null;
-        while (pos < src.length && src[pos] !== CHORD_QUOTE) {
-          const c = src[pos++];
-          if (" \n	\r".includes(c)) continue;
-          if (c === "?" || c === "!") {
-            mark = c;
-            continue;
+        if (SEMI[ch] !== void 0) {
+          let semi = SEMI[ch];
+          while (peek() === "+" || peek() === "#") {
+            semi++;
+            pos++;
           }
-          if (c === ">") {
-            octave = Math.min(8, octave + 1);
-            continue;
+          while (peek() === "-") {
+            semi--;
+            pos++;
           }
-          if (c === "<") {
-            octave = Math.max(1, octave - 1);
-            continue;
+          const dur = readDuration();
+          pushNote(dur, freqOf((octave + 1) * 12 + semi));
+          time += dur;
+        } else if (ch === CHORD_QUOTE) {
+          const keepOctave = octave, keepWave = wave, keepBundle = bundle;
+          const keepVol = vol, keepEnv = env, keepSet = chordSet, keepLane = lane;
+          const notes = [];
+          let mark = null;
+          let said = false;
+          while (pos < src.length && src[pos] !== CHORD_QUOTE) {
+            const c = src[pos++];
+            if (" \n	\r".includes(c)) continue;
+            if (c === "?" || c === "!") {
+              mark = c;
+              continue;
+            }
+            if (c === ">") {
+              octave = Math.min(8, octave + 1);
+              continue;
+            }
+            if (c === "<") {
+              octave = Math.max(1, octave - 1);
+              continue;
+            }
+            if (c === "o") {
+              octave = readNumber() ?? octave;
+              continue;
+            }
+            if (c === "@" && src[pos] === "{") {
+              pos++;
+              takeVoice();
+              said = true;
+              continue;
+            }
+            if (c === "v") {
+              vol = clamp(readNumber() ?? vol, 0, 15);
+              said = true;
+              continue;
+            }
+            if (SEMI[c] !== void 0) {
+              let semi = SEMI[c];
+              while (peek() === "+" || peek() === "#") {
+                semi++;
+                pos++;
+              }
+              while (peek() === "-") {
+                semi--;
+                pos++;
+              }
+              notes.push({
+                midi: (octave + 1) * 12 + semi,
+                mark,
+                wave,
+                bundle,
+                vol,
+                env,
+                lane,
+                // 自分で楽器を書いたか。書いていなければ `#chord` の並びから着せる
+                said
+              });
+              mark = null;
+              continue;
+            }
+            if (c === CUE_AT) {
+              pos++;
+              while (pos < src.length && src[pos] !== CUE_AT) pos++;
+              pos++;
+              continue;
+            }
+            if (c === MARK_AT) {
+              warn("[MMSXX] MML: \u548C\u97F3\u306E\u4E2D\u306B\u30E9\u30D9\u30EB\u306F\u7F6E\u3051\u307E\u305B\u3093(\u548C\u97F3\u306F 1 \u97F3\u3068\u540C\u3058\u6271\u3044\u3067\u3059\u3002\u9589\u3058\u305F\u3042\u3068\u306B\u66F8\u304D\u307E\u3059)");
+              while (pos < src.length && src[pos] !== MARK_AT) pos++;
+              pos++;
+              continue;
+            }
+            warn(`[MMSXX] MML: \u548C\u97F3\u306E\u4E2D\u306B "${c}" \u306F\u66F8\u3051\u307E\u305B\u3093 (\u97F3\u540D\u3068 + # - \u3068 > < o \u3068 @{} \u3068 v \u3068 ? ! \u3060\u3051\u3002\u9577\u3055\u306F\u9589\u3058\u305F\u3042\u3068\u306B\u66F8\u304D\u307E\u3059)`);
           }
-          if (c === "o") {
-            octave = readNumber() ?? octave;
-            continue;
+          pos++;
+          const dur = readDuration();
+          octave = keepOctave;
+          wave = keepWave;
+          bundle = keepBundle;
+          vol = keepVol;
+          env = keepEnv;
+          chordSet = keepSet;
+          lane = keepLane;
+          if (notes.length === 0) {
+            warn("[MMSXX] MML: \u7A7A\u306E\u548C\u97F3\u304C\u3042\u308A\u307E\u3059(\u4F11\u307F\u305F\u3044\u306A\u3089 r \u3092\u66F8\u304D\u307E\u3059)");
+            time += dur;
+          } else {
+            const id = chordSeq++;
+            if (keepSet) {
+              const low = notes.map((n, i) => i).sort((x, y) => notes[x].midi - notes[y].midi);
+              low.forEach((at, rank) => {
+                if (notes[at].said) return;
+                const voice = keepSet[Math.min(rank, keepSet.length - 1)];
+                notes[at].bundle = voice.parts;
+                notes[at].lane = voice.lane;
+              });
+            }
+            for (const n of notes) {
+              wave = n.wave;
+              bundle = n.bundle;
+              vol = n.vol;
+              env = n.env;
+              lane = n.lane;
+              pushNote(dur, freqOf(n.midi), n.mark ? { chord: id, mark: n.mark } : { chord: id });
+            }
+            wave = keepWave;
+            bundle = keepBundle;
+            vol = keepVol;
+            env = keepEnv;
+            lane = keepLane;
+            time += dur;
           }
-          if (SEMI[c] !== void 0) {
-            let semi = SEMI[c];
+        } else if (ch === "}" && section) {
+          section = null;
+        } else if (ch === MARK_AT) {
+          let n = "";
+          while (pos < src.length && src[pos] !== MARK_AT) n += src[pos++];
+          pos++;
+          const name = markNames[Number(n)] ?? "";
+          if (name && !marks.some((m) => m.name === name)) marks.push({ name, t: time });
+        } else if (ch === CUE_AT) {
+          let n = "";
+          while (pos < src.length && src[pos] !== CUE_AT) n += src[pos++];
+          pos++;
+          const said = cueNames[Number(n)] ?? "";
+          const [word, ...rest] = said.split(/\s+/);
+          if (word) {
+            const num = Number(rest[0]);
+            cues.push({ name: word, arg: Number.isFinite(num) ? num : 0, t: time });
+          }
+        } else if (ch === "!") {
+          let word = "";
+          while (pos < src.length && isNameChar(src[pos])) word += src[pos++];
+          if (!word) bad('[MMSXX] MML: "!" \u306E\u3046\u3057\u308D\u306B\u5408\u56F3\u306E\u540D\u524D\u304C\u3042\u308A\u307E\u305B\u3093');
+          const known = cueTable.get(word);
+          cues.push({ name: known ? known.name : word, arg: known ? known.arg : 0, t: time });
+        } else if (ch === "r") {
+          time += readDuration();
+        } else if (ch === "&") {
+          skipSpace();
+          for (; ; ) {
+            if (peek() === ">") {
+              octave = Math.min(8, octave + 1);
+              pos++;
+              skipSpace();
+              continue;
+            }
+            if (peek() === "<") {
+              octave = Math.max(1, octave - 1);
+              pos++;
+              skipSpace();
+              continue;
+            }
+            if (peek() === "o") {
+              pos++;
+              octave = readNumber() ?? octave;
+              skipSpace();
+              continue;
+            }
+            break;
+          }
+          if (SEMI[src[pos]] !== void 0 && events.length > 0) {
+            let semi = SEMI[src[pos]];
+            pos++;
             while (peek() === "+" || peek() === "#") {
               semi++;
               pos++;
@@ -1429,322 +2078,235 @@ ${val}`;
               semi--;
               pos++;
             }
-            notes.push({ midi: (octave + 1) * 12 + semi, mark });
-            mark = null;
-            continue;
-          }
-          if (c === CUE_AT) {
-            pos++;
-            while (pos < src.length && src[pos] !== CUE_AT) pos++;
-            pos++;
-            continue;
-          }
-          if (c === MARK_AT) {
-            console.warn("[MMSXX] MML: \u548C\u97F3\u306E\u4E2D\u306B\u30E9\u30D9\u30EB\u306F\u7F6E\u3051\u307E\u305B\u3093(\u548C\u97F3\u306F 1 \u97F3\u3068\u540C\u3058\u6271\u3044\u3067\u3059\u3002\u9589\u3058\u305F\u3042\u3068\u306B\u66F8\u304D\u307E\u3059)");
-            while (pos < src.length && src[pos] !== MARK_AT) pos++;
-            pos++;
-            continue;
-          }
-          console.warn(`[MMSXX] MML: \u548C\u97F3\u306E\u4E2D\u306B "${c}" \u306F\u66F8\u3051\u307E\u305B\u3093 (\u97F3\u540D\u3068 + # - \u3068 > < o \u3068 ? ! \u3060\u3051\u3002\u9577\u3055\u306F\u9589\u3058\u305F\u3042\u3068\u306B\u66F8\u304D\u307E\u3059)`);
-        }
-        pos++;
-        const dur = readDuration();
-        octave = keepOctave;
-        if (notes.length === 0) {
-          console.warn("[MMSXX] MML: \u7A7A\u306E\u548C\u97F3\u304C\u3042\u308A\u307E\u3059(\u4F11\u307F\u305F\u3044\u306A\u3089 r \u3092\u66F8\u304D\u307E\u3059)");
-          time += dur;
-        } else {
-          const id = chordSeq++;
-          for (const n of notes) {
-            pushNote(dur, freqOf(n.midi), n.mark ? { chord: id, mark: n.mark } : { chord: id });
-          }
-          time += dur;
-        }
-      } else if (ch === "}" && section) {
-        section = null;
-      } else if (ch === MARK_AT) {
-        let n = "";
-        while (pos < src.length && src[pos] !== MARK_AT) n += src[pos++];
-        pos++;
-        const name = markNames[Number(n)] ?? "";
-        if (name && !marks.some((m) => m.name === name)) marks.push({ name, t: time });
-      } else if (ch === CUE_AT) {
-        let n = "";
-        while (pos < src.length && src[pos] !== CUE_AT) n += src[pos++];
-        pos++;
-        const said = cueNames[Number(n)] ?? "";
-        const [word, ...rest] = said.split(/\s+/);
-        if (word) {
-          const num = Number(rest[0]);
-          cues.push({ name: word, arg: Number.isFinite(num) ? num : 0, t: time });
-        }
-      } else if (ch === "!") {
-        let word = "";
-        while (pos < src.length && isNameChar(src[pos])) word += src[pos++];
-        if (!word) throw new Error('[MMSXX] MML: "!" \u306E\u3046\u3057\u308D\u306B\u5408\u56F3\u306E\u540D\u524D\u304C\u3042\u308A\u307E\u305B\u3093');
-        const known = cueTable.get(word);
-        cues.push({ name: known ? known.name : word, arg: known ? known.arg : 0, t: time });
-      } else if (ch === "r") {
-        time += readDuration();
-      } else if (ch === "&") {
-        skipSpace();
-        for (; ; ) {
-          if (peek() === ">") {
-            octave = Math.min(8, octave + 1);
-            pos++;
-            skipSpace();
-            continue;
-          }
-          if (peek() === "<") {
-            octave = Math.max(1, octave - 1);
-            pos++;
-            skipSpace();
-            continue;
-          }
-          if (peek() === "o") {
-            pos++;
-            octave = readNumber() ?? octave;
-            skipSpace();
-            continue;
-          }
-          break;
-        }
-        if (SEMI[src[pos]] !== void 0 && events.length > 0) {
-          let semi = SEMI[src[pos]];
-          pos++;
-          while (peek() === "+" || peek() === "#") {
-            semi++;
-            pos++;
-          }
-          while (peek() === "-") {
-            semi--;
-            pos++;
-          }
-          const dur = readDuration();
-          const last = events[events.length - 1];
-          const f = freqOf((octave + 1) * 12 + semi);
-          if (Math.abs(f - last.freq) < 1e-9) {
-            last.dur += dur;
-            last.gate = last.dur * gate / 8;
-          } else {
-            last.gate = last.dur;
-            pushNote(dur, f, { legato: 1 });
-          }
-          time += dur;
-        }
-      } else if (ch === "*") {
-        skipSpace();
-        for (; ; ) {
-          if (peek() === ">") {
-            octave = Math.min(8, octave + 1);
-            pos++;
-            skipSpace();
-            continue;
-          }
-          if (peek() === "<") {
-            octave = Math.max(1, octave - 1);
-            pos++;
-            skipSpace();
-            continue;
-          }
-          if (peek() === "o") {
-            pos++;
-            octave = readNumber() ?? octave;
-            skipSpace();
-            continue;
-          }
-          break;
-        }
-        if (SEMI[src[pos]] !== void 0 && events.length > 0) {
-          let semi = SEMI[src[pos]];
-          pos++;
-          while (peek() === "+" || peek() === "#") {
-            semi++;
-            pos++;
-          }
-          while (peek() === "-") {
-            semi--;
-            pos++;
-          }
-          const dur = readDuration();
-          const last = events[events.length - 1];
-          if (durWritten) {
-            time += dur - last.dur;
-            last.dur = dur;
-            last.gate = dur * gate / 8;
-          }
-          last.glide = freqOf((octave + 1) * 12 + semi);
-        }
-      } else if (ch === "o") {
-        octave = readNumber() ?? octave;
-      } else if (ch === ">") {
-        octave = Math.min(8, octave + 1);
-      } else if (ch === "<") {
-        octave = Math.max(1, octave - 1);
-      } else if (ch === "l") {
-        defLen = readNumber() ?? defLen;
-      } else if (ch === "t") {
-        tempo = readNumber() ?? tempo;
-      } else if (ch === "v") {
-        vol = Math.max(0, Math.min(15, readNumber() ?? vol));
-      } else if (ch === "q") {
-        gate = Math.max(1, Math.min(8, readNumber() ?? gate));
-      } else if (ch === "=" || ch === "?") {
-        needSection(ch, section);
-        const isData = ch === "?";
-        const bytes = isData ? sec.bytes ?? null : null;
-        const dur = readDuration();
-        if ((WAVEFORMS[wave] || {}).kind !== "beep") {
-          console.warn(`[MMSXX] MML: "${ch}" \u306F\u30D3\u30FC\u30D7\u97F3\u6E90\u5C02\u7528\u3067\u3059 (\u3044\u307E\u306E\u97F3\u8272\u306F "${(WAVEFORMS[wave] || {}).name}")`);
-          time += dur;
-        } else {
-          const baud = sec.baud ?? 1200;
-          pushNote(dur, baud * 2);
-          const tape = { data: isData, bytes, baud, seed: sec.seed ?? 1, seq: tapeSeq++ };
-          for (const k of ["hiss", "wow", "muffle"]) if (sec[k] != null) tape[k] = sec[k];
-          events[events.length - 1].tape = tape;
-          time += dur;
-        }
-      } else if (ch === "p") {
-        const n = readNumber();
-        if (n === 0) muted = 1;
-        else if (n === 1) {
-          muted = 0;
-          px = 1;
-          py = 0;
-          pz = 0;
-        } else if (n === 2) {
-          muted = 0;
-          px = -1;
-          py = 0;
-          pz = 0;
-        } else if (n === 3) {
-          muted = 0;
-          px = 0;
-          py = 0;
-          pz = 0;
-        }
-      } else if (section === "beep" && ch >= "0" && ch <= "9") {
-        pos--;
-        const from = readNumber();
-        if (from !== null) {
-          let to = from, step = 1;
-          if (peek() === "-") {
-            pos++;
-            to = readNumber() ?? from;
-          }
-          if (peek() === ",") {
-            pos++;
-            step = Math.max(1, readNumber() ?? 1);
-          }
-          const dur = readDuration();
-          const dir = to >= from ? 1 : -1;
-          let guard = 0;
-          for (let n = from; dir > 0 ? n <= to : n >= to; n += dir * step) {
-            if (guard++ >= BEEP_MAX_STEPS) break;
-            pushNote(dur, beepFreq(n, sec.tick ?? 150));
-            const over = {};
-            for (const k of ["carrier", "jitter", "frame", "display"]) {
-              if (sec[k] != null) over[k] = sec[k];
+            const dur = readDuration();
+            const last = events[events.length - 1];
+            const f = freqOf((octave + 1) * 12 + semi);
+            if (Math.abs(f - last.freq) < 1e-9) {
+              last.dur += dur;
+              last.gate = last.dur * gate / 8;
+            } else {
+              last.gate = last.dur;
+              pushNote(dur, f, { legato: 1 });
             }
-            if (Object.keys(over).length) events[events.length - 1].beepSet = over;
             time += dur;
           }
-        }
-      } else if (ch === "@") {
-        if (section) {
-          let name = "";
-          let j = pos;
-          while (j < src.length && src[j] >= "a" && src[j] <= "z") name += src[j++];
-          const keys = SECTIONS[section].keys;
-          if (!name || src[j] === "{") {
-            throw new Error(`[MMSXX] MML: "@" \u306F ${howOpen(section)} \u306E\u4E2D\u3067\u306F\u8A2D\u5B9A\u3060\u3051\u3067\u3059(${Object.keys(keys).map((k) => `@${k}`).join(" / ")})\u3002\u97F3\u8272\u3084\u52B9\u679C\u306F\u533A\u9593\u306E\u5916\u3067\u66F8\u3044\u3066\u304F\u3060\u3055\u3044`);
-          }
-          {
-            if (!keys[name]) {
-              throw new Error(`[MMSXX] MML: "@${name}" \u306F ${howOpen(section)} \u306E\u8A2D\u5B9A\u3067\u306F\u3042\u308A\u307E\u305B\u3093(\u3042\u308B\u306E\u306F ${Object.keys(keys).map((k) => `@${k}`).join(" / ")})`);
+        } else if (ch === "*") {
+          skipSpace();
+          for (; ; ) {
+            if (peek() === ">") {
+              octave = Math.min(8, octave + 1);
+              pos++;
+              skipSpace();
+              continue;
             }
-            pos = j;
-            if (keys[name].hex) {
-              while (pos < src.length && " \n	\r".includes(src[pos])) pos++;
-              let word = "";
-              while (pos < src.length && /[0-9a-z]/.test(src[pos])) word += src[pos++];
-              if (word === "random" || word === "") {
-                sec[name] = null;
+            if (peek() === "<") {
+              octave = Math.max(1, octave - 1);
+              pos++;
+              skipSpace();
+              continue;
+            }
+            if (peek() === "o") {
+              pos++;
+              octave = readNumber() ?? octave;
+              skipSpace();
+              continue;
+            }
+            break;
+          }
+          if (SEMI[src[pos]] !== void 0 && events.length > 0) {
+            let semi = SEMI[src[pos]];
+            pos++;
+            while (peek() === "+" || peek() === "#") {
+              semi++;
+              pos++;
+            }
+            while (peek() === "-") {
+              semi--;
+              pos++;
+            }
+            const dur = readDuration();
+            const last = events[events.length - 1];
+            if (durWritten) {
+              time += dur - last.dur;
+              last.dur = dur;
+              last.gate = dur * gate / 8;
+            }
+            last.glide = freqOf((octave + 1) * 12 + semi);
+          }
+        } else if (ch === "o") {
+          octave = readNumber() ?? octave;
+        } else if (ch === ">") {
+          octave = Math.min(8, octave + 1);
+        } else if (ch === "<") {
+          octave = Math.max(1, octave - 1);
+        } else if (ch === "l") {
+          defLen = readNumber() ?? defLen;
+        } else if (ch === "t") {
+          tempo = readNumber() ?? tempo;
+        } else if (ch === "v") {
+          vol = Math.max(0, Math.min(15, readNumber() ?? vol));
+        } else if (ch === "q") {
+          gate = Math.max(1, Math.min(8, readNumber() ?? gate));
+        } else if (ch === "=" || ch === "?") {
+          needSection(ch, section);
+          const isData = ch === "?";
+          const bytes = isData ? sec.bytes ?? null : null;
+          const dur = readDuration();
+          if ((WAVEFORMS[wave] || {}).kind !== "beep") {
+            warn(`[MMSXX] MML: "${ch}" \u306F\u30D3\u30FC\u30D7\u97F3\u6E90\u5C02\u7528\u3067\u3059 (\u3044\u307E\u306E\u97F3\u8272\u306F "${(WAVEFORMS[wave] || {}).name}")`);
+            time += dur;
+          } else {
+            const baud = sec.baud ?? 1200;
+            pushNote(dur, baud * 2);
+            const tape = { data: isData, bytes, baud, seed: sec.seed ?? 1, seq: tapeSeq++ };
+            for (const k of ["hiss", "wow", "muffle"]) if (sec[k] != null) tape[k] = sec[k];
+            events[events.length - 1].tape = tape;
+            time += dur;
+          }
+        } else if (ch === "p") {
+          const n = readNumber();
+          if (n === 0) muted = 1;
+          else if (n === 1) {
+            muted = 0;
+            px = 1;
+            py = 0;
+            pz = 0;
+          } else if (n === 2) {
+            muted = 0;
+            px = -1;
+            py = 0;
+            pz = 0;
+          } else if (n === 3) {
+            muted = 0;
+            px = 0;
+            py = 0;
+            pz = 0;
+          }
+        } else if (section === "beep" && ch >= "0" && ch <= "9") {
+          pos--;
+          const from = readNumber();
+          if (from !== null) {
+            let to = from, step = 1;
+            if (peek() === "-") {
+              pos++;
+              to = readNumber() ?? from;
+            }
+            if (peek() === ",") {
+              pos++;
+              step = Math.max(1, readNumber() ?? 1);
+            }
+            const dur = readDuration();
+            const dir = to >= from ? 1 : -1;
+            let guard = 0;
+            for (let n = from; dir > 0 ? n <= to : n >= to; n += dir * step) {
+              if (guard++ >= BEEP_MAX_STEPS) break;
+              pushNote(dur, beepFreq(n, sec.tick ?? 150));
+              const over = {};
+              for (const k of ["carrier", "jitter", "frame", "display"]) {
+                if (sec[k] != null) over[k] = sec[k];
+              }
+              if (Object.keys(over).length) events[events.length - 1].beepSet = over;
+              time += dur;
+            }
+          }
+        } else if (ch === "@") {
+          if (section) {
+            let name = "";
+            let j = pos;
+            while (j < src.length && src[j] >= "a" && src[j] <= "z") name += src[j++];
+            const keys = SECTIONS[section].keys;
+            if (!name || src[j] === "{") {
+              bad(`[MMSXX] MML: "@" \u306F ${howOpen(section)} \u306E\u4E2D\u3067\u306F\u8A2D\u5B9A\u3060\u3051\u3067\u3059(${Object.keys(keys).map((k) => `@${k}`).join(" / ")})\u3002\u97F3\u8272\u3084\u52B9\u679C\u306F\u533A\u9593\u306E\u5916\u3067\u66F8\u3044\u3066\u304F\u3060\u3055\u3044`);
+            }
+            {
+              if (!keys[name]) {
+                bad(`[MMSXX] MML: "@${name}" \u306F ${howOpen(section)} \u306E\u8A2D\u5B9A\u3067\u306F\u3042\u308A\u307E\u305B\u3093(\u3042\u308B\u306E\u306F ${Object.keys(keys).map((k) => `@${k}`).join(" / ")})`);
+              }
+              pos = j;
+              if (keys[name].hex) {
+                while (pos < src.length && " \n	\r".includes(src[pos])) pos++;
+                let word = "";
+                while (pos < src.length && /[0-9a-z]/.test(src[pos])) word += src[pos++];
+                if (word === "random" || word === "") {
+                  sec[name] = null;
+                  continue;
+                }
+                if (word.length % 2 !== 0 || /[^0-9a-f]/.test(word)) {
+                  bad(`[MMSXX] MML: "@${name} ${word}" \u306F\u8AAD\u3081\u307E\u305B\u3093(16 \u9032\u3092 2 \u6841\u305A\u3064\u4E26\u3079\u308B\u304B\u3001random \u3068\u66F8\u304D\u307E\u3059)`);
+                }
+                sec[name] = word.match(/../g).map((h) => parseInt(h, 16));
                 continue;
               }
-              if (word.length % 2 !== 0 || /[^0-9a-f]/.test(word)) {
-                throw new Error(`[MMSXX] MML: "@${name} ${word}" \u306F\u8AAD\u3081\u307E\u305B\u3093(16 \u9032\u3092 2 \u6841\u305A\u3064\u4E26\u3079\u308B\u304B\u3001random \u3068\u66F8\u304D\u307E\u3059)`);
+              const v = readFloat();
+              if (v === null) {
+                bad(`[MMSXX] MML: "@${name}" \u306B\u5024\u304C\u3042\u308A\u307E\u305B\u3093`);
               }
-              sec[name] = word.match(/../g).map((h) => parseInt(h, 16));
-              continue;
-            }
-            const v = readFloat();
-            if (v === null) {
-              throw new Error(`[MMSXX] MML: "@${name}" \u306B\u5024\u304C\u3042\u308A\u307E\u305B\u3093`);
-            }
-            const { min, max } = keys[name];
-            sec[name] = Math.max(min, Math.min(max, v));
-            continue;
-          }
-        }
-        const kind = peek();
-        if (kind === "{") {
-          pos++;
-          wave = readName(WAVEFORMS, "\u6CE2\u5F62", wave);
-          {
-            let j = pos;
-            while (j < src.length && " \n	\r".includes(src[j])) j++;
-            if (src[j] === "{") {
-              const opened = sectionByVoice(WAVEFORMS[wave]);
-              if (!opened) {
-                throw new Error(`[MMSXX] MML: \u97F3\u8272 "${(WAVEFORMS[wave] || {}).name}" \u306F\u533A\u9593\u3092\u958B\u3051\u307E\u305B\u3093(\u81EA\u5206\u306E\u66F8\u304D\u65B9\u3092\u6301\u3063\u3066\u3044\u307E\u305B\u3093)`);
-              }
-              if (section) {
-                throw new Error(`[MMSXX] MML: \u533A\u9593\u306E\u4E2D\u3067\u533A\u9593\u306F\u958B\u3051\u307E\u305B\u3093`);
-              }
-              pos = j + 1;
-              section = opened;
-              sec = {};
+              const { min, max } = keys[name];
+              sec[name] = Math.max(min, Math.min(max, v));
               continue;
             }
           }
-          const de = (WAVEFORMS[wave] || {}).defaultEnv;
-          env = de !== void 0 ? de : envIndex(DEFAULT_ENV);
-        } else if (kind === "e" && src[pos + 1] === "{") {
-          pos += 2;
-          env = readName(ENVELOPES, "\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7", env);
-        } else if (kind === "e") {
-          pos++;
-          env = clamp(readNumber() ?? env, 0, ENVELOPES.length - 1);
-        } else if (kind === "d") {
-          pos++;
-          detune = clamp(readSigned() ?? detune, -2400, 2400);
-        } else if (kind === "o") {
-          pos++;
-          octShift = clamp(readSigned() ?? octShift, -4, 4);
-        } else if (kind === "m") {
-          pos++;
-          vibrato = clamp(readNumber() ?? vibrato, 0, 9);
-        } else if (kind === "s") {
-          pos++;
-          echo = readEcho(echo);
-        } else if (kind === "p" && src[pos + 1] === "{") {
-          pos += 2;
-          readPlace();
-        } else if (kind === "n") {
-          pos++;
-          wave = findWave("noise");
-        } else {
-          const n = readNumber();
-          if (n !== null) {
-            throw new Error(`[MMSXX] MML: "@${n}" \u2014 \u756A\u53F7\u3067\u306F\u97F3\u8272\u3092\u9078\u3079\u307E\u305B\u3093\u3002@{\u540D\u524D} \u3067\u66F8\u3044\u3066\u304F\u3060\u3055\u3044(\u756A\u53F7\u306F\u97F3\u8272\u3092\u8DB3\u3059\u3068\u305A\u308C\u308B\u306E\u3067\u901A\u3057\u3066\u3044\u307E\u305B\u3093)`);
+          const kind = peek();
+          if (kind === "{") {
+            pos++;
+            if (playDrums()) continue;
+            if (takeVoice()) continue;
+            {
+              let j = pos;
+              while (j < src.length && " \n	\r".includes(src[j])) j++;
+              if (src[j] === "{") {
+                const opened = sectionByVoice(WAVEFORMS[wave]);
+                if (!opened) {
+                  bad(`[MMSXX] MML: \u97F3\u8272 "${(WAVEFORMS[wave] || {}).name}" \u306F\u533A\u9593\u3092\u958B\u3051\u307E\u305B\u3093(\u81EA\u5206\u306E\u66F8\u304D\u65B9\u3092\u6301\u3063\u3066\u3044\u307E\u305B\u3093)`);
+                }
+                if (section) {
+                  bad(`[MMSXX] MML: \u533A\u9593\u306E\u4E2D\u3067\u533A\u9593\u306F\u958B\u3051\u307E\u305B\u3093`);
+                }
+                pos = j + 1;
+                section = opened;
+                sec = {};
+                continue;
+              }
+            }
+            const de = (WAVEFORMS[wave] || {}).defaultEnv;
+            env = de !== void 0 ? de : envIndex(DEFAULT_ENV);
+          } else if (kind === "e" && src[pos + 1] === "{") {
+            pos += 2;
+            env = readName(ENVELOPES, "\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7", env);
+          } else if (kind === "e") {
+            pos++;
+            env = clamp(readNumber() ?? env, 0, ENVELOPES.length - 1);
+          } else if (kind === "d") {
+            pos++;
+            detune = clamp(readSigned() ?? detune, -2400, 2400);
+          } else if (kind === "o") {
+            pos++;
+            octShift = clamp(readSigned() ?? octShift, -4, 4);
+          } else if (kind === "m") {
+            pos++;
+            vibrato = clamp(readNumber() ?? vibrato, 0, 9);
+          } else if (kind === "s") {
+            pos++;
+            echo = readEcho(echo);
+          } else if (kind === "p" && src[pos + 1] === "{") {
+            pos += 2;
+            readPlace();
+          } else if (kind === "n") {
+            pos++;
+            wave = findWave("noise");
+          } else {
+            const n = readNumber();
+            if (n !== null) {
+              bad(`[MMSXX] MML: "@${n}" \u2014 \u756A\u53F7\u3067\u306F\u97F3\u8272\u3092\u9078\u3079\u307E\u305B\u3093\u3002@{\u540D\u524D} \u3067\u66F8\u3044\u3066\u304F\u3060\u3055\u3044(\u756A\u53F7\u306F\u97F3\u8272\u3092\u8DB3\u3059\u3068\u305A\u308C\u308B\u306E\u3067\u901A\u3057\u3066\u3044\u307E\u305B\u3093)`);
+            }
           }
         }
       }
-    }
-    if (section) {
-      throw new Error(`[MMSXX] MML: ${howOpen(section)} \u304C\u9589\u3058\u3066\u3044\u307E\u305B\u3093`);
+      if (section) {
+        bad(`[MMSXX] MML: ${howOpen(section)} \u304C\u9589\u3058\u3066\u3044\u307E\u305B\u3093`);
+      }
+    } catch (e) {
+      if (!(e instanceof LooseStop)) throw e;
     }
     for (let i = 0; i < events.length; i++) {
       const e = events[i], next = events[i + 1];
@@ -1754,16 +2316,32 @@ ${val}`;
     const tail = marks.find((m) => isOutroMark(m.name.trim().toLowerCase()));
     const outro = tail ? tail.t : null;
     const loop = back || tail ? { from: back ? back.t : 0, to: outro ?? time } : null;
-    for (const m of marks) {
-      const name = m.name.trim();
-      const low = name.toLowerCase();
-      if (low === START_LABEL) {
-        throw new Error(`[MMSXX] MML: \u30E9\u30D9\u30EB "${name}" \u306F\u66F8\u3051\u307E\u305B\u3093\u3002\u66F2\u306E\u982D\u306E\u5370\u306F\u9CF4\u3089\u3059\u5074\u304C\u8DB3\u3057\u307E\u3059(\u8DF3\u3076\u5148\u306E\u4E00\u89A7\u306B\u3044\u3064\u3082\u4E26\u3073\u307E\u3059)`);
+    try {
+      for (const m of marks) {
+        const name = m.name.trim();
+        const low = name.toLowerCase();
+        if (low === START_LABEL) {
+          bad(`[MMSXX] MML: \u30E9\u30D9\u30EB "${name}" \u306F\u66F8\u3051\u307E\u305B\u3093\u3002\u66F2\u306E\u982D\u306E\u5370\u306F\u9CF4\u3089\u3059\u5074\u304C\u8DB3\u3057\u307E\u3059(\u8DF3\u3076\u5148\u306E\u4E00\u89A7\u306B\u3044\u3064\u3082\u4E26\u3073\u307E\u3059)`);
+        }
+        if (isSystemMark(name) || !SHOUTING(name)) continue;
+        bad(`[MMSXX] MML: \u30E9\u30D9\u30EB "${name}" \u306F\u5168\u90E8\u5927\u6587\u5B57\u3067\u3059\u3002\u5927\u6587\u5B57\u306E\u540D\u524D\u306F\u4E88\u7D04\u8A9E\u306E\u305F\u3081\u306B\u7A7A\u3051\u3066\u3042\u308A\u307E\u3059(\u3044\u307E\u306E\u4E88\u7D04\u8A9E\u306F LOOP \u3068 OUTRO)\u3002\u5C0F\u6587\u5B57\u3092\u6DF7\u305C\u3066\u304F\u3060\u3055\u3044`);
       }
-      if (isSystemMark(name) || !SHOUTING(name)) continue;
-      throw new Error(`[MMSXX] MML: \u30E9\u30D9\u30EB "${name}" \u306F\u5168\u90E8\u5927\u6587\u5B57\u3067\u3059\u3002\u5927\u6587\u5B57\u306E\u540D\u524D\u306F\u4E88\u7D04\u8A9E\u306E\u305F\u3081\u306B\u7A7A\u3051\u3066\u3042\u308A\u307E\u3059(\u3044\u307E\u306E\u4E88\u7D04\u8A9E\u306F LOOP \u3068 OUTRO)\u3002\u5C0F\u6587\u5B57\u3092\u6DF7\u305C\u3066\u304F\u3060\u3055\u3044`);
+    } catch (e) {
+      if (!(e instanceof LooseStop)) throw e;
     }
-    return { events, total: time, loop, outro, ending: outro, meta, marks, bars, cues };
+    return {
+      events,
+      total: time,
+      loop,
+      outro,
+      ending: outro,
+      meta,
+      marks,
+      bars,
+      cues,
+      // 層の呼び名。`lane` は控えめな字なので、画面に出すものは別に持つ
+      laneLabels
+    };
   }
   function splitTakes(src) {
     const OPEN = /^[ \t]*\/\/[ \t]*#[ \t]*takes\b[ \t]*(.*)$/i;
@@ -1776,10 +2354,10 @@ ${val}`;
         const name = o[1].trim();
         if (open) {
           if (name) {
-            throw new Error(`[MMSXX] MML: "#takes ${name}" \u306F"#takes ${open.group}" \u306E\u4E2D\u3067\u306F\u66F8\u3051\u307E\u305B\u3093(\u5165\u308C\u5B50\u306B\u306F\u3067\u304D\u307E\u305B\u3093)`);
+            bad(`[MMSXX] MML: "#takes ${name}" \u306F"#takes ${open.group}" \u306E\u4E2D\u3067\u306F\u66F8\u3051\u307E\u305B\u3093(\u5165\u308C\u5B50\u306B\u306F\u3067\u304D\u307E\u305B\u3093)`);
           }
           if (!open.options.length) {
-            throw new Error(`[MMSXX] MML: "#takes ${open.group}" \u306B\u9078\u629E\u80A2\u304C\u3042\u308A\u307E\u305B\u3093(\u4E2D\u3092 "// #take <\u540D\u524D>" \u3067\u4ED5\u5207\u308A\u307E\u3059)`);
+            bad(`[MMSXX] MML: "#takes ${open.group}" \u306B\u9078\u629E\u80A2\u304C\u3042\u308A\u307E\u305B\u3093(\u4E2D\u3092 "// #take <\u540D\u524D>" \u3067\u4ED5\u5207\u308A\u307E\u3059)`);
           }
           out.push(open);
           out.push({ kind: "common", text: "" });
@@ -1787,14 +2365,14 @@ ${val}`;
           continue;
         }
         if (!name) {
-          throw new Error('[MMSXX] MML: \u958B\u3044\u3066\u3044\u306A\u3044 "#takes" \u3092\u9589\u3058\u3066\u3044\u307E\u3059');
+          bad('[MMSXX] MML: \u958B\u3044\u3066\u3044\u306A\u3044 "#takes" \u3092\u9589\u3058\u3066\u3044\u307E\u3059');
         }
         const KNOWN = ["restart", "now"];
         const [group, ...flags] = name.split(/[ \t]+/);
         const low = flags.map((f) => f.toLowerCase());
         for (const f of low) {
           if (!KNOWN.includes(f)) {
-            throw new Error(`[MMSXX] MML: "#takes ${group}" \u306E "${f}" \u306F\u77E5\u3089\u306A\u3044\u6307\u5B9A\u3067\u3059(\u3044\u307E\u3042\u308B\u306E\u306F ${KNOWN.join(" \u3068 ")})`);
+            bad(`[MMSXX] MML: "#takes ${group}" \u306E "${f}" \u306F\u77E5\u3089\u306A\u3044\u6307\u5B9A\u3067\u3059(\u3044\u307E\u3042\u308B\u306E\u306F ${KNOWN.join(" \u3068 ")})`);
           }
         }
         open = {
@@ -1807,12 +2385,12 @@ ${val}`;
         continue;
       }
       if (open && /^[ \t]*\/\/[ \t]*#[ \t]*switch\b/i.test(line)) {
-        throw new Error(`[MMSXX] MML: "#switch" \u306F "#takes ${open.group}" \u306E\u4E2D\u3067\u306F\u66F8\u3051\u307E\u305B\u3093(\u7DB2\u306E\u76EE\u306F\u66F2\u305C\u3093\u3076\u3067 1 \u3064\u3067\u3059)`);
+        bad(`[MMSXX] MML: "#switch" \u306F "#takes ${open.group}" \u306E\u4E2D\u3067\u306F\u66F8\u3051\u307E\u305B\u3093(\u7DB2\u306E\u76EE\u306F\u66F2\u305C\u3093\u3076\u3067 1 \u3064\u3067\u3059)`);
       }
       const t = TAKE.exec(line);
       if (t) {
         if (!open) {
-          throw new Error(`[MMSXX] MML: "#take ${t[1].trim()}" \u306F "#takes <\u30B0\u30EB\u30FC\u30D7>" \u306E\u4E2D\u3060\u3051\u3067\u66F8\u3051\u307E\u3059`);
+          bad(`[MMSXX] MML: "#take ${t[1].trim()}" \u306F "#takes <\u30B0\u30EB\u30FC\u30D7>" \u306E\u4E2D\u3060\u3051\u3067\u66F8\u3051\u307E\u3059`);
         }
         open.options.push({ name: t[1].trim(), text: "" });
         continue;
@@ -1827,7 +2405,7 @@ ${val}`;
       open.options[open.options.length - 1].text += line + "\n";
     }
     if (open) {
-      throw new Error(`[MMSXX] MML: "#takes ${open.group}" \u304C\u9589\u3058\u3066\u3044\u307E\u305B\u3093(\u540D\u524D\u3092\u66F8\u304B\u306A\u3044 "// #takes" \u3067\u9589\u3058\u307E\u3059)`);
+      bad(`[MMSXX] MML: "#takes ${open.group}" \u304C\u9589\u3058\u3066\u3044\u307E\u305B\u3093(\u540D\u524D\u3092\u66F8\u304B\u306A\u3044 "// #takes" \u3067\u9589\u3058\u307E\u3059)`);
     }
     return out;
   }
@@ -1842,12 +2420,40 @@ ${val}`;
       total: all.total - head.total
     };
   }
-  function compileMML(mml) {
+  function compileMML(mml, opts = {}) {
+    const own = REPORT === null;
+    if (own) REPORT = { mode: modeOf(opts.mode), problems: [] };
+    try {
+      return compileInto(mml);
+    } catch (e) {
+      if (own && REPORT.mode === "loose" && e instanceof LooseStop) {
+        return {
+          events: [],
+          total: 0,
+          loop: null,
+          outro: null,
+          ending: null,
+          meta: {},
+          marks: [],
+          takes: [],
+          bars: [],
+          cues: [],
+          problems: REPORT.problems
+        };
+      }
+      throw e;
+    } finally {
+      if (own) REPORT = null;
+    }
+  }
+  function compileInto(mml) {
+    const here = () => REPORT ? REPORT.problems : [];
     const segs = splitTakes(mml);
     if (!segs.some((x) => x.kind === "takes")) {
-      return { ...compileOne(mml), takes: [] };
+      return { ...compileOne(mml), takes: [], problems: here() };
     }
     const events = [], marks = [], takes = [], bars = [], cues = [];
+    const laneLabels = /* @__PURE__ */ new Map();
     let prefix = "";
     let at = 0;
     for (const s of segs) {
@@ -1860,6 +2466,7 @@ ${val}`;
         }
         for (const b of p.bars) bars.push(b + at);
         for (const c of p.cues) cues.push({ ...c, t: c.t + at });
+        for (const [k, v] of p.laneLabels ?? []) laneLabels.set(k, v);
         at += p.total;
         prefix += s.text;
         continue;
@@ -1868,7 +2475,7 @@ ${val}`;
       const dur = Math.max(0, ...opts.map((o) => o.total));
       for (const o of opts) {
         if (Math.abs(o.total - dur) > 1e-6) {
-          console.warn(`[MMSXX] MML: \u9078\u629E\u80A2 "${s.group}/${o.name}" \u306E\u9577\u3055\u304C\u305D\u308D\u3063\u3066\u3044\u307E\u305B\u3093(${o.total.toFixed(3)}s / \u3044\u3061\u3070\u3093\u9577\u3044\u3082\u306E ${dur.toFixed(3)}s)\u3002\u5F8C\u308D\u306F\u4F11\u307F\u3067\u57CB\u3081\u307E\u3059`);
+          warn(`[MMSXX] MML: \u9078\u629E\u80A2 "${s.group}/${o.name}" \u306E\u9577\u3055\u304C\u305D\u308D\u3063\u3066\u3044\u307E\u305B\u3093(${o.total.toFixed(3)}s / \u3044\u3061\u3070\u3093\u9577\u3044\u3082\u306E ${dur.toFixed(3)}s)\u3002\u5F8C\u308D\u306F\u4F11\u307F\u3067\u57CB\u3081\u307E\u3059`);
         }
       }
       for (const e of opts[0].events) events.push({ ...e, t: e.t + at });
@@ -1877,6 +2484,7 @@ ${val}`;
       }
       for (const b of opts[0].bars) bars.push(b + at);
       for (const c of opts[0].cues) cues.push({ ...c, t: c.t + at });
+      for (const o of opts) for (const [k, v] of o.laneLabels ?? []) laneLabels.set(k, v);
       takes.push({
         group: s.group,
         at,
@@ -1907,10 +2515,12 @@ ${val}`;
       marks,
       takes,
       bars,
-      cues
+      cues,
+      laneLabels,
+      problems: here()
     };
   }
-  function validateMML(text) {
+  function validateMML(text, mode) {
     const errors = [];
     const warnings = [];
     const channels = [];
@@ -1933,7 +2543,7 @@ ${val}`;
       };
       let got = null;
       try {
-        got = compileMML(src);
+        got = compileMML(src, { mode });
       } catch (e) {
         errors.push({ ch: i, text: String(e && e.message ? e.message : e) });
       } finally {
@@ -4033,7 +4643,24 @@ registerProcessor('mmsxx-duty', DutyBank);
       "@{pulse:50} @e{piano} @s{8,7} q6 t200 v8  o5 l16 r r > c4."
     ]
   };
-  var BEAT_BASS = [
+  var wrap = (bars, per = 2) => {
+    const out = [];
+    for (let i = 0; i < bars.length; i += per) out.push(bars.slice(i, i + per).join(" "));
+    return out.join("\n");
+  };
+  var BEAT_BUNDLES = [
+    "// #bundle beatBass1  = @{wtRamp} @e{piano} @s{8,2}",
+    "// #bundle beatBass2  = @{triangle} @e{flat}",
+    "// #bundle beatKick   = @{fm2DrumKick} @e{percussive},   @{noise} v11 @e{snap}",
+    "// #bundle beatSnare  = @{fm2DrumSnare} @e{percussive},  @{noise} v8 @o+1 @e{snap}",
+    "// #bundle beatHat    = @{fm2DrumCymbal} @e{percussive}",
+    "// #bundle beatHatAir = @{fm2DrumCymbal} @e{percussive}, @{noise} v3 @e{percussive}",
+    "// #bundle beatTom    = @{fm2DrumTom} @e{percussive}",
+    "// #bundle beatPulse  = @{pulse:12} @e{percussive}",
+    "// #bundle beatBrass  = @{fm2Trumpet} @e{soft}",
+    "// #bundle beatHorn   = @{fm2Horn} @e{soft}"
+  ].join("\n");
+  var BEAT_BASS = wrap([
     "o2 d a o3 d o2 a f a d o3 c",
     "o2 d a o3 d o2 a f a d o3 c",
     "o2 b- f o3 b- o2 f d f b- a",
@@ -4042,8 +4669,8 @@ registerProcessor('mmsxx-duty', DutyBank);
     "o2 d a o3 d o2 a f a d o3 c",
     "o2 g d g d b- d g f",
     "o2 a e a e o3 c o2 e a g"
-  ].join(" ");
-  var BEAT_ROOT = [
+  ]);
+  var BEAT_ROOT = wrap([
     "o2 d1",
     "o2 d1",
     "o2 b-1",
@@ -4052,10 +4679,10 @@ registerProcessor('mmsxx-duty', DutyBank);
     "o2 d1",
     "o2 g1",
     "o2 a1"
-  ].join(" ");
+  ], 4);
   var BEAT_KICK_A = "c8 r8 r8 c16 r16 c8 r8 r4";
   var BEAT_KICK_B = "c8 r8 c16 r16 r8 c8 r8 c8 r8";
-  var BEAT_KICK = [
+  var BEAT_KICK = wrap([
     BEAT_KICK_A,
     BEAT_KICK_A,
     BEAT_KICK_A,
@@ -4064,10 +4691,10 @@ registerProcessor('mmsxx-duty', DutyBank);
     BEAT_KICK_A,
     BEAT_KICK_A,
     BEAT_KICK_B
-  ].join(" ");
+  ]);
   var BEAT_SNARE_A = "r4 c8 r8 r4 c8 r8";
   var BEAT_SNARE_B = "r4 c8 r8 r4 c16 c16 c16 c16";
-  var BEAT_SNARE = [
+  var BEAT_SNARE = wrap([
     BEAT_SNARE_A,
     BEAT_SNARE_A,
     BEAT_SNARE_A,
@@ -4076,11 +4703,15 @@ registerProcessor('mmsxx-duty', DutyBank);
     BEAT_SNARE_A,
     BEAT_SNARE_A,
     BEAT_SNARE_B
-  ].join(" ");
-  var BEAT_HAT_A = "c8 c8 c8 c8 c8 c8 c8 c8";
-  var BEAT_HAT = new Array(8).fill(BEAT_HAT_A).join(" ");
+  ]);
+  var BEAT_HAT_MACROS = [
+    "$h = { @{beatHat} c8 }",
+    "$a = { @{beatHatAir} c8 }"
+  ].join("\n");
+  var BEAT_HAT_A = "$h $a $h $h $h $a $h $a";
+  var BEAT_HAT = wrap(new Array(8).fill(BEAT_HAT_A));
   var BEAT_TOM_FILL = "r2 c16 c16 o3 c16 c16 o4 c8 o3 c8";
-  var BEAT_TOM = [
+  var BEAT_TOM = wrap([
     "r1",
     "r1",
     "r1",
@@ -4089,11 +4720,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     "r1",
     "r1",
     BEAT_TOM_FILL
-  ].join(" ");
-  var BEAT_NOISE_A = "v11o2c16 r16 v3o6c8 v8o5c16 r16 v11o2c16 r16 v11o2c16 r16 v3o6c8 v8o5c16 r16 v3o6c8";
-  var BEAT_NOISE = new Array(8).fill(BEAT_NOISE_A).join(" ");
-  var BEAT_BLIP_A = "r16 c16 r16 c16 r16 c16 r16 c16 r16 c16 r16 c16 r16 c16 r16 c16";
-  var BEAT_BLIP = new Array(8).fill(BEAT_BLIP_A).join(" ");
+  ]);
 
   // engine-latest/sound/se.js
   var SE_FRAME = 1 / 60;
@@ -4376,7 +5003,7 @@ registerProcessor('mmsxx-duty', DutyBank);
   }
 
   // engine-latest/sound/version.js
-  var SOUND_VERSION = "0.20.0";
+  var SOUND_VERSION = "0.21.0";
 
   // engine-latest/sound/audio.js
   registerDefaultWaves();
@@ -4508,12 +5135,61 @@ registerProcessor('mmsxx-duty', DutyBank);
     }
     return out;
   }
-  function compileTrack(mml) {
-    const { events, total, loop, outro, meta, marks, takes, bars, cues } = compileMML(mml.trim());
+  function voicesOfTrack(events) {
+    const pts = [];
+    for (const e of events) {
+      if (!(e.vol > 0)) continue;
+      pts.push([e.t, 1], [e.t + Math.max(e.gate, 1e-3), -1]);
+    }
+    pts.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    let now = 0, most = 0;
+    for (const [, d] of pts) {
+      now += d;
+      if (now > most) most = now;
+    }
+    return most;
+  }
+  function lanesOfTrack(events, labels) {
+    const used = /* @__PURE__ */ new Set();
+    for (const e of events) if (e.lane) used.add(e.lane);
+    if (!used.size) return [];
+    const out = [];
+    for (const [name, label] of labels ?? []) {
+      if (used.has(name)) {
+        out.push({ name, label: label || name });
+        used.delete(name);
+      }
+    }
+    for (const name of used) out.push({ name, label: name });
+    return out;
+  }
+  function compileTrack(mml, mode) {
+    const {
+      events,
+      total,
+      loop,
+      outro,
+      meta,
+      marks,
+      takes,
+      bars,
+      cues,
+      problems,
+      laneLabels
+    } = compileMML(mml.trim(), { mode });
     const noise = events.some((e) => (WAVEFORMS[e.wave] || {}).kind === "noise");
+    const played = addEchoes(events, total);
     return {
-      events: addEchoes(events, total),
+      events: played,
       base: events,
+      // 同時に何声使うか。和音とバンドル音色とエコーで 1 本から何本も鳴る
+      voices: voicesOfTrack(played),
+      // 和音を鳴らすチャンネルか。重ねは 1 つの音を厚くするだけだが、
+      // 和音は別の音を並べるので、実機では本当に何本か要る
+      chords: events.some((e) => e.chord !== void 0),
+      // 中の層。`#drum` の字と `#chord` の声に付く。1 本を開いて
+      // 「ハイハットだけ止める」ができるようにするため(2026-09-18)
+      lanes: lanesOfTrack(played, laneLabels),
       total,
       noise,
       loop,
@@ -4522,6 +5198,8 @@ registerProcessor('mmsxx-duty', DutyBank);
       meta,
       takes,
       bars,
+      // 読めなかったところ。読み方(mode)にかかわらず控えてある
+      problems: problems ?? [],
       // 合図と切れ目も選択肢で入れ替わるので、素の並びを取っておく
       cues: cues ?? [],
       baseCues: cues ?? [],
@@ -4663,6 +5341,7 @@ registerProcessor('mmsxx-duty', DutyBank);
       this.loopTimes = Infinity;
       this._range = null;
       this._chMute = /* @__PURE__ */ new Set();
+      this._laneMute = /* @__PURE__ */ new Set();
       this._muteFor = null;
       this._cues = [];
       this.onCue = null;
@@ -5022,7 +5701,8 @@ registerProcessor('mmsxx-tap', MmsxxTap);
      * @param {string} name 呼び出すときの名前。同じ名前で登録し直すと上書きする
      * @param {string|string[]|{url:string,gain?:number}} src
      *   MML 文字列 / チャンネルごとの MML 配列 / {url} を渡すと音声ファイル再生になる
-     * @param {{beep?:boolean}} [opts] beep = 音色を無視して単純なビープで鳴らす
+     * @param {{beep?:boolean, mode?:string}} [opts] beep = 音色を無視して単純なビープで鳴らす。
+     *   mode = 読み方(`strict` / `normal` / `loose`。既定は `normal`)
      * @returns {object} `validateMML()` の返り値
      */
     defineBGM(name, src, opts = {}) {
@@ -5031,16 +5711,15 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         this.bgmDefs.set(name, { kind: "audio", url: src.url, gain: src.gain ?? 1 });
         return { ok: true, errors: [], warnings: [], channels: [], total: 0 };
       }
-      const tracks = (Array.isArray(src) ? src : [src]).map((t, i) => {
-        const track = compileTrack(t);
+      const voices = shareBundles(Array.isArray(src) ? src : [src]);
+      const tracks = voices.map((t, i) => {
+        const track = compileTrack(t, opts.mode);
         track.ch = i;
         if (opts.beep) markBeep(track);
         return track;
       });
-      tracks.check = sayErrors(
-        `BGM "${name}"`,
-        validateMML(Array.isArray(src) ? src : [src])
-      );
+      tracks.check = sayErrors(`BGM "${name}"`, validateMML(voices, opts.mode));
+      tracks.problems = tracks.flatMap((t, i) => (t.problems || []).map((x) => ({ ...x, ch: i })));
       this.bgmDefs.set(name, tracks);
       return tracks.check;
     }
@@ -5352,6 +6031,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
           marks: [],
           meta: {},
           takes: [],
+          problems: [],
           loop: null,
           outro: null,
           ending: null,
@@ -5369,6 +6049,17 @@ registerProcessor('mmsxx-tap', MmsxxTap);
           ch: i,
           name: t.name ?? null,
           role: t.role ?? null,
+          // 同時に何声使うか。1 なら書いたとおりの 1 本
+          voices: t.voices ?? 1,
+          // 和音を鳴らすか。画面はこれを見て、声の数を出すかどうかを決められる
+          chords: t.chords === true,
+          // 中の層。開いて 1 つずつ止められる(`muteLane`)。
+          // `name` は MML に書いた字、`label` は画面に出す呼び名
+          lanes: (t.lanes ?? []).map((lane) => ({
+            name: lane.name,
+            label: lane.label,
+            muted: this.isLaneMuted(i, lane.name)
+          })),
           total: t.total,
           muted: this._chMute.has(i)
         })),
@@ -5376,6 +6067,9 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         takes: takesInfo(def),
         // 切れ目。出どころで分けてある。画面はこれを見て濃さを変えられる
         switches: switchParts(def),
+        // 読めなかったところ。`{ level, text, ch }` の並び。
+        // 読み方(mode)にかかわらず控えてあるので、画面から出せる
+        problems: def.problems || [],
         // 曲に置いた合図。選んである選択肢のぶんだけ並ぶ
         cues: def.flatMap((t, i) => (t.cues || []).map((c) => ({ ...c, ch: i }))).sort((a, b) => a.t - b.t),
         // 曲ぜんぶの覚え書き。チャンネルごとの `name` と `role` は外してある
@@ -6214,6 +6908,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       if (this._muteFor === name) return;
       this._muteFor = name;
       this._chMute.clear();
+      this._laneMute.clear();
     }
     /**
      * いま黙らせてあるチャンネルの番号。小さい順。
@@ -6233,6 +6928,47 @@ registerProcessor('mmsxx-tap', MmsxxTap);
      */
     isMuted(ch) {
       return this._chMute.has(ch);
+    }
+    /**
+     * チャンネルの中の層を 1 つだけ黙らせる / 戻す。
+     *
+     * 層は `#drum` の字と `#chord` の声(`bgmInfo().tracks[].lanes`)。
+     * チャンネルをまとめて止めるのとは別に持つので、まとめて止めてから
+     * 開いても、中の押し具合は残る。
+     *
+     * チャンネルの音量つまみと違って、こちらは積むときに外す。すでに積んだぶんは
+     * 鳴り切るので、押してから効くまでに先読みのぶん(1 秒ほど)かかる。
+     *
+     * @param {number} ch 0 から数える
+     * @param {string} lane 層の名前
+     * @param {boolean} [on] 省略すると切り替え
+     * @returns {boolean} 黙っているか
+     */
+    muteLane(ch, lane, on) {
+      const key2 = `${ch}/${lane}`;
+      const to = on === void 0 ? !this._laneMute.has(key2) : !!on;
+      if (to) this._laneMute.add(key2);
+      else this._laneMute.delete(key2);
+      return to;
+    }
+    /**
+     * その層が黙っているか。
+     * @param {number} ch 0 から数える
+     * @param {string} lane 層の名前
+     * @returns {boolean}
+     */
+    isLaneMuted(ch, lane) {
+      return this._laneMute.has(`${ch}/${lane}`);
+    }
+    /**
+     * いま黙らせてある層。`{ch, lane}` の並び。
+     * @returns {{ch:number, lane:string}[]}
+     */
+    mutedLanes() {
+      return [...this._laneMute].map((k) => {
+        const at = k.indexOf("/");
+        return { ch: Number(k.slice(0, at)), lane: k.slice(at + 1) };
+      });
     }
     /**
      * 黙らせるチャンネルを、まとめて決める。
@@ -7410,11 +8146,11 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       if (src.__fm) {
         const { mod, depth, wf, freq: freq2 } = src.__fm;
         const peak = freq2 * wf.ratio * wf.depth;
-        const keep = peak * wf.sustain;
+        const keep2 = peak * wf.sustain;
         depth.gain.setValueAtTime(0, t0);
         depth.gain.linearRampToValueAtTime(peak, t0 + Math.min(wf.attack, (t1 - t0) * 0.5));
         depth.gain.exponentialRampToValueAtTime(
-          Math.max(1, keep),
+          Math.max(1, keep2),
           Math.min(t1, t0 + wf.attack + wf.decay)
         );
         if (wf.drop > 0 && !ev.glide) {
@@ -7483,6 +8219,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       const tune = this._tuneOn(track.ch);
       for (const ev of track.events) {
         if (ev.t < from || ev.t >= to) continue;
+        if (ev.lane && this._laneMute.has(`${track.ch}/${ev.lane}`)) continue;
         const t0 = when + ev.t;
         const t1 = t0 + Math.max(0.01, ev.gate);
         const amp = ampFor(ev);
@@ -7897,8 +8634,37 @@ registerProcessor('mmsxx-tap', MmsxxTap);
 .mmsxx-player .takes{ display:flex; flex-wrap:wrap; gap:6px 14px; align-items:center; }
 .mmsxx-player .take{ display:inline-flex; align-items:center; gap:6px; }
 .mmsxx-player .take .grp{ font-size:11px; color:var(--dim); }
+/* From top \u306F\u9078\u629E\u80A2\u305C\u3093\u3076\u306B\u52B9\u304F\u3002\u30B0\u30EB\u30FC\u30D7\u306E\u4E26\u3073\u306E\u7D9A\u304D\u306B\u7F6E\u304F\u3068\u3001\u3044\u3061\u3070\u3093\u53F3\u306E
+   \u30B0\u30EB\u30FC\u30D7\u3060\u3051\u306B\u639B\u304B\u308B\u3088\u3046\u306B\u898B\u3048\u308B\u306E\u3067\u3001\u884C\u306E\u7AEF\u307E\u3067\u96E2\u3059(2026-09-18) */
+.mmsxx-player .row .wide{ margin-left:auto; }
 .mmsxx-player .ch{ display:inline-flex; align-items:center; gap:7px; }
 .mmsxx-player .ch .role{ font-size:9.5px; color:var(--dim); letter-spacing:.06em; }
+/* 1 \u672C\u3067\u4F55\u58F0\u4F7F\u3046\u304B\u3002\u548C\u97F3\u3092\u9CF4\u3089\u3059\u30C1\u30E3\u30F3\u30CD\u30EB\u306E\u30DC\u30BF\u30F3\u306E\u4E2D\u306B\u51FA\u3059\u3002
+   \u67A0\u306F\u4ED8\u3051\u306A\u3044\u3002\u30DC\u30BF\u30F3\u306E\u4E2D\u306B\u3082\u3046 1 \u3064\u67A0\u304C\u3042\u308B\u3068\u3001\u62BC\u3057\u3069\u3053\u308D\u304C 2 \u3064\u306B\u898B\u3048\u308B */
+.mmsxx-player .ch .voices{
+  margin-left:5px; font-size:9.5px; color:var(--teal); letter-spacing:.04em;
+}
+/* \u62BC\u3057\u3066\u3042\u308B\u3042\u3044\u3060\u306F\u5730\u304C\u53CD\u8EE2\u3059\u308B\u3002\u9752\u7DD1\u306E\u307E\u307E\u3060\u3068\u3001\u660E\u308B\u3044\u5730\u306B\u660E\u308B\u3044\u5B57\u304C
+   \u8F09\u3063\u3066\u8AAD\u3081\u306A\u304F\u306A\u308B(\u6697\u3044\u914D\u8272\u3067\u3068\u304F\u306B)\u3002\u5730\u3068\u9006\u306E\u8272\u3092\u7D99\u3044\u3067\u8584\u304F\u3059\u308B */
+.mmsxx-player .ch button.sw[aria-pressed="true"] .voices{
+  color:inherit; opacity:.75;
+}
+/* \u4E2D\u306E\u5C64\u3092\u958B\u304F\u5370\u3002\u30C1\u30E3\u30F3\u30CD\u30EB\u306E\u30DC\u30BF\u30F3\u3068\u306F\u5225\u306B\u62BC\u305B\u308B\u5FC5\u8981\u304C\u3042\u308B\u306E\u3067\u3001
+   \u30DC\u30BF\u30F3\u306E\u4E2D\u306B\u306F\u5165\u308C\u306A\u3044\u3002\u62BC\u3057\u3069\u3053\u308D\u304C 2 \u3064\u3042\u308B\u3053\u3068\u3092\u5F62\u3067\u8A00\u3046 */
+.mmsxx-player .ch button.open{
+  border:0; padding:4px 4px; line-height:1; font-size:9px; color:var(--dim);
+  border-radius:2px; margin-left:-4px;
+}
+.mmsxx-player .ch button.open:hover{ color:var(--amber); border:0; }
+.mmsxx-player .ch button.open[aria-pressed="true"]{ color:var(--ink); }
+/* \u958B\u3044\u305F\u4E2D\u8EAB\u3002\u30C1\u30E3\u30F3\u30CD\u30EB\u306E\u4E0B\u306B\u3076\u3089\u4E0B\u3052\u308B\u3002\u884C\u3092\u5206\u3051\u306A\u3044\u3068\u3001
+   \u3069\u306E\u30C1\u30E3\u30F3\u30CD\u30EB\u3092\u958B\u3044\u305F\u306E\u304B\u5206\u304B\u3089\u306A\u304F\u306A\u308B */
+.mmsxx-player .lanes{
+  display:flex; flex-wrap:wrap; gap:5px; align-items:center;
+  width:100%; margin:-2px 0 2px; padding:0 0 0 14px;
+}
+.mmsxx-player .lanes .of{ font-size:9.5px; color:var(--dim); letter-spacing:.06em; }
+.mmsxx-player .lanes button{ font-size:10px; padding:3px 8px; border-radius:999px; }
 /* \u62BC\u3059\u3082\u306E\u306E\u5F62\u3002\u56DB\u89D2\u306F\u4F55\u304B\u304C\u8D77\u304D\u308B\u3082\u306E\u3001\u89D2\u4E38\u306F\u5165 / \u5207(docs/UI.md) */
 .mmsxx-player button{
   font:inherit; font-size:11px; color:var(--ink); background:transparent;
@@ -7979,6 +8745,28 @@ registerProcessor('mmsxx-tap', MmsxxTap);
   border:1px solid var(--line-hi); border-radius:2px; padding:5px 9px; white-space:nowrap;
 }
 .mmsxx-player .got a:hover{ border-color:var(--amber); }
+/* \u6E21\u3055\u308C\u305F MML \u3092\u8AAD\u307E\u305B\u308B\u3068\u3053\u308D\u3002\u30DA\u30FC\u30B8\u306B\u91CD\u306D\u3066\u51FA\u3059\u3002
+   \u8AAD\u3080\u305F\u3081\u306E\u3082\u306E\u306A\u306E\u3067\u3001\u62BC\u3057\u3069\u3053\u308D\u3068\u540C\u3058\u5927\u304D\u3055\u3060\u3068\u5B57\u304C\u5C0F\u3055\u3059\u304E\u308B\u3002
+   \u4E0B\u304C\u898B\u3048\u3066\u3044\u308B\u3068\u3001\u9CF4\u3089\u3057\u306A\u304C\u3089\u8AAD\u3081\u308B\u3088\u3046\u306B\u898B\u3048\u3066\u3001\u5B9F\u969B\u306F\u62BC\u305B\u306A\u3044 */
+.mmsxx-player .srcwrap{
+  position:fixed; inset:0; z-index:20; display:flex;
+  align-items:center; justify-content:center; padding:20px;
+  background:rgba(0,0,0,.45);
+}
+.mmsxx-player .srcbox{
+  display:flex; flex-direction:column; gap:9px;
+  width:min(900px, 100%); max-height:86vh; padding:12px 13px;
+  background:var(--panel); border:1px solid var(--line-hi); border-radius:3px;
+  box-shadow:0 4px 18px rgba(0,0,0,.3);
+}
+.mmsxx-player .srchead{ display:flex; align-items:center; gap:10px; }
+.mmsxx-player .srchead button{ margin-left:auto; }
+.mmsxx-player .src{
+  flex:1; min-height:min(55vh, 420px); width:100%; padding:10px 11px;
+  font-family:var(--mono); font-size:13px; line-height:1.7; color:var(--ink);
+  background:var(--sunk); border:1px solid var(--line); border-radius:2px;
+  resize:none; white-space:pre; overflow:auto;
+}
 /* \u5199\u3057\u305F\u5B57\u3092\u51FA\u3059\u3068\u3053\u308D\u3002\u5199\u305B\u306A\u3044\u7F6E\u304D\u65B9\u304C\u3042\u308B\u306E\u3067\u3001\u5FC5\u305A\u898B\u3048\u308B\u3088\u3046\u306B\u3059\u308B */
 .mmsxx-player .out{
   display:block; width:100%; margin:9px 0 0; padding:8px 9px;
@@ -7995,10 +8783,22 @@ registerProcessor('mmsxx-tap', MmsxxTap);
   };
   function mountPlayer(root, opts = {}) {
     const audio = opts.audio || new ChipTuneSound();
+    const cutGap = Number.isFinite(Number(opts.cutGap)) ? Number(opts.cutGap) : 1;
     const NAME = "__player__";
     root.classList.add("mmsxx-player");
     root.textContent = "";
     root.innerHTML = `
+    <div class="srcwrap" data-p="srcwrap" hidden>
+      <div class="srcbox">
+        <div class="srchead">
+          <span class="lbl">MML</span>
+          <span class="lbl" data-p="srcsize"></span>
+          <button type="button" data-p="srcclose">Close</button>
+        </div>
+        <textarea class="src" data-p="src" readonly
+                  aria-label="The MML this player was given"></textarea>
+      </div>
+    </div>
     <div class="about" data-p="about" hidden>
       <b data-p="title"></b>
       <p data-p="abouttext"></p>
@@ -8032,6 +8832,9 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         </label>
         <button type="button" data-p="wav">Export WAV</button>
         <button type="button" data-p="mml">Export MML</button>
+        <button type="button" class="sw" data-p="showmml" aria-pressed="false"
+                aria-expanded="false" title="Show the MML this player was given"
+                >Show MML</button>
         <button type="button" class="dots" data-p="open" aria-pressed="false"
                 aria-expanded="false" aria-label="More" title="More">&hellip;</button>
         <span class="ver-wrap">
@@ -8053,8 +8856,9 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       <div class="row" data-p="takerow" hidden>
         <span class="lbl">Takes</span>
         <span class="takes" data-p="takes"></span>
-        <button type="button" class="sw" data-p="rew" aria-pressed="false"
-                title="Always restart the block, whatever the tune says">From top</button>
+        <button type="button" class="sw wide" data-p="rew" aria-pressed="false"
+                title="Always restart the block, whatever the tune says. Applies to every group"
+                >From top</button>
       </div>
       <div class="row" data-p="fxrow" hidden>
         <span class="lbl">Effects</span>
@@ -8073,6 +8877,10 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       <div class="row" data-p="logrow" hidden>
         <span class="lbl"></span>
         <div class="cuelog" data-p="cuelog"></div>
+      </div>
+      <div class="row" data-p="looserow">
+        <label class="sw"><input type="checkbox" data-p="loose"> Ignore errors</label>
+        <span class="lbl" data-p="loosenote"></span>
       </div>
       <div class="row" data-p="abrow">
         <label class="sw"><input type="checkbox" data-p="abOn"> A &ndash; B</label>
@@ -8118,6 +8926,8 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       fx: $("fx"),
       fxrow: $("fxrow"),
       rew: $("rew"),
+      loose: $("loose"),
+      loosenote: $("loosenote"),
       leds: $("leds"),
       cuerow: $("cuerow"),
       logsw: $("logsw"),
@@ -8135,6 +8945,11 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       out: $("out"),
       wav: $("wav"),
       mml: $("mml"),
+      showmml: $("showmml"),
+      src: $("src"),
+      srcwrap: $("srcwrap"),
+      srcclose: $("srcclose"),
+      srcsize: $("srcsize"),
       veil: $("veil"),
       barfill: $("barfill"),
       pct: $("pct"),
@@ -8159,6 +8974,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     const showRept = opts.repeat !== false;
     const showAbout = opts.about !== false;
     const copyMode = opts.copy === void 0 ? true : opts.copy;
+    el.showmml.hidden = opts.showMml === false;
     const showVol = opts.volume !== false;
     const showMute = opts.mute === true;
     el.vol.hidden = !showVol;
@@ -8184,6 +9000,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     })();
     const fxOff = {};
     let restart = false;
+    let loose = false;
     let open = opts.open === true;
     const fold = () => {
       el.fold.hidden = !open;
@@ -8209,13 +9026,14 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     let from = 0;
     let mml = opts.mml ?? "";
     let voices = [];
+    const openLanes = /* @__PURE__ */ new Set();
     let chans = [];
     let total = 0;
     let abFrom = 0;
     let abTo = 0;
-    const say = (text, bad) => {
+    const say = (text, bad2) => {
       el.note.textContent = text || "";
-      el.note.className = bad ? "note bad" : "note";
+      el.note.className = bad2 ? "note bad" : "note";
     };
     let chNote = "";
     const sayCount = () => {
@@ -8233,7 +9051,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       }
       let got = null;
       try {
-        audio.defineBGM(NAME, voices);
+        audio.defineBGM(NAME, voices, loose ? { mode: "loose" } : {});
         got = audio.bgmInfo(NAME);
       } catch (e) {
         say(String(e && e.message ? e.message : e), true);
@@ -8258,13 +9076,26 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       el.about.hidden = !showAbout || !(meta.title || meta.about);
       chNote = `${chans.length} channels`;
       sayCount();
+      drawLoose(got.problems || []);
       return true;
+    }
+    function drawLoose(list) {
+      const bad2 = list.filter((x) => x.level === "error").length;
+      const soft = list.length - bad2;
+      if (!list.length) {
+        el.loosenote.textContent = "";
+        return;
+      }
+      const part = [];
+      if (bad2) part.push(`${bad2} dropped`);
+      if (soft) part.push(`${soft} warned`);
+      el.loosenote.textContent = part.join(", ");
     }
     function drawChannels() {
       el.chs.textContent = "";
       for (const t of chans) {
-        const wrap = document.createElement("span");
-        wrap.className = "ch";
+        const wrap2 = document.createElement("span");
+        wrap2.className = "ch";
         const b = document.createElement("button");
         b.type = "button";
         b.className = "sw";
@@ -8275,15 +9106,62 @@ registerProcessor('mmsxx-tap', MmsxxTap);
           audio.muteTrack(t.ch);
           draw();
         });
-        wrap.appendChild(b);
+        if (t.chords && t.voices > 1) {
+          wrap2.classList.add("multi");
+          const n = document.createElement("span");
+          n.className = "voices";
+          n.textContent = `\xD7${t.voices}`;
+          b.title = `${t.voices} voices at once`;
+          b.appendChild(n);
+        }
+        wrap2.appendChild(b);
+        if ((t.lanes || []).length > 1) {
+          const o = document.createElement("button");
+          o.type = "button";
+          o.className = "open";
+          o.setAttribute("aria-pressed", String(openLanes.has(t.ch)));
+          o.textContent = openLanes.has(t.ch) ? "\u25BE" : "\u25B8";
+          o.title = openLanes.has(t.ch) ? "Hide the parts inside" : "Show the parts inside";
+          o.addEventListener("click", () => {
+            if (openLanes.has(t.ch)) openLanes.delete(t.ch);
+            else openLanes.add(t.ch);
+            drawChannels();
+            draw();
+          });
+          wrap2.appendChild(o);
+        }
         if (t.role) {
           const r = document.createElement("span");
           r.className = "role";
           r.textContent = t.role;
-          wrap.appendChild(r);
+          wrap2.appendChild(r);
         }
-        el.chs.appendChild(wrap);
+        el.chs.appendChild(wrap2);
+        if (openLanes.has(t.ch)) el.chs.appendChild(laneRow(t));
       }
+    }
+    function laneRow(t) {
+      const row = document.createElement("span");
+      row.className = "lanes";
+      const of = document.createElement("span");
+      of.className = "of";
+      of.textContent = t.name || `ch${t.ch + 1}`;
+      row.appendChild(of);
+      for (const lane of t.lanes) {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "sw";
+        b.dataset.lane = `${t.ch}/${lane.name}`;
+        b.setAttribute("aria-pressed", String(!lane.muted));
+        b.textContent = lane.label || lane.name;
+        if (lane.label && lane.label !== lane.name) b.title = lane.name;
+        b.addEventListener("click", () => {
+          audio.muteLane(t.ch, lane.name);
+          draw();
+        });
+        row.appendChild(b);
+      }
+      return row;
     }
     const LOOPS = [["1", 1], ["2", 2], ["3", 3], ["4", 4], ["8", 8], ["Endless", Infinity]];
     function drawLoops() {
@@ -8308,7 +9186,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         el.cuts.appendChild(i);
       };
       const step = cuts.grid.length > 1 ? cuts.grid[1] - cuts.grid[0] : span;
-      if (wide > 0 && step / span * wide >= 12) {
+      if (wide > 0 && step / span * wide >= cutGap) {
         for (const t of cuts.grid) line(t, "grid");
       }
       for (const t of cuts.bars) line(t, "bar");
@@ -8407,12 +9285,12 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       el.takes.textContent = "";
       el.takerow.hidden = takes.length === 0;
       for (const g of takes) {
-        const wrap = document.createElement("span");
-        wrap.className = "take";
+        const wrap2 = document.createElement("span");
+        wrap2.className = "take";
         const lbl = document.createElement("span");
         lbl.className = "grp";
         lbl.textContent = g.group;
-        wrap.appendChild(lbl);
+        wrap2.appendChild(lbl);
         for (const name of g.options) {
           const b = document.createElement("button");
           b.type = "button";
@@ -8424,9 +9302,9 @@ registerProcessor('mmsxx-tap', MmsxxTap);
             audio.selectTake(NAME, g.group, name, restart ? { restart: true } : {});
             draw();
           });
-          wrap.appendChild(b);
+          wrap2.appendChild(b);
         }
-        el.takes.appendChild(wrap);
+        el.takes.appendChild(wrap2);
       }
     }
     function draw() {
@@ -8464,6 +9342,15 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         }
       }
       for (const b of el.chs.querySelectorAll("button.sw")) {
+        if (b.dataset.lane) {
+          const at = b.dataset.lane.indexOf("/");
+          const ch = Number(b.dataset.lane.slice(0, at));
+          b.setAttribute(
+            "aria-pressed",
+            String(!audio.isLaneMuted(ch, b.dataset.lane.slice(at + 1)))
+          );
+          continue;
+        }
         b.setAttribute("aria-pressed", String(!audio.isMuted(Number(b.dataset.ch))));
       }
       const len = audio.bgmLength() || total;
@@ -8687,7 +9574,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       say("Could not copy. Here is the MML, selected, to copy by hand.", true);
     });
     el.mml.addEventListener("click", () => {
-      const text = voices.join("\n\n").trim();
+      const text = srcText();
       if (!text) {
         say("Nothing to export.", true);
         return;
@@ -8709,6 +9596,48 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       el.out.focus();
       el.out.select();
       say("Could not save the file. Here is the MML, selected, to copy by hand.", true);
+    });
+    const showSrc = (on) => {
+      el.srcwrap.hidden = !on;
+      el.showmml.setAttribute("aria-pressed", String(on));
+      el.showmml.setAttribute("aria-expanded", String(on));
+    };
+    const srcText = () => {
+      if (!Array.isArray(mml)) return String(mml ?? "").trim();
+      const has = (v) => /^[ \t]*\/\/[ \t]*#[ \t]*ch([ \t]|$)/im.test(v);
+      return voices.map((v) => has(v) ? v : `// #ch
+${v}`).join("\n\n").trim();
+    };
+    el.showmml.addEventListener("click", () => {
+      if (el.showmml.getAttribute("aria-pressed") === "true") {
+        showSrc(false);
+        return;
+      }
+      const text = srcText();
+      if (!text) {
+        say("Nothing to show.", true);
+        return;
+      }
+      el.src.value = text;
+      el.srcsize.textContent = `${text.split("\n").length} lines, ${text.length} chars`;
+      showSrc(true);
+      el.srcclose.focus();
+    });
+    el.srcclose.addEventListener("click", () => {
+      showSrc(false);
+      el.showmml.focus();
+    });
+    el.srcwrap.addEventListener("click", (e) => {
+      if (e.target === el.srcwrap) {
+        showSrc(false);
+        el.showmml.focus();
+      }
+    });
+    el.srcwrap.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        showSrc(false);
+        el.showmml.focus();
+      }
     });
     el.abOn.addEventListener("change", () => applyRange(el.abOn.checked, true));
     for (const [box, which] of [[el.abFrom, "from"], [el.abTo, "to"]]) {
@@ -8759,6 +9688,12 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       el.logrow.hidden = !on;
       el.logsw.setAttribute("aria-pressed", String(on));
       el.logsw.setAttribute("aria-expanded", String(on));
+    });
+    el.loose.addEventListener("change", () => {
+      loose = el.loose.checked;
+      audio.stopBGM();
+      from = 0;
+      if (read()) draw();
     });
     el.rew.addEventListener("click", () => {
       restart = !restart;

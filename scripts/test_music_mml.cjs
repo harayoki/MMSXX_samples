@@ -7,7 +7,7 @@ global.window = global;
 require('../docs/music/player-engine.js');
 
 const E = MMSXX.sound;
-assert.equal(E.SOUND_VERSION, '0.20.0', 'bundled sound engine version');
+assert.equal(E.SOUND_VERSION, '0.21.0', 'bundled sound engine version');
 const nesTriangle = E.WAVEFORMS[E.findWave('wtNesTriangle')];
 assert(nesTriangle?.special?.includes('fixedvolume'),
   'wtNesTriangle must ignore every nonzero MML volume');
