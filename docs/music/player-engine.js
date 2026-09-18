@@ -1,4 +1,4 @@
-// MMS/XX player and audio engine, source commit 8984faa709f5aebfaf516892b06fc61530218099
+// MMS/XX player and audio engine, source commit 232206792cbf6e08532b1e3a61046c9448000658
 (() => {
   var __defProp = Object.defineProperty;
   var __export = (target, all) => {
@@ -1746,17 +1746,20 @@ ${val}`;
         if (!name) {
           throw new Error('[MMSXX] MML: \u958B\u3044\u3066\u3044\u306A\u3044 "#takes" \u3092\u9589\u3058\u3066\u3044\u307E\u3059');
         }
+        const KNOWN = ["restart", "now"];
         const [group, ...flags] = name.split(/[ \t]+/);
-        for (const f of flags) {
-          if (f.toLowerCase() !== "restart") {
-            throw new Error(`[MMSXX] MML: "#takes ${group}" \u306E "${f}" \u306F\u77E5\u3089\u306A\u3044\u6307\u5B9A\u3067\u3059(\u3044\u307E\u3042\u308B\u306E\u306F restart \u3060\u3051)`);
+        const low = flags.map((f) => f.toLowerCase());
+        for (const f of low) {
+          if (!KNOWN.includes(f)) {
+            throw new Error(`[MMSXX] MML: "#takes ${group}" \u306E "${f}" \u306F\u77E5\u3089\u306A\u3044\u6307\u5B9A\u3067\u3059(\u3044\u307E\u3042\u308B\u306E\u306F ${KNOWN.join(" \u3068 ")})`);
           }
         }
         open = {
           kind: "takes",
           group,
           options: [],
-          restart: flags.some((f) => f.toLowerCase() === "restart")
+          restart: low.includes("restart"),
+          now: low.includes("now")
         };
         continue;
       }
@@ -1833,6 +1836,7 @@ ${val}`;
         at,
         dur,
         restart: s.restart === true,
+        now: s.now === true,
         options: opts.map((o) => ({
           name: o.name,
           events: o.events,
@@ -2819,7 +2823,7 @@ class Fm4Bank extends AudioWorkletProcessor {
     this.max = q.voices || 16;
     this.voices = [];
     // **\u3042\u3068\u304B\u3089\u8DB3\u305B\u308B\u3088\u3046\u306B\u3059\u308B\u3002**\u5B9F\u6642\u9593\u306E\u518D\u751F\u306F\u5148\u8AAD\u307F\u3067\u5C11\u3057\u305A\u3064\u7A4D\u3080\u306E\u3067\u3001
-    // \u4F5C\u308B\u3068\u304D\u306B\u5168\u90E8\u306F\u6E21\u305B\u306A\u3044\u3002\u7A4D\u3080\u7A93\u306F\u5FC5\u305A\u524D\u3078\u9032\u3080\u306E\u3067\u3001
+    // \u4F5C\u308B\u3068\u304D\u306B\u5168\u90E8\u306F\u6E21\u305B\u306A\u3044\u3002\u7A4D\u3080\u7BC4\u56F2\u306F\u5FC5\u305A\u524D\u3078\u9032\u3080\u306E\u3067\u3001
     // **\u4E26\u3079\u66FF\u3048\u6E08\u307F\u306E\u675F\u3092\u5F8C\u308D\u3078\u8DB3\u3059\u3060\u3051**\u3067\u5168\u4F53\u306E\u9806\u756A\u306F\u4FDD\u305F\u308C\u308B
     this.port.onmessage = (e) => {
       const add = e.data && e.data.add;
@@ -3864,7 +3868,7 @@ class DutyBank extends AudioWorkletProcessor {
     this.max = q.voices || 16;
     this.voices = [];
     // **\u3042\u3068\u304B\u3089\u8DB3\u305B\u308B\u3088\u3046\u306B\u3059\u308B\u3002**\u5B9F\u6642\u9593\u306E\u518D\u751F\u306F\u5148\u8AAD\u307F\u3067\u5C11\u3057\u305A\u3064\u7A4D\u3080\u306E\u3067\u3001
-    // \u4F5C\u308B\u3068\u304D\u306B\u5168\u90E8\u306F\u6E21\u305B\u306A\u3044\u3002\u7A4D\u3080\u7A93\u306F\u5FC5\u305A\u524D\u3078\u9032\u3080\u306E\u3067\u3001
+    // \u4F5C\u308B\u3068\u304D\u306B\u5168\u90E8\u306F\u6E21\u305B\u306A\u3044\u3002\u7A4D\u3080\u7BC4\u56F2\u306F\u5FC5\u305A\u524D\u3078\u9032\u3080\u306E\u3067\u3001
     // **\u4E26\u3079\u66FF\u3048\u6E08\u307F\u306E\u675F\u3092\u5F8C\u308D\u3078\u8DB3\u3059\u3060\u3051**\u3067\u5168\u4F53\u306E\u9806\u756A\u306F\u4FDD\u305F\u308C\u308B
     this.port.onmessage = (e) => {
       const add = e.data && e.data.add;
@@ -4547,13 +4551,15 @@ registerProcessor('mmsxx-duty', DutyBank);
             now: "",
             options: [],
             boxes: [],
-            restart: false
+            restart: false,
+            noWait: false
           });
         }
         const g = out.get(box.group);
         for (const o of box.options) if (!g.options.includes(o.name)) g.options.push(o.name);
         g.boxes.push({ ch: track.ch, at: box.at, dur: box.dur });
         if (box.restart) g.restart = true;
+        if (box.now) g.noWait = true;
         if (!g.now) g.now = picks[box.group] ?? box.options[0].name;
       }
     }
@@ -5047,19 +5053,25 @@ registerProcessor('mmsxx-tap', MmsxxTap);
      * 場面が変わったことを音でも言いたいときに要る(別の曲にする手もあるが、
      * 共通のパートが多い曲では持ちにくいし、つなぎ目で隙間が出る)(2026-09-17)。
      *
-     * その 1 回だけ変えたいときは `restart` を渡す。渡さなければ曲の指定どおり。
-     * 戻るときは滑らせない — 戻るのだから、鳴っているフレーズを折らない理由が無い。
+     * 切れ目(`#switch` と `|`)を書いた曲では、そこまで待ってから替える。
+     * 頭へ戻すときも同じで、耳が切れ目に着いたところで跳ぶ。待たせたくないときは
+     * `now` を書く(`// #takes mood restart now`)。切れ目を書いていない曲は
+     * 待ちようが無いので、その場で替わる(2026-09-17)。
+     *
+     * その 1 回だけ変えたいときは引数で上書きする。渡さなければ曲の指定どおり。
      *
      * ```js
      * mmsxx.audio.selectTake('曲', 'mood', 'tense');                    // 曲の指定どおり
-     * mmsxx.audio.selectTake('曲', 'mood', 'tense', { restart: true }); // その 1 回だけ
+     * mmsxx.audio.selectTake('曲', 'mood', 'tense', { restart: true }); // 頭へ戻す
+     * mmsxx.audio.selectTake('曲', 'mood', 'tense', { now: true });     // 待たない
      * ```
      *
      * @param {string} name `defineBGM()` で登録した名前
      * @param {string} group グループの名前(`// #takes mood` の mood)
      * @param {string} take 選択肢の名前(`// #take tense` の tense)
-     * @param {{restart?:boolean}} [opts] restart = 囲みの頭へ戻して鳴らし直すか
-     *   (省くと曲の指定どおり)
+     * @param {{restart?:boolean, now?:boolean}} [opts]
+     *   restart = 囲みの頭へ戻して鳴らし直すか / now = 切れ目を待たないか
+     *   (どちらも省くと曲の指定どおり)
      * @returns {boolean} 動いた囲みがあれば true
      */
     selectTake(name, group, take, opts = {}) {
@@ -5084,28 +5096,48 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         clearTimeout(this._takeWait.timer);
         this._takeWait = null;
       }
+      const flag = (key2) => def.some((track) => (track.takes || []).some((box) => box.group === group && box[key2]));
+      const restart = opts.restart === void 0 ? flag("restart") : opts.restart === true;
+      const now = opts.now === void 0 ? flag("now") : opts.now === true;
       const st = this.bgmState;
       const live = st && st.name === name && !st.paused && st.cursor != null;
-      const wants = opts.restart === void 0 ? def.some((track) => (track.takes || []).some((box) => box.group === group && box.restart)) : opts.restart === true;
-      if (wants) {
+      if (!live) {
         apply();
-        if (live) {
-          const at = this.bgmPosition();
-          let head = null;
-          for (const track of def) {
-            for (const box of track.takes || []) {
-              if (box.group !== group || box.at > at + 1e-9) continue;
-              if (head == null || box.at > head) head = box.at;
-            }
-          }
-          if (head != null) this.seekBGM(head);
-        }
         return true;
       }
-      const inside = live && def.some((track) => (track.takes || []).some(
+      const headFor = (at) => {
+        let head = null, first = null;
+        for (const track of def) {
+          for (const box of track.takes || []) {
+            if (box.group !== group) continue;
+            if (first == null || box.at < first) first = box.at;
+            if (box.at > at + 1e-9) continue;
+            if (head == null || box.at > head) head = box.at;
+          }
+        }
+        return head ?? first;
+      };
+      const again = () => {
+        const head = headFor(this.bgmPosition());
+        apply();
+        if (head != null) this.seekBGM(head);
+      };
+      const pts = now ? [] : this.bgmSwitchPoints(name);
+      if (restart) {
+        const at = this.bgmPosition();
+        const pt2 = pts.find((t) => t > at + 1e-3);
+        if (pt2 == null) {
+          again();
+          return true;
+        }
+        const ms2 = Math.max(0, (st.base + pt2 - this.ctx.currentTime) * 1e3);
+        this._takeWait = { at: st.base + pt2, timer: setTimeout(again, ms2), run: apply };
+        return true;
+      }
+      const inside = def.some((track) => (track.takes || []).some(
         (box) => box.group === group && st.cursor > box.at + 1e-9 && st.cursor < box.at + box.dur - 1e-9
       ));
-      const pt = inside ? this.bgmSwitchPoints(name).find((t) => t > st.cursor + 1e-9) : null;
+      const pt = inside ? pts.find((t) => t > st.cursor + 1e-9) : null;
       if (pt == null) {
         apply();
         return true;
@@ -5136,15 +5168,15 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     /**
      * 合図(`// #cue`)を予約する。
      *
-     * 音符と同じ窓([from, to))を見て、そこにある合図を耳に届く時刻へ予約する。
+     * 音符と同じ範囲([from, to))を見て、そこにある合図を耳に届く時刻へ予約する。
      * 音は Web Audio の時計で 0.5 秒先まで積んであるので、合図だけ別に
      * 待たせないと、聞こえる前に届いてしまう(docs/DYNAMIC.md)。
      *
      * @param {object} track トラック
      * @param {number} ch 何本目か
      * @param {object} state 鳴らしている状態
-     * @param {number} from 窓の始まり(曲の中の秒)
-     * @param {number} to 窓の終わり
+     * @param {number} from 積む範囲の始まり(曲の中の秒)
+     * @param {number} to 積む範囲の終わり
      */
     _scheduleCues(track, ch, state, from, to) {
       const list = track.cues;
