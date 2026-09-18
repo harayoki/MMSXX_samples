@@ -58,6 +58,7 @@ const songs = [
   ]],
   ['04_Grassland-Trinity/grassland-trinity.mml', 4],
   ['05_Windward-Battle-Interactive/windward-battle-interactive.mml', 3],
+  ['06_BEAT/beat.mml', 4, ['開始']],
 ];
 
 function splitMML(text) {
@@ -88,8 +89,14 @@ for (const file of [
 // Page-specific timbres are registered by each player.js. Placeholder voices
 // are enough here because this test validates notation and arrangement shape.
 for (const { source } of sources) {
+  const declaredTones = new Set(
+    [...source.matchAll(/^\s*\/\/\s*#(?:bundle|chord)\s+([\w-]+)/gim)]
+      .map(match => match[1].toLowerCase()),
+  );
   for (const match of source.matchAll(/@\{([^}]+)\}/g)) {
-    if (E.findWave(match[1]) < 0) E.registerTone(match[1], { wave: 'pulse:50' });
+    const name = match[1].trim();
+    if (declaredTones.has(name.toLowerCase()) || /^drums(?:\s|$)/i.test(name)) continue;
+    if (E.findWave(name) < 0) E.registerTone(name, { wave: 'pulse:50' });
   }
   for (const match of source.matchAll(/@e\{([^}]+)\}/g)) {
     if (!E.ENVELOPES.some(env =>
@@ -110,6 +117,15 @@ for (const { file, channels, marks, source } of sources) {
     file + ': jump labels');
   if (marks) assert(info.marks.every((mark, index) =>
     index === 0 || mark.t > info.marks[index - 1].t), file + ': jump label order');
+  if (file === '06_BEAT/beat.mml') {
+    assert.deepEqual(info.tracks.map(track => track.name),
+      ['ベース1', 'ベース2', 'ドラム', 'ブラス'], file + ': channel names');
+    assert.deepEqual(info.tracks[2].lanes.map(lane => lane.label),
+      ['バスドラ', 'ハイハットC', 'ハイハットO', 'スネア', 'タム', 'タムLow'],
+      file + ': drum lanes');
+    assert.deepEqual(info.tracks[3].lanes.map(lane => lane.label),
+      ['ブラス1', 'ブラス2', 'ブラス3'], file + ': chord lanes');
+  }
   if (file.startsWith('05_Windward-Battle-Interactive/')) {
     assert.deepEqual(info.marks.map(mark => mark.name), ['エンカウント', 'LOOP', 'OUTRO'],
       file + ': encounter / loop / outro labels');
