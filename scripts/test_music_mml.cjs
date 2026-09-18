@@ -18,6 +18,31 @@ assert(audioProto._scheduleTrack.toString().includes('this._extraVoices'),
   'the shared scheduler must include dynamic effects');
 assert(audioProto._extraVoices.toString().includes('this.dynamic_effects'),
   'dynamic effects must be read by playback and WAV export');
+assert(/at < len \/ 1e3 \? 0 : at/.test(E.mountPlayer.toString()),
+  'the seek slider left edge must resolve to exactly 0 seconds');
+
+// A seek a few milliseconds past a note head must snap back to that head.
+// Otherwise the scheduler drops the complete opening note.
+const seekProbe = Object.create(audioProto);
+seekProbe.ctx = { currentTime: 10 };
+seekProbe._takeWait = null;
+seekProbe._dropCues = () => {};
+const seekState = {
+  pump() { this.pumped = true; },
+  tracks: [{ events: [{ t: 0 }, { t: 1 }] }],
+  length: 2,
+  timer: 0,
+  nodes: [],
+  endAt: null,
+  lapEnd: 2,
+  paused: false,
+  base: 0,
+  showBase: 0,
+  wraps: [],
+};
+seekProbe.bgmState = seekState;
+seekProbe.seekBGM(0.004);
+assert.equal(seekState.cursor, 0, 'seek must snap back to a note head within 5 ms');
 
 const root = path.resolve(__dirname, '../docs/music');
 const songs = [

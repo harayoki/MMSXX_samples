@@ -1,4 +1,4 @@
-// MMS/XX player and audio engine, source commit 232206792cbf6e08532b1e3a61046c9448000658
+// MMS/XX player and audio engine, source commit 2fbf879dc2af855068e40378e4373b49593cdfa9
 (() => {
   var __defProp = Object.defineProperty;
   var __export = (target, all) => {
@@ -5968,7 +5968,18 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         this._takeWait.run();
       }
       this._dropCues(s);
-      const to = Math.max(0, Math.min(Math.max(0, (s.length || 0) - 0.02), sec));
+      let to = Math.max(0, Math.min(Math.max(0, (s.length || 0) - 0.02), sec));
+      if (Array.isArray(s.tracks)) {
+        const SNAP = 5e-3;
+        let head = null;
+        for (const track of s.tracks) {
+          for (const ev of track.events) {
+            if (ev.t > to + 1e-9 || ev.t < to - SNAP) continue;
+            if (head == null || ev.t < head) head = ev.t;
+          }
+        }
+        if (head != null) to = head;
+      }
       if (s.timer) {
         clearTimeout(s.timer);
         s.timer = 0;
@@ -8660,7 +8671,9 @@ ChipTuneSound ${SOUND_VERSION}
     el.seek.addEventListener("change", () => {
       dragging = false;
       const len = audio.bgmLength() || total;
-      if (len > 0) goTo(len * (Number(el.seek.value) / 1e3));
+      if (len <= 0) return;
+      const at = len * (Number(el.seek.value) / 1e3);
+      goTo(at < len / 1e3 ? 0 : at);
     });
     el.seek.addEventListener("input", () => {
       const len = audio.bgmLength() || total;
