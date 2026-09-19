@@ -8,6 +8,14 @@ require('../docs/music/player-engine.js');
 
 const E = MMSXX.sound;
 assert.equal(E.SOUND_VERSION, '0.21.0', 'bundled sound engine version');
+assert(E.compileMML('@{tape:worn}{ o2 a1 f1 c1 g1 }').events.every(event => event.tape?.data),
+  'tape sections must accept note names as data bursts');
+const echoProbeAudio = new E.ChipTuneSound();
+assert(echoProbeAudio.defineBGM('echo-probe', ['t120 @s8 c8 r2']).ok,
+  'echo probe must compile');
+assert(echoProbeAudio.bgmDefs.get('echo-probe')[0].events.some(event =>
+  event.tail && event.echo === null && Math.abs(event.gate - .25) < 1e-9),
+  'echo copies must ring until the next copy and use the fading tail envelope');
 const vibratoProbe = E.compileMML('t120 @m{5,7,18} o4 c4').events[0];
 assert.deepEqual(vibratoProbe.vib, { depth: 5, speed: 7, delay: 18 },
   'extended @m must keep depth, speed and delay');

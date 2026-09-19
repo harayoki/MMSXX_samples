@@ -21,17 +21,17 @@
 // 音色はplayer.jsの標準APIで登録。@m1は標準ビブラート。
 
 // 曲内で使う音色セット。音色にエコーやエンベロープを着せ、宣言をここへ集約。
-#bundle fieldLeadDry = @{wcFieldLead} @s0
-#bundle battleLead   = @{wcBattleLead} @s0
-#bundle counterLead  = @{wcCounterLead} @s0 @o+1
-#bundle fieldBass    = @{wcBass} @s0
-#bundle battleBass   = @{wcBattleBass} @s0
-#bundle fieldArp     = @{wcArp} @s0
-#bundle kick         = @{wcKick} @s0
-#bundle drumNoise    = @{noise:white} @e{wcDrumEnv} @s0
+#bundle fieldLeadDry = @{wcFieldLead}
+#bundle battleLead   = @{wcBattleLead}
+#bundle counterLead  = @{wcCounterLead} @o+1
+#bundle fieldBass    = @{wcBass}
+#bundle battleBass   = @{wcBattleBass}
+#bundle fieldArp     = @{wcArp}
+#bundle kick         = @{wcKick}
+#bundle drumNoise    = @{noise:white} @e{wcDrumEnv}
 
 // 各曲の先頭で状態を初期化。その後、曲固有の設定を指定します。
-$RESET = { o4 l4 t120 v10 q7 p3 @{pulse:50} @e{flat} @d0 @m0 @s0 @o0 }
+$RESET = { o4 l4 t120 v10 q7 p3 @{pulse:50} @e{flat} @d0 @m0 @o0 }
 
 #ch 主旋律
 #role lead
