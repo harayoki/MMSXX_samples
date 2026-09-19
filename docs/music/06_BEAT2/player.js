@@ -1,17 +1,17 @@
-// BEAT 現行プレイヤー。
+// BEAT2 現行プレイヤー。
 (() => {
   const E = MMSXX.sound;
-  const editor = document.getElementById('beat-src');
+  const editor = document.getElementById('beat2-src');
   const status = document.querySelector('[data-music-status]');
   const audio = new E.ChipTuneSound(null, { spatial: 'mono' });
 
-  fetch(MusicAssets.song('beat.mml'))
+  fetch(MusicAssets.song('beat2.mml'))
     .then(response => {
       if (!response.ok) throw new Error('HTTP ' + response.status);
       return response.text();
     })
     .then(source => {
-      const player = E.player.mount(document.getElementById('beat-player'), {
+      const player = E.player.mount(document.getElementById('beat2-player'), {
         audio, mml: MusicPage.splitMML(source), loops: 3,
       });
       MusicPage.mountMMLTextarea(editor, source, {
