@@ -12,16 +12,41 @@ import { tags } from 'https://esm.sh/@lezer/highlight@1.2.3';
 
 // 行頭（空白可）の // # はシステム行、それ以外の // は通常コメント。
 const mmlComments = StreamLanguage.define({
-  token(stream) {
+  startState() {
+    return { blockComment: false };
+  },
+  token(stream, state) {
+    if (state.blockComment) {
+      if (stream.skipTo('*/')) {
+        stream.match('*/');
+        state.blockComment = false;
+      } else {
+        stream.skipToEnd();
+      }
+      return 'comment';
+    }
     if (stream.sol() && stream.match(/^\s*\/\/\s*#/)) {
       stream.skipToEnd();
       return 'meta';
     }
-    if (stream.sol() && stream.match(/^\s*\/\//)) {
+    if (stream.match('//')) {
       stream.skipToEnd();
       return 'comment';
     }
-    stream.skipToEnd();
+    if (stream.match('/*')) {
+      if (stream.skipTo('*/')) {
+        stream.match('*/');
+      } else {
+        state.blockComment = true;
+        stream.skipToEnd();
+      }
+      return 'comment';
+    }
+    while (!stream.eol()
+      && !stream.match('//', false)
+      && !stream.match('/*', false)) {
+      stream.next();
+    }
     return null;
   },
 });
