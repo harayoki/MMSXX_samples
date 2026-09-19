@@ -1,6 +1,6 @@
 // #title 風渡りの境界 (組曲) - Windward Crossing
 // #version 1.6
-// #about 王道RPGを意識した組曲。フィールド、エンカウント、戦闘（A/B/C）、勝利、敗北を連続再生。CH3とCH4は発音が重ならないため統合可能。ファミコン準拠。
+// #about 王道RPGを意識した組曲。フィールド、エンカウント、戦闘（A/B/C）、勝利、敗北を連続再生。CH3とCH4は発音が重ならないため統合可能。
 // #arrangement RPG Suite — 風渡りの境界
 // #copyright 2026 harayoki
 // #license CC BY 4.0 (music, artwork and MML source; https://creativecommons.org/licenses/by/4.0/)
@@ -200,20 +200,20 @@ $sound2 = { @m0 t152 @{fieldBass} v13 q6 o1 }
 $sound3 = { @m0 t132 @{fieldBass} v13 q6 o1 }
 $sound4 = { @m0 t96 @{fieldBass} v13 q6 o2 }
 // 複数箇所で使うフレーズ。
-$phrase1 = { @m0 t152 @{battleBass} q5 v12 o3 d12 v10 o4 d12 v10 o3 a12 v12 o3 d12 v10 o4 d12 v10 o3 a12 v12 o3 d12 v10 o4 d12 v10 o3 a12 v12 o4 d12 v10 o3 a12 v10 o3 d12 }
-$phrase2 = { @m0 t152 @{battleBass} q5 v12 o2 a+12 v10 o3 a+12 v10 o3 f12 v12 o2 a+12 v10 o3 a+12 v10 o3 f12 v12 o2 a+12 v10 o3 a+12 v10 o3 f12 v12 o3 a+12 v10 o3 f12 v10 o2 a+12 }
-$phrase3 = { @m0 t152 @{battleBass} q5 v12 o2 a12 v10 o3 a12 v10 o3 e12 v12 o2 a12 v10 o3 a12 v10 o3 e12 v12 o2 a12 v10 o3 a12 v10 o3 e12 v12 o3 a12 v10 o3 e12 v10 o2 a12 }
+$phrase1 = { @m0 t152 @{battleBass} q5 v10 o3 d12 v8 o4 d12 v8 o3 a12 v10 o3 d12 v8 o4 d12 v8 o3 a12 v10 o3 d12 v8 o4 d12 v8 o3 a12 v10 o4 d12 v8 o3 a12 v8 o3 d12 }
+$phrase2 = { @m0 t152 @{battleBass} q5 v10 o2 a+12 v8 o3 a+12 v8 o3 f12 v10 o2 a+12 v8 o3 a+12 v8 o3 f12 v10 o2 a+12 v8 o3 a+12 v8 o3 f12 v10 o3 a+12 v8 o3 f12 v8 o2 a+12 }
+$phrase3 = { @m0 t152 @{battleBass} q5 v10 o2 a12 v8 o3 a12 v8 o3 e12 v10 o2 a12 v8 o3 a12 v8 o3 e12 v10 o2 a12 v8 o3 a12 v8 o3 e12 v10 o3 a12 v8 o3 e12 v8 o2 a12 }
 $phrase4 = { @m0 t112 @{fieldBass} v15 q6 o2 d8 r8 @{fieldArp} v7 q5 o4 d16 o4 f+16 o4 a16 o5 d16 @{fieldBass} v14 q6 o2 a8 r8 @{fieldArp} v7 q5 o5 d16 o4 a16 o4 f+16 o4 d16 }
 $phrase5 = { $sound1 g8 r8 @{fieldArp} v7 q5 o3 b16 o4 d16 o4 g16 o4 b16 @{fieldBass} v14 q6 o2 d8 r8 @{fieldArp} v7 q5 o4 b16 o4 g16 o4 d16 o3 b16 }
 $phrase6 = { $sound1 b8 r8 @{fieldArp} v7 q5 o3 b16 o4 d16 o4 f+16 o4 b16 @{fieldBass} v14 q6 o2 f+8 r8 @{fieldArp} v7 q5 o4 b16 o4 f+16 o4 d16 o3 b16 }
 $phrase7 = { $sound1 a8 r8 @{fieldArp} v7 q5 o4 c+16 o4 e16 o4 a16 o5 c+16 @{fieldBass} v14 q6 o2 e8 r8 @{fieldArp} v7 q5 o5 c+16 o4 a16 o4 e16 o4 c+16 }
-$phrase8 = { @m0 t152 @{battleBass} q6 v10 o3 d8 v8 o3 d8 v10 o3 d8 v8 o3 a8 v10 o3 d8 v8 o3 d8 v10 o4 d8 v8 o3 a8 }
-$phrase9 = { @m0 t152 @{battleBass} q6 v10 o2 a8 v8 o2 a8 v10 o2 a8 v8 o3 e8 v10 o2 a8 v8 o2 a8 v10 o3 a8 v8 o3 e8 }
-$phrase10 = { @m0 t152 @{battleBass} q6 v10 o2 g8 v8 o2 g8 v10 o2 g8 v8 o3 d8 v10 o2 g8 v8 o2 g8 v10 o3 g8 v8 o3 d8 }
-$phrase11 = { @m0 t152 @{battleBass} q6 v10 o2 b8 v8 o2 b8 v10 o2 b8 v8 o3 f+8 v10 o2 b8 v8 o2 b8 v10 o3 b8 v8 o3 f+8 }
-$phrase12 = { @m0 t152 @{battleBass} q6 v12 o3 d+8 v10 o3 d+8 v12 o3 d+8 v10 o3 a+8 v12 o3 d+8 v10 o3 d+8 v12 o4 d+8 v10 o3 a+8 }
-$phrase13 = { @m0 t152 @{battleBass} q6 v12 o2 a+8 v10 o2 a+8 v12 o2 a+8 v10 o3 e8 v12 o2 a+8 v10 o2 a+8 v12 o3 a+8 v10 o3 e8 }
-$phrase14 = { @m0 t152 @{battleBass} q6 v12 o2 a8 v10 o2 a8 v12 o2 a8 v10 o3 e8 v12 o2 a8 v10 o2 a8 v12 o3 a8 v10 o3 e8 }
+$phrase8 = { @m0 t152 @{battleBass} q6 v8 o3 d8 v6 o3 d8 v8 o3 d8 v6 o3 a8 v8 o3 d8 v6 o3 d8 v8 o4 d8 v6 o3 a8 }
+$phrase9 = { @m0 t152 @{battleBass} q6 v8 o2 a8 v6 o2 a8 v8 o2 a8 v6 o3 e8 v8 o2 a8 v6 o2 a8 v8 o3 a8 v6 o3 e8 }
+$phrase10 = { @m0 t152 @{battleBass} q6 v8 o2 g8 v6 o2 g8 v8 o2 g8 v6 o3 d8 v8 o2 g8 v6 o2 g8 v8 o3 g8 v6 o3 d8 }
+$phrase11 = { @m0 t152 @{battleBass} q6 v8 o2 b8 v6 o2 b8 v8 o2 b8 v6 o3 f+8 v8 o2 b8 v6 o2 b8 v8 o3 b8 v6 o3 f+8 }
+$phrase12 = { @m0 t152 @{battleBass} q6 v10 o3 d+8 v8 o3 d+8 v10 o3 d+8 v8 o3 a+8 v10 o3 d+8 v8 o3 d+8 v10 o4 d+8 v8 o3 a+8 }
+$phrase13 = { @m0 t152 @{battleBass} q6 v10 o2 a+8 v8 o2 a+8 v10 o2 a+8 v8 o3 e8 v10 o2 a+8 v8 o2 a+8 v10 o3 a+8 v8 o3 e8 }
+$phrase14 = { @m0 t152 @{battleBass} q6 v10 o2 a8 v8 o2 a8 v10 o2 a8 v8 o3 e8 v10 o2 a8 v8 o2 a8 v10 o3 a8 v8 o3 e8 }
 // crisis: 8小節
 $crisis = {
   $RESET
@@ -221,8 +221,8 @@ $crisis = {
   $phrase1
   $phrase2
   $phrase2
-  @m0 t152 @{battleBass} q5 v12 o2 g12 v10 o3 g12 v10 o3 d12 v12 o2 g12 v10 o3 g12 v10 o3 d12 v12 o2 g12 v10 o3 g12 v10 o3 d12 v12 o3 g12 v10 o3 d12 v10 o2 g12
-  @m0 t152 @{battleBass} q5 v12 o2 a+12 v10 o3 a+12 v10 o3 e12 v12 o2 a+12 v10 o3 a+12 v10 o3 e12 v12 o2 a+12 v10 o3 a+12 v10 o3 e12 v12 o3 a+12 v10 o3 e12 v10 o2 a+12
+  @m0 t152 @{battleBass} q5 v10 o2 g12 v8 o3 g12 v8 o3 d12 v10 o2 g12 v8 o3 g12 v8 o3 d12 v10 o2 g12 v8 o3 g12 v8 o3 d12 v10 o3 g12 v8 o3 d12 v8 o2 g12
+  @m0 t152 @{battleBass} q5 v10 o2 a+12 v8 o3 a+12 v8 o3 e12 v10 o2 a+12 v8 o3 a+12 v8 o3 e12 v10 o2 a+12 v8 o3 a+12 v8 o3 e12 v10 o3 a+12 v8 o3 e12 v8 o2 a+12
   $phrase3
   $phrase3
 }
@@ -268,16 +268,16 @@ $good = {
   $phrase10 
   $phrase9 
   $phrase8 
-  @m0 t152 @{battleBass} q6 v10 o3 d4 v8 a4 v10 d4 v8 d4
+  @m0 t152 @{battleBass} q6 v8 o3 d4 v6 a4 v8 d4 v6 d4
 }
 // bad: 8小節
 $bad = {
   $RESET
-  @m0 t152 @{battleBass} q6 v12 o3 d8 v10 o3 d8 v12 o3 d8 v10 o3 a8 v12 o3 d8 v10 o3 d8 v12 o4 d8 v10 o3 a8
+  @m0 t152 @{battleBass} q6 v10 o3 d8 v8 o3 d8 v10 o3 d8 v8 o3 a8 v10 o3 d8 v8 o3 d8 v10 o4 d8 v8 o3 a8
   $phrase12
   $phrase13
   $phrase14
-  @m0 t152 @{battleBass} q6 v12 o2 g8 v10 o2 g8 v12 o2 g8 v10 o3 d8 v12 o2 g8 v10 o2 g8 v12 o3 g8 v10 o3 d8
+  @m0 t152 @{battleBass} q6 v10 o2 g8 v8 o2 g8 v10 o2 g8 v8 o3 d8 v10 o2 g8 v8 o2 g8 v10 o3 g8 v8 o3 d8
   $phrase12
   $phrase13
   $phrase14
