@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>テープロードの憂鬱</title>
+  <link rel="stylesheet" href="../music-page.css">
+</head>
+<body>
+<main class="music-page" id="tape-load-melancholy">
+  <nav class="music-top-nav" aria-label="ページナビゲーション"><a href="./" aria-label="DUMMYへ戻る" title="DUMMYへ戻る"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V4M5.5 10.5 12 4l6.5 6.5"/></svg></a></nav>
+  <div class="music-player" id="tape-load-player"></div>
+  <p class="music-status text-small text-muted" data-music-status aria-live="polite"></p>
+  <div class="music-credits">
+    <p class="text-small text-muted">MMLはこの場で編集できます。Music, MML and exports:
+      <a href="https://creativecommons.org/licenses/by/4.0/" rel="license">CC BY 4.0</a>.</p>
+  </div>
+  <div class="music-editor">
+    <textarea placeholder="LOADING" aria-label="MMLソース" id="tape-load-src"
+      rows="24" spellcheck="false" disabled></textarea>
+  </div>
+  <div class="music-credits">
+    <p class="text-small text-muted">JavaScript source is not covered by CC BY 4.0. Redistribution is prohibited.</p>
+    <p class="text-small text-muted">Editor: <a href="https://codemirror.net/">CodeMirror 6</a> (MIT License).</p>
+  </div>
+</main>
+<script src="../music-page.js" data-song="DUMMY"></script>
+</body>
+</html>

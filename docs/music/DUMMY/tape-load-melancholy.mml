@@ -1,0 +1,49 @@
+#title テープロードの憂鬱
+#version 1.0
+#about テープロード音と電子音で組み立てた楽曲。
+#copyright 2026 harayoki
+#license CC BY 4.0 (music and MML source; https://creativecommons.org/licenses/by/4.0/)
+
+#bundle tapeLead  = @{beep:clean} @e{piano} @o+1 @s5
+#bundle tapeSub   = @{beep:clean} @e{soft}
+#bundle tapeArp   = @{pulse:25} @e{flat}
+#bundle tapeBass  = @{triangle} @e{flat}
+#bundle tapeKick  = @{fm2DrumKick} @e{percussive} @o-2
+#bundle tapeSnare = @{fm2DrumSnare} @e{percussive}
+#bundle tapeSnap  = @{fm2DrumSnare} @e{tap}
+#bundle tapeHat   = @{fm2DrumCymbal} @e{tap} @o+2
+#bundle tapeBeep  = @{beep:noisy} @e{percussive}
+
+#ch テープ
+t126 @e{flat} q8 @{tape:worn}{ @baud 1200 @seed 7 v9 =1 =1 ?4 r2 =1 r4 @baud 1320 ?1 @baud 1048 ?1 @baud 785 ?1 @baud 1176 ?1 @baud 1320 ?1 @baud 1048 ?1 @baud 785 ?1 @baud 1176 ?1 v6 @baud 1320 ?1 @baud 1048 ?1 @baud 785 ?1 @baud 1176 ?1 @baud 1320 ?1 @baud 1048 ?1 @baud 785 ?1 @baud 1176 ?1 v5 @baud 1320 @bytes ff ?1 @bytes random @baud 1048 @bytes 55 ?1 @bytes random @baud 785 @bytes 0f ?1 @bytes random @baud 1176 @bytes 33 ?1 @bytes random @baud 1320 @bytes cc ?1 @bytes random @baud 1048 @bytes 99 ?1 @bytes random @baud 785 @bytes 3c ?1 @bytes random @baud 1176 @bytes 81 ?1 @bytes random @baud 785 ?1 @baud 1176 ?1 @baud 1320 ?1 @baud 1048 ?1 @baud 785 ?1 @baud 1176 ?1 @baud 1320 ?1 @baud 1048 ?1 v10 =1 r1 @baud 1570 ?4 @baud 1978 ?4 @baud 2352 ?4 @baud 3140 ?4 @baud 3140 ?2 r2 }
+
+#ch 旋律
+t126 @{tapeLead} v11 q7 o5 l4 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 v11 a8. a16 r8 a8. a16 e8 r4 a8. a16 r8 a8. a16 f8 r4 g8. g16 r8 g8. g16 e8 r4 g8. g16 r8 d8. d16 g8 r4 r8 a16 a16 a8 r16 a16 e8 g8 r4 r8 a16 a16 a8 r16 a16 f8 c8 r4 r8 g16 g16 g8 r16 g16 e8 c8 r4 r8 d16 d16 d8 r16 d16 g8 b8 r4 v13 a8. a16 r8 a8. a16 e8 r4 a8. a16 r8 a8. a16 f8 r4 g8. g16 r8 g8. g16 e8 r4 g8. g16 r8 d8. d16 g8 r4 r8 a16 a16 a8 r16 a16 e8 g8 r4 r8 a16 a16 a8 r16 a16 f8 c8 r4 r8 g16 g16 g8 r16 g16 e8 c8 r4 r8 d16 d16 d8 r16 d16 g8 b8 r4 c8. c16 r8 c8. c16 e8 r4 d8. d16 r8 d8. d16 g8 r4 e8. e16 r8 e8. e16 a8 r4 f8. f16 r8 f8. f16 > c8 < r4 g16 g16 r16 g16 r8 > c16 c16 r16 c16 e8 < r4 b16 b16 r16 b16 r8 > d16 d16 r16 d16 g8 < r4 a16 a16 r16 a16 r8 > c16 c16 r16 c16 e8 < r4 a16 a16 r16 a16 r8 > c16 c16 r16 c16 f8 < r4 v9 g8. g16 r8 g8. g16 g8 r4 g1 r1 r1
+
+#ch 対旋律
+t126 @{tapeSub} v6 q6 o6 l2 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 e a d g c f b e g > c < b e a d g c r1 r1 r1 r1
+
+#ch アルペジオ
+t126 @{tapeArp} q7 o5 l32 r1 r1 r1 r1 v4 [a > c e a e c < a > c <]4 [f a > c f c < a f a]4 [c e g > c g e < c e]4 [g b > d g d < b g b]4 v6 [a > c e a e c < a > c <]4 [f a > c f c < a f a]4 [c e g > c g e < c e]4 [g b > d g d < b g b]4 v9 [a > c e a e c < a > c <]4 [f a > c f c < a f a]4 [c e g > c g e < c e]4 [g b > d g d < b g b]4 [a > c e a e c < a > c <]4 [f a > c f c < a f a]4 [c e g > c g e < c e]4 [g b > d g d < b g b]4 v13 [a > c e a e c < a > c <]4 [f a > c f c < a f a]4 [c e g > c g e < c e]4 [g b > d g d < b g b]4 [a > c e a e c < a > c <]4 [f a > c f c < a f a]4 [c e g > c g e < c e]4 [g b > d g d < b g b]4 v13 [c e g > c g e < c e]4 [g b > d g d < b g b]4 [a > c e a e c < a > c <]4 [f a > c f c < a f a]4 [c e g > c g e < c e]4 [g b > d g d < b g b]4 [a > c e a e c < a > c <]4 [f a > c f c < a f a]4 r1 r1 r1 r1
+
+#ch ベース
+t126 @{tapeBass} q7 o2 l16 r1 r1 r1 r1 r1 r1 r1 r1 v5 a8. a16 r8 a16 a16 a8. a16 e8 a8 f8. f16 r8 f16 f16 f8. f16 c8 f8 c8. c16 r8 c16 c16 c8. c16 g8 c8 g8. g16 r8 g16 g16 g8. g16 d8 g8 v8 a8. a16 r8 a16 a16 a8. a16 e8 a8 f8. f16 r8 f16 f16 f8. f16 c8 f8 c8. c16 r8 c16 c16 c8. c16 g8 c8 g8. g16 r8 g16 g16 g8. g16 d8 g8 a8. a16 r8 a16 a16 a8. a16 e8 a8 f8. f16 r8 f16 f16 f8. f16 c8 f8 c8. c16 r8 c16 c16 c8. c16 g8 c8 g8. g16 r8 g16 g16 g8. g16 d8 g8 v11 a8. a16 r8 a16 a16 a8. a16 e8 a8 f8. f16 r8 f16 f16 f8. f16 c8 f8 c8. c16 r8 c16 c16 c8. c16 g8 c8 g8. g16 r8 g16 g16 g8. g16 d8 g8 a8. a16 r8 a16 a16 a8. a16 e8 a8 f8. f16 r8 f16 f16 f8. f16 c8 f8 c8. c16 r8 c16 c16 c8. c16 g8 c8 g8. g16 r8 g16 g16 g8. g16 d8 g8 v11 c8. c16 r8 c16 c16 c8. c16 g8 c8 g8. g16 r8 g16 g16 g8. g16 d8 g8 a8. a16 r8 a16 a16 a8. a16 e8 a8 f8. f16 r8 f16 f16 f8. f16 c8 f8 c8. c16 r8 c16 c16 c8. c16 g8 c8 g8. g16 r8 g16 g16 g8. g16 d8 g8 a8. a16 r8 a16 a16 a8. a16 e8 a8 f8. f16 r8 f16 f16 f8. f16 c8 f8 r1 r1 r1 r1
+
+#ch ドラム
+#drum B = @{tapeKick}      バスドラ
+#drum S = @{tapeSnare} v10 スネア
+#drum s = @{tapeSnap}  v10 スネア(短)
+#drum H = @{tapeHat}   v3  ハイハット
+$ta = { BH H H H BH H H H BH H H H BH H H H }
+$tb = { BH H H H BSH H H H BH H H H BSH H H sH }
+t126 q8 l16 r1 r1 r1 r1 r1 r1 r1 r1
+@{drums 16}{ v6 [$ta |]4 }
+@{drums 16}{ v9 [$tb |]8 }
+@{drums 16}{
+#drum S = @{tapeSnare} v13 スネア
+#drum s = @{tapeSnap}  v13 スネア(短)
+v13 [$tb |]16 }
+r1 r1 r1 r1
+
+#ch ビープ
+t126 @{tapeBeep} v7 q4 o6 l16 r1 r1 r1 r2 r4 r8 c8 r1 r1 r1 c r2. r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 c r8 c r2 r4 r1 r1 r1 r1 r1 r1 r1 c r2. r1 r1 r1 r1 r1 r1 r1 r2 r4 c8 c8 r1 r1 r1 r1
