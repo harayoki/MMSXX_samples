@@ -128,6 +128,12 @@
       };
       MMSXX.sound.player.mount = mountWithStoredOpen;
       MMSXX.sound.mountPlayer = mountWithStoredOpen;
+      const editorModule = await import(MusicAssets.shared('mml-editor.js'));
+      window.MusicPage = Object.freeze({
+        splitMML,
+        mountMMLEditor: editorModule.mountMMLEditor,
+        mountMMLTextarea: editorModule.mountMMLTextarea,
+      });
       await load(song('player.js'));
       // The player title is created after each page fetches its MML. Dock the
       // MUSIC TOP icon after the title/version group as soon as it appears.

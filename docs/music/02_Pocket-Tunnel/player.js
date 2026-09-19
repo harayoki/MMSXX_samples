@@ -127,11 +127,13 @@
   let current = songs.find(song =>
     song.id === new URLSearchParams(location.search).get('mix')) ?? songs[0];
   let player;
+  let sourceEditor;
 
   function select(song) {
-    if (current?.source) drafts.set(current.id, editor.value);
+    if (current?.source && sourceEditor) drafts.set(current.id, sourceEditor.getValue());
     current = song;
-    editor.value = drafts.get(song.id) ?? song.source;
+    const source = drafts.get(song.id) ?? song.source;
+    if (sourceEditor) sourceEditor.setValue(source);
     for (const button of tabs.children) {
       const active = button.dataset.mix === song.id;
       button.setAttribute('aria-selected', String(active));
@@ -139,7 +141,7 @@
     }
     if (player) {
       configureDynamicEffects(song, audio);
-      player.setMML(MusicPage.splitMML(editor.value));
+      player.setMML(MusicPage.splitMML(source));
       prepare(song, audio);
     }
   }
@@ -176,19 +178,19 @@
     song.source = await response.text();
   })).then(() => {
     addTabs();
-    editor.disabled = false;
-    editor.value = current.source;
     configureDynamicEffects(current, audio);
     player = E.player.mount(document.getElementById('pt-player'), {
       audio, mml: MusicPage.splitMML(current.source), loops: 3,
     });
+    sourceEditor = MusicPage.mountMMLTextarea(editor, current.source, {
+      onCommit: value => {
+        drafts.set(current.id, value);
+        player.setMML(MusicPage.splitMML(value));
+        prepare(current, audio);
+      },
+    });
     prepare(current, audio);
     select(current);
-    editor.addEventListener('change', () => {
-      drafts.set(current.id, editor.value);
-      player.setMML(MusicPage.splitMML(editor.value));
-      prepare(current, audio);
-    });
     status.textContent = '';
   }).catch(error => { status.textContent = 'MML読み込みエラー：' + error.message; });
 })();

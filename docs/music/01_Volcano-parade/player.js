@@ -170,15 +170,15 @@
       return response.text();
     })
     .then(source => {
-      editor.value = source;
-      editor.disabled = false;
       const player = E.player.mount(document.getElementById('vp-player'), {
         audio, mml: MusicPage.splitMML(source), loops: 3,
       });
       prepare(audio);
-      editor.addEventListener('change', () => {
-        player.setMML(MusicPage.splitMML(editor.value));
-        prepare(audio);
+      MusicPage.mountMMLTextarea(editor, source, {
+        onCommit: value => {
+          player.setMML(MusicPage.splitMML(value));
+          prepare(audio);
+        },
       });
       status.textContent = '';
     })

@@ -65,17 +65,14 @@
   audio.psgTune = false;
   audio.volume = 2.25;
 
-  Promise.all([
-    import(MusicAssets.song('mml-editor.js')),
-    fetch(MusicAssets.shared('03_Windward-Crossing/windward-crossing.mml')),
-  ])
-    .then(async ([editorModule, response]) => {
+  fetch(MusicAssets.shared('03_Windward-Crossing/windward-crossing.mml'))
+    .then(async response => {
       if (!response.ok) throw new Error('HTTP ' + response.status);
       const source = await response.text();
       const player = E.player.mount(document.getElementById('cm-player'), {
         audio, mml: MusicPage.splitMML(source), loops: 3,
       });
-      editorModule.mountMMLEditor(host, source, {
+      MusicPage.mountMMLEditor(host, source, {
         mirror,
         onCommit: value => player.setMML(MusicPage.splitMML(value)),
       });
