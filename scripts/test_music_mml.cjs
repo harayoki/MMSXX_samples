@@ -61,7 +61,7 @@ const songs = [
   ]],
   ['04_Grassland-Trinity/grassland-trinity.mml', 4],
   ['05_Windward-Battle-Interactive/windward-battle-interactive.mml', 4],
-  ['06_BEAT/beat.mml', 4, ['開始']],
+  ['06_BEAT2/beat2.mml', 4, ['開始']],
 ];
 
 function splitMML(text) {
@@ -142,7 +142,7 @@ for (const { file, channels, marks, source } of sources) {
     assert(counter.some(event => event.echo !== null),
       file + ': channel 3 counter melody self echo');
   }
-  if (file === '06_BEAT/beat.mml') {
+  if (file === '06_BEAT2/beat2.mml') {
     assert.deepEqual(info.tracks.map(track => track.name),
       ['ベース1', 'ベース2', 'ドラム', 'ブラス'], file + ': channel names');
     assert.deepEqual(info.tracks[2].lanes.map(lane => lane.label),
