@@ -1,4 +1,4 @@
-// MMS/XX player and audio engine, source commit d66bd8d26d928d927230707eb27f020063c63d2c
+// MMS/XX player and audio engine, source commit 602d40592c84524fdca879d5b515f8c963b8ac9f
 (() => {
   var __defProp = Object.defineProperty;
   var __export = (target, all) => {
@@ -5241,9 +5241,12 @@ registerProcessor('mmsxx-duty', DutyBank);
   function addEchoes(events, total) {
     if (!events.some((e) => e.echo)) return events;
     const out = [...events];
+    const busy = events.filter((e) => e.gate > 0).map((e) => [e.t, e.t + e.gate]);
+    const sounding = (t) => busy.some(([s, e]) => t > s - 1e-9 && t < e - 1e-9);
     const nextAt = (t) => {
-      for (const e of events) if (e.t > t + 1e-9) return e.t;
-      return Number.isFinite(total) ? total : Infinity;
+      let at = Number.isFinite(total) ? total : Infinity;
+      for (const [s] of busy) if (s > t + 1e-9 && s < at) at = s;
+      return at;
     };
     for (const e of events) {
       if (!e.echo || !(e.echo.delay > 0) || !(e.vol > 0)) continue;
@@ -5254,10 +5257,12 @@ registerProcessor('mmsxx-duty', DutyBank);
         if (vol < 0.7) break;
         const t = e.t + e.echo.delay * r;
         if (t >= total - 1e-9) break;
+        if (sounding(t)) continue;
         const stop = Math.min(nextAt(t), total);
         const gate = Math.min(e.gate, stop - t);
-        if (gate <= 0.01) break;
+        if (gate <= 0.01) continue;
         out.push({ ...e, t, dur: gate, gate, vol: Math.round(vol), echo: null, tail: true });
+        busy.push([t, t + gate]);
       }
     }
     out.sort((a, b) => a.t - b.t);
@@ -6859,9 +6864,12 @@ registerProcessor('mmsxx-tap', MmsxxTap);
      *
      * 和音は同じチャンネルに重なるので、1 本から何個も返ることがある。
      *
+     * 層(`#drum` の字と `#chord` の声)を持つ音符は、その名前も返す。
+     * 画面が中を開いたときに、どの層が鳴っているかを言えるようにするため。
+     *
      * @param {number} [sec] 曲の中の秒。省くと、いま鳴らしているところ
      * @returns {{ch:number, freq:number, vol:number, level:number, t:number,
-     *            age:number, muted:boolean}[]}
+     *            age:number, muted:boolean, lane:string|undefined}[]}
      */
     notesAt(sec) {
       const s = this.bgmState;
@@ -6882,14 +6890,16 @@ registerProcessor('mmsxx-tap', MmsxxTap);
           const ev = evs[i];
           const age = pos - ev.t;
           if (age < 0 || age >= ev.gate) continue;
+          const off = this._chMute.has(ch) || ev.lane !== void 0 && this._laneMute.has(`${ch}/${ev.lane}`);
           out.push({
             ch,
             freq: freqAt(ev, age),
             vol: ev.vol,
-            level: this._chMute.has(ch) ? 0 : levelAt(ev, age),
+            level: off ? 0 : levelAt(ev, age),
             t: ev.t,
             age,
-            muted: this._chMute.has(ch)
+            muted: this._chMute.has(ch),
+            lane: ev.lane
           });
         }
       });
@@ -8680,6 +8690,17 @@ registerProcessor('mmsxx-tap', MmsxxTap);
 .mmsxx-player .ch button.sw[aria-pressed="true"] .voices{
   color:inherit; opacity:.75;
 }
+/* \u3044\u307E\u9CF4\u3063\u3066\u3044\u308B\u30C1\u30E3\u30F3\u30CD\u30EB\u3068\u5C64\u3002\u62BC\u3057\u3066\u3042\u308B\u30DC\u30BF\u30F3\u3060\u3051\u304C\u5149\u308B(\u9ED9\u3089\u305B\u305F\u3082\u306E\u306F
+   \u97F3\u91CF\u304C 0 \u306A\u306E\u3067\u5149\u3089\u306A\u3044)\u3002\u7425\u73C0\u306F\u300C\u3044\u307E\u9CF4\u3063\u3066\u3044\u308B\u300D\u306E\u8272(docs/UI.md)\u3002
+   \u5730\u306E\u53CD\u8EE2\u306F\u5165 / \u5207\u306B\u4F7F\u3063\u3066\u3044\u308B\u306E\u3067\u3001\u3053\u3061\u3089\u306F\u67A0\u3067\u8A00\u3046\u3002
+   \u70B9\u304F\u306E\u306F\u4E00\u77AC\u306A\u306E\u3067\u3001\u6D88\u3048\u308B\u307B\u3046\u3060\u3051\u5C11\u3057\u5F15\u304D\u305A\u308B(2026-09-19) */
+.mmsxx-player .ch button.sw,
+.mmsxx-player .lanes button.sw{ transition:box-shadow .18s ease-out; }
+.mmsxx-player .ch button.sw.hot,
+.mmsxx-player .lanes button.sw.hot{
+  box-shadow:0 0 0 1px var(--amber), 0 0 6px -1px var(--amber);
+  transition:none;
+}
 /* \u4E2D\u306E\u5C64\u3092\u958B\u304F\u5370\u3002\u30C1\u30E3\u30F3\u30CD\u30EB\u306E\u30DC\u30BF\u30F3\u3068\u306F\u5225\u306B\u62BC\u305B\u308B\u5FC5\u8981\u304C\u3042\u308B\u306E\u3067\u3001
    \u30DC\u30BF\u30F3\u306E\u4E2D\u306B\u306F\u5165\u308C\u306A\u3044\u3002\u62BC\u3057\u3069\u3053\u308D\u304C 2 \u3064\u3042\u308B\u3053\u3068\u3092\u5F62\u3067\u8A00\u3046 */
 .mmsxx-player .ch button.open{
@@ -8737,10 +8758,16 @@ registerProcessor('mmsxx-tap', MmsxxTap);
 /* \u984C\u3068\u89E3\u8AAC\u3002\u66F2\u304C\u540D\u4E57\u308B\u3082\u306E\u306A\u306E\u3067\u3001\u62BC\u3059\u3068\u3053\u308D\u306E\u5916\u306B\u7F6E\u304F */
 .mmsxx-player .about{ margin:0 0 9px; }
 .mmsxx-player .about b{ font-size:12px; font-weight:600; color:var(--ink); }
-/* \u66F2\u306E\u30D0\u30FC\u30B8\u30E7\u30F3(// #version)\u3002\u984C\u306E\u96A3\u306B\u5C0F\u3055\u304F\u51FA\u3059\u3002
-   \u540C\u3058\u66F2\u3092\u4F55\u5EA6\u3082\u76F4\u3059\u306E\u3067\u3001\u3044\u307E\u9CF4\u3063\u3066\u3044\u308B\u306E\u304C\u3069\u308C\u306A\u306E\u304B\u304C\u5206\u304B\u308B\u3088\u3046\u306B\u3059\u308B */
+/* \u984C\u3068\u30D0\u30FC\u30B8\u30E7\u30F3\u306E\u884C\u3002\u984C\u306F\u5DE6\u3001\u30D0\u30FC\u30B8\u30E7\u30F3\u306F\u53F3\u7AEF\u3002\u540C\u3058\u66F2\u3092\u4F55\u5EA6\u3082\u76F4\u3059\u306E\u3067\u3001
+   \u3044\u307E\u9CF4\u3063\u3066\u3044\u308B\u306E\u304C\u3069\u308C\u306A\u306E\u304B\u304C\u5206\u304B\u308B\u3088\u3046\u306B\u3059\u308B(// #version)\u3002
+   1 \u884C\u306B\u4E26\u3079\u308B\u306E\u306B\u56F2\u307F\u304C\u8981\u308B\u3002b \u3068 span \u3092\u4E26\u3079\u305F\u3060\u3051\u3060\u3068\u3001
+   \u984C\u304C\u9577\u3044\u3068\u304D\u306B\u30D0\u30FC\u30B8\u30E7\u30F3\u304C\u4E0B\u3078\u6298\u308A\u8FD4\u3059(2026-09-19) */
+.mmsxx-player .about .head{
+  display:flex; align-items:baseline; gap:10px;
+}
 .mmsxx-player .about .ver{
-  margin-left:6px; font-size:10px; font-weight:400; color:var(--dim);
+  margin-left:auto; font-size:10px; font-weight:400; color:var(--dim);
+  white-space:nowrap;
 }
 .mmsxx-player .about p{
   margin:4px 0 0; font-size:11px; line-height:1.7; color:var(--dim);
@@ -8836,7 +8863,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       </div>
     </div>
     <div class="about" data-p="about" hidden>
-      <b data-p="title"></b><span class="ver" data-p="songver" hidden></span>
+      <div class="head"><b data-p="title"></b><span class="ver" data-p="songver" hidden></span></div>
       <p data-p="abouttext"></p>
     </div>
     <div class="deck">
@@ -9795,7 +9822,24 @@ ChipTuneSound ${SOUND_VERSION}
       const len = audio.bgmLength() || total;
       if (len > 0) el.now.textContent = clock(len * (Number(el.seek.value) / 1e3));
     });
+    function beat() {
+      const s = audio.bgmState;
+      const on = !!(s && s.name === NAME && !s.paused);
+      const hot = /* @__PURE__ */ new Set();
+      if (on) {
+        for (const n of audio.notesAt()) {
+          if (!(n.level > 0)) continue;
+          hot.add(String(n.ch));
+          if (n.lane !== void 0) hot.add(`${n.ch}/${n.lane}`);
+        }
+      }
+      for (const b of el.chs.querySelectorAll("button.sw")) {
+        b.classList.toggle("hot", hot.has(b.dataset.lane ?? b.dataset.ch));
+      }
+      frame = requestAnimationFrame(beat);
+    }
     const timer = setInterval(draw, 100);
+    let frame = requestAnimationFrame(beat);
     read();
     drawLoops();
     drawChannels();
@@ -9917,6 +9961,7 @@ ChipTuneSound ${SOUND_VERSION}
       /** 時計を止める。ページから外すときに呼ぶ */
       destroy() {
         clearInterval(timer);
+        cancelAnimationFrame(frame);
         window.removeEventListener("resize", onSize);
         document.removeEventListener("pointerdown", shut);
         document.removeEventListener("keydown", shutKey);
