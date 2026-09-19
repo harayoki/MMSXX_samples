@@ -29,11 +29,14 @@
 }
 
 .cm-mml-shell .cm-scroller { overflow: auto; }
-.cm-mml-shell .cm-content { min-height: 100%; padding: 10px 0; caret-color: #fff; }
+.cm-mml-shell .cm-content { min-height: 100%; padding: 10px 0; caret-color: #fff !important; }
+.cm-mml-shell .cm-line { caret-color: #fff !important; }
 .cm-mml-shell .cm-cursor,
-.cm-mml-shell .cm-dropCursor {
+.cm-mml-shell .cm-cursorLayer .cm-cursor,
+.cm-mml-shell .cm-dropCursor,
+.cm-mml-shell .cm-dropCursorLayer .cm-dropCursor {
   border-left-color: #fff !important;
-  border-left-width: 2px !important;
+  border-left-width: 3px !important;
 }
 .cm-mml-shell .cm-line { padding: 0 10px; }
 .cm-mml-shell .cm-activeLine { background: rgba(255,255,255,.08); }
