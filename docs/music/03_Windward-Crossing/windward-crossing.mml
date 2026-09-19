@@ -20,11 +20,11 @@
 
 // 曲内で使う音色セット。音色にエコーやエンベロープを着せ、宣言をここへ集約。
 // 複数セットを同時に重ねる場合は、#bundle の右辺へカンマ区切りで並べる。
-// #bundle fieldLeadEcho = @{wcFieldLead} @s4
+// #bundle fieldLeadEcho = @{wcFieldLead} @s8
 // #bundle fieldLeadDry  = @{wcFieldLead} @s0
 // #bundle battleLead    = @{wcBattleLead} @s0
-// #bundle counterLead   = @{wcCounterLead} @s4 @o+1
-// #bundle fieldCounter  = @{wcFieldCounter} @s4
+// #bundle counterLead   = @{wcCounterLead} @s8 @o+1
+// #bundle fieldCounter  = @{wcFieldCounter} @s8
 // #bundle fieldBass     = @{wcBass} @s0
 // #bundle battleBass    = @{wcBattleBass} @s0
 // #bundle fieldArp      = @{wcArp} @s0
