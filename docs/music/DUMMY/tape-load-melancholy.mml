@@ -15,19 +15,46 @@
 #bundle tapeBeep  = @{beep:noisy} @e{percussive}
 
 #ch テープ
-t126 @e{flat} q8 @{tape:worn}{ @baud 1200 @seed 7 v9 =1 =1 ?4 r2 =1 r4 o2 a1 f1 c1 g1 a1 f1 c1 g1 v6 a1 f1 c1 g1 a1 f1 c1 g1 v5 @bytes ff a1 @bytes random @bytes 55 f1 @bytes random @bytes 0f c1 @bytes random @bytes 33 g1 @bytes random @bytes cc a1 @bytes random @bytes 99 f1 @bytes random @bytes 3c c1 @bytes random @bytes 81 g1 @bytes random c1 g1 a1 f1 c1 g1 a1 f1 v10 =1 r1 o3 c4 e4 g4 o4 c4 c2 r2 }
+t126 @e{flat} q8 @{tape:worn}{ @baud 1200 @seed 7 v9 =1 =1 ?4 r2 =1 r4 o2 a1 f1 c1 g1 a1 f1 c1 g1 v6 a1 f1 c1 g1
+  a1 f1 c1 g1 v5 @bytes ff a1 @bytes random @bytes 55 f1 @bytes random @bytes 0f c1 @bytes random @bytes 33 g1
+  @bytes random @bytes cc a1 @bytes random @bytes 99 f1 @bytes random @bytes 3c c1 @bytes random @bytes 81 g1
+  @bytes random c1 g1 a1 f1 c1 g1 a1 f1 v10 =1 r1 o3 c4 e4 g4 o4 c4 c2 r2 }
 
 #ch 旋律
-t126 @{tapeLead} v11 q7 o5 l4 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 v11 a8. a16 r8 a8. a16 e8 r4 a8. a16 r8 a8. a16 f8 r4 g8. g16 r8 g8. g16 e8 r4 g8. g16 r8 d8. d16 g8 r4 r8 a16 a16 a8 r16 a16 e8 g8 r4 r8 a16 a16 a8 r16 a16 f8 c8 r4 r8 g16 g16 g8 r16 g16 e8 c8 r4 r8 d16 d16 d8 r16 d16 g8 b8 r4 v13 a8. a16 r8 a8. a16 e8 r4 a8. a16 r8 a8. a16 f8 r4 g8. g16 r8 g8. g16 e8 r4 g8. g16 r8 d8. d16 g8 r4 r8 a16 a16 a8 r16 a16 e8 g8 r4 r8 a16 a16 a8 r16 a16 f8 c8 r4 r8 g16 g16 g8 r16 g16 e8 c8 r4 r8 d16 d16 d8 r16 d16 g8 b8 r4 c8. c16 r8 c8. c16 e8 r4 d8. d16 r8 d8. d16 g8 r4 e8. e16 r8 e8. e16 a8 r4 f8. f16 r8 f8. f16 > c8 < r4 g16 g16 r16 g16 r8 > c16 c16 r16 c16 e8 < r4 b16 b16 r16 b16 r8 > d16 d16 r16 d16 g8 < r4 a16 a16 r16 a16 r8 > c16 c16 r16 c16 e8 < r4 a16 a16 r16 a16 r8 > c16 c16 r16 c16 f8 < r4 v9 g8. g16 r8 g8. g16 g8 r4 g1 r1 r1
+t126 @{tapeLead} v11 q7 o5 l4 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 v11 a8. a16 r8 a8. a16 e8 r4 a8. a16 r8 a8.
+  a16 f8 r4 g8. g16 r8 g8. g16 e8 r4 g8. g16 r8 d8. d16 g8 r4 r8 a16 a16 a8 r16 a16 e8 g8 r4 r8 a16 a16 a8 r16
+  a16 f8 c8 r4 r8 g16 g16 g8 r16 g16 e8 c8 r4 r8 d16 d16 d8 r16 d16 g8 b8 r4 v13 a8. a16 r8 a8. a16 e8 r4 a8.
+  a16 r8 a8. a16 f8 r4 g8. g16 r8 g8. g16 e8 r4 g8. g16 r8 d8. d16 g8 r4 r8 a16 a16 a8 r16 a16 e8 g8 r4 r8 a16
+  a16 a8 r16 a16 f8 c8 r4 r8 g16 g16 g8 r16 g16 e8 c8 r4 r8 d16 d16 d8 r16 d16 g8 b8 r4 c8. c16 r8 c8. c16 e8 r4
+  d8. d16 r8 d8. d16 g8 r4 e8. e16 r8 e8. e16 a8 r4 f8. f16 r8 f8. f16 > c8 < r4 g16 g16 r16 g16 r8 > c16 c16
+  r16 c16 e8 < r4 b16 b16 r16 b16 r8 > d16 d16 r16 d16 g8 < r4 a16 a16 r16 a16 r8 > c16 c16 r16 c16 e8 < r4 a16
+  a16 r16 a16 r8 > c16 c16 r16 c16 f8 < r4 v9 g8. g16 r8 g8. g16 g8 r4 g1 r1 r1
 
 #ch 対旋律
-t126 @{tapeSub} v6 q6 o6 l2 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 e a d g c f b e g > c < b e a d g c r1 r1 r1 r1
+t126 @{tapeSub} v6 q6 o6 l2 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 e a d g c f b e g > c <
+  b e a d g c r1 r1 r1 r1
 
 #ch アルペジオ
-t126 @{tapeArp} q7 o5 l32 r1 r1 r1 r1 v4 [a > c e a e c < a > c <]4 [f a > c f c < a f a]4 [c e g > c g e < c e]4 [g b > d g d < b g b]4 v6 [a > c e a e c < a > c <]4 [f a > c f c < a f a]4 [c e g > c g e < c e]4 [g b > d g d < b g b]4 v9 [a > c e a e c < a > c <]4 [f a > c f c < a f a]4 [c e g > c g e < c e]4 [g b > d g d < b g b]4 [a > c e a e c < a > c <]4 [f a > c f c < a f a]4 [c e g > c g e < c e]4 [g b > d g d < b g b]4 v13 [a > c e a e c < a > c <]4 [f a > c f c < a f a]4 [c e g > c g e < c e]4 [g b > d g d < b g b]4 [a > c e a e c < a > c <]4 [f a > c f c < a f a]4 [c e g > c g e < c e]4 [g b > d g d < b g b]4 v13 [c e g > c g e < c e]4 [g b > d g d < b g b]4 [a > c e a e c < a > c <]4 [f a > c f c < a f a]4 [c e g > c g e < c e]4 [g b > d g d < b g b]4 [a > c e a e c < a > c <]4 [f a > c f c < a f a]4 r1 r1 r1 r1
+t126 @{tapeArp} q7 o5 l32 r1 r1 r1 r1 v4 [a > c e a e c < a > c <]4 [f a > c f c < a f a]4 [c e g > c g e < c
+  e]4 [g b > d g d < b g b]4 v6 [a > c e a e c < a > c <]4 [f a > c f c < a f a]4 [c e g > c g e < c e]4 [g b >
+  d g d < b g b]4 v9 [a > c e a e c < a > c <]4 [f a > c f c < a f a]4 [c e g > c g e < c e]4 [g b > d g d < b g
+  b]4 [a > c e a e c < a > c <]4 [f a > c f c < a f a]4 [c e g > c g e < c e]4 [g b > d g d < b g b]4 v13 [a > c
+  e a e c < a > c <]4 [f a > c f c < a f a]4 [c e g > c g e < c e]4 [g b > d g d < b g b]4 [a > c e a e c < a >
+  c <]4 [f a > c f c < a f a]4 [c e g > c g e < c e]4 [g b > d g d < b g b]4 v13 [c e g > c g e < c e]4 [g b > d
+  g d < b g b]4 [a > c e a e c < a > c <]4 [f a > c f c < a f a]4 [c e g > c g e < c e]4 [g b > d g d < b g b]4
+  [a > c e a e c < a > c <]4 [f a > c f c < a f a]4 r1 r1 r1 r1
 
 #ch ベース
-t126 @{tapeBass} q7 o2 l16 r1 r1 r1 r1 r1 r1 r1 r1 v5 a8. a16 r8 a16 a16 a8. a16 e8 a8 f8. f16 r8 f16 f16 f8. f16 c8 f8 c8. c16 r8 c16 c16 c8. c16 g8 c8 g8. g16 r8 g16 g16 g8. g16 d8 g8 v8 a8. a16 r8 a16 a16 a8. a16 e8 a8 f8. f16 r8 f16 f16 f8. f16 c8 f8 c8. c16 r8 c16 c16 c8. c16 g8 c8 g8. g16 r8 g16 g16 g8. g16 d8 g8 a8. a16 r8 a16 a16 a8. a16 e8 a8 f8. f16 r8 f16 f16 f8. f16 c8 f8 c8. c16 r8 c16 c16 c8. c16 g8 c8 g8. g16 r8 g16 g16 g8. g16 d8 g8 v11 a8. a16 r8 a16 a16 a8. a16 e8 a8 f8. f16 r8 f16 f16 f8. f16 c8 f8 c8. c16 r8 c16 c16 c8. c16 g8 c8 g8. g16 r8 g16 g16 g8. g16 d8 g8 a8. a16 r8 a16 a16 a8. a16 e8 a8 f8. f16 r8 f16 f16 f8. f16 c8 f8 c8. c16 r8 c16 c16 c8. c16 g8 c8 g8. g16 r8 g16 g16 g8. g16 d8 g8 v11 c8. c16 r8 c16 c16 c8. c16 g8 c8 g8. g16 r8 g16 g16 g8. g16 d8 g8 a8. a16 r8 a16 a16 a8. a16 e8 a8 f8. f16 r8 f16 f16 f8. f16 c8 f8 c8. c16 r8 c16 c16 c8. c16 g8 c8 g8. g16 r8 g16 g16 g8. g16 d8 g8 a8. a16 r8 a16 a16 a8. a16 e8 a8 f8. f16 r8 f16 f16 f8. f16 c8 f8 r1 r1 r1 r1
+t126 @{tapeBass} q7 o2 l16 r1 r1 r1 r1 r1 r1 r1 r1 v5 a8. a16 r8 a16 a16 a8. a16 e8 a8 f8. f16 r8 f16 f16 f8.
+  f16 c8 f8 c8. c16 r8 c16 c16 c8. c16 g8 c8 g8. g16 r8 g16 g16 g8. g16 d8 g8 v8 a8. a16 r8 a16 a16 a8. a16 e8
+  a8 f8. f16 r8 f16 f16 f8. f16 c8 f8 c8. c16 r8 c16 c16 c8. c16 g8 c8 g8. g16 r8 g16 g16 g8. g16 d8 g8 a8. a16
+  r8 a16 a16 a8. a16 e8 a8 f8. f16 r8 f16 f16 f8. f16 c8 f8 c8. c16 r8 c16 c16 c8. c16 g8 c8 g8. g16 r8 g16 g16
+  g8. g16 d8 g8 v11 a8. a16 r8 a16 a16 a8. a16 e8 a8 f8. f16 r8 f16 f16 f8. f16 c8 f8 c8. c16 r8 c16 c16 c8. c16
+  g8 c8 g8. g16 r8 g16 g16 g8. g16 d8 g8 a8. a16 r8 a16 a16 a8. a16 e8 a8 f8. f16 r8 f16 f16 f8. f16 c8 f8 c8.
+  c16 r8 c16 c16 c8. c16 g8 c8 g8. g16 r8 g16 g16 g8. g16 d8 g8 v11 c8. c16 r8 c16 c16 c8. c16 g8 c8 g8. g16 r8
+  g16 g16 g8. g16 d8 g8 a8. a16 r8 a16 a16 a8. a16 e8 a8 f8. f16 r8 f16 f16 f8. f16 c8 f8 c8. c16 r8 c16 c16 c8.
+  c16 g8 c8 g8. g16 r8 g16 g16 g8. g16 d8 g8 a8. a16 r8 a16 a16 a8. a16 e8 a8 f8. f16 r8 f16 f16 f8. f16 c8 f8
+  r1 r1 r1 r1
 
 #ch ドラム
 #drum B = @{tapeKick}      バスドラ
@@ -36,14 +63,11 @@ t126 @{tapeBass} q7 o2 l16 r1 r1 r1 r1 r1 r1 r1 r1 v5 a8. a16 r8 a16 a16 a8. a16
 #drum H = @{tapeHat}   v3  ハイハット
 $ta = { BH H H H BH H H H BH H H H BH H H H }
 $tb = { BH H H H BSH H H H BH H H H BSH H H sH }
-t126 q8 l16 r1 r1 r1 r1 r1 r1 r1 r1
-@{drums 16}{ v6 [$ta |]4 }
-@{drums 16}{ v9 [$tb |]8 }
-@{drums 16}{
+t126 q8 l16 r1 r1 r1 r1 r1 r1 r1 r1 @{drums 16}{ v6 [$ta |]4 } @{drums 16}{ v9 [$tb |]8 } @{drums 16}{
 #drum S = @{tapeSnare} v13 スネア
 #drum s = @{tapeSnap}  v13 スネア(短)
-v13 [$tb |]16 }
-r1 r1 r1 r1
+v13 [$tb |]16 } r1 r1 r1 r1
 
 #ch ビープ
-t126 @{tapeBeep} v7 q4 o6 l16 r1 r1 r1 r2 r4 r8 c8 r1 r1 r1 c r2. r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 c r8 c r2 r4 r1 r1 r1 r1 r1 r1 r1 c r2. r1 r1 r1 r1 r1 r1 r1 r2 r4 c8 c8 r1 r1 r1 r1
+t126 @{tapeBeep} v7 q4 o6 l16 r1 r1 r1 r2 r4 r8 c8 r1 r1 r1 c r2. r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 c r8 c r2 r4
+  r1 r1 r1 r1 r1 r1 r1 c r2. r1 r1 r1 r1 r1 r1 r1 r2 r4 c8 c8 r1 r1 r1 r1
