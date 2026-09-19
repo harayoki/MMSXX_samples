@@ -113,6 +113,19 @@ for (const { source } of sources) {
   }
 }
 
+const expectedBundleCounts = new Map([
+  ['01_Volcano-parade/volcano-parade.mml', 8],
+  ['02_Pocket-Tunnel/original.mml', 9],
+  ['02_Pocket-Tunnel/jazz.mml', 10],
+  ['02_Pocket-Tunnel/fusion-v1.mml', 2],
+]);
+for (const { file, source } of sources) {
+  if (expectedBundleCounts.has(file)) {
+    assert.equal(E.readBundles(source).size, expectedBundleCounts.get(file),
+      file + ': bundled voice count');
+  }
+}
+
 for (const { file, channels, marks, source } of sources) {
   const audio = new E.ChipTuneSound();
   const result = audio.defineBGM('test', splitMML(source));
