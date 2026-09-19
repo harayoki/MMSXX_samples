@@ -81,6 +81,7 @@ const songs = [
   ['03_Windward-Crossing/ch1-field/ch1-field.mml', 1, ['フィールド']],
   ['04_Grassland-Trinity/grassland-trinity.mml', 4],
   ['05_Windward-Battle-Interactive/windward-battle-interactive.mml', 4],
+  ['06_BEAT_V2/beat_v2.mml', 4],
   ['DUMMY/tape-load-melancholy.mml', 7],
 ];
 

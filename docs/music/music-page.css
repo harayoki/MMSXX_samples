@@ -18,7 +18,7 @@ body {
   font-family: system-ui, sans-serif;
 }
 .music-page {
-  --mml-system: color-mix(in srgb, var(--blue) 75%, white);
+  --mml-system: color-mix(in srgb, var(--blue) 88%, white);
   display: grid;
   gap: 12px;
   width: min(100%, 1000px);
@@ -260,7 +260,9 @@ body {
 }
 .cm-mml-shell .cm-activeLine { background: rgba(255,255,255,.08); }
 .cm-mml-shell .cm-selectionBackground,
-.cm-mml-shell .cm-content ::selection { background: rgba(38,141,245,.5) !important; }
+.cm-mml-shell .cm-content ::selection {
+  background: color-mix(in srgb, var(--blue) 35%, #111) !important;
+}
 .cm-mml-shell .cm-focused { outline: 2px solid var(--blue); outline-offset: -2px; }
 .mix-tabs + .cm-mml-shell { border-radius: 0 0 8px 8px; }
 

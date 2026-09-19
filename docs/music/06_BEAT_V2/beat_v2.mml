@@ -16,14 +16,12 @@
 #chord  brass        = @{beatBrassLow} ブラス1, @{beatBrassMid} ブラス2, @{beatBrassTop} ブラス3
 
 #ch ベース1
-t152 q7 v13 l8 @{beatBass1} [o2 d a o3 d o2 a f a d o3 c o2 d a o3 d o2 a f a d o3 c
-o2 b- f o3 b- o2 f d f b- a o2 c g o3 c o2 g e g c b-
-o2 d a o3 d o2 a f a d o3 c o2 d a o3 d o2 a f a d o3 c
-o2 g d g d b- d g f o2 a e a e o3 c o2 e a g]2
+t152 q7 v13 l8 @{beatBass1} [o2 d a o3 d o2 a f a d o3 c o2 d a o3 d o2 a f a d o3 c o2 b- f o3 b- o2 f d f b- a
+  o2 c g o3 c o2 g e g c b- o2 d a o3 d o2 a f a d o3 c o2 d a o3 d o2 a f a d o3 c o2 g d g d b- d g f o2 a e a
+  e o3 c o2 e a g]2
 
 #ch ベース2
-t152 q8 v11 l1 @{beatBass2} [o2 d1 o2 d1 o2 b-1 o2 c1
-o2 d1 o2 d1 o2 g1 o2 a1]2
+t152 q8 v11 l1 @{beatBass2} [o2 d1 o2 d1 o2 b-1 o2 c1 o2 d1 o2 d1 o2 g1 o2 a1]2
 
 #ch ドラム
 #drum B = @{beatKick}       バスドラ
@@ -35,14 +33,9 @@ o2 d1 o2 d1 o2 g1 o2 a1]2
 $a = { BH . h . SH . BH . BH . h . SH . h . }
 $b = { BH . h . BSH . H . BHT T ht t BSHT . ht . }
 $c = { BH . h . BSH . H . BHT T ht t BSHT S Sht S }
-t152 q8
-@{drums 16}{
-v13
-[$a | $a | $a | $b | $a | $a | $a | $c |]2
+t152 q8 @{drums 16}{ v13 [$a | $a | $a | $b | $a | $a | $a | $c |]2
 }
 
 #ch ブラス
-t152 q8 v7 l16 @{brass} [r1 r2 r4 r8 'o4a o4f o4d'16 'o4a o4f o4d'16
-r1 r2 r4 'o4g o4e o4c'4
-r1 r2 r4 r8 'o4a o4f o4d'16 'o4a o4f o4d'16
-r2 'o5d o4b- o4g'4 'o5d o4b- o4g'4 'o5e o5c+ o4a'4 r4 r2]2
+t152 q8 v7 l16 @{brass} [r1 r2 r4 r8 'o4a o4f o4d'16 'o4a o4f o4d'16 r1 r2 r4 'o4g o4e o4c'4 r1 r2 r4 r8 'o4a
+  o4f o4d'16 'o4a o4f o4d'16 r2 'o5d o4b- o4g'4 'o5d o4b- o4g'4 'o5e o5c+ o4a'4 r4 r2]2

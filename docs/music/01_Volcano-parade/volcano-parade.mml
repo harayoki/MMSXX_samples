@@ -72,14 +72,14 @@ t135 l16 q7 v8 @{vpArpVoice} @d0
 [ v6 $INTRO
 #label Aメロ
 [ v8 $D_to_A v8 $A_to_Bm v11 $Bm_to_G v6 $G_to_D v8 $D2_to_A v7 $A2_to_Bm v8 $Bm2_to_A v6 $A2_to_D
-  #label Bメロ
-  v8 $B1 v7 $B2 v9 $B3 v7 $B4 v8 $B5 v7 $B6 v9 $B7 v8 $B8
-  #label Cメロ
-  v8 $C1 v9 $C2 v7 $C3 v9 $C4 v8 $C5 v10 $C6 v9 $C7 v8 $C8
-  #label 静かな区間
-  v4 $QUIET
-  #label イントロ2
-  v6 $INTRO2 ]$LOOP_END
+#label Bメロ
+v8 $B1 v7 $B2 v9 $B3 v7 $B4 v8 $B5 v7 $B6 v9 $B7 v8 $B8
+#label Cメロ
+v8 $C1 v9 $C2 v7 $C3 v9 $C4 v8 $C5 v10 $C6 v9 $C7 v8 $C8
+#label 静かな区間
+v4 $QUIET
+#label イントロ2
+v6 $INTRO2 ]$LOOP_END
 // Ending: 後半で和音全体を半音ずつ駆け上がり、1オクターブ上へ到達する。
 #label エンディング
 o5 v7 @{vpArpVoice} d2 d8 d+32 e32 f32 f+32 g32 g+32 a32 b-32 b32 >c32 c+32 d32
@@ -94,41 +94,23 @@ o5 v7 @{vpArpVoice} d2 d8 d+32 e32 f32 f+32 g32 g+32 a32 b-32 b32 >c32 c+32 d32
 // 2分音符だけ@{vpLead}へ切替。約0.3秒はビブラートなしの直進音、その後ビブラートが立ち上がる。
 t135 l16 q8 v12 @{vpPulseSoft}
 // 1小節イントロ共通フレーズ。
-[ o5 v9 d8. f+16 a8 >d8 <a4 f+8 e8
-[ o5 v13 @{vpLeadVoice} f+2 @{pulse:50} e4 d4
-o5 v13 @{vpLeadVoice} c+2 @{pulse:50} b4 r4
-o5 v10 @{vpLeadVoice} d2 @{pulse:50} e4 f+4
-o5 r1
-o5 v13 @{vpLeadVoice} a2 @{pulse:50} g4 f+4
-o5 v10 @{vpLeadVoice} e2 @{pulse:50} d4 r4
-o5 v13 @{vpLeadVoice} f+2 @{pulse:50} e4 d4
-o5 r1
+[ o5 v9 d8. f+16 a8 >d8 <a4 f+8 e8 [ o5 v13 @{vpLeadVoice} f+2 @{pulse:50} e4 d4 o5 v13 @{vpLeadVoice} c+2
+  @{pulse:50} b4 r4 o5 v10 @{vpLeadVoice} d2 @{pulse:50} e4 f+4 o5 r1 o5 v13 @{vpLeadVoice} a2 @{pulse:50} g4
+  f+4 o5 v10 @{vpLeadVoice} e2 @{pulse:50} d4 r4 o5 v13 @{vpLeadVoice} f+2 @{pulse:50} e4 d4 o5 r1
 // Bメロ8小節。Fメジャーの明るさを保ち、後半で進行感を強めてDへ帰る。
-o5 v13 @{vpLeadVoice} a2 @{pulse:50} g4 f4
-o5 v10 @{vpLeadVoice} g2 @{pulse:50} e4 r4
-o5 v11 @{vpLeadVoice} f2 @{pulse:50} a4 g4
-o5 v12 @{vpLeadVoice} d2 @{pulse:50} f4 r4
-o5 v11 @{vpLeadVoice} b-2 @{pulse:50} a4 g4
-o5 v12 @{vpLeadVoice} g2 @{pulse:50} c4 b-4
-o5 v13 @{vpLeadVoice} c+2 @{pulse:50} e4 g4
-o5 v13 @{vpLeadVoice} f+2 @{pulse:50} e4 d4
+o5 v13 @{vpLeadVoice} a2 @{pulse:50} g4 f4 o5 v10 @{vpLeadVoice} g2 @{pulse:50} e4 r4 o5 v11 @{vpLeadVoice} f2
+  @{pulse:50} a4 g4 o5 v12 @{vpLeadVoice} d2 @{pulse:50} f4 r4 o5 v11 @{vpLeadVoice} b-2 @{pulse:50} a4 g4 o5
+  v12 @{vpLeadVoice} g2 @{pulse:50} c4 b-4 o5 v13 @{vpLeadVoice} c+2 @{pulse:50} e4 g4 o5 v13 @{vpLeadVoice} f+2
+  @{pulse:50} e4 d4
 // Cメロ8小節。Bより高い音域へ持ち上げ、後半はA7上でAメロを待つ。
-o5 v12 @{vpLeadVoice} b2 @{pulse:50} a4 g4
-o5 v13 @{vpLeadVoice} c+2 @{pulse:50} e4 a4
-o5 v11 @{vpLeadVoice} a2 @{pulse:50} c+4 b4
-o5 v13 @{vpLeadVoice} d2 @{pulse:50} f+4 a4
-o5 v12 @{vpLeadVoice} g2 @{pulse:50} b4 >e4
-o6 v13 @{vpLeadVoice} d2 @{pulse:50} c+4 b4
-o5 v12 @{vpLeadVoice} a2 @{pulse:50} c+4 e4
-o5 v13 @{vpLeadVoice} g2 @{pulse:50} e4 c+4
+o5 v12 @{vpLeadVoice} b2 @{pulse:50} a4 g4 o5 v13 @{vpLeadVoice} c+2 @{pulse:50} e4 a4 o5 v11 @{vpLeadVoice} a2
+  @{pulse:50} c+4 b4 o5 v13 @{vpLeadVoice} d2 @{pulse:50} f+4 a4 o5 v12 @{vpLeadVoice} g2 @{pulse:50} b4 >e4 o6
+  v13 @{vpLeadVoice} d2 @{pulse:50} c+4 b4 o5 v12 @{vpLeadVoice} a2 @{pulse:50} c+4 e4 o5 v13 @{vpLeadVoice} g2
+  @{pulse:50} e4 c+4
 // 静かな4小節。長音と休符で密度を落とす。
-o5 v7 @{vpPulseSoft} d1
-o5 r1
-o4 v7 @{vpLeadVoice} a2 @{pulse:50} g4 r4
-o4 v6 @{vpLeadVoice} e2 r2
+o5 v7 @{vpPulseSoft} d1 o5 r1 o4 v7 @{vpLeadVoice} a2 @{pulse:50} g4 r4 o4 v6 @{vpLeadVoice} e2 r2
 // イントロ2。
-o5 r1
-o5 v11 @{vpPulseSoft} a8. f+16 d8 e8 f+4 e8 c+8 ]$LOOP_END
+o5 r1 o5 v11 @{vpPulseSoft} a8. f+16 d8 e8 f+4 e8 c+8 ]$LOOP_END
 // Ending: root rises chromatically by one octave.
 o5 v9 @{vpLeadVoice} d2 d8 d+32 e32 f32 f+32 g32 g+32 a32 b-32 b32 >c32 c+32 d32
 
@@ -139,41 +121,21 @@ o5 v9 @{vpLeadVoice} d2 d8 d+32 e32 f32 f+32 g32 g+32 a32 b-32 b32 >c32 c+32 d32
 // 半音または全音で下がり、4拍目で少し止めてから次の小節へ着地する。
 t135 l16 q7 v14 @{vpBassVoice}
 // イントロはメロディーと同じフレーズを低音ユニゾンで演奏する。
-[ v10 o2 d8. f+16 a8 >d8 <a4 f+8 e8
-[ v11 o2 d8 >d d o2 c+8 >c+ c+ o2 b8 >b b o2 a8 >a a
-v11 o2 a8 >a a o2 g+8 >g+ g+ o2 f+8 >f+ f+ o2 e8 >e e
-v11 o2 b8 >b b o2 a8 >a a o2 g+8 >g+ g+ o2 f+8 >f+ f+
-v9 o2 g8 >g g o2 f+8 >f+ f+ o2 e8 >e e o2 c+8 >c+ c+
-v11 o2 d8 >d d o2 c+8 >c+ c+ o2 b8 >b b o2 a8 >a a
-v14 o2 a8 >a a o2 g+8 >g+ g+ o2 f+8 >f+ f+ o2 e8 >e e
-v11 o2 b8 >b b o2 a8 >a a o2 g8 >g g o2 f+8 >f+ f+
-v9 o2 a8 >a a o2 g+8 >g+ g+ o2 f+8 >f+ f+ o2 e8 >e e
+[ v10 o2 d8. f+16 a8 >d8 <a4 f+8 e8 [ v11 o2 d8 >d d o2 c+8 >c+ c+ o2 b8 >b b o2 a8 >a a v11 o2 a8 >a a o2 g+8
+  >g+ g+ o2 f+8 >f+ f+ o2 e8 >e e v11 o2 b8 >b b o2 a8 >a a o2 g+8 >g+ g+ o2 f+8 >f+ f+ v9 o2 g8 >g g o2 f+8 >f+
+  f+ o2 e8 >e e o2 c+8 >c+ c+ v11 o2 d8 >d d o2 c+8 >c+ c+ o2 b8 >b b o2 a8 >a a v14 o2 a8 >a a o2 g+8 >g+ g+ o2
+  f+8 >f+ f+ o2 e8 >e e v11 o2 b8 >b b o2 a8 >a a o2 g8 >g g o2 f+8 >f+ f+ v9 o2 a8 >a a o2 g+8 >g+ g+ o2 f+8
+  >f+ f+ o2 e8 >e e
 // Bメロは4分音符中心。後半で根音の動きを強め、A7からDへ帰る。
-v10 o2 f4 c4 f4 e4
-v12 o2 e4 g4 c4 e4
-v10 o2 d4 a4 d4 c4
-v11 o2 b-4 f4 b-4 a4
-v12 o2 g4 d4 g4 b-4
-v11 o2 c4 g4 c4 b-4
-v13 o2 a4 e4 g4 c+4
-v13 o2 d4 a4 d4 r4
+v10 o2 f4 c4 f4 e4 v12 o2 e4 g4 c4 e4 v10 o2 d4 a4 d4 c4 v11 o2 b-4 f4 b-4 a4 v12 o2 g4 d4 g4 b-4 v11 o2 c4 g4
+  c4 b-4 v13 o2 a4 e4 g4 c+4 v13 o2 d4 a4 d4 r4
 // Cメロは上向きの4分音符パターン。終盤はAを保持して帰着を待つ。
-v11 o2 g4 d4 g4 b4
-v12 o2 a4 e4 a4 c+4
-v10 o2 f+4 c+4 f+4 a4
-v12 o2 b4 f+4 b4 d4
-v11 o2 e4 b4 e4 g4
-v13 o2 a4 e4 g4 b4
-v12 o2 a4 e4 g4 c+4
-v13 o2 a4 a4 e4 c+4
+v11 o2 g4 d4 g4 b4 v12 o2 a4 e4 a4 c+4 v10 o2 f+4 c+4 f+4 a4 v12 o2 b4 f+4 b4 d4 v11 o2 e4 b4 e4 g4 v13 o2 a4 e4
+  g4 b4 v12 o2 a4 e4 g4 c+4 v13 o2 a4 a4 e4 c+4
 // 静かな4小節。根音を長く保持する。
-v7 o2 d1
-v6 o2 b-1
-v7 o2 g1
-v8 o2 a1
+v7 o2 d1 v6 o2 b-1 v7 o2 g1 v8 o2 a1
 // イントロ2。
-o2 r1
-v10 o2 a8. f+16 d8 e8 f+4 e8 c+8 ]$LOOP_END
+o2 r1 v10 o2 a8. f+16 d8 e8 f+4 e8 c+8 ]$LOOP_END
 // Ending: low D rises chromatically by one octave.
 o2 v11 @{vpBassVoice} d2 d8 d+32 e32 f32 f+32 g32 g+32 a32 b-32 b32 >c32 c+32 d32
 
@@ -184,34 +146,17 @@ o2 v11 @{vpBassVoice} d2 d8 d+32 e32 f32 f+32 g32 g+32 a32 b-32 b32 >c32 c+32 d3
 // ハモリは saw + softで主旋律より少し細くする。
 t135 o4 l8 q5 v10 @{vpPianoVoice}
 // I1の後、A・B・C・静かな4小節・I2を2回。
-r1
-[ o4 r1 r1 r1
-v15 r8 g8 b8 >d8 <a8 f+8 e8 c+8
-r1 r1 r1
-v15 r8 a8 >c+8 e8 <b8 a8 f+8 e8
+r1 [ o4 r1 r1 r1 v15 r8 g8 b8 >d8 <a8 f+8 e8 c+8 r1 r1 r1 v15 r8 a8 >c+8 e8 <b8 a8 f+8 e8
 // Bメロ: Fメジャー内で主旋律からおおむね3度下。リズムと休符位置は主旋律に揃える。
-o5 l16 q8 v8 @{vpSawSoft} f2 e4 d4
-o5 v7 e2 c4 r4
-o5 v7 d2 f4 e4
-o4 v8 b-2 >d4 r4
-o5 v7 g2 f4 e4
-o5 v8 e2 a4 g4
-o5 v8 a2 c+4 e4
-o5 v8 d2 c+4 a4
+o5 l16 q8 v8 @{vpSawSoft} f2 e4 d4 o5 v7 e2 c4 r4 o5 v7 d2 f4 e4 o4 v8 b-2 >d4 r4 o5 v7 g2 f4 e4 o5 v8 e2 a4 g4
+  o5 v8 a2 c+4 e4 o5 v8 d2 c+4 a4
 // Cメロは3度下中心。終盤だけ反行してAへの戻りを目立たせる。
-o5 v8 g2 f+4 e4
-o5 v8 a2 c+4 e4
-o5 v7 f+2 a4 g4
-o5 v8 b2 d4 f+4
-o5 v8 e2 g4 b4
-o5 v9 b2 a4 g4
-o5 v8 f+2 a4 c+4
-o5 v8 e2 c+4 a4
+o5 v8 g2 f+4 e4 o5 v8 a2 c+4 e4 o5 v7 f+2 a4 g4 o5 v8 b2 d4 f+4 o5 v8 e2 g4 b4 o5 v9 b2 a4 g4 o5 v8 f+2 a4 c+4
+  o5 v8 e2 c+4 a4
 // 静かな4小節ではハモリを止める。
 o4 r1 r1 r1 r1
 // I2の最後だけ低い合いの手を入れる。
-o4 r1
-o4 v11 @{vpPianoVoice} a8. f+16 d8 e8 f+4 e8 c+8 ]$LOOP_END
+o4 r1 o4 v11 @{vpPianoVoice} a8. f+16 d8 e8 f+4 e8 c+8 ]$LOOP_END
 // Ending: major third rises chromatically by one octave.
 o5 l16 q8 v7 @{vpPulseSoft} f+2 f+8 g32 g+32 a32 b-32 b32 >c32 c+32 d32 d+32 e32 f32 f+32
 
@@ -224,14 +169,9 @@ t135 o3 l8 q5 v8 @{vpPianoVoice}
 // I1
 r1
 // Aの4・8小節目だけ上の合いの手と同時発音。B・C・静かな区間は休む。
-[ o3 r1 r1 r1
-v9 r8 g8 b8 >d8 <a8 f+8 e8 c+8
-r1 r1 r1
-v9 r8 a8 >c+8 e8 <b8 a8 f+8 e8
-$REST8 $REST8 $REST4
+[ o3 r1 r1 r1 v9 r8 g8 b8 >d8 <a8 f+8 e8 c+8 r1 r1 r1 v9 r8 a8 >c+8 e8 <b8 a8 f+8 e8 $REST8 $REST8 $REST4
 // I2
-r1
-o3 v8 a8. f+16 d8 e8 f+4 e8 c+8 ]$LOOP_END
+r1 o3 v8 a8. f+16 d8 e8 f+4 e8 c+8 ]$LOOP_END
 // Ending: fifth rises chromatically by one octave.
 o4 l16 q8 v6 @{vpPulseSoft} a2 a8 b-32 b32 >c32 c+32 d32 d+32 e32 f32 f+32 g32 g+32 a32
 
@@ -241,47 +181,20 @@ o4 l16 q8 v6 @{vpPulseSoft} a2 a8 b-32 b32 >c32 c+32 d32 d+32 e32 f32 f+32 g32 g
 // イントロ1小節と静かな区間は休み。キックやスネアは入れない。
 t135 l8 q2 v3 @{vpHatVoice}
 $OLD_HATS = { [ r1
-v3 r8 a8 r8 a8 r8 a8 r8 a8
-v3 r8 a8 r8 a8 r8 a8 r8 a8
-v3 r8 a8 r8 a8 r8 a8 r8 a8
-v2 r8 a8 r8 a8 r8 a8 r8 a8
-v3 r8 a8 r8 a8 r8 a8 r8 a8
-v3 r8 a8 r8 a8 r8 a8 r8 a8
-v3 r8 a8 r8 a8 r8 a8 r8 a8
-v2 r8 a8 r8 a8 r8 a8 r8 a8
-v3 r8 a8 r8 a8 r8 a8 r8 a8
-v3 r8 a8 r8 a8 r8 a8 r8 a8
-v3 r8 a8 r8 a8 r8 a8 r8 a8
-v3 r8 a8 r8 a8 r8 a8 r8 a8
-r1
-r1
-r1
-r1
-r1
-v2 r8 a8 r8 a8 r8 a8 r8 a8
-v3 r8 a8 r8 a8 r8 a8 r8 a8
-v3 r8 a8 r8 a8 r8 a8 r8 a8
-v3 r8 a8 r8 a8 r8 a8 r8 a8
-v3 r8 a8 r8 a8 r8 a8 r8 a8
-v3 r8 a8 r8 a8 r8 a8 r8 a8
-v3 r8 a8 r8 a8 r8 a8 r8 a8
-v3 r8 a8 r8 a8 r8 a8 r8 a8
-v3 r8 a8 r8 a8 r8 a8 r8 a8
-v3 r8 a8 r8 a8 r8 a8 r8 a8
-v3 r8 a8 r8 a8 r8 a8 r8 a8
-v3 r8 a8 r8 a8 r8 a8 r8 a8
-v3 r8 a8 r8 a8 r8 a8 r8 a8
-v3 r8 a8 r8 a8 r8 a8 r8 a8
-v3 r8 a8 r8 a8 r8 a8 r8 a8
-v3 r8 a8 r8 a8 r8 a8 r8 a8
-v3 r8 a8 r8 a8 r8 a8 r8 a8
-v3 r8 a8 r8 a8 r8 a8 r8 a8
-v3 r8 a8 r8 a8 r8 a8 r8 a8
-v3 r8 a8 r8 a8 r8 a8 r8 a8
-v3 r8 a8 r8 a8 r8 a8 r8 a8 ]3
+v3 r8 a8 r8 a8 r8 a8 r8 a8 v3 r8 a8 r8 a8 r8 a8 r8 a8 v3 r8 a8 r8 a8 r8 a8 r8 a8 v2 r8 a8 r8 a8 r8 a8 r8 a8 v3
+  r8 a8 r8 a8 r8 a8 r8 a8 v3 r8 a8 r8 a8 r8 a8 r8 a8 v3 r8 a8 r8 a8 r8 a8 r8 a8 v2 r8 a8 r8 a8 r8 a8 r8 a8 v3 r8
+  a8 r8 a8 r8 a8 r8 a8 v3 r8 a8 r8 a8 r8 a8 r8 a8 v3 r8 a8 r8 a8 r8 a8 r8 a8 v3 r8 a8 r8 a8 r8 a8 r8 a8 r1 r1 r1
+  r1 r1 v2 r8 a8 r8 a8 r8 a8 r8 a8 v3 r8 a8 r8 a8 r8 a8 r8 a8 v3 r8 a8 r8 a8 r8 a8 r8 a8 v3 r8 a8 r8 a8 r8 a8 r8
+  a8 v3 r8 a8 r8 a8 r8 a8 r8 a8 v3 r8 a8 r8 a8 r8 a8 r8 a8 v3 r8 a8 r8 a8 r8 a8 r8 a8 v3 r8 a8 r8 a8 r8 a8 r8 a8
+  v3 r8 a8 r8 a8 r8 a8 r8 a8 v3 r8 a8 r8 a8 r8 a8 r8 a8 v3 r8 a8 r8 a8 r8 a8 r8 a8 v3 r8 a8 r8 a8 r8 a8 r8 a8 v3
+  r8 a8 r8 a8 r8 a8 r8 a8 v3 r8 a8 r8 a8 r8 a8 r8 a8 v3 r8 a8 r8 a8 r8 a8 r8 a8 v3 r8 a8 r8 a8 r8 a8 r8 a8 v3 r8
+  a8 r8 a8 r8 a8 r8 a8 v3 r8 a8 r8 a8 r8 a8 r8 a8 v3 r8 a8 r8 a8 r8 a8 r8 a8 v3 r8 a8 r8 a8 r8 a8 r8 a8 v3 r8 a8
+  r8 a8 r8 a8 r8 a8 ]3
 // Ending has no hi-hat.
 r1 }
-$HAT8 = { v6 r8 a8 r8 a8 r8 a8 r8 a8 v6 r8 a8 r8 a8 r8 a8 r8 a8 v6 r8 a8 r8 a8 r8 a8 r8 a8 v5 r8 a8 r8 a8 r8 a8 r8 a8 v6 r8 a8 r8 a8 r8 a8 r8 a8 v6 r8 a8 r8 a8 r8 a8 r8 a8 v6 r8 a8 r8 a8 r8 a8 r8 a8 v5 r8 a8 r8 a8 r8 a8 r8 a8 }
+$HAT8 = { v6 r8 a8 r8 a8 r8 a8 r8 a8 v6 r8 a8 r8 a8 r8 a8 r8 a8 v6 r8 a8 r8 a8 r8 a8 r8 a8 v5 r8 a8 r8 a8 r8 a8
+  r8 a8 v6 r8 a8 r8 a8 r8 a8 r8 a8 v6 r8 a8 r8 a8 r8 a8 r8 a8 v6 r8 a8 r8 a8 r8 a8 r8 a8 v5 r8 a8 r8 a8 r8 a8 r8
+  a8 }
 // I1 [A B C QUIET I2]2 E
 r1 [ $HAT8 $HAT8 $HAT8 r1 r1 r1 r1 r1 v5 r8 a8 r8 a8 r8 a8 r8 a8 ]$LOOP_END r1
 
@@ -291,13 +204,6 @@ r1 [ $HAT8 $HAT8 $HAT8 r1 r1 r1 r1 r1 v5 r8 a8 r8 a8 r8 a8 r8 a8 ]$LOOP_END r1
 // キンキンしたピアノだけだと高さが分からないので、下から音階を支える。
 $REST4 = { r1 r1 r1 r1 }
 $REST8 = { r1 r1 r1 r1 r1 r1 r1 r1 }
-t135 o3 l8 q5 v8 @{vpTomVoice}
-r1
-[ o3 r1 r1 r1
-v9 r8 g8 b8 >d8 <a8 f+8 e8 c+8
-r1 r1 r1
-v9 r8 a8 >c+8 e8 <b8 a8 f+8 e8
-$REST8 $REST8 $REST4
-r1
-o3 v8 a8. f+16 d8 e8 f+4 e8 c+8 ]$LOOP_END
-o4 l16 q8 v6 @{vpTomVoice} a2 a8 b-32 b32 >c32 c+32 d32 d+32 e32 f32 f+32 g32 g+32 a32
+t135 o3 l8 q5 v8 @{vpTomVoice} r1 [ o3 r1 r1 r1 v9 r8 g8 b8 >d8 <a8 f+8 e8 c+8 r1 r1 r1 v9 r8 a8 >c+8 e8 <b8 a8
+  f+8 e8 $REST8 $REST8 $REST4 r1 o3 v8 a8. f+16 d8 e8 f+4 e8 c+8 ]$LOOP_END o4 l16 q8 v6 @{vpTomVoice} a2 a8
+  b-32 b32 >c32 c+32 d32 d+32 e32 f32 f+32 g32 g+32 a32
