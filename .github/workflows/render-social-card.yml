@@ -146,14 +146,14 @@ jobs:
           node scripts/render_mml_overlay.cjs "$MML" \
             "$RUNNER_TEMP/mml-left.txt" "$RUNNER_TEMP/mml-right.txt"
           "${image_magick[@]}" -background none -fill 'rgba(114,255,192,0.64)' \
-            -font DejaVu-Sans-Mono -pointsize 33 -size 286x630 -gravity north \
+            -font DejaVu-Sans-Mono -pointsize 33 -size 315x630 -gravity northwest \
             caption:"$(cat "$RUNNER_TEMP/mml-left.txt")" "$RUNNER_TEMP/mml-left.png"
           "${image_magick[@]}" -background none -fill 'rgba(114,255,192,0.64)' \
-            -font DejaVu-Sans-Mono -pointsize 33 -size 286x630 -gravity north \
+            -font DejaVu-Sans-Mono -pointsize 33 -size 315x630 -gravity northeast \
             caption:"$(cat "$RUNNER_TEMP/mml-right.txt")" "$RUNNER_TEMP/mml-right.png"
           "${image_magick[@]}" "$RUNNER_TEMP/card-background.png" \
-            "$RUNNER_TEMP/mml-left.png" -geometry +14+0 -composite \
-            "$RUNNER_TEMP/mml-right.png" -geometry +900+0 -composite \
+            "$RUNNER_TEMP/mml-left.png" -geometry +0+0 -composite \
+            "$RUNNER_TEMP/mml-right.png" -geometry +885+0 -composite \
             \( "$RUNNER_TEMP/card-foreground.png" \
               -bordercolor 'rgba(255,255,255,0.25)' -border 2 \) \
             -gravity center -composite -strip "$OUTPUT"
