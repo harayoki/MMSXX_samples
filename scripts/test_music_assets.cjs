@@ -8,11 +8,12 @@ const songs = [
   ['01_Volcano-parade', 'vp-src', 'vol_par_crt_256.png', 'Volcano Parade'],
   ['02_Pocket-Tunnel', 'pt-src', 'pocket-tunnel.png', 'Pocket Tunnel'],
   ['03_Windward-Crossing', 'wc-src', 'windward-crossing.png', 'Windward Crossing'],
+  ['03_Windward-Crossing/ch1-field', 'wc-ch1-field-src',
+    '../windward-crossing.png', 'Windward Crossing — CH1 Field'],
   ['04_Grassland-Trinity', 'gt-src', 'grassland-trinity.png', '草原のトリニティ'],
   ['05_Windward-Battle-Interactive', 'wbi-src',
     '../03_Windward-Crossing/windward-crossing.png',
     '風渡りの境界 戦闘曲(インタラクティブ)', true],
-  ['06_BEAT2', 'beat2-src', 'beat2.png', 'BEAT2'],
 ];
 
 (async () => {
