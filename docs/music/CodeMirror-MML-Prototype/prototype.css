@@ -1,0 +1,41 @@
+.cm-mml-shell {
+  width: 100%;
+  min-height: 0;
+  aspect-ratio: 4 / 3;
+  resize: vertical;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background-color: rgba(12, 16, 20, .68);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-blend-mode: multiply;
+}
+
+.music-editor textarea[hidden] { display: none; }
+
+.cm-mml-shell .cm-editor {
+  height: 100%;
+  color: #fff;
+  background: transparent;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas,
+    "BIZ UDGothic", "Noto Sans Mono CJK JP", "Source Han Mono", "MS Gothic",
+    Osaka-Mono, monospace;
+  font-size: .875rem;
+  line-height: 1.45;
+  text-shadow: 0 0 2px rgba(0,0,0,.95), 0 0 5px rgba(0,0,0,.75),
+    0 1px 2px rgba(0,0,0,.9);
+}
+
+.cm-mml-shell .cm-scroller { overflow: auto; }
+.cm-mml-shell .cm-content { min-height: 100%; padding: 10px 0; caret-color: #fff; }
+.cm-mml-shell .cm-line { padding: 0 10px; }
+.cm-mml-shell .cm-activeLine { background: rgba(255,255,255,.08); }
+.cm-mml-shell .cm-selectionBackground,
+.cm-mml-shell .cm-content ::selection { background: rgba(38,141,245,.5) !important; }
+.cm-mml-shell .cm-focused { outline: 2px solid var(--blue); outline-offset: -2px; }
+
+@media (max-width: 640px) {
+  .cm-mml-shell .cm-editor { font-size: .8125rem; }
+}
