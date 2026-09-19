@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>BEAT</title>
+  <link rel="stylesheet" href="../music-page.css">
+</head>
+<body>
+<main class="music-page" id="beat">
+  <nav class="music-top-nav" aria-label="ページナビゲーション"><a href="../" aria-label="1階層上へ" title="1階層上へ"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V4M5.5 10.5 12 4l6.5 6.5"/></svg></a></nav>
+  <div class="music-player" id="beat-player"></div>
+  <p class="music-status text-small text-muted" data-music-status aria-live="polite"></p>
+  <div class="music-editor">
+    <textarea placeholder="LOADING" aria-label="MMLソース"
+      data-music-background="beat.jpg" id="beat-src"
+      rows="24" spellcheck="false" disabled></textarea>
+  </div>
+  <div class="music-credits">
+    <p class="text-small text-muted">Music, artwork, MML source and exported WAV:
+      <a href="https://creativecommons.org/licenses/by/4.0/" rel="license">CC BY 4.0</a>.
+      JavaScript source is not covered by CC BY 4.0. Redistribution is prohibited.</p>
+    <p class="text-small">This
+      <a href="./beat.png" data-music-image="beat.png">cover art</a>
+      was created with mmsxx-pixel-studio.</p>
+  </div>
+</main>
+<script src="../music-page.js" data-song="06_BEAT"></script>
+</body>
+</html>
