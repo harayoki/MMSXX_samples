@@ -8,6 +8,7 @@ import {
 import {
   HighlightStyle, StreamLanguage, syntaxHighlighting,
 } from 'https://esm.sh/@codemirror/language@6.12.4';
+import { search, searchKeymap } from 'https://esm.sh/@codemirror/search@6.5.11';
 import { tags } from 'https://esm.sh/@lezer/highlight@1.2.3';
 
 // 行頭（空白可）の # はシステム行。// と /* ... */ は通常コメント。
@@ -67,8 +68,9 @@ export function mountMMLEditor(host, source, options = {}) {
       doc: source,
       extensions: [
         history(),
+        search(),
         highlightActiveLine(),
-        keymap.of([...defaultKeymap, ...historyKeymap]),
+        keymap.of([...defaultKeymap, ...searchKeymap, ...historyKeymap]),
         mmlComments,
         syntaxHighlighting(mmlHighlight),
         EditorView.lineWrapping,

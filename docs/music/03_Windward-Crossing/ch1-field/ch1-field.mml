@@ -6,7 +6,7 @@
 #license CC BY 4.0 (music, artwork and MML source; https://creativecommons.org/licenses/by/4.0/)
 
 // 元曲と同じフィールド用リードと8分音符間隔のセルフエコー。
-#bundle fieldLeadEcho = @{wcFieldLead} @s8
+#bundle fieldLeadEcho = @{wcFieldLead} @s{8,8}
 
 #ch 主旋律
 #role lead

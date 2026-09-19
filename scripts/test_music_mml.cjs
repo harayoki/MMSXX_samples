@@ -102,6 +102,7 @@ const sources = songs.map(([file, channels, marks]) => ({
 
 for (const { file, source } of sources) {
   assert.equal(E.countOldStyle(source), 0, file + ': no legacy // # directives');
+  assert(!/@s[1-9]\d*/.test(source), file + ': active echo must specify depth');
 }
 
 for (const file of [
