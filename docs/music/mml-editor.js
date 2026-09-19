@@ -53,8 +53,8 @@ const mmlComments = StreamLanguage.define({
 });
 
 const mmlHighlight = HighlightStyle.define([
-  { tag: tags.meta, color: '#a8d69a', fontWeight: '600' },
-  { tag: tags.comment, color: '#a0a0a0', fontStyle: 'italic' },
+  { tag: tags.meta, color: 'var(--mml-system)', fontWeight: '600' },
+  { tag: tags.comment, color: '#b8b8b8', fontStyle: 'italic' },
 ]);
 
 export function mountMMLEditor(host, source, options = {}) {

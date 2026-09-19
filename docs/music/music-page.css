@@ -18,6 +18,7 @@ body {
   font-family: system-ui, sans-serif;
 }
 .music-page {
+  --mml-system: color-mix(in srgb, var(--blue) 75%, white);
   display: grid;
   gap: 12px;
   width: min(100%, 1000px);
@@ -25,10 +26,12 @@ body {
 }
 #volcano-parade { --blue: #cd4b09; }
 #pocket-tunnel { --blue: #e51d0b; }
-#windward-crossing { --blue: #2424f5; }
+#windward-crossing,
+#windward-crossing-ch1-field { --blue: #2424f5; }
 #windward-battle-interactive { --blue: #2424f5; }
 #grassland-trinity { --blue: #068911; }
-#beat2 { --blue: #7135b7; }
+#beat2,
+#beat_v2 { --blue: #7135b7; }
 .music-page p { margin: 2px; }
 .music-credits { display: grid; gap: 0; }
 .music-credits p { margin: 0; }
