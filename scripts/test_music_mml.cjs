@@ -14,8 +14,19 @@ const echoProbeAudio = new E.ChipTuneSound();
 assert(echoProbeAudio.defineBGM('echo-probe', ['t120 @s8 c8 r2']).ok,
   'echo probe must compile');
 assert(echoProbeAudio.bgmDefs.get('echo-probe')[0].events.some(event =>
-  event.tail && event.echo === null && Math.abs(event.gate - .25) < 1e-9),
-  'echo copies must ring until the next copy and use the fading tail envelope');
+  event.tail && event.echo === null && Math.abs(event.gate - .21875) < 1e-9),
+  'echo copies must keep the source gate length and use the fading tail envelope');
+const hiddenEchoAudio = new E.ChipTuneSound();
+assert(hiddenEchoAudio.defineBGM('hidden-echo', ['t120 @s8 l4 q5 c c r c r c r2']).ok,
+  'hidden echo probe must compile');
+const hiddenEchoEvents = hiddenEchoAudio.bgmDefs.get('hidden-echo')[0].events;
+const hiddenEchoCopies = hiddenEchoEvents.filter(event => event.tail);
+for (const note of hiddenEchoEvents.filter(event => !event.tail)) {
+  assert(hiddenEchoCopies.some(copy => copy.t > note.t && copy.t < note.t + .5),
+    `echo hidden by note at ${note.t.toFixed(3)} must emerge in the following gap`);
+}
+assert.equal(Math.max(...hiddenEchoCopies.map(event => event.vol)), 4,
+  'the loudest hidden echo copy must not be discarded');
 const vibratoProbe = E.compileMML('t120 @m{5,7,18} o4 c4').events[0];
 assert.deepEqual(vibratoProbe.vib, { depth: 5, speed: 7, delay: 18 },
   'extended @m must keep depth, speed and delay');
@@ -201,8 +212,10 @@ for (const { file, channels, marks, source } of sources) {
       vib: event.vib,
       open: event.open,
     });
-    assert.deepEqual(compiled[0].events.map(event => comparable(event, 0)),
-      suiteField.map(event => comparable(event, fieldStart)),
+    assert.deepEqual(compiled[0].events.filter(event => !event.tail)
+      .map(event => comparable(event, 0)),
+      suiteField.filter(event => !event.tail)
+        .map(event => comparable(event, fieldStart)),
       file + ': notes and sound settings match the suite CH1 field');
   }
   if (file.startsWith('05_Windward-Battle-Interactive/')) {

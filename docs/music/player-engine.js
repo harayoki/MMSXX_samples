@@ -1,4 +1,4 @@
-// MMS/XX player and audio engine, source commit 5554e5e221bbf0805e674362c0140025715f8840
+// MMS/XX player and audio engine, source commit c689363fa61288455fd99c0d8ee4bd6b060b7a70
 (() => {
   var __defProp = Object.defineProperty;
   var __export = (target, all) => {
@@ -5339,12 +5339,17 @@ registerProcessor('mmsxx-duty', DutyBank);
     if (!events.some((e) => e.echo)) return events;
     const out = [...events];
     const busy = events.filter((e) => e.gate > 0).map((e) => [e.t, e.t + e.gate]);
-    const sounding = (t) => busy.some(([s, e]) => t > s - 1e-9 && t < e - 1e-9);
     const nextAt = (t) => {
       let at = Number.isFinite(total) ? total : Infinity;
       for (const [s] of busy) if (s > t + 1e-9 && s < at) at = s;
       return at;
     };
+    const freeFrom = (t) => {
+      let at = t;
+      for (const [s, e] of busy) if (at > s - 1e-9 && at < e - 1e-9) at = Math.max(at, e);
+      return at;
+    };
+    const copies = [];
     for (const e of events) {
       if (!e.echo || !(e.echo.delay > 0) || !(e.vol > 0)) continue;
       const k = 0.12 + e.echo.depth * 0.05;
@@ -5352,15 +5357,27 @@ registerProcessor('mmsxx-duty', DutyBank);
       for (let r = 1; r <= 8; r++) {
         vol *= k;
         if (vol < 0.7) break;
-        const t = e.t + e.echo.delay * r;
-        if (t >= total - 1e-9) break;
-        if (sounding(t)) continue;
-        const stop = Math.min(nextAt(t), total);
-        const gate = Math.min(stop - t, e.echo.delay);
+        const at = e.t + e.echo.delay * r;
+        if (at >= total - 1e-9) break;
+        const t = freeFrom(at);
+        const stop = Math.min(at + e.gate, nextAt(t), total);
+        const gate = stop - t;
         if (gate <= 0.01) continue;
-        out.push({ ...e, t, dur: gate, gate, vol: Math.round(vol), echo: null, tail: true });
-        busy.push([t, t + gate]);
+        copies.push({ ...e, t, dur: gate, gate, vol: Math.round(vol), echo: null, tail: true });
       }
+    }
+    copies.sort((a, b) => a.t - b.t || b.vol - a.vol);
+    let last = null;
+    for (const c of copies) {
+      if (last) {
+        if (c.t < last.t + 1e-9) continue;
+        if (c.t < last.t + last.gate - 1e-9) {
+          last.gate = c.t - last.t;
+          last.dur = last.gate;
+        }
+      }
+      out.push(c);
+      last = c;
     }
     out.sort((a, b) => a.t - b.t);
     return out;
