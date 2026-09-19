@@ -1,0 +1,166 @@
+name: Render social card
+
+on:
+  workflow_dispatch:
+    inputs:
+      folder:
+        description: "Music folder (for example: 04_Grassland-Trinity)"
+        required: true
+        type: string
+      image_path:
+        description: "Optional source image path (folder-relative or repository-relative)"
+        required: false
+        default: ""
+        type: string
+  push:
+    branches:
+      - "codex/card-render-*"
+    paths:
+      - ".card-render/*.json"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: social-card-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  render:
+    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[card-rendered]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          lfs: false
+
+      - name: Validate request and select branch
+        id: request
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REQUEST_COMMIT: ${{ github.sha }}
+          REQUEST_BRANCH: ${{ github.ref_name }}
+          INPUT_FOLDER: ${{ inputs.folder }}
+          INPUT_IMAGE_PATH: ${{ inputs.image_path }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$EVENT_NAME" == push ]]; then
+            mapfile -d '' requests < <(
+              find .card-render -maxdepth 1 -type f -name '*.json' -print0
+            )
+            if [[ ${#requests[@]} -ne 1 ]]; then
+              echo "Exactly one .card-render/*.json request is required." >&2
+              exit 1
+            fi
+            request="${requests[0]}"
+            base_sha="$(jq -er '.base_sha' "$request")"
+            folder="$(jq -er '.folder' "$request")"
+            image_path="$(jq -r '.image_path // ""' "$request")"
+
+            if [[ "$(git rev-parse HEAD^)" != "$base_sha" ]]; then
+              echo "base_sha must be the request commit parent." >&2
+              exit 1
+            fi
+            changed="$(git diff --name-only "$base_sha" HEAD)"
+            if [[ "$changed" != "$request" ]]; then
+              echo "The request commit may only add one request JSON file." >&2
+              exit 1
+            fi
+
+            git reset --hard "$base_sha"
+            branch="$REQUEST_BRANCH"
+            expected_sha="$REQUEST_COMMIT"
+          else
+            folder="$INPUT_FOLDER"
+            image_path="$INPUT_IMAGE_PATH"
+            branch="codex/card-render-$GITHUB_RUN_ID"
+            expected_sha=""
+            git switch -c "$branch"
+          fi
+
+          {
+            echo "folder=$folder"
+            echo "image_path=$image_path"
+            echo "branch=$branch"
+            echo "expected_sha=$expected_sha"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Prepare metadata and fetch source art
+        id: metadata
+        shell: bash
+        env:
+          FOLDER: ${{ steps.request.outputs.folder }}
+          IMAGE_PATH: ${{ steps.request.outputs.image_path }}
+        run: |
+          set -euo pipefail
+          node scripts/prepare_social_card.cjs "$FOLDER" "$IMAGE_PATH" > "$RUNNER_TEMP/card.json"
+          source="$(jq -r '.source' "$RUNNER_TEMP/card.json")"
+          output="$(jq -r '.output' "$RUNNER_TEMP/card.json")"
+          html="$(jq -r '.html' "$RUNNER_TEMP/card.json")"
+          title="$(jq -r '.title' "$RUNNER_TEMP/card.json")"
+
+          git lfs install --local
+          git lfs pull --include="$source" --exclude=""
+
+          {
+            echo "source=$source"
+            echo "output=$output"
+            echo "html=$html"
+            echo "title=$title"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Render 1200 x 630 card
+        shell: bash
+        env:
+          SOURCE: ${{ steps.metadata.outputs.source }}
+          OUTPUT: ${{ steps.metadata.outputs.output }}
+        run: |
+          set -euo pipefail
+          if command -v magick >/dev/null 2>&1; then
+            image_magick=(magick)
+          else
+            image_magick=(convert)
+          fi
+
+          "${image_magick[@]}" "$SOURCE" -auto-orient -resize '1200x630^' \
+            -gravity center -extent 1200x630 -blur 0x24 -modulate 68,95,100 \
+            "$RUNNER_TEMP/card-background.png"
+          "${image_magick[@]}" "$SOURCE" -auto-orient -resize '1120x570>' \
+            "$RUNNER_TEMP/card-foreground.png"
+          "${image_magick[@]}" "$RUNNER_TEMP/card-background.png" \
+            \( "$RUNNER_TEMP/card-foreground.png" \
+              -bordercolor 'rgba(255,255,255,0.25)' -border 2 \) \
+            -gravity center -composite -strip "$OUTPUT"
+
+          dimensions="$(identify -format '%wx%h' "$OUTPUT")"
+          if [[ "$dimensions" != 1200x630 ]]; then
+            echo "Unexpected card dimensions: $dimensions" >&2
+            exit 1
+          fi
+
+      - name: Commit and push generated card
+        shell: bash
+        env:
+          HTML: ${{ steps.metadata.outputs.html }}
+          OUTPUT: ${{ steps.metadata.outputs.output }}
+          TITLE: ${{ steps.metadata.outputs.title }}
+          BRANCH: ${{ steps.request.outputs.branch }}
+          EXPECTED_SHA: ${{ steps.request.outputs.expected_sha }}
+        run: |
+          set -euo pipefail
+          git add -- "$HTML" "$OUTPUT"
+          node scripts/check_lfs_pointers.cjs
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "SNSカードを生成: $TITLE [card-rendered]"
+
+          if [[ -n "$EXPECTED_SHA" ]]; then
+            git push --force-with-lease="refs/heads/$BRANCH:$EXPECTED_SHA" origin "HEAD:$BRANCH"
+          else
+            git push -u origin "HEAD:$BRANCH"
+          fi
