@@ -130,12 +130,12 @@
       MMSXX.sound.mountPlayer = mountWithStoredOpen;
       await load(song('player.js'));
       // The player title is created after each page fetches its MML. Dock the
-      // MUSIC TOP icon beside it as soon as that title appears.
+      // MUSIC TOP icon after the title/version group as soon as it appears.
       const dockMusicTop = () => {
         const nav = document.querySelector('.music-top-nav');
         const title = document.querySelector('.music-player .about [data-p="title"]');
         if (!nav || !title) return false;
-        title.after(nav);
+        (title.closest('.head') || title).after(nav);
         return true;
       };
       if (!dockMusicTop()) {

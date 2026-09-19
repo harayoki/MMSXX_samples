@@ -127,7 +127,7 @@ for (const { file, channels, marks, source } of sources) {
     assert(!info.meta.about.includes('ファミコン準拠'),
       file + ': must not claim Famicom compliance');
     assert.deepEqual(info.tracks.map(track => track.name),
-      ['主旋律', 'ベース', '副旋律', 'ドラム補佐'], file + ': channel names');
+      ['主旋律', 'ベース', '副旋律', 'ドラム'], file + ': channel names');
     assert.equal(info.tracks[0].voices, 1,
       file + ': channel 1 self echo must stay within one voice');
     const compiled = audio.bgmDefs.get('test');

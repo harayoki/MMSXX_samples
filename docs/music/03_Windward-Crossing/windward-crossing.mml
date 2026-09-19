@@ -369,7 +369,7 @@ $fieldShort = {
 // 演奏順は冒頭の $ORDER と回数で指定します。
 $ORDER
 
-// #ch ドラム補佐
+// #ch ドラム
 // #role perc
 // 副旋律の休符位置だけを担当します。
 $battleDrums = {

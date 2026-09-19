@@ -60,6 +60,13 @@ const songs = [
       if (!initiallyOpen) assert.equal(await page.evaluate(() =>
         localStorage.getItem('mmsxx.samples.player.open')), 'true');
       assert((await player.locator('[data-p="title"]').textContent()).includes(title));
+      assert.equal(await player.locator('.about').evaluate(about => {
+        const head = about.querySelector('.head');
+        const nav = about.querySelector('.music-top-nav');
+        const songver = head?.querySelector('[data-p="songver"]');
+        return !!head && head.nextElementSibling === nav &&
+          head.lastElementChild === songver;
+      }), true, 'title / version / upper-level navigation order');
       assert.equal(await player.locator('[data-p="showmml"]').isVisible(), false);
       assert.equal(await page.locator('#' + editorId).isEnabled(), true);
       assert.equal(
