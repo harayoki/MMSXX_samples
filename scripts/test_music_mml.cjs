@@ -62,6 +62,7 @@ const songs = [
   ['03_Windward-Crossing/ch1-field/ch1-field.mml', 1, ['フィールド']],
   ['04_Grassland-Trinity/grassland-trinity.mml', 4],
   ['05_Windward-Battle-Interactive/windward-battle-interactive.mml', 4],
+  ['DUMMY/tape-load-melancholy.mml', 7],
 ];
 
 function splitMML(text) {
@@ -242,6 +243,12 @@ for (const { file, channels, marks, source } of sources) {
           file + `: ${outcome} cannot switch before its end`);
       }
     }
+  }
+  if (file === 'DUMMY/tape-load-melancholy.mml') {
+    assert.deepEqual(info.tracks.map(track => track.name),
+      ['テープ', '旋律', '対旋律', 'アルペジオ', 'ベース', 'ドラム', 'ビープ'],
+      file + ': channel names');
+    assert.equal(E.readBundles(source).size, 9, file + ': bundled voice count');
   }
   console.log('PASS', file, channels + 'ch', info.total.toFixed(3) + 's');
 }
