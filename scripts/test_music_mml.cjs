@@ -51,7 +51,7 @@ const songs = [
   ['02_Pocket-Tunnel/original.mml', 12, ['イントロ', '本編', 'エンディング']],
   ['02_Pocket-Tunnel/jazz.mml', 13, ['イントロ', '本編', 'エンディング']],
   ['02_Pocket-Tunnel/fusion-v1.mml', 10, ['イントロ', '本編', 'エンディング']],
-  ['03_Windward-Crossing/windward-crossing.mml', 3, [
+  ['03_Windward-Crossing/windward-crossing.mml', 4, [
     'イントロ', 'フィールド', 'エンカウント', '戦闘 A', '戦闘 B', '戦闘 C',
     '勝利', 'フィールド（後半）', 'エンカウント（後半）',
     '戦闘 B（後半）', '戦闘 C（後半）', '敗北',
@@ -119,7 +119,13 @@ for (const { file, channels, marks, source } of sources) {
     index === 0 || mark.t > info.marks[index - 1].t), file + ': jump label order');
   if (file === '03_Windward-Crossing/windward-crossing.mml') {
     assert.deepEqual(info.tracks.map(track => track.name),
-      ['主旋律', 'ベース', '副旋律＋ドラム補佐'], file + ': channel names');
+      ['主旋律', 'ベース', '副旋律', 'ドラム補佐'], file + ': channel names');
+    const compiled = audio.bgmDefs.get('test');
+    const counter = compiled[2].events;
+    const drums = compiled[3].events;
+    assert(!counter.some(a => drums.some(b =>
+      a.t < b.t + b.gate - 1e-9 && b.t < a.t + a.gate - 1e-9)),
+    file + ': counter melody and drums must not overlap');
   }
   if (file === '06_BEAT/beat.mml') {
     assert.deepEqual(info.tracks.map(track => track.name),
