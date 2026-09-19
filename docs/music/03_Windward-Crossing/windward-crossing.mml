@@ -1,9 +1,9 @@
-// #title 風渡りの境界 (組曲) - Windward Crossing
-// #version 1.8
-// #about 王道RPGを意識した組曲。フィールド、エンカウント、戦闘（A/B/C）、勝利、敗北を連続再生。
-// #arrangement RPG Suite — 風渡りの境界
-// #copyright 2026 harayoki
-// #license CC BY 4.0 (music, artwork and MML source; https://creativecommons.org/licenses/by/4.0/)
+#title 風渡りの境界 (組曲) - Windward Crossing
+#version 1.8
+#about 王道RPGを意識した組曲。フィールド、エンカウント、戦闘（A/B/C）、勝利、敗北を連続再生。
+#arrangement RPG Suite — 風渡りの境界
+#copyright 2026 harayoki
+#license CC BY 4.0 (music, artwork and MML source; https://creativecommons.org/licenses/by/4.0/)
 // イントロ → 草原×2 → エンカウント → 有利×1 → 不利×2 → 大ピンチ×2
 // → 勝利 → 草原4小節 → エンカウント → 不利×2 → 大ピンチ×2 → 敗北
 // 4声。戦闘はベース専用、副旋律とドラムを分離。
@@ -20,16 +20,16 @@
 
 // 曲内で使う音色セット。音色にエコーやエンベロープを着せ、宣言をここへ集約。
 // 複数セットを同時に重ねる場合は、#bundle の右辺へカンマ区切りで並べる。
-// #bundle fieldLeadEcho = @{wcFieldLead} @s8
-// #bundle fieldLeadDry  = @{wcFieldLead} @s0
-// #bundle battleLead    = @{wcBattleLead} @s0
-// #bundle counterLead   = @{wcCounterLead} @s8 @o+1
-// #bundle fieldCounter  = @{wcFieldCounter} @s8
-// #bundle fieldBass     = @{wcBass} @s0
-// #bundle battleBass    = @{wcBattleBass} @s0
-// #bundle fieldArp      = @{wcArp} @s0
-// #bundle kick          = @{wcKick} @s0
-// #bundle drumNoise     = @{noise:white} @e{wcDrumEnv} @s0
+#bundle fieldLeadEcho = @{wcFieldLead} @s8
+#bundle fieldLeadDry  = @{wcFieldLead} @s0
+#bundle battleLead    = @{wcBattleLead} @s0
+#bundle counterLead   = @{wcCounterLead} @s8 @o+1
+#bundle fieldCounter  = @{wcFieldCounter} @s8
+#bundle fieldBass     = @{wcBass} @s0
+#bundle battleBass    = @{wcBattleBass} @s0
+#bundle fieldArp      = @{wcArp} @s0
+#bundle kick          = @{wcKick} @s0
+#bundle drumNoise     = @{noise:white} @e{wcDrumEnv} @s0
 
 // 再生設定：ここだけ編集すれば全4パートへ反映されます。
 // 回数は 0＝省略、1以上＝指定回数です。
@@ -49,37 +49,37 @@ $LOSE_COUNT = { 1 } // 敗北
 
 // 演奏順も全パート共通。順番を変える場合はこの定義を編集します。
 $ORDER = {
-  // #label イントロ
+  #label イントロ
   [$intro]$INTRO_COUNT
-  // #label フィールド
+  #label フィールド
   [$field]$FIELD_COUNT
-  // #label エンカウント
+  #label エンカウント
   [$encounter]$ENCOUNTER_COUNT
-  // #label 戦闘 A
+  #label 戦闘 A
   [$good]$GOOD_COUNT
-  // #label 戦闘 B
+  #label 戦闘 B
   [$bad]$BAD_COUNT
-  // #label 戦闘 C
+  #label 戦闘 C
   [$crisis]$CRISIS_COUNT
-  // #label 勝利
+  #label 勝利
   [$win]$WIN_COUNT
-  // #label フィールド（後半）
+  #label フィールド（後半）
   [$fieldShort]$FIELD_SHORT_COUNT
-  // #label エンカウント（後半）
+  #label エンカウント（後半）
   [$encounter]$ENCOUNTER_AGAIN_COUNT
-  // #label 戦闘 B（後半）
+  #label 戦闘 B（後半）
   [$bad]$BAD_AGAIN_COUNT
-  // #label 戦闘 C（後半）
+  #label 戦闘 C（後半）
   [$crisis]$CRISIS_AGAIN_COUNT
-  // #label 敗北
+  #label 敗北
   [$lose]$LOSE_COUNT
 }
 
 // 各曲の先頭で状態を初期化。その後、曲固有の設定を指定します。
 $RESET = { o4 l4 t120 v10 q7 p3 @{pulse:50} @e{flat} @d0 @m0 @s0 @o0 }
 
-// #ch 主旋律
-// #role lead
+#ch 主旋律
+#role lead
 // 音色・テンポ・音量の共通設定。音符は下のフレーズ／各曲に記述。
 $sound1 = { @m0 t112 @{fieldLeadEcho} @m1 v10 q5 o5 }
 $sound2 = { @m0 t152 @{battleLead} @m1 v7 q6 o4 }
@@ -195,8 +195,8 @@ $fieldShort = {
 // 演奏順は冒頭の $ORDER と回数で指定します。
 $ORDER
 
-// #ch ベース
-// #role bass
+#ch ベース
+#role bass
 // 音色・テンポ・音量の共通設定。音符は下のフレーズ／各曲に記述。
 $sound1 = { @m0 t112 @{fieldBass} v15 q6 o1 }
 $sound2 = { @m0 t152 @{fieldBass} v13 q6 o1 }
@@ -311,8 +311,8 @@ $fieldShort = {
 // 演奏順は冒頭の $ORDER と回数で指定します。
 $ORDER
 
-// #ch 副旋律
-// #role counter
+#ch 副旋律
+#role counter
 // 打楽器と同時に鳴らない位置だけを担当します。フィールドでは主旋律の隙間を薄く補完します。
 $battle = { @m0 t152 q6 @{counterLead} v4 }
 $fieldCounter = { @m0 t112 q5 @{fieldCounter} v5 o4 }
@@ -369,8 +369,8 @@ $fieldShort = {
 // 演奏順は冒頭の $ORDER と回数で指定します。
 $ORDER
 
-// #ch ドラム
-// #role perc
+#ch ドラム
+#role perc
 // 副旋律の休符位置だけを担当します。
 $battleDrums = {
   @m0 t152 q6

@@ -15,14 +15,14 @@
     song, image, shared: path => new URL(path, root).href
   });
   /**
-   * 現行の `// #ch` でチャンネルを分ける。
+   * 現行の `#ch` でチャンネルを分ける。
    * サンプル曲は先頭に共通マクロを置くため、エンジン標準の splitVoices と違い、
    * 最初の #ch より前を各チャンネルへそのまま渡す。
    */
   function splitMML(text) {
     const lines = String(text ?? '').split(/\r?\n/);
     const marks = lines.map((line, index) =>
-      /^\s*\/\/\s*#\s*ch(?:\s|$)/i.test(line) ? index : -1
+      /^\s*#\s*ch(?:\s|$)/i.test(line) ? index : -1
     ).filter(index => index >= 0);
     if (!marks.length) return String(text ?? '').trim() ? [String(text)] : [];
     const head = lines.slice(0, marks[0]);

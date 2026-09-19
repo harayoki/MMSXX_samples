@@ -2,11 +2,11 @@
 // イントロとエンディングは1回ずつ。全パート共通で、再生とWAVの両方に適用。
 $LOOP_END = { 1 }
 
-// #title Pocket Tunnel
-// #about おしゃれアレンジ · テンションを強調した大人向けのゲームBGM
-// #arrangement おしゃれアレンジ
-// #copyright 2026 harayoki
-// #license CC BY 4.0 (music, artwork and MML source; https://creativecommons.org/licenses/by/4.0/)
+#title Pocket Tunnel
+#about おしゃれアレンジ · テンションを強調した大人向けのゲームBGM
+#arrangement おしゃれアレンジ
+#copyright 2026 harayoki
+#license CC BY 4.0 (music, artwork and MML source; https://creativecommons.org/licenses/by/4.0/)
 
 // 使用音色：
 // 本編メロディは標準エコー @s6。イントロと終止は @s0。
@@ -20,16 +20,16 @@ $LOOP_END = { 1 }
 // @e{ptHeld} は持続、@e{ptDecay} は音長に応じた減衰。
 // 音量の換算とADSRの秒数調整だけを共通JS処理で行う。
 
-// #ch メロディ
-// #role lead
+#ch メロディ
+#role lead
 // パート 1 — メロディ。
 // イントロ
-// #label イントロ
+#label イントロ
 t120 q8 @{ptjazzlead} @e{ptheld} v11 @d0 @s0 q8 o3 c16&c400 r40 r320 r1600 o3 e20&e100 r32 r400 o3 g20&g100
 r32 r400 o3 a20&a100 r32 r400 o4 d16&d64&d640&d3200 r25 r200 o4 f20&f100 r32 r400 o4 a16&a160&a800 r20 r200 o4
 b16&b64&b640&b3200 r16 r80 r800 o5 d16&d40&d400 r16 r32 r320 r1600 o5 e16&e160&e800 r5 r25 r400
 // 本編
-// #label 本編
+#label 本編
 [ t120 o5 l4 v11 q8 @{ptJazzLead} @e{ptHeld} @d0 @m0 @s0 @o0 @p{0,0,0}
 @s6 q6 o5 f16 o5 a16 q3 o6 c8 q6 o5 a16 o6 c16 o6 f8 o6 e16 o6 d16 o6 c8 o5 a8 o5 g8 o5 g16 o5 b16 q3 o6 d8 q6
 o5 b16 o6 d16 o6 g8 o6 f16 o6 e16 o6 d8 q3 o5 b4 q6 o5 f16 o5 g16 q3 o6 c8 q6 o5 g16 o6 c16 o6 f8 o6 d16 o6
@@ -50,12 +50,12 @@ o6 c8 q6 o5 g16 o6 c16 o6 f8 o6 d16 o6 c16 o5 g8 o5 f8 o5 g8 q7 o5 e16 o5 g16 o6
 o5 c4 r4
 ]$LOOP_END
 // エンディング
-// #label エンディング
+#label エンディング
 @s0 q8 o5 a10 r16 r40 o5 g10&g100 r16 r80 r400 o5 e10 r40 o5 d8&d32&d320&d1600 r16 r40 r400 o4 b10 r40 o5
 d16&d80 r20 o5 c2&c8&c20 r4 r16 r80
 
-// #ch アルペジオ／合いの手
-// #role arp
+#ch アルペジオ／合いの手
+#role arp
 // パート 2 — アルペジオ／合いの手。
 // イントロ
 t120 q8 r1 r4 r8
@@ -82,8 +82,8 @@ r25 o4 g8&g80&g400 r25 r160 r800
 // エンディング
 r2 r4 r5 r400 r1 r25 r160 r800
 
-// #ch ベース
-// #role bass
+#ch ベース
+#role bass
 // パート 3 — ベース。
 // イントロ
 t120 q8 @{ptjazzbass} @e{ptdecay} v8 @d0 @s0 q8 o2 c4&c8&c20 r16 r80 o2 g4&g8&g20 r4 r5
@@ -121,8 +121,8 @@ c5&c80&c400 r32 r320 r1600 o2 c+5&c+80&c+400 r32 r320 r1600
 // エンディング
 @e{ptheld} v8 o2 d4&d10 r8 r40 o2 g4&g10 r8 r40 o2 c2&c8&c20 r4 r16 r80
 
-// #ch キック
-// #role perc
+#ch キック
+#role perc
 // パート 4 — キック。
 // イントロ
 t120 q8 r1 r4 r8
@@ -141,8 +141,8 @@ f+25r4 r5 r100 o1 f+25 r4 r5 r100
 // エンディング
 v7 o1 f+20 r4 r5 o1 f+20r4 r5 o1 f+20 r2 r4 r5
 
-// #ch スネア
-// #role perc
+#ch スネア
+#role perc
 // パート 5 — スネア。
 // イントロ
 t120 q8 r1 r4 r8
@@ -167,8 +167,8 @@ r5 r64 r640 r3200 o4 a32&a800 r4 r5 r64 r640 r3200 o4 a32&a800 r5 r64 r640 r3200
 // エンディング
 r2 r4 r32 r800 r1 r5 r64 r640 r3200
 
-// #ch ハイハット
-// #role perc
+#ch ハイハット
+#role perc
 // パート 6 — ハイハット。
 // イントロ
 t120 q8 r1 r4 r8
@@ -218,8 +218,8 @@ v4 o6 a50&a400 r8 r64 r320 r4000 v2 o6 a50&a400 r20 r100 r1000
 // エンディング
 r2 r4 r8 r16 r800 r6400 r12800 r64000 r1 r20 r100 r1000
 
-// #ch 和音 1
-// #role chord
+#ch 和音 1
+#role chord
 // パート 7 — 和音 1。
 // イントロ
 t120 q8 @{ptjazzchord} @e{ptdecay} v9 @d0 @s0 q8 o3 e4&e8&e20 r16 r80 o3 f4&f8&f20 r4 r5
@@ -245,8 +245,8 @@ r16 r200 o3 f5&f100 r5 r40 r400 o3 e8&e80&e400 r8 r25 r160 r800 o3 e5&e100 r8 r2
 // エンディング
 @e{ptheld} v10 o3 f4&f10 r8 r40 o3 f4&f10 r8 r40 o3 e2&e8&e20 r4 r16 r80
 
-// #ch 和音 1 上声
-// #role chord
+#ch 和音 1 上声
+#role chord
 // パート 7 — 和音 1（同時発音の追加声部 1）。
 // イントロ
 t120 q8 @{ptjazzchord} @e{ptdecay} v9 @d0 @s0 q8 o3 a4&a8&a20 r16 r80 o3 b4&b8&b20 r4 r5
@@ -257,8 +257,8 @@ r2 r20 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r4 r
 // エンディング
 @e{ptheld} v10 o4 c4&c10 r8 r40 o3 b4&b10 r8 r40 o3 a2&a8&a20 r4 r16 r80
 
-// #ch 和音 1 中声
-// #role chord
+#ch 和音 1 中声
+#role chord
 // パート 7 — 和音 1（同時発音の追加声部 2）。
 // イントロ
 t120 q8 @{ptjazzchord} @e{ptdecay} v9 @d0 @s0 q8 o4 d4&d8&d20 r16 r80 o4 e4&e8&e20 r4 r5
@@ -269,8 +269,8 @@ r2 r20 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r4 r
 // エンディング
 @e{ptheld} v10 o4 e4&e10 r8 r40 o4 e4&e10 r8 r40 o4 d2&d8&d20 r4 r16 r80
 
-// #ch 和音 1 最高声
-// #role chord
+#ch 和音 1 最高声
+#role chord
 // パート 7 — 和音 1（同時発音の追加声部 3）。
 // イントロ
 t120 q8 @{ptjazzchord} @e{ptdecay} v9 @d0 @s0 q8 o4 g4&g8&g20 r16 r80 o4 a4&a8&a20 r4 r5
@@ -281,8 +281,8 @@ r2 r20 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r4 r
 // エンディング
 @e{ptheld} v10 o4 a4&a10 r8 r40 o4 a4&a10 r8 r40 o4 g2&g8&g20 r4 r16 r80
 
-// #ch 和音 2
-// #role chord
+#ch 和音 2
+#role chord
 // パート 8 — 和音 2。
 // イントロ
 t120 q8 r1 r4 r8
@@ -309,8 +309,8 @@ r25 o3 a8&a80&a400 r25 r160 r800
 // エンディング
 r2 r4 r5 r400 r1 r25 r160 r800
 
-// #ch 和音 3
-// #role chord
+#ch 和音 3
+#role chord
 // パート 9 — 和音 3。
 // イントロ
 t120 q8 r1 r4 r8
@@ -337,8 +337,8 @@ d5&d100 r8 r25 o4 d8&d80&d400 r25 r160 r800
 // エンディング
 r2 r4 r5 r400 r1 r25 r160 r800
 
-// #ch ハモリ
-// #role harmony
+#ch ハモリ
+#role harmony
 // パート 10 — ハモリ。
 // イントロ
 t120 q8 r1 r4 r8

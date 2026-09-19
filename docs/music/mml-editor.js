@@ -10,7 +10,7 @@ import {
 } from 'https://esm.sh/@codemirror/language@6.12.4';
 import { tags } from 'https://esm.sh/@lezer/highlight@1.2.3';
 
-// 行頭（空白可）の // # はシステム行。// と /* ... */ は通常コメント。
+// 行頭（空白可）の # はシステム行。// と /* ... */ は通常コメント。
 const mmlComments = StreamLanguage.define({
   startState() {
     return { blockComment: false };
@@ -25,7 +25,7 @@ const mmlComments = StreamLanguage.define({
       }
       return 'comment';
     }
-    if (stream.sol() && stream.match(/^\s*\/\/\s*#/)) {
+    if (stream.sol() && stream.match(/^\s*#/)) {
       stream.skipToEnd();
       return 'meta';
     }

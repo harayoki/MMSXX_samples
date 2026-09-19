@@ -67,7 +67,7 @@ const songs = [
 function splitMML(text) {
   const lines = text.split(/\r?\n/);
   const marks = lines.map((line, index) =>
-    /^\s*\/\/\s*#\s*ch(?:\s|$)/i.test(line) ? index : -1
+    /^\s*#\s*ch(?:\s|$)/i.test(line) ? index : -1
   ).filter(index => index >= 0);
   if (!marks.length) return text.trim() ? [text] : [];
   const head = lines.slice(0, marks[0]);
@@ -79,6 +79,10 @@ function splitMML(text) {
 const sources = songs.map(([file, channels, marks]) => ({
   file, channels, marks, source: fs.readFileSync(path.join(root, file), 'utf8'),
 }));
+
+for (const { file, source } of sources) {
+  assert.equal(E.countOldStyle(source), 0, file + ': no legacy // # directives');
+}
 
 for (const file of [
   '03_Windward-Crossing/player.js',
@@ -93,7 +97,7 @@ for (const file of [
 // are enough here because this test validates notation and arrangement shape.
 for (const { source } of sources) {
   const declaredTones = new Set(
-    [...source.matchAll(/^\s*\/\/\s*#(?:bundle|chord)\s+([\w-]+)/gim)]
+    [...source.matchAll(/^\s*#(?:bundle|chord)\s+([\w-]+)/gim)]
       .map(match => match[1].toLowerCase()),
   );
   for (const match of source.matchAll(/@\{([^}]+)\}/g)) {
@@ -172,7 +176,7 @@ for (const { file, channels, marks, source } of sources) {
     ], file + ': interactive takes');
     assert(info.takes.every(take => take.boxes.every(box =>
       Math.abs(box.dur - take.boxes[0].dur) < 1e-6)), file + ': aligned take lengths');
-    assert.equal((source.match(/\/\/\s*#switch 0\s*\n\/\/\s*#takes 結末/g) || []).length,
+    assert.equal((source.match(/#switch 0\s*\n\s*#takes 結末/g) || []).length,
       channels, file + ': #switch 0 immediately before every outcome takes block');
     assert.equal(info.switches.grid.length, 0, file + ': #switch 0 disables the grid');
     const compiled = audio.bgmDefs.get('test');

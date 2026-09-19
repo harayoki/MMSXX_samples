@@ -1,13 +1,13 @@
-// #title 草原のトリニティ
-// #about アクションRPGの草原BGMをイメージ。ファミコン4音に限定。
-// #ch メロディ
-// #role lead
+#title 草原のトリニティ
+#about アクションRPGの草原BGMをイメージ。ファミコン4音に限定。
+#ch メロディ
+#role lead
 t140 q5
-// #label Intro
+#label Intro
 r1 r2 r4 $tone q5 o4 f8 a8
 q5
-// #label LOOP
-// #label 出発
+#label LOOP
+#label 出発
 q5
 $tone o4 b-4
 $tone q5 o4 b-16&o5 c16&d+16&e16&f2&f4
@@ -45,7 +45,7 @@ $p6
 $tone o5 g4
 q5
 $tone o5 f1
-// #label 遠望
+#label 遠望
 q5
 $p9
 $p9
@@ -90,7 +90,7 @@ $tone o4 f+4
 $p5
 $p2
 $p7
-// #label 飛翔
+#label 飛翔
 r4
 q5
 $tone o4 b4
@@ -108,7 +108,7 @@ $tone o4 g8
 $p6
 $tone o5 e2
 $p7
-// #label OUTRO
+#label OUTRO
 $p3
 $tone o5 d8
 q5
@@ -196,21 +196,21 @@ $tone o5 f8
 q5
 }
 
-// #ch 対旋律
-// #role counter
+#ch 対旋律
+#role counter
 t140 q8
-// #label Intro
+#label Intro
 @{pulse:25} @e{piano} v8 q6 o4 f4 r4 d4 r4
 @{pulse:12} @e{flat} r4 c4 o3 a4 r4
 q8
-// #label LOOP
-// #label 出発
+#label LOOP
+#label 出発
 $p17
 $p15
 $p20
 $p18
 $p22
-// #label 遠望
+#label 遠望
 $p17
 $p3
 $p20
@@ -267,11 +267,11 @@ $p1
 $p24
 $p27
 $p22
-// #label 飛翔
+#label 飛翔
 $p18
 $p3
 $p20
-// #label OUTRO
+#label OUTRO
 $p17
 $p15
 r16
@@ -563,21 +563,21 @@ $p27={
 r32
 }
 
-// #ch ベース
-// #role bass
+#ch ベース
+#role bass
 t140 q8
-// #label Intro
+#label Intro
 $tone q8 o2 b-2 f4 b-4
 f2 c4 f4
 q8
-// #label LOOP
-// #label 出発
+#label LOOP
+#label 出発
 $p8
 $p1
 $p6
 $tone o2 g8
 $p7
-// #label 遠望
+#label 遠望
 $p1
 $p1
 $p1
@@ -610,13 +610,13 @@ $p1
 $tone o2 f+8
 $p9
 $p7
-// #label 飛翔
+#label 飛翔
 $p4
 $p1
 $p6
 $tone o2 g8
 $p7
-// #label OUTRO
+#label OUTRO
 $p8
 $p1
 $tone o3 c+16
@@ -727,23 +727,23 @@ $p9={
 $tone o2 e8
 }
 
-// #ch ドラム
-// #role noise
+#ch ドラム
+#role noise
 t140 q8
-// #label Intro
+#label Intro
 $tone @e{percussive} v4 q3 o2 f+4 r4 f+4 r4
 f+4 r4 v5 f+8 r8 v4 f+16 f+16 v6 f+8
 q8
-// #label LOOP
-// #label 出発
+#label LOOP
+#label 出発
 $p8
 $p8
-// #label 遠望
+#label 遠望
 $p8
 $p8
-// #label 飛翔
+#label 飛翔
 $p8
-// #label OUTRO
+#label OUTRO
 $p8
 $p4
 $p7

@@ -11,10 +11,10 @@ $LOOP_END = { 2 }
 // 音量とグルーヴ(重なったときの引き / 8 分の裏の張り / 16 打ごとのオープン)調整は
 // 現在のMMLでは書けないので、動的にJavaScript処理が音量を書き換えている。
 
-// #title Volcano Parade
-// #about 明るい循環進行と下降ベースを使った、タイトル／エンディング向けの曲。
-// #copyright 2026 harayoki
-// #license CC BY 4.0 (music, artwork and MML source; https://creativecommons.org/licenses/by/4.0/)
+#title Volcano Parade
+#about 明るい循環進行と下降ベースを使った、タイトル／エンディング向けの曲。
+#copyright 2026 harayoki
+#license CC BY 4.0 (music, artwork and MML source; https://creativecommons.org/licenses/by/4.0/)
 // Powered by mmsxx-mml-studio (engine license undecided; redistribution currently prohibited).
 // K005289 arpeggio — MIDI ch.1 rhythm/contour, reharmonized
 // アルペジオの7セント重ねはplayer.jsのdynamic_effectsで指定。
@@ -55,28 +55,28 @@ $C8 = { o5 a c+ e g  c+ e g >c+  <a g e c+  a e c+ a }
 // 静かな4小節＋イントロ2。前半は高域を止め、最後の1小節だけ共通フレーズを戻す。
 $QUIET = { r1 r1 o5 d2 a2  r2 e4 a4 }
 $INTRO2 = { r1 o5 a8. f+16 d8 e8 f+4 e8 c+8 }
-// #ch アルペジオ
-// #role arp
+#ch アルペジオ
+#role arp
 t135 l16 q7 v8 @{saw} @e{flat} @d0
 // 小節別主役: M M A F | M B M F | M B A M（M=メロディ、A=アルペジオ、B=ベース、F=合いの手）
-// #label イントロ
+#label イントロ
 [ v6 $INTRO
-// #label Aメロ
+#label Aメロ
 [ v8 $D_to_A v8 $A_to_Bm v11 $Bm_to_G v6 $G_to_D v8 $D2_to_A v7 $A2_to_Bm v8 $Bm2_to_A v6 $A2_to_D
-  // #label Bメロ
+  #label Bメロ
   v8 $B1 v7 $B2 v9 $B3 v7 $B4 v8 $B5 v7 $B6 v9 $B7 v8 $B8
-  // #label Cメロ
+  #label Cメロ
   v8 $C1 v9 $C2 v7 $C3 v9 $C4 v8 $C5 v10 $C6 v9 $C7 v8 $C8
-  // #label 静かな区間
+  #label 静かな区間
   v4 $QUIET
-  // #label イントロ2
+  #label イントロ2
   v6 $INTRO2 ]$LOOP_END
 // Ending: 後半で和音全体を半音ずつ駆け上がり、1オクターブ上へ到達する。
-// #label エンディング
+#label エンディング
 o5 v7 @{saw} @e{flat} d2 d8 d+32 e32 f32 f+32 g32 g+32 a32 b-32 b32 >c32 c+32 d32
 
-// #ch メロディ
-// #role lead
+#ch メロディ
+#role lead
 // AY melody — 忙しいアルペジオとベースに対し、長音と休符で呼吸を作る。
 // この旋律ではポルタメントを使わず、音階の順次進行で滑らかに聞かせる。
 // 4・8小節目は全休符にして合いの手へ渡す。
@@ -123,8 +123,8 @@ o5 v11 @{pulse:50} @e{soft} a8. f+16 d8 e8 f+4 e8 c+8 ]$LOOP_END
 // Ending: root rises chromatically by one octave.
 o5 v9 @{vpLead} @e{soft} d2 d8 d+32 e32 f32 f+32 g32 g+32 a32 b-32 b32 >c32 c+32 d32
 
-// #ch ベース
-// #role bass
+#ch ベース
+#role bass
 // Triangle bass — low eighth + two high sixteenths。跳躍を抑えた下降ベース。
 // 全区間・全音で、輪郭を補うpulse:50矩形波を元の約半分の強さで同音程に重ねる。
 // 半音または全音で下がり、4拍目で少し止めてから次の小節へ着地する。
@@ -168,8 +168,8 @@ v10 o2 a8. f+16 d8 e8 f+4 e8 c+8 ]$LOOP_END
 // Ending: low D rises chromatically by one octave.
 o2 v11 @{vpBass} @e{flat} d2 d8 d+32 e32 f32 f+32 g32 g+32 a32 b-32 b32 >c32 c+32 d32
 
-// #ch 合いの手／ハモリ
-// #role harmony
+#ch 合いの手／ハモリ
+#role harmony
 // AY call-and-response / harmony — Aメロは4・8小節目の合いの手、Bメロは主旋律の下ハモリ。
 // 合いの手は vpPiano + percussive。鳴り始めを強くし、短く切れる金属音にする。
 // ハモリは saw + softで主旋律より少し細くする。
@@ -206,8 +206,8 @@ o4 v11 @{vpPiano} @e{percussive} a8. f+16 d8 e8 f+4 e8 c+8 ]$LOOP_END
 // Ending: major third rises chromatically by one octave.
 o5 l16 q8 v7 @{pulse:50} @e{soft} f+2 f+8 g32 g+32 a32 b-32 b32 >c32 c+32 d32 d+32 e32 f32 f+32
 
-// #ch 合いの手低音
-// #role harmony
+#ch 合いの手低音
+#role harmony
 // 合いの手のオクターブ下レイヤー。単旋律MMLでは同時発音できないため独立チャンネルで重ねる。
 $REST4 = { r1 r1 r1 r1 }
 $REST8 = { r1 r1 r1 r1 r1 r1 r1 r1 }
@@ -226,8 +226,8 @@ o3 v8 a8. f+16 d8 e8 f+4 e8 c+8 ]$LOOP_END
 // Ending: fifth rises chromatically by one octave.
 o4 l16 q8 v6 @{pulse:50} @e{soft} a2 a8 b-32 b32 >c32 c+32 d32 d+32 e32 f32 f+32 g32 g+32 a32
 
-// #ch ハイハット
-// #role perc
+#ch ハイハット
+#role perc
 // Noise hi-hat — 裏拍のクローズを基本に、4小節程度ごとに短いオープンを混ぜる。
 // イントロ1小節と静かな区間は休み。キックやスネアは入れない。
 t135 l8 q2 v3 @{noise:white} @e{percussive}
@@ -276,8 +276,8 @@ $HAT8 = { v6 r8 a8 r8 a8 r8 a8 r8 a8 v6 r8 a8 r8 a8 r8 a8 r8 a8 v6 r8 a8 r8 a8 r
 // I1 [A B C QUIET I2]2 E
 r1 [ $HAT8 $HAT8 $HAT8 r1 r1 r1 r1 r1 v5 r8 a8 r8 a8 r8 a8 r8 a8 ]$LOOP_END r1
 
-// #ch タム
-// #role perc
+#ch タム
+#role perc
 // 合いの手の下敷き — 5 本目と同じ音・同じ長さを、丸い太鼓の音で重ねる。
 // キンキンしたピアノだけだと高さが分からないので、下から音階を支える。
 $REST4 = { r1 r1 r1 r1 }

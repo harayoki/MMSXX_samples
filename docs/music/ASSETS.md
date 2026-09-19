@@ -3,7 +3,7 @@
 各楽曲ページは共通ローダー `music-page.js` と共通プレイヤー
 `player-engine.js` を使用する。共通プレイヤーは
 `harayoki/mmsxx-mml-studio` の
-`602d40592c84524fdca879d5b515f8c963b8ac9f` をバンドルしたもの。
+`58fdcc38613960fac5b021df43ce81382098bc61` をバンドルしたもの。
 
 ## ファイル構成
 
@@ -18,7 +18,7 @@
 <script src="../music-page.js" data-song="02_Pocket-Tunnel"></script>
 ```
 
-新しいMMLは `// #ch 名前` でチャンネルを分ける。先頭の共通マクロは
+新しいMMLは `#ch 名前` でチャンネルを分ける。先頭の共通マクロは
 `MusicPage.splitMML()` が各チャンネルへ渡す。空行は自由に使用できる。
 
 ## 曲一覧
@@ -47,15 +47,15 @@ python3 serve.py
 
 ## MMLとJS APIの更新点
 
-- メタデータ：`// #title`、`// #about`
-- チャンネル：`// #ch`、`// #role`
+- メタデータ：`#title`、`#about`
+- チャンネル：`#ch`、`#role`
 - 波形：`pulse:50`、`pulse:25`、`pulse:12`、`noise:white`
 - ビブラート：旧 `@v` ではなく `@m`
 - `@d`：元音を増やさず音程そのものをセント移動
 - `@o`：元音を増やさずチャンネル全体をオクターブ移動
 - `@s`：空き部分へエコー音符を生成
-- `// #takes <グループ> restart`：次の切れ目でテイク変更し、囲みの先頭から再生
-- `// #takes <グループ> now`：切れ目を待たず、ただちにテイク変更
+- `#takes <グループ> restart`：次の切れ目でテイク変更し、囲みの先頭から再生
+- `#takes <グループ> now`：切れ目を待たず、ただちにテイク変更
 - 声を重ねるデチューン・オクターブ・エコー：
   `audio.dynamic_effects[ch]`
 
