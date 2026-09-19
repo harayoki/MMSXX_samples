@@ -1,4 +1,5 @@
 // Requires Playwright and Chromium. Runs without external network requests.
+require('./check_lfs_pointers.cjs')();
 const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
