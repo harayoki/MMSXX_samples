@@ -1,4 +1,4 @@
-// MMS/XX player and audio engine, source commit 58fdcc38613960fac5b021df43ce81382098bc61
+// MMS/XX player and audio engine, source commit 5554e5e221bbf0805e674362c0140025715f8840
 (() => {
   var __defProp = Object.defineProperty;
   var __export = (target, all) => {
@@ -930,8 +930,9 @@
     tape: {
       byVoice: "tape",
       chars: ["=", "?"],
+      notes: true,
       keys: {
-        baud: { min: 1, max: 1e6 },
+        baud: { min: 1, max: 1e6, note: true },
         seed: { min: 0, max: 1e9 },
         // 以下 3 つは音色が持っている値の上書き。書かなければ音色のまま
         hiss: { min: 0, max: 1 },
@@ -979,7 +980,7 @@
   for (const [name, set] of Object.entries(SECTIONS)) {
     for (const c of set.chars) SECTION_OF[c] = name;
   }
-  var SEC_COMMON = ["l", "q", "v", "r", "}"];
+  var SEC_COMMON = ["l", "q", "v", "r", "o", ">", "<", "}"];
   var howOpen = (name) => `@{${SECTIONS[name].byVoice || name}\u2026}{ ... }`;
   function needSection(what, now) {
     const name = SECTION_OF[what];
@@ -1902,6 +1903,36 @@ ${val}`;
       py = n[1] ?? 0;
       pz = n[2] ?? 0;
     };
+    const readPitchArg = () => {
+      const back2 = pos;
+      while (pos < src.length && " 	".includes(src[pos])) pos++;
+      let oct = octave;
+      if (src[pos] === "o") {
+        pos++;
+        const n = readNumber();
+        if (n === null) {
+          pos = back2;
+          return null;
+        }
+        oct = clamp(n, 1, 8);
+      }
+      const ch = src[pos];
+      if (SEMI[ch] === void 0) {
+        pos = back2;
+        return null;
+      }
+      pos++;
+      let semi = SEMI[ch];
+      while (peek() === "+" || peek() === "#") {
+        semi++;
+        pos++;
+      }
+      while (peek() === "-") {
+        semi--;
+        pos++;
+      }
+      return (oct + 1) * 12 + semi;
+    };
     const readEcho = (now) => {
       let len = null, depth = 5;
       if (src[pos] === "{") {
@@ -1938,6 +1969,26 @@ ${val}`;
       vibSaid = true;
     };
     let durWritten = false;
+    const pushTape = (isData, dur) => {
+      const ch = isData ? "?" : "=";
+      if ((WAVEFORMS[wave] || {}).kind !== "beep") {
+        warn(`[ChpTnSnd] MML: "${ch}" \u306F\u30D3\u30FC\u30D7\u97F3\u6E90\u5C02\u7528\u3067\u3059 (\u3044\u307E\u306E\u97F3\u8272\u306F "${(WAVEFORMS[wave] || {}).name}")`);
+        time += dur;
+        return;
+      }
+      const baud = sec.baud ?? 1200;
+      pushNote(dur, baud * 2);
+      const tape = {
+        data: isData,
+        bytes: isData ? sec.bytes ?? null : null,
+        baud,
+        seed: sec.seed ?? 1,
+        seq: tapeSeq++
+      };
+      for (const k of ["hiss", "wow", "muffle"]) if (sec[k] != null) tape[k] = sec[k];
+      events[events.length - 1].tape = tape;
+      time += dur;
+    };
     const readDuration = () => {
       const n = readNumber();
       durWritten = n !== null;
@@ -1962,10 +2013,11 @@ ${val}`;
           continue;
         }
         if (" \n	\r".includes(ch)) continue;
-        if (section && ch !== MARK_AT && ch !== CUE_AT && ch !== "@" && !SEC_COMMON.includes(ch) && !SECTIONS[section].chars.includes(ch) && !(SECTIONS[section].digits && ch >= "0" && ch <= "9")) {
+        if (section && ch !== MARK_AT && ch !== CUE_AT && ch !== "@" && !SEC_COMMON.includes(ch) && !SECTIONS[section].chars.includes(ch) && !(SECTIONS[section].digits && ch >= "0" && ch <= "9") && !(SECTIONS[section].notes && SEMI[ch] !== void 0)) {
           const ok = [
             ...SECTIONS[section].chars,
             ...SECTIONS[section].digits ? ["\u6570\u5B57"] : [],
+            ...SECTIONS[section].notes ? ["\u97F3\u540D"] : [],
             ...SEC_COMMON.filter((c) => c !== "}")
           ];
           bad(`[ChpTnSnd] MML: "${ch}" \u306F ${howOpen(section)} \u306E\u4E2D\u3067\u306F\u66F8\u3051\u307E\u305B\u3093(\u4E2D\u3067\u66F8\u3051\u308B\u306E\u306F ${ok.join(" ")} \u3068 @\u8A2D\u5B9A)`);
@@ -1981,8 +2033,16 @@ ${val}`;
             pos++;
           }
           const dur = readDuration();
-          pushNote(dur, freqOf((octave + 1) * 12 + semi));
-          time += dur;
+          if (section === "tape") {
+            sec.baud = Math.max(1, Math.min(
+              1e6,
+              Math.round(freqOf((octave + 1) * 12 + semi) * 12)
+            ));
+            pushTape(true, dur);
+          } else {
+            pushNote(dur, freqOf((octave + 1) * 12 + semi));
+            time += dur;
+          }
         } else if (ch === CHORD_QUOTE) {
           const keepOctave = octave, keepWave = wave, keepBundle = bundle;
           const keepVol = vol, keepEnv = env, keepSet = chordSet, keepLane = lane;
@@ -2226,20 +2286,7 @@ ${val}`;
           gate = Math.max(1, Math.min(8, readNumber() ?? gate));
         } else if (ch === "=" || ch === "?") {
           needSection(ch, section);
-          const isData = ch === "?";
-          const bytes = isData ? sec.bytes ?? null : null;
-          const dur = readDuration();
-          if ((WAVEFORMS[wave] || {}).kind !== "beep") {
-            warn(`[ChpTnSnd] MML: "${ch}" \u306F\u30D3\u30FC\u30D7\u97F3\u6E90\u5C02\u7528\u3067\u3059 (\u3044\u307E\u306E\u97F3\u8272\u306F "${(WAVEFORMS[wave] || {}).name}")`);
-            time += dur;
-          } else {
-            const baud = sec.baud ?? 1200;
-            pushNote(dur, baud * 2);
-            const tape = { data: isData, bytes, baud, seed: sec.seed ?? 1, seq: tapeSeq++ };
-            for (const k of ["hiss", "wow", "muffle"]) if (sec[k] != null) tape[k] = sec[k];
-            events[events.length - 1].tape = tape;
-            time += dur;
-          }
+          pushTape(ch === "?", readDuration());
         } else if (ch === "p") {
           const n = readNumber();
           if (n === 0) muted = 1;
@@ -2314,7 +2361,8 @@ ${val}`;
                 sec[name] = word.match(/../g).map((h) => parseInt(h, 16));
                 continue;
               }
-              const v = readFloat();
+              const p = keys[name].note ? readPitchArg() : null;
+              const v = p === null ? readFloat() : Math.round(freqOf(p) / 2);
               if (v === null) {
                 bad(`[ChpTnSnd] MML: "@${name}" \u306B\u5024\u304C\u3042\u308A\u307E\u305B\u3093`);
               }
@@ -5150,7 +5198,8 @@ registerProcessor('mmsxx-duty', DutyBank);
   }
   function envOf(ev) {
     const e = ENVELOPES[ev.env] || ENVELOPES[0];
-    return ev.legato && !e.table ? { ...e, a: 0 } : e;
+    const base = ev.tail && !e.table ? { ...e, a: Math.min(e.a, 4e-3), d: 99, s: 0 } : e;
+    return ev.legato && !base.table ? { ...base, a: 0 } : base;
   }
   function envShape(e, len) {
     const a = Math.min(e.a, len * 0.5);
@@ -5307,7 +5356,7 @@ registerProcessor('mmsxx-duty', DutyBank);
         if (t >= total - 1e-9) break;
         if (sounding(t)) continue;
         const stop = Math.min(nextAt(t), total);
-        const gate = Math.min(e.gate, stop - t);
+        const gate = Math.min(stop - t, e.echo.delay);
         if (gate <= 0.01) continue;
         out.push({ ...e, t, dur: gate, gate, vol: Math.round(vol), echo: null, tail: true });
         busy.push([t, t + gate]);
@@ -9128,7 +9177,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     const fold = () => {
       el.fold.hidden = !open;
       if (open) drawFx();
-      sayCount();
+      clearNote();
       if (!open) {
         el.out.hidden = true;
         dropWAV();
@@ -9158,10 +9207,9 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       el.note.textContent = text || "";
       el.note.className = kind ? `note ${kind}` : "note";
     };
-    let chNote = "";
-    const sayCount = () => {
+    const clearNote = () => {
       if (el.note.classList.contains("bad") || el.note.classList.contains("err")) return;
-      say(open ? "" : chNote);
+      say("");
     };
     function read() {
       voices = Array.isArray(mml) ? mml.map((v) => String(v ?? "")).filter((v) => v.trim() !== "") : splitVoices(mml);
@@ -9204,8 +9252,6 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         console.warn(`[ChpTnSnd] MML: \u6307\u793A\u884C\u306E "// #" \u304C ${old} \u884C\u3042\u308A\u307E\u3059\u3002"#" \u3060\u3051\u3067\u66F8\u3051\u307E\u3059("// #" \u306F\u3044\u305A\u308C\u8AAD\u307E\u306A\u304F\u306A\u308A\u307E\u3059)`);
       }
       say("");
-      chNote = `${chans.length} channels`;
-      sayCount();
       drawLoose(got.problems || []);
       return true;
     }

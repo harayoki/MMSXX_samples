@@ -89,7 +89,7 @@ const songs = [
       await page.locator('#' + editorId).fill(shortMML);
       await page.locator('#' + editorId).press('Tab');
       await page.waitForFunction(() =>
-        document.querySelector('.mmsxx-player [data-p="note"]')?.textContent === '1 channels');
+        document.querySelectorAll('.mmsxx-player [data-p="chs"] button').length === 1);
       const pending = page.waitForEvent('download', { timeout: 120000 });
       await player.locator('[data-p="wav"]').click();
       const download = await pending;
