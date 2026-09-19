@@ -60,6 +60,7 @@ const songs = [
       if (!initiallyOpen) assert.equal(await page.evaluate(() =>
         localStorage.getItem('mmsxx.samples.player.open')), 'true');
       assert((await player.locator('[data-p="title"]').textContent()).includes(title));
+      assert.equal(await player.locator('[data-p="showmml"]').isVisible(), false);
       assert.equal(await page.locator('#' + editorId).isEnabled(), true);
       assert.equal(
         await page.locator('[data-music-image]').getAttribute('href'),

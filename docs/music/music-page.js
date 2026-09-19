@@ -116,6 +116,8 @@
         const player = originalMount(root, {
           ...playerOptions,
           open: forceOpen || readPlayerOpen(),
+          // サンプルページには常設のMML欄があるため、重複する表示ボタンは出さない。
+          showMml: false,
         });
         const toggle = root.querySelector('[data-p="open"]');
         if (!forceOpen) toggle?.addEventListener('click', () => {
