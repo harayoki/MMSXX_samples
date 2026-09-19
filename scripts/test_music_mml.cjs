@@ -117,6 +117,10 @@ for (const { file, channels, marks, source } of sources) {
     file + ': jump labels');
   if (marks) assert(info.marks.every((mark, index) =>
     index === 0 || mark.t > info.marks[index - 1].t), file + ': jump label order');
+  if (file === '03_Windward-Crossing/windward-crossing.mml') {
+    assert.deepEqual(info.tracks.map(track => track.name),
+      ['主旋律', 'ベース', '副旋律＋ドラム補佐'], file + ': channel names');
+  }
   if (file === '06_BEAT/beat.mml') {
     assert.deepEqual(info.tracks.map(track => track.name),
       ['ベース1', 'ベース2', 'ドラム', 'ブラス'], file + ': channel names');
