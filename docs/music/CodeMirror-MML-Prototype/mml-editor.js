@@ -10,9 +10,13 @@ import {
 } from 'https://esm.sh/@codemirror/language@6.12.4';
 import { tags } from 'https://esm.sh/@lezer/highlight@1.2.3';
 
-// 試作では行頭（空白可）の // コメントだけを認識する。
+// 行頭（空白可）の // # はシステム行、それ以外の // は通常コメント。
 const mmlComments = StreamLanguage.define({
   token(stream) {
+    if (stream.sol() && stream.match(/^\s*\/\/\s*#/)) {
+      stream.skipToEnd();
+      return 'meta';
+    }
     if (stream.sol() && stream.match(/^\s*\/\//)) {
       stream.skipToEnd();
       return 'comment';
@@ -23,6 +27,7 @@ const mmlComments = StreamLanguage.define({
 });
 
 const mmlHighlight = HighlightStyle.define([
+  { tag: tags.meta, color: '#ffd166', fontWeight: '600' },
   { tag: tags.comment, color: '#a8d69a', fontStyle: 'italic' },
 ]);
 

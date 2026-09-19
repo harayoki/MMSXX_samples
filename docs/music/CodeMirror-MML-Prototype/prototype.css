@@ -6,7 +6,7 @@
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background-color: rgba(12, 16, 20, .68);
+  background-color: rgba(12, 16, 20, .42);
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
@@ -30,6 +30,11 @@
 
 .cm-mml-shell .cm-scroller { overflow: auto; }
 .cm-mml-shell .cm-content { min-height: 100%; padding: 10px 0; caret-color: #fff; }
+.cm-mml-shell .cm-cursor,
+.cm-mml-shell .cm-dropCursor {
+  border-left-color: #fff !important;
+  border-left-width: 2px !important;
+}
 .cm-mml-shell .cm-line { padding: 0 10px; }
 .cm-mml-shell .cm-activeLine { background: rgba(255,255,255,.08); }
 .cm-mml-shell .cm-selectionBackground,
