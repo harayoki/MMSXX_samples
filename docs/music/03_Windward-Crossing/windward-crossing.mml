@@ -1,5 +1,5 @@
 // #title 風渡りの境界 (組曲) - Windward Crossing
-// #version 1.6
+// #version 1.7
 // #about 王道RPGを意識した組曲。フィールド、エンカウント、戦闘（A/B/C）、勝利、敗北を連続再生。CH3とCH4は発音が重ならないため統合可能。
 // #arrangement RPG Suite — 風渡りの境界
 // #copyright 2026 harayoki
@@ -10,6 +10,7 @@
 // @{wcFieldLead} 草原・イントロ・敗北の三角波メロディー。
 // @{wcBattleLead} 戦闘・勝利の矩形波メロディーと副旋律。
 // @{wcCounterLead} 戦闘副旋律用の細い矩形波。ベースとの音域重複を避ける。
+// @{wcFieldCounter} フィールド副旋律用の柔らかい矩形波。
 // @{wcBass} 草原などの短く減衰する三角波ベース。
 // @{wcBattleBass} 戦闘用の矩形波ベース。大ピンチは8分3連符（l12相当）。
 // @{wcArp} 草原などの隙間に入る矩形波アルペジオ。
@@ -19,9 +20,11 @@
 
 // 曲内で使う音色セット。音色にエコーやエンベロープを着せ、宣言をここへ集約。
 // 複数セットを同時に重ねる場合は、#bundle の右辺へカンマ区切りで並べる。
+// #bundle fieldLeadEcho = @{wcFieldLead} @s2
 // #bundle fieldLeadDry  = @{wcFieldLead} @s0
 // #bundle battleLead    = @{wcBattleLead} @s0
 // #bundle counterLead   = @{wcCounterLead} @s0 @o+1
+// #bundle fieldCounter  = @{wcFieldCounter} @s0
 // #bundle fieldBass     = @{wcBass} @s0
 // #bundle battleBass    = @{wcBattleBass} @s0
 // #bundle fieldArp      = @{wcArp} @s0
@@ -78,7 +81,7 @@ $RESET = { o4 l4 t120 v10 q7 p3 @{pulse:50} @e{flat} @d0 @m0 @s0 @o0 }
 // #ch 主旋律
 // #role lead
 // 音色・テンポ・音量の共通設定。音符は下のフレーズ／各曲に記述。
-$sound1 = { @m0 t112 @{fieldLeadDry} @m1 v10 q6 o5 }
+$sound1 = { @m0 t112 @{fieldLeadEcho} @m1 v10 q6 o5 }
 $sound2 = { @m0 t152 @{battleLead} @m1 v7 q6 o4 }
 $sound3 = { @m0 t152 @{battleLead} @m1 v7 q6 o5 }
 $sound4 = { @m0 t152 @{battleLead} @m1 v9 q6 o5 }
@@ -310,8 +313,17 @@ $ORDER
 
 // #ch 副旋律
 // #role counter
-// 打楽器と同時に鳴らない位置だけを担当します。
+// 打楽器と同時に鳴らない位置だけを担当します。フィールドでは主旋律の隙間を薄く補完します。
 $battle = { @m0 t152 q6 @{counterLead} v4 }
+$fieldCounter = { @m0 t112 q5 @{fieldCounter} v5 o4 }
+$fieldReply1 = { $fieldCounter r2 r8 a8 r8 a8 }
+$fieldReply2 = { $fieldCounter r8 b8 r8 o5 d8 r2 }
+$fieldReply3 = { $fieldCounter r2. r8 o4 d8 }
+$fieldReply4 = { $fieldCounter r2 r8 c+8 r4 }
+$fieldReply5 = { $fieldCounter r2 r8 a8 r8 f+8 }
+$fieldReply6 = { $fieldCounter r8 b8 r8 o5 d8 r2 }
+$fieldReply7 = { $fieldCounter r2 r8 d8 r8 c+8 }
+$fieldReply8 = { $fieldCounter r2. r8 a8 }
 $fullFD = { $battle o4 [r16 f16]4 [r16 d16]4 }
 $fullAG = { $battle o3 [r16 a+16]4 [r16 g16]4 }
 $fullCsAs = { $battle o4 [r16 c+16]4 o3 [r16 a+16]4 }
@@ -325,7 +337,11 @@ $halfECs = { $battle o4 [r16 e16 r8]2 [r16 c+16 r8]2 }
 $halfDB = { $battle o4 [r16 d16 r8]2 o3 [r16 b16 r8]2 }
 
 $intro = { $RESET t112 [r1]2 }
-$field = { $RESET t112 [r1]8 }
+$field = {
+  $RESET
+  $fieldReply1 $fieldReply2 $fieldReply3 $fieldReply4
+  $fieldReply5 $fieldReply6 $fieldReply7 $fieldReply8
+}
 $encounter = { $RESET t152 [r1]2 }
 $good = {
   $RESET
@@ -346,7 +362,10 @@ $crisis = {
 }
 $win = { $RESET t132 [r1]4 }
 $lose = { $RESET t96 [r1]4 }
-$fieldShort = { $RESET t112 [r1]4 }
+$fieldShort = {
+  $RESET
+  $fieldReply1 $fieldReply2 $fieldReply3 $fieldReply4
+}
 // 演奏順は冒頭の $ORDER と回数で指定します。
 $ORDER
 

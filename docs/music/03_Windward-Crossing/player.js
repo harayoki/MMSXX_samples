@@ -33,6 +33,10 @@
     wave: 'pulse:12.5', env: 'wcLeadEnv',
     note: 'Battle counter melody.', noteJa: '戦闘用副旋律。',
   });
+  E.registerTone('wcFieldCounter', {
+    wave: 'pulse:50', env: 'wcLeadEnv',
+    note: 'Soft field counter melody.', noteJa: '柔らかいフィールド用副旋律。',
+  });
   E.registerTone('wcBattleBass', {
     wave: 'pulse:50', env: 'wcBattleBassEnv',
     note: 'Battle bass.', noteJa: '戦闘用ベース。',

@@ -121,19 +121,25 @@ for (const { file, channels, marks, source } of sources) {
   if (marks) assert(info.marks.every((mark, index) =>
     index === 0 || mark.t > info.marks[index - 1].t), file + ': jump label order');
   if (file === '03_Windward-Crossing/windward-crossing.mml') {
-    assert.equal(info.meta.version, '1.6', file + ': song version');
+    assert.equal(info.meta.version, '1.7', file + ': song version');
     assert(info.meta.about.includes('CH3とCH4は発音が重ならないため統合可能。'),
       file + ': mergeable channel note');
     assert(!info.meta.about.includes('ファミコン準拠'),
       file + ': must not claim Famicom compliance');
     assert.deepEqual(info.tracks.map(track => track.name),
       ['主旋律', 'ベース', '副旋律', 'ドラム補佐'], file + ': channel names');
-    assert.equal(info.tracks[0].voices, 1, file + ': channel 1 must use one voice');
+    assert.equal(info.tracks[0].voices, 1,
+      file + ': channel 1 self echo must stay within one voice');
     const compiled = audio.bgmDefs.get('test');
-    assert(compiled[0].events.every(event => event.echo === null),
-      file + ': channel 1 self echo is temporarily disabled');
     const counter = compiled[2].events;
     const drums = compiled[3].events;
+    const fieldStart = info.marks.find(mark => mark.name === 'フィールド').t;
+    const fieldEnd = info.marks.find(mark => mark.name === 'エンカウント').t;
+    assert(compiled[0].events.some(event =>
+      event.t >= fieldStart && event.t < fieldEnd && event.echo !== null),
+    file + ': channel 1 field lead self echo');
+    assert(counter.some(event => event.t >= fieldStart && event.t < fieldEnd),
+      file + ': channel 3 must complement the field melody');
     assert(!counter.some(a => drums.some(b =>
       a.t < b.t + b.gate - 1e-9 && b.t < a.t + a.gate - 1e-9)),
     file + ': counter melody and drums must not overlap');
