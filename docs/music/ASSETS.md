@@ -66,6 +66,7 @@ Volcano Paradeの7セント重ねと、Pocket Tunnel「おしゃれアレンジ�
 ## 検証
 
 ```sh
+node scripts/check_lfs_pointers.cjs
 node scripts/test_music_mml.cjs
 node scripts/test_music_assets.cjs
 node scripts/test_music_wav.cjs
