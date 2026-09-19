@@ -10,7 +10,7 @@ import {
 } from 'https://esm.sh/@codemirror/language@6.12.4';
 import { tags } from 'https://esm.sh/@lezer/highlight@1.2.3';
 
-// 行頭（空白可）の // # はシステム行、それ以外の // は通常コメント。
+// 行頭（空白可）の // # はシステム行。// と /* ... */ は通常コメント。
 const mmlComments = StreamLanguage.define({
   startState() {
     return { blockComment: false };
@@ -97,7 +97,29 @@ export function mountMMLEditor(host, source, options = {}) {
   return {
     view,
     getValue: () => view.state.doc.toString(),
+    setValue(value) {
+      const next = String(value ?? '');
+      view.dispatch({
+        changes: { from: 0, to: view.state.doc.length, insert: next },
+      });
+      dirty = false;
+      if (mirror) mirror.value = next;
+    },
     focus: () => view.focus(),
     destroy: () => view.destroy(),
   };
+}
+
+export function mountMMLTextarea(textarea, source, options = {}) {
+  const host = document.createElement('div');
+  host.className = 'cm-mml-shell';
+  host.style.backgroundImage = textarea.style.backgroundImage;
+  textarea.before(host);
+  textarea.hidden = true;
+  textarea.disabled = false;
+  return mountMMLEditor(host, source, {
+    ...options,
+    mirror: textarea,
+    label: textarea.getAttribute('aria-label') || 'MMLソース',
+  });
 }

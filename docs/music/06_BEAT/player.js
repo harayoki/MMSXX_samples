@@ -11,13 +11,11 @@
       return response.text();
     })
     .then(source => {
-      editor.value = source;
-      editor.disabled = false;
       const player = E.player.mount(document.getElementById('beat-player'), {
         audio, mml: MusicPage.splitMML(source), loops: 3,
       });
-      editor.addEventListener('change', () => {
-        player.setMML(MusicPage.splitMML(editor.value));
+      MusicPage.mountMMLTextarea(editor, source, {
+        onCommit: value => player.setMML(MusicPage.splitMML(value)),
       });
       status.textContent = '';
     })

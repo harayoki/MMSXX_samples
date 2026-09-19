@@ -47,12 +47,12 @@
       return response.text();
     })
     .then(source => {
-      editor.value = source;
-      editor.disabled = false;
       const player = E.player.mount(document.getElementById('gt-player'), {
         audio, mml: source, loops: 2,
       });
-      editor.addEventListener('change', () => player.setMML(editor.value));
+      MusicPage.mountMMLTextarea(editor, source, {
+        onCommit: value => player.setMML(value),
+      });
       status.textContent = '';
     })
     .catch(error => { status.textContent = 'MML読み込みエラー：' + error.message; });
