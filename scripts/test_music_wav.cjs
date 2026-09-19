@@ -40,7 +40,7 @@ const server = http.createServer((request, response) => {
     await player.locator('[data-p="open"]').click();
 
     const shortMML =
-      '// #title WAV Test\n// #ch Tone\nt120 @{pulse:25} @e{flat} o4 c8 r8';
+      '#title WAV Test\n#ch Tone\nt120 @{pulse:25} @e{flat} o4 c8 r8';
     await page.locator('#gt-src').fill(shortMML);
     await page.locator('#gt-src').press('Tab');
     const pending = page.waitForEvent('download', { timeout: 120000 });

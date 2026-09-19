@@ -83,7 +83,7 @@ const songs = [
       await player.locator('[data-p="stop"]').click();
 
       const shortMML =
-        '// #title Test\n// #about Short\n// #ch Test\n// #role lead\n' +
+        '#title Test\n#about Short\n#ch Test\n#role lead\n' +
         't120 @{pulse:50} @e{flat} o4 l4 c4';
       await page.locator('#' + editorId).fill(shortMML);
       await page.locator('#' + editorId).press('Tab');

@@ -1,11 +1,11 @@
-// #title 調整中：風渡りの境界 戦闘曲(インタラクティブ)
-// #version 1.7
-// #about 風渡りの境界 の戦闘曲を動的に切り変え可能にしたものです。ゲームの展開に合わせて使います。CH3とCH4は発音が重ならないため統合可能。
-// #arrangement Interactive Battle — 風渡りの境界
-// #tempo 152
-// #switch 2
-// #copyright 2026 harayoki
-// #license CC BY 4.0 (music, artwork and MML source; https://creativecommons.org/licenses/by/4.0/)
+#title 調整中：風渡りの境界 戦闘曲(インタラクティブ)
+#version 1.7
+#about 風渡りの境界 の戦闘曲を動的に切り変え可能にしたものです。ゲームの展開に合わせて使います。CH3とCH4は発音が重ならないため統合可能。
+#arrangement Interactive Battle — 風渡りの境界
+#tempo 152
+#switch 2
+#copyright 2026 harayoki
+#license CC BY 4.0 (music, artwork and MML source; https://creativecommons.org/licenses/by/4.0/)
 // エンカウント → 戦闘曲3種をテイク選択 → 勝敗をテイク選択。
 // 戦闘中は2小節ごとの | で切り替え、結末直前の #switch 0 で自動網目を止める。
 // 勝利・敗退は末尾の | まで切り替えない。3つの戦闘曲は16小節にそろえてある。
@@ -21,20 +21,20 @@
 // 音色はplayer.jsの標準APIで登録。@m1は標準ビブラート。
 
 // 曲内で使う音色セット。音色にエコーやエンベロープを着せ、宣言をここへ集約。
-// #bundle fieldLeadDry = @{wcFieldLead} @s0
-// #bundle battleLead   = @{wcBattleLead} @s0
-// #bundle counterLead  = @{wcCounterLead} @s0 @o+1
-// #bundle fieldBass    = @{wcBass} @s0
-// #bundle battleBass   = @{wcBattleBass} @s0
-// #bundle fieldArp     = @{wcArp} @s0
-// #bundle kick         = @{wcKick} @s0
-// #bundle drumNoise    = @{noise:white} @e{wcDrumEnv} @s0
+#bundle fieldLeadDry = @{wcFieldLead} @s0
+#bundle battleLead   = @{wcBattleLead} @s0
+#bundle counterLead  = @{wcCounterLead} @s0 @o+1
+#bundle fieldBass    = @{wcBass} @s0
+#bundle battleBass   = @{wcBattleBass} @s0
+#bundle fieldArp     = @{wcArp} @s0
+#bundle kick         = @{wcKick} @s0
+#bundle drumNoise    = @{noise:white} @e{wcDrumEnv} @s0
 
 // 各曲の先頭で状態を初期化。その後、曲固有の設定を指定します。
 $RESET = { o4 l4 t120 v10 q7 p3 @{pulse:50} @e{flat} @d0 @m0 @s0 @o0 }
 
-// #ch 主旋律
-// #role lead
+#ch 主旋律
+#role lead
 // 戦闘の主旋律。勝利・敗退までを担当します。
 $sound2 = { @m0 t152 @{battleLead} @m1 v7 q6 o4 }
 $sound3 = { @m0 t152 @{battleLead} @m1 v7 q6 o5 }
@@ -119,31 +119,31 @@ $lose = {
   $sound8 a4 o5 c+4 e4 c+4
   $sound8 d2 r2
 }
-// #label エンカウント
+#label エンカウント
 $encounter
-// #label LOOP
-// #takes 戦闘曲 restart
-// #take 戦闘 A
+#label LOOP
+#takes 戦闘曲 restart
+#take 戦闘 A
 $good
-// #take 戦闘 B
+#take 戦闘 B
 [$bad]2
-// #take 戦闘 C
+#take 戦闘 C
 [$crisis]2
-// #takes
-// #label OUTRO
-// #switch 0
-// #takes 結末
-// #take 勝利
+#takes
+#label OUTRO
+#switch 0
+#takes 結末
+#take 勝利
 $win
 t132 r1 r2
 |
-// #take 敗北
+#take 敗北
 $lose
 |
-// #takes
+#takes
 
-// #ch ベース
-// #role bass
+#ch ベース
+#role bass
 // 戦闘時は専用矩形波、エンカウントと勝敗では三角波を使います。
 $sound2 = { @m0 t152 @{fieldBass} v13 q6 o1 }
 $sound3 = { @m0 t132 @{fieldBass} v13 q6 o1 }
@@ -234,31 +234,31 @@ $lose = {
   @m0 t96 @{fieldBass} v13 q6 o1 a8 r8 @{fieldArp} v5 q5 o4 c+16 o4 e16 o4 g16 o4 a16 @{fieldBass} v12 q6 o2 e8 r8 @{fieldArp} v5 q5 o4 a16 o4 g16 o4 e16 o4 c+16
   @m0 t96 @{fieldBass} v12 q6 o2 d2 r2
 }
-// #label エンカウント
+#label エンカウント
 $encounter
-// #label LOOP
-// #takes 戦闘曲 restart
-// #take 戦闘 A
+#label LOOP
+#takes 戦闘曲 restart
+#take 戦闘 A
 $good
-// #take 戦闘 B
+#take 戦闘 B
 [$bad]2
-// #take 戦闘 C
+#take 戦闘 C
 [$crisis]2
-// #takes
-// #label OUTRO
-// #switch 0
-// #takes 結末
-// #take 勝利
+#takes
+#label OUTRO
+#switch 0
+#takes 結末
+#take 勝利
 $win
 t132 r1 r2
 |
-// #take 敗北
+#take 敗北
 $lose
 |
-// #takes
+#takes
 
-// #ch 副旋律
-// #role counter
+#ch 副旋律
+#role counter
 // ドラムの休符位置だけを担当します。
 $battle = { @m0 t152 q6 @{counterLead} v4 }
 $fullFD = { $battle o4 [r16 f16]4 [r16 d16]4 }
@@ -316,31 +316,31 @@ $crisis = {
 }
 $win = { $RESET t132 [r1]4 }
 $lose = { $RESET t96 [r1]4 }
-// #label エンカウント
+#label エンカウント
 $encounter
-// #label LOOP
-// #takes 戦闘曲 restart
-// #take 戦闘 A
+#label LOOP
+#takes 戦闘曲 restart
+#take 戦闘 A
 $good
-// #take 戦闘 B
+#take 戦闘 B
 [$bad]2
-// #take 戦闘 C
+#take 戦闘 C
 [$crisis]2
-// #takes
-// #label OUTRO
-// #switch 0
-// #takes 結末
-// #take 勝利
+#takes
+#label OUTRO
+#switch 0
+#takes 結末
+#take 勝利
 $win
 t132 r1 r2
 |
-// #take 敗北
+#take 敗北
 $lose
 |
-// #takes
+#takes
 
-// #ch ドラム
-// #role perc
+#ch ドラム
+#role perc
 // 副旋律の休符位置だけを担当します。
 $battleDrums = {
   @m0 t152 q6
@@ -371,25 +371,25 @@ $bad = { $RESET [$battleDrums2]4 }
 $crisis = { $RESET [$battleDrums2]4 }
 $win = { $RESET [$winDrums]3 $endingKick132 }
 $lose = { $RESET [$loseDrums]3 $endingKick96 }
-// #label エンカウント
+#label エンカウント
 $encounter
-// #label LOOP
-// #takes 戦闘曲 restart
-// #take 戦闘 A
+#label LOOP
+#takes 戦闘曲 restart
+#take 戦闘 A
 $good
-// #take 戦闘 B
+#take 戦闘 B
 [$bad]2
-// #take 戦闘 C
+#take 戦闘 C
 [$crisis]2
-// #takes
-// #label OUTRO
-// #switch 0
-// #takes 結末
-// #take 勝利
+#takes
+#label OUTRO
+#switch 0
+#takes 結末
+#take 勝利
 $win
 t132 r1 r2
 |
-// #take 敗北
+#take 敗北
 $lose
 |
-// #takes
+#takes

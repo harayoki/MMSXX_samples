@@ -1,4 +1,4 @@
-// MMS/XX player and audio engine, source commit 602d40592c84524fdca879d5b515f8c963b8ac9f
+// MMS/XX player and audio engine, source commit 58fdcc38613960fac5b021df43ce81382098bc61
 (() => {
   var __defProp = Object.defineProperty;
   var __export = (target, all) => {
@@ -30,6 +30,7 @@
     WAVE: () => WAVE,
     WAVEFORMS: () => WAVEFORMS,
     compileMML: () => compileMML,
+    countOldStyle: () => countOldStyle,
     findWave: () => findWave,
     isSystemMark: () => isSystemMark,
     listEnvelopes: () => listEnvelopes,
@@ -530,7 +531,7 @@
   function registerEnvelope(name, spec = {}) {
     const at = ENVELOPES.findIndex((e) => e.name.toLowerCase() === String(name).toLowerCase());
     if (at >= 0 && !spec.overwrite) {
-      throw new Error(`[MMSXX] \u30A8\u30F3\u30D9\u30ED\u30FC\u30D7 "${name}" \u306F\u3082\u3046\u767B\u9332\u3055\u308C\u3066\u3044\u307E\u3059(\u5DEE\u3057\u66FF\u3048\u308B\u306A\u3089 overwrite: true \u3092\u6E21\u3057\u3066\u304F\u3060\u3055\u3044)`);
+      throw new Error(`[ChpTnSnd] \u30A8\u30F3\u30D9\u30ED\u30FC\u30D7 "${name}" \u306F\u3082\u3046\u767B\u9332\u3055\u308C\u3066\u3044\u307E\u3059(\u5DEE\u3057\u66FF\u3048\u308B\u306A\u3089 overwrite: true \u3092\u6E21\u3057\u3066\u304F\u3060\u3055\u3044)`);
     }
     const entry = {
       id: at >= 0 ? at : ENVELOPES.length,
@@ -544,7 +545,7 @@
       const lp = spec.loop;
       entry.loop = Number.isInteger(lp) && lp >= 0 && lp < table.length ? lp : null;
       if (lp !== void 0 && entry.loop === null) {
-        console.warn(`[MMSXX] \u30A8\u30F3\u30D9\u30ED\u30FC\u30D7 "${name}": loop ${lp} \u306F\u8868\u306E\u5916\u3067\u3059(\u8868\u306F ${table.length} \u500B)\u3002\u623B\u3089\u305A\u306B\u6700\u5F8C\u306E\u5024\u3067\u6B62\u307E\u308A\u307E\u3059`);
+        console.warn(`[ChpTnSnd] \u30A8\u30F3\u30D9\u30ED\u30FC\u30D7 "${name}": loop ${lp} \u306F\u8868\u306E\u5916\u3067\u3059(\u8868\u306F ${table.length} \u500B)\u3002\u623B\u3089\u305A\u306B\u6700\u5F8C\u306E\u5024\u3067\u6B62\u307E\u308A\u307E\u3059`);
       }
       entry.a = 0;
       entry.d = 0;
@@ -648,7 +649,7 @@
     const s = String(role).trim().toLowerCase();
     if (!s) return null;
     if (!ROLES.includes(s)) {
-      console.warn(`[MMSXX] \u97F3\u8272 "${name}" \u306E\u30ED\u30FC\u30EB "${role}" \u306F\u77E5\u3089\u306A\u3044\u8A00\u8449\u3067\u3059 (\u6C7A\u307E\u3063\u3066\u3044\u308B\u306E\u306F ${ROLES.join(" / ")})\u3002\u305D\u306E\u307E\u307E\u6301\u3061\u307E\u3059\u304C\u3001\u66F8\u304D\u51FA\u3057\u306E\u5F53\u3066\u306F\u3081\u306B\u306F\u5F53\u305F\u308A\u307E\u305B\u3093`);
+      console.warn(`[ChpTnSnd] \u97F3\u8272 "${name}" \u306E\u30ED\u30FC\u30EB "${role}" \u306F\u77E5\u3089\u306A\u3044\u8A00\u8449\u3067\u3059 (\u6C7A\u307E\u3063\u3066\u3044\u308B\u306E\u306F ${ROLES.join(" / ")})\u3002\u305D\u306E\u307E\u307E\u6301\u3061\u307E\u3059\u304C\u3001\u66F8\u304D\u51FA\u3057\u306E\u5F53\u3066\u306F\u3081\u306B\u306F\u5F53\u305F\u308A\u307E\u305B\u3093`);
     }
     return s;
   }
@@ -705,7 +706,7 @@
     const list = (v) => Array.isArray(v) && v.length ? v.map(Number) : null;
     let duty = list(spec.duty);
     if (duty && kind !== "pulse") {
-      console.warn(`[MMSXX] \u97F3\u8272 "${name}": duty \u306E\u8868\u306F\u77E9\u5F62\u6CE2(pulse)\u306B\u3057\u304B\u52B9\u304D\u307E\u305B\u3093(\u3053\u306E\u97F3\u8272\u306F ${kind})\u3002\u8868\u306F\u843D\u3068\u3057\u3066\u767B\u9332\u3057\u307E\u3059`);
+      console.warn(`[ChpTnSnd] \u97F3\u8272 "${name}": duty \u306E\u8868\u306F\u77E9\u5F62\u6CE2(pulse)\u306B\u3057\u304B\u52B9\u304D\u307E\u305B\u3093(\u3053\u306E\u97F3\u8272\u306F ${kind})\u3002\u8868\u306F\u843D\u3068\u3057\u3066\u767B\u9332\u3057\u307E\u3059`);
       duty = null;
     }
     const arp = list(spec.arp), pitch = list(spec.pitch), vol = list(spec.vol);
@@ -733,13 +734,13 @@
     if (typeof v === "number" || /^\d+$/.test(String(v).trim())) {
       const n = Math.round(Number(v));
       if (n >= 0 && n <= 127) return n;
-      console.warn(`[MMSXX] gm: ${v} \u306F 0\u301C127 \u306E\u5916\u3067\u3059`);
+      console.warn(`[ChpTnSnd] gm: ${v} \u306F 0\u301C127 \u306E\u5916\u3067\u3059`);
       return null;
     }
     const at = gmIndex(v);
     if (at >= 0) return at;
     const like = gmLike(v);
-    console.warn(`[MMSXX] gm: "${v}" \u306F GM \u306E\u97F3\u8272\u540D\u3067\u306F\u3042\u308A\u307E\u305B\u3093` + (like.length ? `(\u8FD1\u3044\u306E\u306F ${like.join(" / ")})` : "(sound/gm.js \u306B 128 \u500B\u3042\u308A\u307E\u3059)"));
+    console.warn(`[ChpTnSnd] gm: "${v}" \u306F GM \u306E\u97F3\u8272\u540D\u3067\u306F\u3042\u308A\u307E\u305B\u3093` + (like.length ? `(\u8FD1\u3044\u306E\u306F ${like.join(" / ")})` : "(sound/gm.js \u306B 128 \u500B\u3042\u308A\u307E\u3059)"));
     return null;
   }
   function metaOf(opts = {}) {
@@ -777,7 +778,7 @@
   function requireFreeName(name, overwrite) {
     const at = WAVEFORMS.findIndex((w) => w.name.toLowerCase() === String(name).toLowerCase());
     if (at >= 0 && !overwrite) {
-      throw new Error(`[MMSXX] \u97F3\u8272 "${name}" \u306F\u3082\u3046\u767B\u9332\u3055\u308C\u3066\u3044\u307E\u3059(\u5DEE\u3057\u66FF\u3048\u308B\u306A\u3089 overwrite: true \u3092\u6E21\u3057\u3066\u304F\u3060\u3055\u3044)`);
+      throw new Error(`[ChpTnSnd] \u97F3\u8272 "${name}" \u306F\u3082\u3046\u767B\u9332\u3055\u308C\u3066\u3044\u307E\u3059(\u5DEE\u3057\u66FF\u3048\u308B\u306A\u3089 overwrite: true \u3092\u6E21\u3057\u3066\u304F\u3060\u3055\u3044)`);
     }
     return at;
   }
@@ -844,7 +845,7 @@
   }
   function registerBaked(name, opts = {}, flags = {}) {
     const at = requireFreeName(name, flags.overwrite);
-    if (!opts.from) throw new Error("[MMSXX] " + name + ": \u713C\u304F\u5143\u306E\u97F3\u8272(from)\u304C\u3042\u308A\u307E\u305B\u3093");
+    if (!opts.from) throw new Error("[ChpTnSnd] " + name + ": \u713C\u304F\u5143\u306E\u97F3\u8272(from)\u304C\u3042\u308A\u307E\u305B\u3093");
     const entry = {
       role: roleOf(opts.role, name),
       ...metaOf(opts),
@@ -867,13 +868,13 @@
     const at = requireFreeName(name, flags.overwrite);
     const list = Array.isArray(opts.layers) ? opts.layers : [];
     if (list.length < 2) {
-      throw new Error(`[MMSXX] ${name}: \u5408\u6210\u97F3\u8272\u306F 2 \u3064\u4EE5\u4E0A\u3092\u91CD\u306D\u307E\u3059(1 \u3064\u3060\u3051\u306A\u3089\u3001\u305D\u306E\u97F3\u8272\u3092\u305D\u306E\u307E\u307E\u4F7F\u3063\u3066\u304F\u3060\u3055\u3044)`);
+      throw new Error(`[ChpTnSnd] ${name}: \u5408\u6210\u97F3\u8272\u306F 2 \u3064\u4EE5\u4E0A\u3092\u91CD\u306D\u307E\u3059(1 \u3064\u3060\u3051\u306A\u3089\u3001\u305D\u306E\u97F3\u8272\u3092\u305D\u306E\u307E\u307E\u4F7F\u3063\u3066\u304F\u3060\u3055\u3044)`);
     }
     const layers = list.map((m, i) => {
       const w = findWave(m.wave);
-      if (w < 0) throw new Error(`[MMSXX] ${name}: ${i} \u756A\u76EE\u306E\u97F3\u8272 "${m.wave}" \u306F\u77E5\u3089\u306A\u3044\u540D\u524D\u3067\u3059`);
+      if (w < 0) throw new Error(`[ChpTnSnd] ${name}: ${i} \u756A\u76EE\u306E\u97F3\u8272 "${m.wave}" \u306F\u77E5\u3089\u306A\u3044\u540D\u524D\u3067\u3059`);
       if (WAVEFORMS[w].kind === "layer") {
-        throw new Error(`[MMSXX] ${name}: \u5408\u6210\u97F3\u8272\u3092\u5408\u6210\u97F3\u8272\u306B\u91CD\u306D\u3089\u308C\u307E\u305B\u3093 ("${m.wave}")`);
+        throw new Error(`[ChpTnSnd] ${name}: \u5408\u6210\u97F3\u8272\u3092\u5408\u6210\u97F3\u8272\u306B\u91CD\u306D\u3089\u308C\u307E\u305B\u3093 ("${m.wave}")`);
       }
       const follow = m.follow == null ? true : !!m.follow;
       return {
@@ -960,7 +961,7 @@
   }
   function keep(level, text) {
     if (!REPORT) return;
-    REPORT.problems.push({ level, text: String(text).replace(/^\[MMSXX\]\s*/, "") });
+    REPORT.problems.push({ level, text: String(text).replace(/^\[[^\]]+\]\s*/, "") });
   }
   function warn(text) {
     keep("warn", text);
@@ -983,7 +984,7 @@
   function needSection(what, now) {
     const name = SECTION_OF[what];
     if (!name || now === name) return;
-    bad(`[MMSXX] MML: "${what}" \u306F ${howOpen(name)} \u306E\u4E2D\u3060\u3051\u3067\u66F8\u3051\u307E\u3059(\u5916\u306B\u66F8\u304F\u3068\u3001\u3069\u3061\u3089\u306E\u66F8\u304D\u65B9\u3067\u8AAD\u3080\u306E\u304B\u5206\u304B\u3089\u306A\u304F\u306A\u308A\u307E\u3059)`);
+    bad(`[ChpTnSnd] MML: "${what}" \u306F ${howOpen(name)} \u306E\u4E2D\u3060\u3051\u3067\u66F8\u3051\u307E\u3059(\u5916\u306B\u66F8\u304F\u3068\u3001\u3069\u3061\u3089\u306E\u66F8\u304D\u65B9\u3067\u8AAD\u3080\u306E\u304B\u5206\u304B\u3089\u306A\u304F\u306A\u308A\u307E\u3059)`);
   }
   var LOOP_MAX_CHARS = 1 << 20;
   var isNameChar = (c) => c >= "a" && c <= "z" || c >= "0" && c <= "9" || c === "_" || c.charCodeAt(0) > 127;
@@ -1009,7 +1010,7 @@
       j++;
       while (j < src.length && " \n	\r".includes(src[j])) j++;
       if (src[j] !== "{") {
-        warn(`[MMSXX] MML: \u30DE\u30AF\u30ED "${name}" \u306E\u4E2D\u8EAB\u304C { } \u3067\u56F2\u307E\u308C\u3066\u3044\u307E\u305B\u3093`);
+        warn(`[ChpTnSnd] MML: \u30DE\u30AF\u30ED "${name}" \u306E\u4E2D\u8EAB\u304C { } \u3067\u56F2\u307E\u308C\u3066\u3044\u307E\u305B\u3093`);
         body += src.slice(at, i);
         continue;
       }
@@ -1019,14 +1020,14 @@
         else if (src[k] === "}" && --depth === 0) break;
       }
       if (k >= src.length) {
-        warn(`[MMSXX] MML: \u30DE\u30AF\u30ED "${name}" \u306E } \u304C\u3042\u308A\u307E\u305B\u3093`);
+        warn(`[ChpTnSnd] MML: \u30DE\u30AF\u30ED "${name}" \u306E } \u304C\u3042\u308A\u307E\u305B\u3093`);
         i = src.length;
         continue;
       }
-      if (table.has(name)) warn(`[MMSXX] MML: \u30DE\u30AF\u30ED "${name}" \u304C\u4E8C\u91CD\u306B\u767B\u9332\u3055\u308C\u3066\u3044\u307E\u3059(\u5F8C\u306E\u307B\u3046\u3092\u4F7F\u3044\u307E\u3059)`);
+      if (table.has(name)) warn(`[ChpTnSnd] MML: \u30DE\u30AF\u30ED "${name}" \u304C\u4E8C\u91CD\u306B\u767B\u9332\u3055\u308C\u3066\u3044\u307E\u3059(\u5F8C\u306E\u307B\u3046\u3092\u4F7F\u3044\u307E\u3059)`);
       if (!wide.has(name) && [...name].some((c) => c.codePointAt(0) > 127)) {
         wide.add(name);
-        warn(`[MMSXX] MML: \u30DE\u30AF\u30ED "${name}" \u306E\u540D\u524D\u306B\u82F1\u6570\u5B57\u3067\u306A\u3044\u5B57\u304C\u5165\u3063\u3066\u3044\u307E\u3059(\u3044\u307E\u306F\u52D5\u304D\u307E\u3059\u304C\u3001\u3053\u308C\u304B\u3089\u5148\u306F a-z 0-9 _ \u3067\u66F8\u3044\u3066\u304F\u3060\u3055\u3044)`);
+        warn(`[ChpTnSnd] MML: \u30DE\u30AF\u30ED "${name}" \u306E\u540D\u524D\u306B\u82F1\u6570\u5B57\u3067\u306A\u3044\u5B57\u304C\u5165\u3063\u3066\u3044\u307E\u3059(\u3044\u307E\u306F\u52D5\u304D\u307E\u3059\u304C\u3001\u3053\u308C\u304B\u3089\u5148\u306F a-z 0-9 _ \u3067\u66F8\u3044\u3066\u304F\u3060\u3055\u3044)`);
       }
       table.set(name, src.slice(j + 1, k).trim());
       i = k + 1;
@@ -1048,7 +1049,7 @@
       if (st === 1) {
         const from = path.indexOf(name);
         const ring = [...path.slice(from < 0 ? 0 : from), name].map((n) => `$${n}`).join(" \u2192 ");
-        bad(`[MMSXX] MML: \u30DE\u30AF\u30ED "${name}" \u304C\u5FAA\u74B0\u53C2\u7167\u3057\u3066\u3044\u307E\u3059(${ring})\u3002\u5C55\u958B\u3057\u3066\u3082\u7D42\u308F\u3089\u306A\u3044\u306E\u3067\u3001\u3053\u3053\u3067\u6B62\u3081\u307E\u3059`);
+        bad(`[ChpTnSnd] MML: \u30DE\u30AF\u30ED "${name}" \u304C\u5FAA\u74B0\u53C2\u7167\u3057\u3066\u3044\u307E\u3059(${ring})\u3002\u5C55\u958B\u3057\u3066\u3082\u7D42\u308F\u3089\u306A\u3044\u306E\u3067\u3001\u3053\u3053\u3067\u6B62\u3081\u307E\u3059`);
       }
       if (st === 2) return;
       state.set(name, 1);
@@ -1069,14 +1070,14 @@
       if (hit === void 0) {
         if (name && !missing.has(name)) {
           missing.add(name);
-          warn(`[MMSXX] MML: \u30DE\u30AF\u30ED "${name}" \u306F\u767B\u9332\u3055\u308C\u3066\u3044\u307E\u305B\u3093(\u3042\u308B\u306E\u306F ${[...table.keys()].join(" / ")})`);
+          warn(`[ChpTnSnd] MML: \u30DE\u30AF\u30ED "${name}" \u306F\u767B\u9332\u3055\u308C\u3066\u3044\u307E\u305B\u3093(\u3042\u308B\u306E\u306F ${[...table.keys()].join(" / ")})`);
         }
         body = body.slice(0, at) + body.slice(e);
         continue;
       }
       const next = body.slice(0, at) + hit + body.slice(e);
       if (next.length > LOOP_MAX_CHARS) {
-        bad(`[MMSXX] MML: \u30DE\u30AF\u30ED "${name}" \u304C\u5927\u304D\u3059\u304E\u307E\u3059(\u5E83\u3052\u308B\u3068 ${next.length} \u6587\u5B57\u3002\u4E0A\u9650\u306F ${LOOP_MAX_CHARS} \u6587\u5B57)`);
+        bad(`[ChpTnSnd] MML: \u30DE\u30AF\u30ED "${name}" \u304C\u5927\u304D\u3059\u304E\u307E\u3059(\u5E83\u3052\u308B\u3068 ${next.length} \u6587\u5B57\u3002\u4E0A\u9650\u306F ${LOOP_MAX_CHARS} \u6587\u5B57)`);
       }
       body = next;
     }
@@ -1097,7 +1098,7 @@
     if (low !== OLD_OUTRO_LABEL) return false;
     if (!saidOldOutro) {
       saidOldOutro = true;
-      warn('[MMSXX] MML: \u30E9\u30D9\u30EB "ENDING" \u306F\u53E4\u3044\u540D\u524D\u3067\u3059\u3002\u3053\u308C\u304B\u3089\u306F "OUTRO" \u3068\u66F8\u304D\u307E\u3059(intro \u306E\u5BFE\u8A9E)\u3002\u3044\u307E\u306E\u3068\u3053\u308D ENDING \u3082\u305D\u306E\u307E\u307E\u8AAD\u307F\u307E\u3059');
+      warn('[ChpTnSnd] MML: \u30E9\u30D9\u30EB "ENDING" \u306F\u53E4\u3044\u540D\u524D\u3067\u3059\u3002\u3053\u308C\u304B\u3089\u306F "OUTRO" \u3068\u66F8\u304D\u307E\u3059(intro \u306E\u5BFE\u8A9E)\u3002\u3044\u307E\u306E\u3068\u3053\u308D ENDING \u3082\u305D\u306E\u307E\u307E\u8AAD\u307F\u307E\u3059');
     }
     return true;
   }
@@ -1119,7 +1120,7 @@
       }
       const body = src.slice(open + 1, close);
       if (src[close + 1] === "*") {
-        warn('[MMSXX] MML: "]*" \u306F\u4F7F\u3048\u307E\u305B\u3093\u3002\u304F\u308A\u8FD4\u3059\u3068\u304D\u306B\u623B\u308B\u5148\u306F "// #label LOOP" \u3067\u66F8\u304D\u307E\u3059(\u3053\u3053\u306F 1 \u56DE\u3060\u3051\u9CF4\u308A\u307E\u3059)');
+        warn('[ChpTnSnd] MML: "]*" \u306F\u4F7F\u3048\u307E\u305B\u3093\u3002\u304F\u308A\u8FD4\u3059\u3068\u304D\u306B\u623B\u308B\u5148\u306F "#label LOOP" \u3067\u66F8\u304D\u307E\u3059(\u3053\u3053\u306F 1 \u56DE\u3060\u3051\u9CF4\u308A\u307E\u3059)');
         src = src.slice(0, open) + body + src.slice(close + 2);
         continue;
       }
@@ -1132,7 +1133,7 @@
       }
       const next = src.slice(0, open) + body.repeat(Math.max(0, count)) + src.slice(numEnd);
       if (next.length > LOOP_MAX_CHARS) {
-        bad(`[MMSXX] MML: \u304F\u308A\u8FD4\u3057\u304C\u5927\u304D\u3059\u304E\u307E\u3059(\u5E83\u3052\u308B\u3068 ${next.length} \u6587\u5B57\u3002\u4E0A\u9650\u306F ${LOOP_MAX_CHARS} \u6587\u5B57)`);
+        bad(`[ChpTnSnd] MML: \u304F\u308A\u8FD4\u3057\u304C\u5927\u304D\u3059\u304E\u307E\u3059(\u5E83\u3052\u308B\u3068 ${next.length} \u6587\u5B57\u3002\u4E0A\u9650\u306F ${LOOP_MAX_CHARS} \u6587\u5B57)`);
       }
       src = next;
     }
@@ -1173,16 +1174,16 @@ ${val}`;
       if (!m) continue;
       const name = m[1].trim().toLowerCase();
       if (findWave(name) >= 0) {
-        bad(`[MMSXX] MML: \u30D0\u30F3\u30C9\u30EB\u97F3\u8272 "${name}" \u306F\u97F3\u8272\u306E\u540D\u524D\u3068\u540C\u3058\u3067\u3059(\u5225\u306E\u540D\u524D\u306B\u3057\u3066\u304F\u3060\u3055\u3044)`);
+        bad(`[ChpTnSnd] MML: \u30D0\u30F3\u30C9\u30EB\u97F3\u8272 "${name}" \u306F\u97F3\u8272\u306E\u540D\u524D\u3068\u540C\u3058\u3067\u3059(\u5225\u306E\u540D\u524D\u306B\u3057\u3066\u304F\u3060\u3055\u3044)`);
       }
       const raw = m[2].trim();
       if (out.has(name) && seenText.get(name) !== raw) {
-        warn(`[MMSXX] MML: \u30D0\u30F3\u30C9\u30EB\u97F3\u8272 "${name}" \u3092 2 \u5EA6\u66F8\u3044\u3066\u3044\u307E\u3059(\u5F8C\u306E\u307B\u3046\u3092\u4F7F\u3044\u307E\u3059)`);
+        warn(`[ChpTnSnd] MML: \u30D0\u30F3\u30C9\u30EB\u97F3\u8272 "${name}" \u3092 2 \u5EA6\u66F8\u3044\u3066\u3044\u307E\u3059(\u5F8C\u306E\u307B\u3046\u3092\u4F7F\u3044\u307E\u3059)`);
       }
       seenText.set(name, raw);
       const parts = splitParts(m[2]);
       if (!parts.length) {
-        bad(`[MMSXX] MML: \u30D0\u30F3\u30C9\u30EB\u97F3\u8272 "${name}" \u306E\u4E2D\u8EAB\u304C\u3042\u308A\u307E\u305B\u3093`);
+        bad(`[ChpTnSnd] MML: \u30D0\u30F3\u30C9\u30EB\u97F3\u8272 "${name}" \u306E\u4E2D\u8EAB\u304C\u3042\u308A\u307E\u305B\u3093`);
       }
       out.set(name, parts.map((t) => readBundlePart(name, t, out)));
     }
@@ -1198,15 +1199,15 @@ ${val}`;
       if (!m) continue;
       const name = m[1].trim().toLowerCase();
       if (findWave(name) >= 0 || bundles.has(name)) {
-        bad(`[MMSXX] MML: \u548C\u97F3\u306E\u697D\u5668 "${name}" \u306F\u97F3\u8272\u306E\u540D\u524D\u3068\u540C\u3058\u3067\u3059(\u5225\u306E\u540D\u524D\u306B\u3057\u3066\u304F\u3060\u3055\u3044)`);
+        bad(`[ChpTnSnd] MML: \u548C\u97F3\u306E\u697D\u5668 "${name}" \u306F\u97F3\u8272\u306E\u540D\u524D\u3068\u540C\u3058\u3067\u3059(\u5225\u306E\u540D\u524D\u306B\u3057\u3066\u304F\u3060\u3055\u3044)`);
       }
       const raw = m[2].trim();
       if (out.has(name) && seenText.get(name) !== raw) {
-        warn(`[MMSXX] MML: \u548C\u97F3\u306E\u697D\u5668 "${name}" \u3092 2 \u5EA6\u66F8\u3044\u3066\u3044\u307E\u3059(\u5F8C\u306E\u307B\u3046\u3092\u4F7F\u3044\u307E\u3059)`);
+        warn(`[ChpTnSnd] MML: \u548C\u97F3\u306E\u697D\u5668 "${name}" \u3092 2 \u5EA6\u66F8\u3044\u3066\u3044\u307E\u3059(\u5F8C\u306E\u307B\u3046\u3092\u4F7F\u3044\u307E\u3059)`);
       }
       seenText.set(name, raw);
       const parts = splitParts(m[2]);
-      if (!parts.length) bad(`[MMSXX] MML: \u548C\u97F3\u306E\u697D\u5668 "${name}" \u306E\u4E2D\u8EAB\u304C\u3042\u308A\u307E\u305B\u3093`);
+      if (!parts.length) bad(`[ChpTnSnd] MML: \u548C\u97F3\u306E\u697D\u5668 "${name}" \u306E\u4E2D\u8EAB\u304C\u3042\u308A\u307E\u305B\u3093`);
       out.set(name, parts.map((t) => readChordVoice(name, t, bundles)));
     }
     return out;
@@ -1214,15 +1215,15 @@ ${val}`;
   function readChordVoice(name, text, bundles) {
     const m = /^@\{([^}]*)\}[ \t]*(.*)$/.exec(text.trim());
     if (!m) {
-      bad(`[MMSXX] MML: \u548C\u97F3\u306E\u697D\u5668 "${name}" \u306E "${text.trim()}" \u306F\u8AAD\u3081\u307E\u305B\u3093(\u66F8\u3051\u308B\u306E\u306F @{\u540D\u524D} \u3068\u547C\u3073\u540D\u3060\u3051\u3067\u3059\u3002\u97F3\u91CF\u3084\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u306F\u3001\u305D\u306E\u97F3\u8272\u306E\u5074\u306B\u6301\u305F\u305B\u307E\u3059)`);
+      bad(`[ChpTnSnd] MML: \u548C\u97F3\u306E\u697D\u5668 "${name}" \u306E "${text.trim()}" \u306F\u8AAD\u3081\u307E\u305B\u3093(\u66F8\u3051\u308B\u306E\u306F @{\u540D\u524D} \u3068\u547C\u3073\u540D\u3060\u3051\u3067\u3059\u3002\u97F3\u91CF\u3084\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u306F\u3001\u305D\u306E\u97F3\u8272\u306E\u5074\u306B\u6301\u305F\u305B\u307E\u3059)`);
     }
     const key2 = m[1].trim().toLowerCase();
     const lane = m[1].trim();
-    const label = looksLikeSetting(m[2].trim()) ? bad(`[MMSXX] MML: \u548C\u97F3\u306E\u697D\u5668 "${name}" \u306E "${m[2].trim()}" \u306F\u8AAD\u3081\u307E\u305B\u3093(\u97F3\u91CF\u3084\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u306F\u3001\u305D\u306E\u97F3\u8272\u306E\u5074\u306B\u6301\u305F\u305B\u307E\u3059\u3002\u3046\u3057\u308D\u306B\u66F8\u3051\u308B\u306E\u306F\u547C\u3073\u540D\u3060\u3051\u3067\u3059)`) : m[2].trim() || lane;
+    const label = looksLikeSetting(m[2].trim()) ? bad(`[ChpTnSnd] MML: \u548C\u97F3\u306E\u697D\u5668 "${name}" \u306E "${m[2].trim()}" \u306F\u8AAD\u3081\u307E\u305B\u3093(\u97F3\u91CF\u3084\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u306F\u3001\u305D\u306E\u97F3\u8272\u306E\u5074\u306B\u6301\u305F\u305B\u307E\u3059\u3002\u3046\u3057\u308D\u306B\u66F8\u3051\u308B\u306E\u306F\u547C\u3073\u540D\u3060\u3051\u3067\u3059)`) : m[2].trim() || lane;
     if (bundles.has(key2)) return { parts: bundles.get(key2), lane, label };
     const w = findWave(key2);
     if (w < 0) {
-      bad(`[MMSXX] MML: \u548C\u97F3\u306E\u697D\u5668 "${name}" \u306E "${m[1].trim()}" \u306F\u77E5\u3089\u306A\u3044\u540D\u524D\u3067\u3059`);
+      bad(`[ChpTnSnd] MML: \u548C\u97F3\u306E\u697D\u5668 "${name}" \u306E "${m[1].trim()}" \u306F\u77E5\u3089\u306A\u3044\u540D\u524D\u3067\u3059`);
     }
     return { parts: [{
       wave: w,
@@ -1249,14 +1250,15 @@ ${val}`;
     if (!(e.s === 0)) return fallback;
     return Math.max(fallback, (e.a ?? 0) + (e.d ?? 0) + (e.r ?? 0));
   }
-  function readDrums(mml, bundles = readBundles(mml)) {
+  function readDrums(raw, bundles = readBundles(raw)) {
+    const mml = normalizeDirectives(raw);
     const outer = /* @__PURE__ */ new Map();
     const scopes = [];
     let depth = 0;
-    for (const raw of String(mml ?? "").split("\n")) {
-      const cut = raw.indexOf("//");
-      const code = cut < 0 ? raw : raw.slice(0, cut);
-      const note = cut < 0 ? "" : raw.slice(cut + 2);
+    for (const raw2 of String(mml ?? "").split("\n")) {
+      const cut = raw2.indexOf("//");
+      const code = cut < 0 ? raw2 : raw2.slice(0, cut);
+      const note = cut < 0 ? "" : raw2.slice(cut + 2);
       const m = DRUM_LINE.exec(note);
       if (m) {
         const name = m[1].trim();
@@ -1284,16 +1286,16 @@ ${val}`;
     const t = String(text).trim();
     const m = /^@\{([^}]*)\}[ \t]*(?:v[ \t]*(\d+)\b)?[ \t]*(?:!([A-Za-z_]\w*)(?:[ \t]+(-?\d+))?)?[ \t]*(.*)$/.exec(t);
     if (!m) {
-      bad(`[MMSXX] MML: \u30C9\u30E9\u30E0 "${name}" \u306E "${t}" \u306F\u8AAD\u3081\u307E\u305B\u3093(\u66F8\u3051\u308B\u306E\u306F @{\u540D\u524D} \u3068 v \u3068\u5408\u56F3\u3068\u547C\u3073\u540D\u3060\u3051\u3067\u3059\u3002\u9577\u3055\u3068\u9AD8\u3055\u306F\u66F8\u304D\u307E\u305B\u3093)`);
+      bad(`[ChpTnSnd] MML: \u30C9\u30E9\u30E0 "${name}" \u306E "${t}" \u306F\u8AAD\u3081\u307E\u305B\u3093(\u66F8\u3051\u308B\u306E\u306F @{\u540D\u524D} \u3068 v \u3068\u5408\u56F3\u3068\u547C\u3073\u540D\u3060\u3051\u3067\u3059\u3002\u9577\u3055\u3068\u9AD8\u3055\u306F\u66F8\u304D\u307E\u305B\u3093)`);
     }
     const key2 = m[1].trim().toLowerCase();
     const vol = m[2] === void 0 ? null : clamp(parseInt(m[2], 10), 0, 15);
     const cue = m[3] ? { name: m[3], arg: m[4] === void 0 ? 0 : parseInt(m[4], 10) } : null;
-    const label = looksLikeSetting(m[5].trim()) ? bad(`[MMSXX] MML: \u30C9\u30E9\u30E0 "${name}" \u306E "${m[5].trim()}" \u306F\u8AAD\u3081\u307E\u305B\u3093(\u9577\u3055\u3068\u9AD8\u3055\u306F\u66F8\u304D\u307E\u305B\u3093\u3002\u3046\u3057\u308D\u306B\u66F8\u3051\u308B\u306E\u306F\u547C\u3073\u540D\u3060\u3051\u3067\u3059)`) : m[5].trim() || m[1].trim();
+    const label = looksLikeSetting(m[5].trim()) ? bad(`[ChpTnSnd] MML: \u30C9\u30E9\u30E0 "${name}" \u306E "${m[5].trim()}" \u306F\u8AAD\u3081\u307E\u305B\u3093(\u9577\u3055\u3068\u9AD8\u3055\u306F\u66F8\u304D\u307E\u305B\u3093\u3002\u3046\u3057\u308D\u306B\u66F8\u3051\u308B\u306E\u306F\u547C\u3073\u540D\u3060\u3051\u3067\u3059)`) : m[5].trim() || m[1].trim();
     if (bundles.has(key2)) return { parts: bundles.get(key2), vol, label, cue };
     const w = findWave(key2);
     if (w < 0) {
-      bad(`[MMSXX] MML: \u30C9\u30E9\u30E0 "${name}" \u306E "${m[1].trim()}" \u306F\u77E5\u3089\u306A\u3044\u540D\u524D\u3067\u3059`);
+      bad(`[ChpTnSnd] MML: \u30C9\u30E9\u30E0 "${name}" \u306E "${m[1].trim()}" \u306F\u77E5\u3089\u306A\u3044\u540D\u524D\u3067\u3059`);
     }
     return { parts: [{
       wave: w,
@@ -1304,6 +1306,19 @@ ${val}`;
       detune: 0,
       echo: void 0
     }], vol, label, cue };
+  }
+  function spaceDrumRepeats(src) {
+    const text = String(src);
+    const keep2 = drumRanges(text);
+    if (!keep2.length) return text;
+    keep2.sort((a, b) => a[0] - b[0]);
+    let out = "", at = 0;
+    for (const [s, e] of keep2) {
+      if (s < at) continue;
+      out += text.slice(at, s) + text.slice(s, e).replace(/\[/g, "[ ").replace(/\]/g, " ]");
+      at = e;
+    }
+    return out + text.slice(at);
   }
   function lowerOutsideDrums(src) {
     const text = String(src);
@@ -1389,7 +1404,8 @@ ${val}`;
     }
     return out;
   }
-  function shareBundles(voices) {
+  function shareBundles(raw) {
+    const voices = (raw || []).map((v) => normalizeDirectives(v));
     const lines = [];
     for (const v of voices) {
       for (const line of commentLines(String(v ?? ""))) {
@@ -1432,7 +1448,7 @@ ${val}`;
       BUNDLE_PART.lastIndex = at;
       const m = BUNDLE_PART.exec(text);
       if (!m) {
-        bad(`[MMSXX] MML: \u30D0\u30F3\u30C9\u30EB\u97F3\u8272 "${name}" \u306E "${text.slice(at)}" \u306F\u8AAD\u3081\u307E\u305B\u3093(\u66F8\u3051\u308B\u306E\u306F @{\u97F3\u8272} @e{\u5F62} v q @o @d @s \u3060\u3051\u3067\u3059)`);
+        bad(`[ChpTnSnd] MML: \u30D0\u30F3\u30C9\u30EB\u97F3\u8272 "${name}" \u306E "${text.slice(at)}" \u306F\u8AAD\u3081\u307E\u305B\u3093(\u66F8\u3051\u308B\u306E\u306F @{\u97F3\u8272} @e{\u5F62} v q @o @d @s \u3060\u3051\u3067\u3059)`);
       }
       at = BUNDLE_PART.lastIndex;
       const g = m.groups;
@@ -1449,14 +1465,14 @@ ${val}`;
       if (g.wave !== void 0) {
         const key2 = g.wave.trim().toLowerCase();
         if (seen.has(key2)) {
-          bad(`[MMSXX] MML: \u30D0\u30F3\u30C9\u30EB\u97F3\u8272 "${name}" \u306B\u30D0\u30F3\u30C9\u30EB\u97F3\u8272 "${key2}" \u306F\u5165\u308C\u3089\u308C\u307E\u305B\u3093`);
+          bad(`[ChpTnSnd] MML: \u30D0\u30F3\u30C9\u30EB\u97F3\u8272 "${name}" \u306B\u30D0\u30F3\u30C9\u30EB\u97F3\u8272 "${key2}" \u306F\u5165\u308C\u3089\u308C\u307E\u305B\u3093`);
         }
         const w = findWave(key2);
         if (w < 0) {
-          bad(`[MMSXX] MML: \u30D0\u30F3\u30C9\u30EB\u97F3\u8272 "${name}" \u306E\u97F3\u8272 "${g.wave.trim()}" \u306F\u77E5\u3089\u306A\u3044\u540D\u524D\u3067\u3059`);
+          bad(`[ChpTnSnd] MML: \u30D0\u30F3\u30C9\u30EB\u97F3\u8272 "${name}" \u306E\u97F3\u8272 "${g.wave.trim()}" \u306F\u77E5\u3089\u306A\u3044\u540D\u524D\u3067\u3059`);
         }
         if (WAVEFORMS[w].kind === "layer") {
-          bad(`[MMSXX] MML: \u30D0\u30F3\u30C9\u30EB\u97F3\u8272 "${name}" \u306B\u5408\u6210\u97F3\u8272 "${WAVEFORMS[w].name}" \u306F\u5165\u308C\u3089\u308C\u307E\u305B\u3093(\u5408\u6210\u97F3\u8272\u306F\u305D\u306E\u307E\u307E\u4F7F\u3063\u3066\u304F\u3060\u3055\u3044)`);
+          bad(`[ChpTnSnd] MML: \u30D0\u30F3\u30C9\u30EB\u97F3\u8272 "${name}" \u306B\u5408\u6210\u97F3\u8272 "${WAVEFORMS[w].name}" \u306F\u5165\u308C\u3089\u308C\u307E\u305B\u3093(\u5408\u6210\u97F3\u8272\u306F\u305D\u306E\u307E\u307E\u4F7F\u3063\u3066\u304F\u3060\u3055\u3044)`);
         }
         part.wave = w;
         continue;
@@ -1479,7 +1495,7 @@ ${val}`;
       }
     }
     if (part.wave < 0) {
-      bad(`[MMSXX] MML: \u30D0\u30F3\u30C9\u30EB\u97F3\u8272 "${name}" \u306E "${text}" \u306B\u97F3\u8272\u304C\u3042\u308A\u307E\u305B\u3093(@{\u540D\u524D} \u3092\u66F8\u3044\u3066\u304F\u3060\u3055\u3044)`);
+      bad(`[ChpTnSnd] MML: \u30D0\u30F3\u30C9\u30EB\u97F3\u8272 "${name}" \u306E "${text}" \u306B\u97F3\u8272\u304C\u3042\u308A\u307E\u305B\u3093(@{\u540D\u524D} \u3092\u66F8\u3044\u3066\u304F\u3060\u3055\u3044)`);
     }
     return part;
   }
@@ -1496,11 +1512,12 @@ ${val}`;
   ].join("|"), "giy");
   var SONG_WIDE = ["title", "tempo", "meter", "about"];
   var STACKED = ["about"];
-  function splitVoices(text) {
-    const lines = String(text ?? "").split(/\r?\n/);
+  function splitVoices(raw) {
+    const text = normalizeDirectives(raw);
+    const lines = text.split(/\r?\n/);
     const isMark = (line) => /^\s*\/\/\s*#\s*ch(\s|$)/i.test(line);
     const at = lines.map((l, i) => isMark(l) ? i : -1).filter((i) => i >= 0);
-    const whole = String(text ?? "").trim();
+    const whole = text.trim();
     if (at.length === 0) return whole ? [whole] : [];
     const head = lines.slice(0, at[0]).filter((l) => /^\s*\/\//.test(l));
     const out = [];
@@ -1510,7 +1527,36 @@ ${val}`;
     }
     return out.filter(Boolean);
   }
-  function commentLines(src) {
+  var BARE_DIRECTIVE = /^([ \t]*)#/;
+  function normalizeDirectives(src) {
+    const text = String(src ?? "");
+    if (!/^[ \t]*#/m.test(text)) return text;
+    const out = [];
+    let inBlock = false;
+    for (const line of text.split("\n")) {
+      out.push(!inBlock && BARE_DIRECTIVE.test(line) ? line.replace(BARE_DIRECTIVE, "$1// #") : line);
+      let i = 0;
+      while (i < line.length) {
+        if (!inBlock && line[i] === "/" && line[i + 1] === "*") {
+          inBlock = true;
+          i += 2;
+          continue;
+        }
+        if (inBlock && line[i] === "*" && line[i + 1] === "/") {
+          inBlock = false;
+          i += 2;
+          continue;
+        }
+        i++;
+      }
+    }
+    return out.join("\n");
+  }
+  function countOldStyle(src) {
+    return (String(src ?? "").match(/^[ \t]*\/\/[ \t]*#/gm) || []).length;
+  }
+  function commentLines(raw) {
+    const src = normalizeDirectives(raw);
     const out = [];
     for (let i = 0; i < src.length; i++) {
       if (src[i] === "/" && src[i + 1] === "/") {
@@ -1525,7 +1571,8 @@ ${val}`;
     }
     return out;
   }
-  function stripComments(src, names = [], cues = []) {
+  function stripComments(raw, names = [], cues = []) {
+    const src = normalizeDirectives(raw);
     const LABEL = /^\s*#\s*label\b[ \t]*(.*)$/i;
     const CUE = /^\s*#\s*cue\b[ \t]*(.*)$/i;
     let out = "";
@@ -1541,12 +1588,12 @@ ${val}`;
           names.push(m[1].trim());
           out += `${MARK_AT}${names.length - 1}${MARK_AT}`;
         } else if (m) {
-          warn(`[MMSXX] MML: \u30E9\u30D9\u30EB "${m[1].trim()}" \u306F\u884C\u982D\u306B\u66F8\u304D\u307E\u3059 (\u97F3\u7B26\u306E\u5F8C\u308D\u306B\u66F8\u3044\u305F\u3082\u306E\u306F\u52B9\u304D\u307E\u305B\u3093)`);
+          warn(`[ChpTnSnd] MML: \u30E9\u30D9\u30EB "${m[1].trim()}" \u306F\u884C\u982D\u306B\u66F8\u304D\u307E\u3059 (\u97F3\u7B26\u306E\u5F8C\u308D\u306B\u66F8\u3044\u305F\u3082\u306E\u306F\u52B9\u304D\u307E\u305B\u3093)`);
         } else if (c && headOfLine) {
           cues.push(c[1].trim());
           out += `${CUE_AT}${cues.length - 1}${CUE_AT}`;
         } else if (c) {
-          warn(`[MMSXX] MML: \u5408\u56F3 "${c[1].trim()}" \u306F\u884C\u982D\u306B\u66F8\u304D\u307E\u3059 (\u97F3\u7B26\u306E\u5F8C\u308D\u306B\u66F8\u3044\u305F\u3082\u306E\u306F\u52B9\u304D\u307E\u305B\u3093)`);
+          warn(`[ChpTnSnd] MML: \u5408\u56F3 "${c[1].trim()}" \u306F\u884C\u982D\u306B\u66F8\u304D\u307E\u3059 (\u97F3\u7B26\u306E\u5F8C\u308D\u306B\u66F8\u3044\u305F\u3082\u306E\u306F\u52B9\u304D\u307E\u305B\u3093)`);
         }
         i = j - 1;
         out += "\n";
@@ -1585,14 +1632,14 @@ ${val}`;
       j++;
       while (j < src.length && " \n	\r".includes(src[j])) j++;
       if (src[j] !== "{") {
-        bad(`[MMSXX] MML: \u5408\u56F3 "!${name}" \u306E\u4E2D\u8EAB\u304C { } \u3067\u56F2\u307E\u308C\u3066\u3044\u307E\u305B\u3093`);
+        bad(`[ChpTnSnd] MML: \u5408\u56F3 "!${name}" \u306E\u4E2D\u8EAB\u304C { } \u3067\u56F2\u307E\u308C\u3066\u3044\u307E\u305B\u3093`);
       }
       const k = src.indexOf("}", j);
-      if (k < 0) bad(`[MMSXX] MML: \u5408\u56F3 "!${name}" \u306E } \u304C\u3042\u308A\u307E\u305B\u3093`);
+      if (k < 0) bad(`[ChpTnSnd] MML: \u5408\u56F3 "!${name}" \u306E } \u304C\u3042\u308A\u307E\u305B\u3093`);
       const [word, ...rest] = src.slice(j + 1, k).trim().split(/\s+/);
-      if (!word) bad(`[MMSXX] MML: \u5408\u56F3 "!${name}" \u306E\u4E2D\u8EAB\u304C\u7A7A\u3067\u3059`);
+      if (!word) bad(`[ChpTnSnd] MML: \u5408\u56F3 "!${name}" \u306E\u4E2D\u8EAB\u304C\u7A7A\u3067\u3059`);
       if (word === name) {
-        bad(`[MMSXX] MML: \u5408\u56F3 "!${name}" \u3092\u540C\u3058\u540D\u524D\u3078\u767B\u9332\u3057\u3066\u3044\u307E\u3059(\u77ED\u3044\u540D\u524D\u3092\u4ED8\u3051\u308B\u305F\u3081\u306E\u66F8\u304D\u65B9\u3067\u3059)`);
+        bad(`[ChpTnSnd] MML: \u5408\u56F3 "!${name}" \u3092\u540C\u3058\u540D\u524D\u3078\u767B\u9332\u3057\u3066\u3044\u307E\u3059(\u77ED\u3044\u540D\u524D\u3092\u4ED8\u3051\u308B\u305F\u3081\u306E\u66F8\u304D\u65B9\u3067\u3059)`);
       }
       const num = Number(rest[0]);
       table.set(name, { name: word, arg: Number.isFinite(num) ? num : 0 });
@@ -1607,9 +1654,9 @@ ${val}`;
     const drums = readDrums(mml, bundles);
     const markNames = [];
     const cueNames = [];
-    const expanded = expandLoops(expandMacros(
+    const expanded = expandLoops(expandMacros(spaceDrumRepeats(
       lowerOutsideDrums(stripComments(String(mml), markNames, cueNames))
-    ));
+    )));
     const { body: src, table: cueTable } = readCueNames(expanded);
     let pos = 0;
     let octave = 4, defLen = 4, tempo = 120, vol = 10, gate = 7;
@@ -1721,7 +1768,7 @@ ${val}`;
         for (const { nm, bang } of names) {
           const d = table.get(nm);
           if (!d) {
-            warn(`[MMSXX] MML: \u30C9\u30E9\u30E0 "${nm}" \u306F\u5272\u308A\u5F53\u3066\u304C\u3042\u308A\u307E\u305B\u3093(// #drum ` + nm + " = @{\u97F3\u8272} \u3068\u66F8\u304D\u307E\u3059)");
+            warn(`[ChpTnSnd] MML: \u30C9\u30E9\u30E0 "${nm}" \u306F\u5272\u308A\u5F53\u3066\u304C\u3042\u308A\u307E\u305B\u3093(#drum ` + nm + " = @{\u97F3\u8272} \u3068\u66F8\u304D\u307E\u3059)");
             continue;
           }
           bundle = d.parts;
@@ -1729,7 +1776,7 @@ ${val}`;
           if (d.label) laneLabels.set(nm, d.label);
           if (bang) {
             if (!d.cue) {
-              warn(`[MMSXX] MML: \u30C9\u30E9\u30E0 "${nm}" \u306B\u5408\u56F3\u306E\u540D\u524D\u304C\u3042\u308A\u307E\u305B\u3093(// #drum ${nm} = @{\u97F3\u8272} !\u540D\u524D \u3068\u66F8\u304D\u307E\u3059)`);
+              warn(`[ChpTnSnd] MML: \u30C9\u30E9\u30E0 "${nm}" \u306B\u5408\u56F3\u306E\u540D\u524D\u304C\u3042\u308A\u307E\u305B\u3093(#drum ${nm} = @{\u97F3\u8272} !\u540D\u524D \u3068\u66F8\u304D\u307E\u3059)`);
             } else {
               cues.push({ name: d.cue.name, arg: d.cue.arg, t: time });
             }
@@ -1789,9 +1836,9 @@ ${val}`;
           continue;
         }
         if (c >= "0" && c <= "9") {
-          bad(`[MMSXX] MML: \u30C9\u30E9\u30E0\u306E\u56F2\u307F\u306E\u4E2D\u306B\u6570\u5B57 "${c}" \u306F\u66F8\u3051\u307E\u305B\u3093(\u9577\u3055\u306F\u56F2\u307F\u304C\u6301\u3061\u307E\u3059\u3002\u97F3\u91CF\u306F v \u306E\u3046\u3057\u308D\u3060\u3051\u3067\u3059)`);
+          bad(`[ChpTnSnd] MML: \u30C9\u30E9\u30E0\u306E\u56F2\u307F\u306E\u4E2D\u306B\u6570\u5B57 "${c}" \u306F\u66F8\u3051\u307E\u305B\u3093(\u9577\u3055\u306F\u56F2\u307F\u304C\u6301\u3061\u307E\u3059\u3002\u97F3\u91CF\u306F v \u306E\u3046\u3057\u308D\u3060\u3051\u3067\u3059)`);
         }
-        warn(`[MMSXX] MML: \u30C9\u30E9\u30E0\u306E\u56F2\u307F\u306E\u4E2D\u306B "${c}" \u306F\u66F8\u3051\u307E\u305B\u3093(\u697D\u5668\u306E\u5B57\u3068 . \u3068 v \u3068 ! \u3068 [ ] | \u3060\u3051\u3067\u3059)`);
+        warn(`[ChpTnSnd] MML: \u30C9\u30E9\u30E0\u306E\u56F2\u307F\u306E\u4E2D\u306B "${c}" \u306F\u66F8\u3051\u307E\u305B\u3093(\u697D\u5668\u306E\u5B57\u3068 . \u3068 v \u3068 ! \u3068 [ ] | \u3060\u3051\u3067\u3059)`);
         pos++;
       }
       hit();
@@ -1840,7 +1887,7 @@ ${val}`;
         hit = table.findIndex((e) => (e.alias || []).some((a) => String(a).toLowerCase() === key2));
       }
       if (hit >= 0) return hit;
-      warn(`[MMSXX] MML: ${what} "${s}" \u306F\u77E5\u3089\u306A\u3044\u540D\u524D\u3067\u3059 (\u4F7F\u3048\u308B\u306E\u306F ${table.map((e) => e.name).join(" / ")})`);
+      warn(`[ChpTnSnd] MML: ${what} "${s}" \u306F\u77E5\u3089\u306A\u3044\u540D\u524D\u3067\u3059 (\u4F7F\u3048\u308B\u306E\u306F ${table.map((e) => e.name).join(" / ")})`);
       return now;
     };
     const readPlace = () => {
@@ -1921,7 +1968,7 @@ ${val}`;
             ...SECTIONS[section].digits ? ["\u6570\u5B57"] : [],
             ...SEC_COMMON.filter((c) => c !== "}")
           ];
-          bad(`[MMSXX] MML: "${ch}" \u306F ${howOpen(section)} \u306E\u4E2D\u3067\u306F\u66F8\u3051\u307E\u305B\u3093(\u4E2D\u3067\u66F8\u3051\u308B\u306E\u306F ${ok.join(" ")} \u3068 @\u8A2D\u5B9A)`);
+          bad(`[ChpTnSnd] MML: "${ch}" \u306F ${howOpen(section)} \u306E\u4E2D\u3067\u306F\u66F8\u3051\u307E\u305B\u3093(\u4E2D\u3067\u66F8\u3051\u308B\u306E\u306F ${ok.join(" ")} \u3068 @\u8A2D\u5B9A)`);
         }
         if (SEMI[ch] !== void 0) {
           let semi = SEMI[ch];
@@ -2003,12 +2050,12 @@ ${val}`;
               continue;
             }
             if (c === MARK_AT) {
-              warn("[MMSXX] MML: \u548C\u97F3\u306E\u4E2D\u306B\u30E9\u30D9\u30EB\u306F\u7F6E\u3051\u307E\u305B\u3093(\u548C\u97F3\u306F 1 \u97F3\u3068\u540C\u3058\u6271\u3044\u3067\u3059\u3002\u9589\u3058\u305F\u3042\u3068\u306B\u66F8\u304D\u307E\u3059)");
+              warn("[ChpTnSnd] MML: \u548C\u97F3\u306E\u4E2D\u306B\u30E9\u30D9\u30EB\u306F\u7F6E\u3051\u307E\u305B\u3093(\u548C\u97F3\u306F 1 \u97F3\u3068\u540C\u3058\u6271\u3044\u3067\u3059\u3002\u9589\u3058\u305F\u3042\u3068\u306B\u66F8\u304D\u307E\u3059)");
               while (pos < src.length && src[pos] !== MARK_AT) pos++;
               pos++;
               continue;
             }
-            warn(`[MMSXX] MML: \u548C\u97F3\u306E\u4E2D\u306B "${c}" \u306F\u66F8\u3051\u307E\u305B\u3093 (\u97F3\u540D\u3068 + # - \u3068 > < o \u3068 @{} \u3068 v \u3068 ? ! \u3060\u3051\u3002\u9577\u3055\u306F\u9589\u3058\u305F\u3042\u3068\u306B\u66F8\u304D\u307E\u3059)`);
+            warn(`[ChpTnSnd] MML: \u548C\u97F3\u306E\u4E2D\u306B "${c}" \u306F\u66F8\u3051\u307E\u305B\u3093 (\u97F3\u540D\u3068 + # - \u3068 > < o \u3068 @{} \u3068 v \u3068 ? ! \u3060\u3051\u3002\u9577\u3055\u306F\u9589\u3058\u305F\u3042\u3068\u306B\u66F8\u304D\u307E\u3059)`);
           }
           pos++;
           const dur = readDuration();
@@ -2020,7 +2067,7 @@ ${val}`;
           chordSet = keepSet;
           lane = keepLane;
           if (notes.length === 0) {
-            warn("[MMSXX] MML: \u7A7A\u306E\u548C\u97F3\u304C\u3042\u308A\u307E\u3059(\u4F11\u307F\u305F\u3044\u306A\u3089 r \u3092\u66F8\u304D\u307E\u3059)");
+            warn("[ChpTnSnd] MML: \u7A7A\u306E\u548C\u97F3\u304C\u3042\u308A\u307E\u3059(\u4F11\u307F\u305F\u3044\u306A\u3089 r \u3092\u66F8\u304D\u307E\u3059)");
             time += dur;
           } else {
             const id = chordSeq++;
@@ -2069,7 +2116,7 @@ ${val}`;
         } else if (ch === "!") {
           let word = "";
           while (pos < src.length && isNameChar(src[pos])) word += src[pos++];
-          if (!word) bad('[MMSXX] MML: "!" \u306E\u3046\u3057\u308D\u306B\u5408\u56F3\u306E\u540D\u524D\u304C\u3042\u308A\u307E\u305B\u3093');
+          if (!word) bad('[ChpTnSnd] MML: "!" \u306E\u3046\u3057\u308D\u306B\u5408\u56F3\u306E\u540D\u524D\u304C\u3042\u308A\u307E\u305B\u3093');
           const known = cueTable.get(word);
           cues.push({ name: known ? known.name : word, arg: known ? known.arg : 0, t: time });
         } else if (ch === "r") {
@@ -2183,7 +2230,7 @@ ${val}`;
           const bytes = isData ? sec.bytes ?? null : null;
           const dur = readDuration();
           if ((WAVEFORMS[wave] || {}).kind !== "beep") {
-            warn(`[MMSXX] MML: "${ch}" \u306F\u30D3\u30FC\u30D7\u97F3\u6E90\u5C02\u7528\u3067\u3059 (\u3044\u307E\u306E\u97F3\u8272\u306F "${(WAVEFORMS[wave] || {}).name}")`);
+            warn(`[ChpTnSnd] MML: "${ch}" \u306F\u30D3\u30FC\u30D7\u97F3\u6E90\u5C02\u7528\u3067\u3059 (\u3044\u307E\u306E\u97F3\u8272\u306F "${(WAVEFORMS[wave] || {}).name}")`);
             time += dur;
           } else {
             const baud = sec.baud ?? 1200;
@@ -2246,11 +2293,11 @@ ${val}`;
             while (j < src.length && src[j] >= "a" && src[j] <= "z") name += src[j++];
             const keys = SECTIONS[section].keys;
             if (!name || src[j] === "{") {
-              bad(`[MMSXX] MML: "@" \u306F ${howOpen(section)} \u306E\u4E2D\u3067\u306F\u8A2D\u5B9A\u3060\u3051\u3067\u3059(${Object.keys(keys).map((k) => `@${k}`).join(" / ")})\u3002\u97F3\u8272\u3084\u52B9\u679C\u306F\u533A\u9593\u306E\u5916\u3067\u66F8\u3044\u3066\u304F\u3060\u3055\u3044`);
+              bad(`[ChpTnSnd] MML: "@" \u306F ${howOpen(section)} \u306E\u4E2D\u3067\u306F\u8A2D\u5B9A\u3060\u3051\u3067\u3059(${Object.keys(keys).map((k) => `@${k}`).join(" / ")})\u3002\u97F3\u8272\u3084\u52B9\u679C\u306F\u533A\u9593\u306E\u5916\u3067\u66F8\u3044\u3066\u304F\u3060\u3055\u3044`);
             }
             {
               if (!keys[name]) {
-                bad(`[MMSXX] MML: "@${name}" \u306F ${howOpen(section)} \u306E\u8A2D\u5B9A\u3067\u306F\u3042\u308A\u307E\u305B\u3093(\u3042\u308B\u306E\u306F ${Object.keys(keys).map((k) => `@${k}`).join(" / ")})`);
+                bad(`[ChpTnSnd] MML: "@${name}" \u306F ${howOpen(section)} \u306E\u8A2D\u5B9A\u3067\u306F\u3042\u308A\u307E\u305B\u3093(\u3042\u308B\u306E\u306F ${Object.keys(keys).map((k) => `@${k}`).join(" / ")})`);
               }
               pos = j;
               if (keys[name].hex) {
@@ -2262,14 +2309,14 @@ ${val}`;
                   continue;
                 }
                 if (word.length % 2 !== 0 || /[^0-9a-f]/.test(word)) {
-                  bad(`[MMSXX] MML: "@${name} ${word}" \u306F\u8AAD\u3081\u307E\u305B\u3093(16 \u9032\u3092 2 \u6841\u305A\u3064\u4E26\u3079\u308B\u304B\u3001random \u3068\u66F8\u304D\u307E\u3059)`);
+                  bad(`[ChpTnSnd] MML: "@${name} ${word}" \u306F\u8AAD\u3081\u307E\u305B\u3093(16 \u9032\u3092 2 \u6841\u305A\u3064\u4E26\u3079\u308B\u304B\u3001random \u3068\u66F8\u304D\u307E\u3059)`);
                 }
                 sec[name] = word.match(/../g).map((h) => parseInt(h, 16));
                 continue;
               }
               const v = readFloat();
               if (v === null) {
-                bad(`[MMSXX] MML: "@${name}" \u306B\u5024\u304C\u3042\u308A\u307E\u305B\u3093`);
+                bad(`[ChpTnSnd] MML: "@${name}" \u306B\u5024\u304C\u3042\u308A\u307E\u305B\u3093`);
               }
               const { min, max } = keys[name];
               sec[name] = Math.max(min, Math.min(max, v));
@@ -2287,10 +2334,10 @@ ${val}`;
               if (src[j] === "{") {
                 const opened = sectionByVoice(WAVEFORMS[wave]);
                 if (!opened) {
-                  bad(`[MMSXX] MML: \u97F3\u8272 "${(WAVEFORMS[wave] || {}).name}" \u306F\u533A\u9593\u3092\u958B\u3051\u307E\u305B\u3093(\u81EA\u5206\u306E\u66F8\u304D\u65B9\u3092\u6301\u3063\u3066\u3044\u307E\u305B\u3093)`);
+                  bad(`[ChpTnSnd] MML: \u97F3\u8272 "${(WAVEFORMS[wave] || {}).name}" \u306F\u533A\u9593\u3092\u958B\u3051\u307E\u305B\u3093(\u81EA\u5206\u306E\u66F8\u304D\u65B9\u3092\u6301\u3063\u3066\u3044\u307E\u305B\u3093)`);
                 }
                 if (section) {
-                  bad(`[MMSXX] MML: \u533A\u9593\u306E\u4E2D\u3067\u533A\u9593\u306F\u958B\u3051\u307E\u305B\u3093`);
+                  bad(`[ChpTnSnd] MML: \u533A\u9593\u306E\u4E2D\u3067\u533A\u9593\u306F\u958B\u3051\u307E\u305B\u3093`);
                 }
                 pos = j + 1;
                 section = opened;
@@ -2327,13 +2374,13 @@ ${val}`;
           } else {
             const n = readNumber();
             if (n !== null) {
-              bad(`[MMSXX] MML: "@${n}" \u2014 \u756A\u53F7\u3067\u306F\u97F3\u8272\u3092\u9078\u3079\u307E\u305B\u3093\u3002@{\u540D\u524D} \u3067\u66F8\u3044\u3066\u304F\u3060\u3055\u3044(\u756A\u53F7\u306F\u97F3\u8272\u3092\u8DB3\u3059\u3068\u305A\u308C\u308B\u306E\u3067\u901A\u3057\u3066\u3044\u307E\u305B\u3093)`);
+              bad(`[ChpTnSnd] MML: "@${n}" \u2014 \u756A\u53F7\u3067\u306F\u97F3\u8272\u3092\u9078\u3079\u307E\u305B\u3093\u3002@{\u540D\u524D} \u3067\u66F8\u3044\u3066\u304F\u3060\u3055\u3044(\u756A\u53F7\u306F\u97F3\u8272\u3092\u8DB3\u3059\u3068\u305A\u308C\u308B\u306E\u3067\u901A\u3057\u3066\u3044\u307E\u305B\u3093)`);
             }
           }
         }
       }
       if (section) {
-        bad(`[MMSXX] MML: ${howOpen(section)} \u304C\u9589\u3058\u3066\u3044\u307E\u305B\u3093`);
+        bad(`[ChpTnSnd] MML: ${howOpen(section)} \u304C\u9589\u3058\u3066\u3044\u307E\u305B\u3093`);
       }
     } catch (e) {
       if (!(e instanceof LooseStop)) throw e;
@@ -2351,10 +2398,10 @@ ${val}`;
         const name = m.name.trim();
         const low = name.toLowerCase();
         if (low === START_LABEL) {
-          bad(`[MMSXX] MML: \u30E9\u30D9\u30EB "${name}" \u306F\u66F8\u3051\u307E\u305B\u3093\u3002\u66F2\u306E\u982D\u306E\u5370\u306F\u9CF4\u3089\u3059\u5074\u304C\u8DB3\u3057\u307E\u3059(\u8DF3\u3076\u5148\u306E\u4E00\u89A7\u306B\u3044\u3064\u3082\u4E26\u3073\u307E\u3059)`);
+          bad(`[ChpTnSnd] MML: \u30E9\u30D9\u30EB "${name}" \u306F\u66F8\u3051\u307E\u305B\u3093\u3002\u66F2\u306E\u982D\u306E\u5370\u306F\u9CF4\u3089\u3059\u5074\u304C\u8DB3\u3057\u307E\u3059(\u8DF3\u3076\u5148\u306E\u4E00\u89A7\u306B\u3044\u3064\u3082\u4E26\u3073\u307E\u3059)`);
         }
         if (isSystemMark(name) || !SHOUTING(name)) continue;
-        bad(`[MMSXX] MML: \u30E9\u30D9\u30EB "${name}" \u306F\u5168\u90E8\u5927\u6587\u5B57\u3067\u3059\u3002\u5927\u6587\u5B57\u306E\u540D\u524D\u306F\u4E88\u7D04\u8A9E\u306E\u305F\u3081\u306B\u7A7A\u3051\u3066\u3042\u308A\u307E\u3059(\u3044\u307E\u306E\u4E88\u7D04\u8A9E\u306F LOOP \u3068 OUTRO)\u3002\u5C0F\u6587\u5B57\u3092\u6DF7\u305C\u3066\u304F\u3060\u3055\u3044`);
+        bad(`[ChpTnSnd] MML: \u30E9\u30D9\u30EB "${name}" \u306F\u5168\u90E8\u5927\u6587\u5B57\u3067\u3059\u3002\u5927\u6587\u5B57\u306E\u540D\u524D\u306F\u4E88\u7D04\u8A9E\u306E\u305F\u3081\u306B\u7A7A\u3051\u3066\u3042\u308A\u307E\u3059(\u3044\u307E\u306E\u4E88\u7D04\u8A9E\u306F LOOP \u3068 OUTRO)\u3002\u5C0F\u6587\u5B57\u3092\u6DF7\u305C\u3066\u304F\u3060\u3055\u3044`);
       }
     } catch (e) {
       if (!(e instanceof LooseStop)) throw e;
@@ -2373,7 +2420,8 @@ ${val}`;
       laneLabels
     };
   }
-  function splitTakes(src) {
+  function splitTakes(raw) {
+    const src = normalizeDirectives(raw);
     const OPEN = /^[ \t]*\/\/[ \t]*#[ \t]*takes\b[ \t]*(.*)$/i;
     const TAKE = /^[ \t]*\/\/[ \t]*#[ \t]*take\b[ \t]*(.*)$/i;
     const out = [{ kind: "common", text: "" }];
@@ -2384,10 +2432,10 @@ ${val}`;
         const name = o[1].trim();
         if (open) {
           if (name) {
-            bad(`[MMSXX] MML: "#takes ${name}" \u306F"#takes ${open.group}" \u306E\u4E2D\u3067\u306F\u66F8\u3051\u307E\u305B\u3093(\u5165\u308C\u5B50\u306B\u306F\u3067\u304D\u307E\u305B\u3093)`);
+            bad(`[ChpTnSnd] MML: "#takes ${name}" \u306F"#takes ${open.group}" \u306E\u4E2D\u3067\u306F\u66F8\u3051\u307E\u305B\u3093(\u5165\u308C\u5B50\u306B\u306F\u3067\u304D\u307E\u305B\u3093)`);
           }
           if (!open.options.length) {
-            bad(`[MMSXX] MML: "#takes ${open.group}" \u306B\u9078\u629E\u80A2\u304C\u3042\u308A\u307E\u305B\u3093(\u4E2D\u3092 "// #take <\u540D\u524D>" \u3067\u4ED5\u5207\u308A\u307E\u3059)`);
+            bad(`[ChpTnSnd] MML: "#takes ${open.group}" \u306B\u9078\u629E\u80A2\u304C\u3042\u308A\u307E\u305B\u3093(\u4E2D\u3092 "#take <\u540D\u524D>" \u3067\u4ED5\u5207\u308A\u307E\u3059)`);
           }
           out.push(open);
           out.push({ kind: "common", text: "" });
@@ -2395,14 +2443,14 @@ ${val}`;
           continue;
         }
         if (!name) {
-          bad('[MMSXX] MML: \u958B\u3044\u3066\u3044\u306A\u3044 "#takes" \u3092\u9589\u3058\u3066\u3044\u307E\u3059');
+          bad('[ChpTnSnd] MML: \u958B\u3044\u3066\u3044\u306A\u3044 "#takes" \u3092\u9589\u3058\u3066\u3044\u307E\u3059');
         }
         const KNOWN = ["restart", "now"];
         const [group, ...flags] = name.split(/[ \t]+/);
         const low = flags.map((f) => f.toLowerCase());
         for (const f of low) {
           if (!KNOWN.includes(f)) {
-            bad(`[MMSXX] MML: "#takes ${group}" \u306E "${f}" \u306F\u77E5\u3089\u306A\u3044\u6307\u5B9A\u3067\u3059(\u3044\u307E\u3042\u308B\u306E\u306F ${KNOWN.join(" \u3068 ")})`);
+            bad(`[ChpTnSnd] MML: "#takes ${group}" \u306E "${f}" \u306F\u77E5\u3089\u306A\u3044\u6307\u5B9A\u3067\u3059(\u3044\u307E\u3042\u308B\u306E\u306F ${KNOWN.join(" \u3068 ")})`);
           }
         }
         open = {
@@ -2415,12 +2463,12 @@ ${val}`;
         continue;
       }
       if (open && /^[ \t]*\/\/[ \t]*#[ \t]*switch\b/i.test(line)) {
-        bad(`[MMSXX] MML: "#switch" \u306F "#takes ${open.group}" \u306E\u4E2D\u3067\u306F\u66F8\u3051\u307E\u305B\u3093(\u7DB2\u306E\u76EE\u306F\u66F2\u305C\u3093\u3076\u3067 1 \u3064\u3067\u3059)`);
+        bad(`[ChpTnSnd] MML: "#switch" \u306F "#takes ${open.group}" \u306E\u4E2D\u3067\u306F\u66F8\u3051\u307E\u305B\u3093(\u7DB2\u306E\u76EE\u306F\u66F2\u305C\u3093\u3076\u3067 1 \u3064\u3067\u3059)`);
       }
       const t = TAKE.exec(line);
       if (t) {
         if (!open) {
-          bad(`[MMSXX] MML: "#take ${t[1].trim()}" \u306F "#takes <\u30B0\u30EB\u30FC\u30D7>" \u306E\u4E2D\u3060\u3051\u3067\u66F8\u3051\u307E\u3059`);
+          bad(`[ChpTnSnd] MML: "#take ${t[1].trim()}" \u306F "#takes <\u30B0\u30EB\u30FC\u30D7>" \u306E\u4E2D\u3060\u3051\u3067\u66F8\u3051\u307E\u3059`);
         }
         open.options.push({ name: t[1].trim(), text: "" });
         continue;
@@ -2435,7 +2483,7 @@ ${val}`;
       open.options[open.options.length - 1].text += line + "\n";
     }
     if (open) {
-      bad(`[MMSXX] MML: "#takes ${open.group}" \u304C\u9589\u3058\u3066\u3044\u307E\u305B\u3093(\u540D\u524D\u3092\u66F8\u304B\u306A\u3044 "// #takes" \u3067\u9589\u3058\u307E\u3059)`);
+      bad(`[ChpTnSnd] MML: "#takes ${open.group}" \u304C\u9589\u3058\u3066\u3044\u307E\u305B\u3093(\u540D\u524D\u3092\u66F8\u304B\u306A\u3044 "#takes" \u3067\u9589\u3058\u307E\u3059)`);
     }
     return out;
   }
@@ -2505,7 +2553,7 @@ ${val}`;
       const dur = Math.max(0, ...opts.map((o) => o.total));
       for (const o of opts) {
         if (Math.abs(o.total - dur) > 1e-6) {
-          warn(`[MMSXX] MML: \u9078\u629E\u80A2 "${s.group}/${o.name}" \u306E\u9577\u3055\u304C\u305D\u308D\u3063\u3066\u3044\u307E\u305B\u3093(${o.total.toFixed(3)}s / \u3044\u3061\u3070\u3093\u9577\u3044\u3082\u306E ${dur.toFixed(3)}s)\u3002\u5F8C\u308D\u306F\u4F11\u307F\u3067\u57CB\u3081\u307E\u3059`);
+          warn(`[ChpTnSnd] MML: \u9078\u629E\u80A2 "${s.group}/${o.name}" \u306E\u9577\u3055\u304C\u305D\u308D\u3063\u3066\u3044\u307E\u305B\u3093(${o.total.toFixed(3)}s / \u3044\u3061\u3070\u3093\u9577\u3044\u3082\u306E ${dur.toFixed(3)}s)\u3002\u5F8C\u308D\u306F\u4F11\u307F\u3067\u57CB\u3081\u307E\u3059`);
         }
       }
       for (const e of opts[0].events) events.push({ ...e, t: e.t + at });
@@ -2642,7 +2690,7 @@ ${val}`;
         if (b.names.some((n) => n === "")) {
           warnings.push({
             ch: b.ch,
-            text: `\u9078\u629E\u80A2 "${group}" \u306B\u540D\u524D\u306E\u7121\u3044\u3082\u306E\u304C\u3042\u308A\u307E\u3059("// #take <\u540D\u524D>" \u3067\u4ED5\u5207\u308A\u307E\u3059)`
+            text: `\u9078\u629E\u80A2 "${group}" \u306B\u540D\u524D\u306E\u7121\u3044\u3082\u306E\u304C\u3042\u308A\u307E\u3059("#take <\u540D\u524D>" \u3067\u4ED5\u5207\u308A\u307E\u3059)`
           });
         }
       }
@@ -3908,7 +3956,7 @@ registerProcessor('mmsxx-fm4', Fm4Bank);
   function registerTone(name, spec = {}) {
     const at = waveByName(name);
     if (at >= 0 && !spec.overwrite) {
-      throw new Error(`[MMSXX] \u97F3\u8272 "${name}" \u306F\u3082\u3046\u767B\u9332\u3055\u308C\u3066\u3044\u307E\u3059(\u5DEE\u3057\u66FF\u3048\u308B\u306A\u3089 overwrite: true \u3092\u6E21\u3057\u3066\u304F\u3060\u3055\u3044)`);
+      throw new Error(`[ChpTnSnd] \u97F3\u8272 "${name}" \u306F\u3082\u3046\u767B\u9332\u3055\u308C\u3066\u3044\u307E\u3059(\u5DEE\u3057\u66FF\u3048\u308B\u306A\u3089 overwrite: true \u3092\u6E21\u3057\u3066\u304F\u3060\u3055\u3044)`);
     }
     const base = WAVEFORMS[waveByName(spec.wave || "pulse:50")] || WAVEFORMS[2];
     const tone = toneOf(spec, base.kind, name) || {
@@ -4679,16 +4727,16 @@ registerProcessor('mmsxx-duty', DutyBank);
     return out.join("\n");
   };
   var BEAT_BUNDLES = [
-    "// #bundle beatBass1  = @{wtRamp} @e{piano} @s{8,2}",
-    "// #bundle beatBass2  = @{triangle} @e{flat}",
-    "// #bundle beatKick   = @{fm2DrumKick} @e{percussive},   @{noise} v11 @e{snap}",
-    "// #bundle beatSnare  = @{fm2DrumSnare} @e{percussive},  @{noise} v8 @o+1 @e{snap}",
-    "// #bundle beatHat    = @{fm2DrumCymbal} @e{percussive}",
-    "// #bundle beatHatAir = @{fm2DrumCymbal} @e{percussive}, @{noise} v3 @e{percussive}",
-    "// #bundle beatTom    = @{fm2DrumTom} @e{percussive}",
-    "// #bundle beatPulse  = @{pulse:12} @e{percussive}",
-    "// #bundle beatBrass  = @{fm2Trumpet} @e{soft}",
-    "// #bundle beatHorn   = @{fm2Horn} @e{soft}"
+    "#bundle beatBass1  = @{wtRamp} @e{piano} @s{8,2}",
+    "#bundle beatBass2  = @{triangle} @e{flat}",
+    "#bundle beatKick   = @{fm2DrumKick} @e{percussive},   @{noise} v11 @e{snap}",
+    "#bundle beatSnare  = @{fm2DrumSnare} @e{percussive},  @{noise} v8 @o+1 @e{snap}",
+    "#bundle beatHat    = @{fm2DrumCymbal} @e{percussive}",
+    "#bundle beatHatAir = @{fm2DrumCymbal} @e{percussive}, @{noise} v3 @e{percussive}",
+    "#bundle beatTom    = @{fm2DrumTom} @e{percussive}",
+    "#bundle beatPulse  = @{pulse:12} @e{percussive}",
+    "#bundle beatBrass  = @{fm2Trumpet} @e{soft}",
+    "#bundle beatHorn   = @{fm2Horn} @e{soft}"
   ].join("\n");
   var BEAT_BASS = wrap([
     "o2 d a o3 d o2 a f a d o3 c",
@@ -4786,7 +4834,7 @@ registerProcessor('mmsxx-duty', DutyBank);
       }
       const rest = ch === "r";
       if (!rest && SEMI2[ch] === void 0) {
-        console.warn(`[MMSXX] SE: \u97F3\u540D\u3068\u3057\u3066\u8AAD\u3081\u306A\u3044\u5B57 "${ch}" \u306F\u8AAD\u307F\u98DB\u3070\u3057\u307E\u3059 (${spec})`);
+        console.warn(`[ChpTnSnd] SE: \u97F3\u540D\u3068\u3057\u3066\u8AAD\u3081\u306A\u3044\u5B57 "${ch}" \u306F\u8AAD\u307F\u98DB\u3070\u3057\u307E\u3059 (${spec})`);
         i++;
         continue;
       }
@@ -4811,7 +4859,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     const s = spec === true ? "c1" : String(spec || "c1").toLowerCase().trim();
     const got = /^([a-g])([+#-]*)(\d*)/.exec(s);
     if (!got) {
-      console.warn(`[MMSXX] SE: \u672C\u4F53\u306E\u9AD8\u3055 "${spec}" \u304C\u8AAD\u3081\u306A\u3044\u306E\u3067 c1 \u3068\u307F\u306A\u3057\u307E\u3059`);
+      console.warn(`[ChpTnSnd] SE: \u672C\u4F53\u306E\u9AD8\u3055 "${spec}" \u304C\u8AAD\u3081\u306A\u3044\u306E\u3067 c1 \u3068\u307F\u306A\u3057\u307E\u3059`);
       return { semi: 0, len: 1 };
     }
     let semi = SEMI2[got[1]];
@@ -5056,12 +5104,12 @@ registerProcessor('mmsxx-duty', DutyBank);
   function oldWay(what, instead) {
     if (saidOld.has(what)) return;
     saidOld.add(what);
-    console.warn(`[MMSXX] ${what} \u306F\u53E4\u3044\u547C\u3073\u65B9\u3067\u3059\u3002${instead}(\u3044\u307E\u306F\u52D5\u304D\u307E\u3059\u304C\u3001\u3044\u305A\u308C\u7121\u304F\u306A\u308A\u307E\u3059)`);
+    console.warn(`[ChpTnSnd] ${what} \u306F\u53E4\u3044\u547C\u3073\u65B9\u3067\u3059\u3002${instead}(\u3044\u307E\u306F\u52D5\u304D\u307E\u3059\u304C\u3001\u3044\u305A\u308C\u7121\u304F\u306A\u308A\u307E\u3059)`);
   }
   function sayErrors(what, got) {
     for (const e of got.errors) {
       const ch = e.ch === null ? "" : `${e.ch + 1} \u672C\u76EE: `;
-      console.warn(`[MMSXX] ${what}: ${ch}${e.text}`);
+      console.warn(`[ChpTnSnd] ${what}: ${ch}${e.text}`);
     }
     return got;
   }
@@ -5807,13 +5855,13 @@ registerProcessor('mmsxx-tap', MmsxxTap);
      * 待っている最中に跳んだり止めたりしたら、待たずに差し替える。
      *
      * 囲みの頭から鳴らし直すかどうかは、曲のほうが決める。
-     * `// #takes mood restart` と書いた囲みは、押されると頭へ戻って鳴らし直す。
+     * `#takes mood restart` と書いた囲みは、押されると頭へ戻って鳴らし直す。
      * 場面が変わったことを音でも言いたいときに要る(別の曲にする手もあるが、
      * 共通のパートが多い曲では持ちにくいし、つなぎ目で隙間が出る)(2026-09-17)。
      *
      * 切れ目(`#switch` と `|`)を書いた曲では、そこまで待ってから替える。
      * 頭へ戻すときも同じで、耳が切れ目に着いたところで跳ぶ。待たせたくないときは
-     * `now` を書く(`// #takes mood restart now`)。切れ目を書いていない曲は
+     * `now` を書く(`#takes mood restart now`)。切れ目を書いていない曲は
      * 待ちようが無いので、その場で替わる(2026-09-17)。
      *
      * その 1 回だけ変えたいときは引数で上書きする。渡さなければ曲の指定どおり。
@@ -5825,8 +5873,8 @@ registerProcessor('mmsxx-tap', MmsxxTap);
      * ```
      *
      * @param {string} name `defineBGM()` で登録した名前
-     * @param {string} group グループの名前(`// #takes mood` の mood)
-     * @param {string} take 選択肢の名前(`// #take tense` の tense)
+     * @param {string} group グループの名前(`#takes mood` の mood)
+     * @param {string} take 選択肢の名前(`#take tense` の tense)
      * @param {{restart?:boolean, now?:boolean}} [opts]
      *   restart = 囲みの頭へ戻して鳴らし直すか / now = 切れ目を待たないか
      *   (どちらも省くと曲の指定どおり)
@@ -5923,7 +5971,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       return out;
     }
     /**
-     * 合図(`// #cue`)を予約する。
+     * 合図(`#cue`)を予約する。
      *
      * 音符と同じ範囲([from, to))を見て、そこにある合図を耳に届く時刻へ予約する。
      * 音は Web Audio の時計で 0.5 秒先まで積んであるので、合図だけ別に
@@ -5952,7 +6000,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
             try {
               this.onCue(cue);
             } catch (e) {
-              console.warn("[MMSXX] onCue:", e);
+              console.warn("[ChpTnSnd] onCue:", e);
             }
           }
         }, wait);
@@ -6112,7 +6160,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         // (あちらは tracks に入っている)
         meta: songMeta(def),
         loop: def.map((t) => t.loop).find(Boolean) ?? null,
-        // 後奏の始まる秒。`// #label OUTRO` を書いた曲だけが持つ。
+        // 後奏の始まる秒。`#label OUTRO` を書いた曲だけが持つ。
         // 押すところを出すかどうかを、画面がこれで決められる(2026-09-15)。
         // `ending` は前の名前。読む側が直るまで、同じ値を両方の名前で返す
         outro: def.map((t) => t.outro).find((v) => v != null) ?? null,
@@ -6214,7 +6262,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       const tracks = this.bgmDefs.get(name);
       if (!tracks || !this.ctx) return false;
       if (!this.bgmActive(name)) {
-        console.warn(`[MMSXX] BGM "${name}": \u76F4\u3059\u3068\u3053\u308D\u304C\u3042\u308B\u306E\u3067\u9CF4\u3089\u3057\u307E\u305B\u3093`);
+        console.warn(`[ChpTnSnd] BGM "${name}": \u76F4\u3059\u3068\u3053\u308D\u304C\u3042\u308B\u306E\u3067\u9CF4\u3089\u3057\u307E\u305B\u3093`);
         return false;
       }
       if (!restart && this.bgmState && this.bgmState.name === name && !this.bgmState.fading) {
@@ -6275,7 +6323,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       if (mark) {
         tracks.forEach((t, i) => {
           if (t.loop && Math.abs(t.loop.from - mark.from) >= 1e-3) {
-            console.warn(`[MMSXX] MML: ${i + 1} \u672C\u76EE\u306E REPEAT \u306F\u307B\u304B\u3068\u9055\u3046\u3068\u3053\u308D\u306B\u3042\u308A\u307E\u3059 (${t.loop.from.toFixed(2)} \u79D2)\u3002\u6700\u521D\u306B\u898B\u3064\u3051\u305F ${mark.from.toFixed(2)} \u79D2\u306B\u5408\u308F\u305B\u307E\u3059`);
+            console.warn(`[ChpTnSnd] MML: ${i + 1} \u672C\u76EE\u306E REPEAT \u306F\u307B\u304B\u3068\u9055\u3046\u3068\u3053\u308D\u306B\u3042\u308A\u307E\u3059 (${t.loop.from.toFixed(2)} \u79D2)\u3002\u6700\u521D\u306B\u898B\u3064\u3051\u305F ${mark.from.toFixed(2)} \u79D2\u306B\u5408\u308F\u305B\u307E\u3059`);
           }
         });
       }
@@ -6563,13 +6611,13 @@ registerProcessor('mmsxx-tap', MmsxxTap);
      */
     async renderBGM(name, opts = {}) {
       const def = this.bgmDefs.get(name);
-      if (!def) throw new Error(`[MMSXX] BGM "${name}" \u306F\u767B\u9332\u3055\u308C\u3066\u3044\u307E\u305B\u3093`);
+      if (!def) throw new Error(`[ChpTnSnd] BGM "${name}" \u306F\u767B\u9332\u3055\u308C\u3066\u3044\u307E\u305B\u3093`);
       if (!Array.isArray(def)) {
-        throw new Error(`[MMSXX] BGM "${name}" \u306F\u97F3\u58F0\u30D5\u30A1\u30A4\u30EB\u306A\u306E\u3067\u66F8\u304D\u51FA\u305B\u307E\u305B\u3093(MML \u306E\u66F2\u3060\u3051\u304C\u5BFE\u8C61\u3067\u3059)`);
+        throw new Error(`[ChpTnSnd] BGM "${name}" \u306F\u97F3\u58F0\u30D5\u30A1\u30A4\u30EB\u306A\u306E\u3067\u66F8\u304D\u51FA\u305B\u307E\u305B\u3093(MML \u306E\u66F2\u3060\u3051\u304C\u5BFE\u8C61\u3067\u3059)`);
       }
       const OAC = globalThis.OfflineAudioContext || globalThis.webkitOfflineAudioContext;
       if (!OAC) {
-        throw new Error("[MMSXX] OfflineAudioContext \u304C\u3042\u308A\u307E\u305B\u3093(\u66F8\u304D\u51FA\u3057\u306B\u306F\u30D6\u30E9\u30A6\u30B6\u304C\u8981\u308A\u307E\u3059\u3002\u753B\u9762\u306F\u7121\u304F\u3066\u304B\u307E\u3044\u307E\u305B\u3093)");
+        throw new Error("[ChpTnSnd] OfflineAudioContext \u304C\u3042\u308A\u307E\u305B\u3093(\u66F8\u304D\u51FA\u3057\u306B\u306F\u30D6\u30E9\u30A6\u30B6\u304C\u8981\u308A\u307E\u3059\u3002\u753B\u9762\u306F\u7121\u304F\u3066\u304B\u307E\u3044\u307E\u305B\u3093)");
       }
       const loops = Math.max(1, Math.floor(opts.loops ?? 1));
       const tail = Math.max(0, opts.tail ?? 0.5);
@@ -6782,7 +6830,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     /**
      * いま鳴っている曲のチャンネル一覧。
      *
-     * 名前と役割は MML の注釈に書いたもの(`// #name 主旋律`)。
+     * 名前と役割は MML の注釈に書いたもの(`#name 主旋律`)。
      * 書いていなければ null なので、出す側が `ch1` のような札を当てる。
      * @returns {{ch:number, name:string|null, role:string|null, muted:boolean}[]}
      */
@@ -6799,7 +6847,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     /**
      * いま鳴っている曲のラベル。跳ぶ先として使う。
      *
-     * MML の注釈に `// #label サビ` と書いたところ。どのチャンネルに書いても
+     * MML の注釈に `#label サビ` と書いたところ。どのチャンネルに書いても
      * 並ぶので、旋律のチャンネルにだけ書けば足りる。
      * 同じ名前は 1 つにまとめる(全部のチャンネルに書いても増えない)。
      *
@@ -6839,7 +6887,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       return hit ? hit.t : null;
     }
     /**
-     * 戻る先。`// #label REPEAT` を書いた曲だけ持つ。
+     * 戻る先。`#label REPEAT` を書いた曲だけ持つ。
      *
      * ラベルと同じで「曲のこの位置」を指すものなので、跳ぶ先としても使える。
      * 違うのは、ここが終わりに来たときの動きまで決めるところ。
@@ -7122,7 +7170,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       const wantVol = opts.vol != null;
       if (!wantNote && !wantVol) return tracks;
       if (wantNote && !tracks.base) {
-        console.warn(`[MMSXX] SE "${name}" \u306F\u97F3\u540D\u3067\u9CF4\u3089\u3057\u5206\u3051\u3089\u308C\u307E\u305B\u3093(defineSE \u306E base \u3092\u4ED8\u3051\u3066\u767B\u9332\u3057\u3066\u304F\u3060\u3055\u3044)`);
+        console.warn(`[ChpTnSnd] SE "${name}" \u306F\u97F3\u540D\u3067\u9CF4\u3089\u3057\u5206\u3051\u3089\u308C\u307E\u305B\u3093(defineSE \u306E base \u3092\u4ED8\u3051\u3066\u767B\u9332\u3057\u3066\u304F\u3060\u3055\u3044)`);
       }
       const notes = wantNote && tracks.base ? parseSENotes(opts.note, tracks.base.semi) : [{ semi: 0, sec: Math.max(...tracks.map((t) => t.total), 0), rest: false }];
       if (!notes.length) return tracks;
@@ -7545,11 +7593,11 @@ registerProcessor('mmsxx-tap', MmsxxTap);
      */
     async bakeVoice(name) {
       const wf = WAVEFORMS.find((w) => w.name === name && w.kind === "baked");
-      if (!wf) throw new Error("[MMSXX] " + name + " \u306F\u713C\u3051\u308B\u97F3\u8272\u3067\u306F\u3042\u308A\u307E\u305B\u3093");
+      if (!wf) throw new Error("[ChpTnSnd] " + name + " \u306F\u713C\u3051\u308B\u97F3\u8272\u3067\u306F\u3042\u308A\u307E\u305B\u3093");
       if (wf.baked) return wf.baked.length;
       if (wf.baking) return 0;
       const srcIndex = WAVEFORMS.findIndex((w) => w.name === wf.from);
-      if (srcIndex < 0) throw new Error("[MMSXX] " + name + ": \u5143\u306E\u97F3\u8272\u304C\u3042\u308A\u307E\u305B\u3093");
+      if (srcIndex < 0) throw new Error("[ChpTnSnd] " + name + ": \u5143\u306E\u97F3\u8272\u304C\u3042\u308A\u307E\u305B\u3093");
       wf.baking = true;
       try {
         const src = WAVEFORMS[srcIndex];
@@ -7589,7 +7637,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
      */
     async _renderTone(waveIndex, freq, samples, sampleRate) {
       const OAC = globalThis.OfflineAudioContext || globalThis.webkitOfflineAudioContext;
-      if (!OAC) throw new Error("[MMSXX] \u713C\u304F\u306B\u306F\u30D6\u30E9\u30A6\u30B6\u304C\u8981\u308A\u307E\u3059");
+      if (!OAC) throw new Error("[ChpTnSnd] \u713C\u304F\u306B\u306F\u30D6\u30E9\u30A6\u30B6\u304C\u8981\u308A\u307E\u3059");
       const ctx = new OAC(1, samples, sampleRate);
       const tmp = new _ChipTuneSound({ maxVoices: this.maxVoices });
       tmp.ctx = ctx;
@@ -8356,7 +8404,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
      *
      * 周回数を決め直すのではない。長さを変えずに、次の周へ入らないようにする
      * だけ。いまの周は鳴らし終えるので、いきなり切れることはない。
-     * `// #label OUTRO` を書いた曲なら、抜ける道として後奏を通る。
+     * `#label OUTRO` を書いた曲なら、抜ける道として後奏を通る。
      *
      * 鳴っていなければ何もしない。
      *
@@ -8470,8 +8518,8 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       const notes = (t.events || []).filter((e) => e.t >= from - 1e-6 && e.t < to - 1e-6).sort((a, b) => a.t - b.t);
       if (!notes.length) continue;
       const L = [];
-      if (t.name) L.push(`// #ch ${t.name}`);
-      if (t.role) L.push(`// #role ${t.role}`);
+      if (t.name) L.push(`#ch ${t.name}`);
+      if (t.role) L.push(`#role ${t.role}`);
       const body = [];
       if (head) {
         body.push(`t${tempo}`);
@@ -8759,7 +8807,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
 .mmsxx-player .about{ margin:0 0 9px; }
 .mmsxx-player .about b{ font-size:12px; font-weight:600; color:var(--ink); }
 /* \u984C\u3068\u30D0\u30FC\u30B8\u30E7\u30F3\u306E\u884C\u3002\u984C\u306F\u5DE6\u3001\u30D0\u30FC\u30B8\u30E7\u30F3\u306F\u53F3\u7AEF\u3002\u540C\u3058\u66F2\u3092\u4F55\u5EA6\u3082\u76F4\u3059\u306E\u3067\u3001
-   \u3044\u307E\u9CF4\u3063\u3066\u3044\u308B\u306E\u304C\u3069\u308C\u306A\u306E\u304B\u304C\u5206\u304B\u308B\u3088\u3046\u306B\u3059\u308B(// #version)\u3002
+   \u3044\u307E\u9CF4\u3063\u3066\u3044\u308B\u306E\u304C\u3069\u308C\u306A\u306E\u304B\u304C\u5206\u304B\u308B\u3088\u3046\u306B\u3059\u308B(#version)\u3002
    1 \u884C\u306B\u4E26\u3079\u308B\u306E\u306B\u56F2\u307F\u304C\u8981\u308B\u3002b \u3068 span \u3092\u4E26\u3079\u305F\u3060\u3051\u3060\u3068\u3001
    \u984C\u304C\u9577\u3044\u3068\u304D\u306B\u30D0\u30FC\u30B8\u30E7\u30F3\u304C\u4E0B\u3078\u6298\u308A\u8FD4\u3059(2026-09-19) */
 .mmsxx-player .about .head{
@@ -8838,7 +8886,16 @@ registerProcessor('mmsxx-tap', MmsxxTap);
   resize:vertical; white-space:pre; overflow:auto;
 }
 .mmsxx-player .note{ font-size:11px; color:var(--dim); margin:7px 0 0; }
+/* \u6C17\u3092\u3064\u3051\u3066\u307B\u3057\u3044\u3053\u3068\u3002\u7425\u73C0\u3002\u9CF4\u3089\u305B\u3066\u306F\u3044\u308B */
 .mmsxx-player .note.bad{ color:var(--amber); }
+/* \u76F4\u3059\u3068\u3053\u308D\u304C\u3042\u3063\u3066\u3001\u9CF4\u3089\u305B\u306A\u3044\u3068\u304D\u3002\u65E2\u5B9A\u306F\u8D64\u3002
+   \u7425\u73C0\u306F\u300C\u62BC\u305B\u308B\u30FB\u9CF4\u3063\u3066\u3044\u308B\u300D\u306B\u4F7F\u3063\u3066\u3044\u308B\u306E\u3067\u3001\u6B62\u307E\u3063\u3066\u3044\u308B\u3053\u3068\u3092\u540C\u3058\u8272\u3067
+   \u8A00\u3046\u3068\u8AAD\u307F\u5206\u3051\u3089\u308C\u306A\u3044\u3002\u30DA\u30FC\u30B8\u304C --err \u3092\u7F6E\u3051\u3070\u3001\u305D\u3061\u3089\u304C\u52DD\u3064 */
+.mmsxx-player .note.err{ color:var(--err, #c62f26); }
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .mmsxx-player .note.err{ color:var(--err, #ff7a6e); }
+}
+:root[data-theme="dark"] .mmsxx-player .note.err{ color:var(--err, #ff7a6e); }
 `;
   var clock = (sec) => {
     const s = Math.max(0, Math.floor(sec));
@@ -8893,8 +8950,8 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         <label class="pick" data-p="looplbl">Main loops
           <select data-p="loops"></select>
         </label>
-        <button type="button" data-p="wav">Export WAV</button>
-        <button type="button" data-p="mml">Export MML</button>
+        <button type="button" data-p="wav" title="Export WAV">&darr; WAV</button>
+        <button type="button" data-p="mml" title="Export MML">&darr; MML</button>
         <button type="button" class="sw" data-p="showmml" aria-pressed="false"
                 aria-expanded="false" title="Show the MML this player was given"
                 >Show MML</button>
@@ -8991,6 +9048,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       rew: $("rew"),
       loose: $("loose"),
       loosenote: $("loosenote"),
+      looserow: $("looserow"),
       leds: $("leds"),
       cuerow: $("cuerow"),
       logsw: $("logsw"),
@@ -9039,6 +9097,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     const showAbout = opts.about !== false;
     const copyMode = opts.copy === void 0 ? true : opts.copy;
     el.showmml.hidden = opts.showMml === false;
+    el.looserow.hidden = opts.ignoreErrors !== true;
     const showVol = opts.volume !== false;
     const showMute = opts.mute === true;
     el.vol.hidden = !showVol;
@@ -9095,13 +9154,13 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     let total = 0;
     let abFrom = 0;
     let abTo = 0;
-    const say = (text, bad2) => {
+    const say = (text, kind) => {
       el.note.textContent = text || "";
-      el.note.className = bad2 ? "note bad" : "note";
+      el.note.className = kind ? `note ${kind}` : "note";
     };
     let chNote = "";
     const sayCount = () => {
-      if (el.note.classList.contains("bad")) return;
+      if (el.note.classList.contains("bad") || el.note.classList.contains("err")) return;
       say(open ? "" : chNote);
     };
     function read() {
@@ -9110,7 +9169,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       marks = [];
       total = 0;
       if (!voices.length) {
-        say("Nothing to play.", true);
+        say("Nothing to play.", "err");
         return false;
       }
       let got = null;
@@ -9118,7 +9177,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         audio.defineBGM(NAME, voices, loose ? { mode: "loose" } : {});
         got = audio.bgmInfo(NAME);
       } catch (e) {
-        say(String(e && e.message ? e.message : e), true);
+        say(String(e && e.message ? e.message : e), "err");
         return false;
       }
       chans = got.tracks;
@@ -9130,7 +9189,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       takes = got.takes ?? [];
       total = got.total;
       if (!got.active) {
-        say(got.errors.map((e) => e.text).join(" / "), true);
+        say(got.errors.map((e) => e.text).join(" / "), "err");
         return false;
       }
       const meta = got.meta || {};
@@ -9140,6 +9199,11 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       el.abouttext.textContent = meta.about || "";
       el.abouttext.hidden = !meta.about;
       el.about.hidden = !showAbout || !(meta.title || meta.about || meta.version);
+      const old = voices.reduce((n, v) => n + countOldStyle(v), 0);
+      if (old) {
+        console.warn(`[ChpTnSnd] MML: \u6307\u793A\u884C\u306E "// #" \u304C ${old} \u884C\u3042\u308A\u307E\u3059\u3002"#" \u3060\u3051\u3067\u66F8\u3051\u307E\u3059("// #" \u306F\u3044\u305A\u308C\u8AAD\u307E\u306A\u304F\u306A\u308A\u307E\u3059)`);
+      }
+      say("");
       chNote = `${chans.length} channels`;
       sayCount();
       drawLoose(got.problems || []);
@@ -9541,7 +9605,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         el.wavnote.hidden = false;
         say("");
       } catch (e) {
-        say(String(e && e.message ? e.message : e), true);
+        say(String(e && e.message ? e.message : e), "err");
       } finally {
         busy = false;
         root.classList.remove("busy");
@@ -9604,7 +9668,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     el.copy.addEventListener("click", async () => {
       const text = mmlOf();
       if (!text) {
-        say("Nothing to copy.", true);
+        say("Nothing to copy.", "bad");
         return;
       }
       const show = () => {
@@ -9637,12 +9701,12 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         say("Copied as MML.");
         return;
       }
-      say("Could not copy. Here is the MML, selected, to copy by hand.", true);
+      say("Could not copy. Here is the MML, selected, to copy by hand.", "bad");
     });
     el.mml.addEventListener("click", () => {
       const text = srcText();
       if (!text) {
-        say("Nothing to export.", true);
+        say("Nothing to export.", "bad");
         return;
       }
       const meta = audio.bgmInfo(NAME)?.meta ?? {};
@@ -9661,7 +9725,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       el.out.value = text;
       el.out.focus();
       el.out.select();
-      say("Could not save the file. Here is the MML, selected, to copy by hand.", true);
+      say("Could not save the file. Here is the MML, selected, to copy by hand.", "bad");
     });
     const showSrc = (on) => {
       el.srcwrap.hidden = !on;
@@ -9671,7 +9735,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     const srcText = () => {
       if (!Array.isArray(mml)) return String(mml ?? "").trim();
       const has = (v) => /^[ \t]*\/\/[ \t]*#[ \t]*ch([ \t]|$)/im.test(v);
-      return voices.map((v) => has(v) ? v : `// #ch
+      return voices.map((v) => has(v) ? v : `#ch
 ${v}`).join("\n\n").trim();
     };
     el.showmml.addEventListener("click", () => {
@@ -9681,7 +9745,7 @@ ${v}`).join("\n\n").trim();
       }
       const text = srcText();
       if (!text) {
-        say("Nothing to show.", true);
+        say("Nothing to show.", "bad");
         return;
       }
       el.src.value = text;
@@ -9906,7 +9970,7 @@ ChipTuneSound ${SOUND_VERSION}
       /**
        * ラベルの名前で跳ぶ。見つからなければ何もしない。
        *
-       * @param {string} name `// #label` に書いた名前。大文字小文字は見る
+       * @param {string} name `#label` に書いた名前。大文字小文字は見る
        */
       jump(name) {
         const m = marks.find((x) => x.name === name);
@@ -9936,6 +10000,10 @@ ChipTuneSound ${SOUND_VERSION}
       setMML(text) {
         mml = Array.isArray(text) ? text : String(text ?? "");
         audio.stopBGM();
+        audio.muteTracks([]);
+        for (const { ch, lane } of audio.mutedLanes()) audio.muteLane(ch, lane, false);
+        for (const t of chans) audio.muteCues(t.ch, false);
+        openLanes.clear();
         from = 0;
         el.out.hidden = true;
         dropWAV();
@@ -9955,7 +10023,7 @@ ChipTuneSound ${SOUND_VERSION}
        * マクロも残らない。`Copy as MML` が呼んでいるのもこれ
        *
        * @param {{from?:number, to?:number}} [opts] 秒で切る範囲。省くと AB リピートの範囲
-       * @returns {string} チャンネルを `// #ch` で分けた 1 本のテキスト
+       * @returns {string} チャンネルを `#ch` で分けた 1 本のテキスト
        */
       mml: (opts2) => mmlOf(opts2),
       /** 時計を止める。ページから外すときに呼ぶ */
