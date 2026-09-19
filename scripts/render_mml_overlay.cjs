@@ -20,7 +20,7 @@ function render(inputPath, leftPath, rightPath) {
   assert(source, 'MML source is empty: ' + inputPath);
 
   const width = 12;
-  const rows = 14;
+  const rows = 15;
   const fragments = [];
   for (let at = 0; fragments.length < rows * 2; at += width) {
     if (at >= source.length) at = 0;
