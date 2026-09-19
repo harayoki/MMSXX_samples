@@ -4,817 +4,185 @@
 #role lead
 t140 q5
 #label Intro
-r1 r2 r4 $tone q5 o4 f8 a8
-q5
+r1 r2 r4 $tone q5 o4 f8 a8 q5
 #label LOOP
 #label 出発
-q5
-$tone o4 b-4
-$tone q5 o4 b-16&o5 c16&d+16&e16&f2&f4
-$p1
-$p4
-$tone o4 g+4
-$p6
-$tone o5 c+4&c+8
-$p1
-$p2
-$p5
-$tone o4 g+4
-q5
-$tone o4 f2&f4&f8
-q5
-$tone o4 f8
-q5
-$tone o4 f+2
-q5
-$tone o4 g+8
-q5
-$tone o4 b8
-$p8
-$p1
-$tone o5 f2&f8
-q5
-$tone o4 g16
-q5
-$tone o4 g16
-q5
-$tone o5 e8
-q5
-$tone o5 d4
-$p6
-$tone o5 g4
-q5
-$tone o5 f1
+q5 $tone o4 b-4 $tone q5 o4 b-16&o5 c16&d+16&e16&f2&f4 $p1 $p4 $tone o4 g+4 $p6 $tone o5 c+4&c+8 $p1 $p2 $p5
+$tone o4 g+4 q5 $tone o4 f2&f4&f8 q5 $tone o4 f8 q5 $tone o4 f+2 q5 $tone o4 g+8 q5 $tone o4 b8 $p8 $p1 $tone o5
+f2&f8 q5 $tone o4 g16 q5 $tone o4 g16 q5 $tone o5 e8 q5 $tone o5 d4 $p6 $tone o5 g4 q5 $tone o5 f1
 #label 遠望
-q5
-$p9
-$p9
-$tone o5 b-2
-q5
-$tone o5 a8
-q5
-$tone o5 g8
-q5
-$tone o5 g+2
-q5
-$tone o5 f4
-$p1
-$p4
-$tone o5 c+2&c+4
-$p5
-$p2
-q5
-$p4
-$tone o4 a8
-q5
-$tone o4 f8
-q5
-$tone o4 a8
-q5
-$tone o5 c2&c8
-q5
-$p2
-$p3
-$tone o5 f+2
-q5
-$tone o5 f4&f8
-q5
-$tone o5 e8
-q5
-$p4
-$tone o4 a8
-$p6
-$tone o4 b-2
-q5
-$tone o4 f+4
-$p5
-$p2
-$p7
+q5 $p9 $p9 $tone o5 b-2 q5 $tone o5 a8 q5 $tone o5 g8 q5 $tone o5 g+2 q5 $tone o5 f4 $p1 $p4 $tone o5 c+2&c+4
+$p5 $p2 q5 $p4 $tone o4 a8 q5 $tone o4 f8 q5 $tone o4 a8 q5 $tone o5 c2&c8 q5 $p2 $p3 $tone o5 f+2 q5 $tone o5
+f4&f8 q5 $tone o5 e8 q5 $p4 $tone o4 a8 $p6 $tone o4 b-2 q5 $tone o4 f+4 $p5 $p2 $p7
 #label 飛翔
-r4
-q5
-$tone o4 b4
-$p8
-q5
-$tone o5 c+4
-$p5
-$tone o4 g+8
-q5
-$tone o4 f2
-q5
-$tone o4 g8
-q5
-$tone o4 g8
-$p6
-$tone o5 e2
-$p7
+r4 q5 $tone o4 b4 $p8 q5 $tone o5 c+4 $p5 $tone o4 g+8 q5 $tone o4 f2 q5 $tone o4 g8 q5 $tone o4 g8 $p6 $tone o5
+e2 $p7
 #label OUTRO
-$p3
-$tone o5 d8
-q5
-$p4
-$tone o5 f2&f4
-$p1
-$p4
-$tone o4 g+2
-$p3
-$p2
-$p1
-$tone o5 c+4
-$p3
-$tone o5 f2
-$p1
-$p9
-$tone o5 g+4
-q5
-$tone o5 f+4
-$p1
-$tone o5 f+8
-q5
-$tone o5 b2
-q5
-$tone o5 b-4&b-8
-q5
-$tone o5 g+8
-q5
-$tone o5 f4
-$p1
-$p2
-q5
-$tone o5 c+4
-$p3
-$tone o4 f+4
-q5
-$tone o5 d+4
-$tone o5 d+8
-$tone o5 d4&d8
-$tone o4 b-4
-r4
+$p3 $tone o5 d8 q5 $p4 $tone o5 f2&f4 $p1 $p4 $tone o4 g+2 $p3 $p2 $p1 $tone o5 c+4 $p3 $tone o5 f2 $p1 $p9
+$tone o5 g+4 q5 $tone o5 f+4 $p1 $tone o5 f+8 q5 $tone o5 b2 q5 $tone o5 b-4&b-8 q5 $tone o5 g+8 q5 $tone o5 f4
+$p1 $p2 q5 $tone o5 c+4 $p3 $tone o4 f+4 q5 $tone o5 d+4 $tone o5 d+8 $tone o5 d4&d8 $tone o4 b-4 r4
 
 $tone={@{fieldLeadAttack} @e{flat} v7}
-$p1={
-q5
-$tone o5 d+8
-q5
-}
-$p2={
-$tone o5 c+8
-}
-$p3={
-q5
-$tone o4 b-4
-q5
-}
-$p4={
-$tone o5 c8
-q5
-}
-$p5={
-q5
-$tone o4 b-8
-q5
-}
-$p6={
-q5
-$tone o5 c4
-q5
-}
-$p7={
-q5
-$tone o5 c2&c4&c8
-q5
-$tone o4 a8
-}
-$p8={
-q5
-$tone o5 d+4&d+8
-q5
-$p2
-}
-$p9={
-$tone o5 f8
-q5
-}
+$p1={ q5 $tone o5 d+8 q5 }
+$p2={ $tone o5 c+8 }
+$p3={ q5 $tone o4 b-4 q5 }
+$p4={ $tone o5 c8 q5 }
+$p5={ q5 $tone o4 b-8 q5 }
+$p6={ q5 $tone o5 c4 q5 }
+$p7={ q5 $tone o5 c2&c4&c8 q5 $tone o4 a8 }
+$p8={ q5 $tone o5 d+4&d+8 q5 $p2 }
+$p9={ $tone o5 f8 q5 }
 
 #ch 対旋律
 #role counter
 t140 q8
 #label Intro
-@{pulse:25} @e{piano} v8 q6 o4 f4 r4 d4 r4
-@{pulse:12} @e{flat} r4 c4 o3 a4 r4
-q8
+@{pulse:25} @e{piano} v8 q6 o4 f4 r4 d4 r4 @{pulse:12} @e{flat} r4 c4 o3 a4 r4 q8
 #label LOOP
 #label 出発
-$p17
-$p15
-$p20
-$p18
-$p22
+$p17 $p15 $p20 $p18 $p22
 #label 遠望
-$p17
-$p3
-$p20
-$p2
-@{pulse:25} @e{fieldEnv3x35357} v8 o4 b-64&b-256&b-1024&b-8192
-r64
-$p25
-$p16
-$p1
-@{pulse:25} @e{fieldEnv3x115714} v8 o4 f+16&f+256&f+1024&f+8192
-r32
-$p16
-$p2
-$p24
-$p26
-$p19
-$p1
-@{pulse:25} @e{fieldEnv3x115714} v8 o4 b-16&b-256&b-1024&b-8192
-r32
-@{pulse:25} @e{fieldEnv3x160714} v8 o4 f+16&f+32
-r32
-$p2
-$p23
-r32
-$p21
-$p21
-$p1
-@{pulse:25} @e{fieldEnv3x115714} v8 o5 c16&c256&c1024&c8192
-$p4
-$p2
-@{pulse:12} @e{flat} v8 o5 c16&c256&c1024&c8192
-r32
-@{pulse:12} @e{flat} v8 o4 a32&a64
-r64
-@{pulse:12} @e{flat} v8 o4 f32&f64
-r64
-$p1
-$p23
-$p4
-$p2
-@{pulse:25} @e{fieldEnv3x35357} v8 o4 e64&e256&e1024&e8192
-r64
-$p26
-$p16
-$p1
-@{pulse:25} @e{fieldEnv3x35357} v8 o4 f+64&f+256&f+1024&f+8192
-r64
-$p19
-$p16
-$p2
-@{pulse:25} @e{fieldEnv3x276429} v8 o4 e8&e32&e256&e1024&e8192
-r16
-$p1
-$p24
-$p27
-$p22
+$p17 $p3 $p20 $p2 @{pulse:25} @e{fieldEnv3x35357} v8 o4 b-64&b-256&b-1024&b-8192 r64 $p25 $p16 $p1 @{pulse:25}
+@e{fieldEnv3x115714} v8 o4 f+16&f+256&f+1024&f+8192 r32 $p16 $p2 $p24 $p26 $p19 $p1 @{pulse:25}
+@e{fieldEnv3x115714} v8 o4 b-16&b-256&b-1024&b-8192 r32 @{pulse:25} @e{fieldEnv3x160714} v8 o4 f+16&f+32 r32 $p2
+$p23 r32 $p21 $p21 $p1 @{pulse:25} @e{fieldEnv3x115714} v8 o5 c16&c256&c1024&c8192 $p4 $p2 @{pulse:12} @e{flat}
+v8 o5 c16&c256&c1024&c8192 r32 @{pulse:12} @e{flat} v8 o4 a32&a64 r64 @{pulse:12} @e{flat} v8 o4 f32&f64 r64 $p1
+$p23 $p4 $p2 @{pulse:25} @e{fieldEnv3x35357} v8 o4 e64&e256&e1024&e8192 r64 $p26 $p16 $p1 @{pulse:25}
+@e{fieldEnv3x35357} v8 o4 f+64&f+256&f+1024&f+8192 r64 $p19 $p16 $p2 @{pulse:25} @e{fieldEnv3x276429} v8 o4
+e8&e32&e256&e1024&e8192 r16 $p1 $p24 $p27 $p22
 #label 飛翔
-$p18
-$p3
-$p20
+$p18 $p3 $p20
 #label OUTRO
-$p17
-$p15
-r16
-$p1
-@{pulse:12} @e{flat} v8 o4 g+8&g+32&g+256&g+1024&g+8192
-r16
-$p13
-$p19
-$p19
-$p16
-@{pulse:25} @e{fieldEnv3x160714} v8 o5 c+16&c+32
-r32
-$p16
-$p27
-@{pulse:12} @e{flat} v8 o4 f+16&f+32
-r32
-$p21
-@{pulse:25} @e{fieldEnv3x80357} v8 o5 c32&c64
-r64
-@{pulse:25} @e{fieldEnv3x160714} v8 o5 d+16&d+32
-$p4
-$p25
-@{pulse:25} @e{fieldEnv3x80357} v8 o5 d32&d64
-r64
-@{pulse:25} @e{fieldEnv3x160714} v8 o5 f16&f32
-r32
-@{pulse:25} @e{fieldEnv3x160714} v8 o5 d16&d32
-r32
-@{pulse:12} @e{flat} v8 o4 f4
-r4
+$p17 $p15 r16 $p1 @{pulse:12} @e{flat} v8 o4 g+8&g+32&g+256&g+1024&g+8192 r16 $p13 $p19 $p19 $p16 @{pulse:25}
+@e{fieldEnv3x160714} v8 o5 c+16&c+32 r32 $p16 $p27 @{pulse:12} @e{flat} v8 o4 f+16&f+32 r32 $p21 @{pulse:25}
+@e{fieldEnv3x80357} v8 o5 c32&c64 r64 @{pulse:25} @e{fieldEnv3x160714} v8 o5 d+16&d+32 $p4 $p25 @{pulse:25}
+@e{fieldEnv3x80357} v8 o5 d32&d64 r64 @{pulse:25} @e{fieldEnv3x160714} v8 o5 f16&f32 r32 @{pulse:25}
+@e{fieldEnv3x160714} v8 o5 d16&d32 r32 @{pulse:12} @e{flat} v8 o4 f4 r4
 
-$p1={
-@{fieldHit0x29000} @e{flat} v11 o4 d256&d512&d1024&d8192&d32768&d65536
-r1024 r2048 r4096 r32768
-@{fieldHit0x18000} @e{flat} v9 o3 f+256&f+512&f+1024&f+8192&f+32768&f+65536
-r1024 r2048 r4096 r32768 r65536
-@{fieldHit0x11800} @e{flat} v7 o2 b-256&b-512&b-1024&b-8192&b-32768&b-65536
-r1024 r2048 r4096 r32768
-}
-$p2={
-@{fieldHit2x14500} @e{flat} v13 o3 d256&d512&d1024&d8192&d32768&d65536
-r1024 r2048 r4096 r32768
-@{fieldHit2x8200} @e{flat} v11 o2 e256&e512&e1024&e8192&e32768&e65536
-r1024 r2048 r4096 r32768 r65536
-@{fieldHit2x5200} @e{flat} v9 o1 g+256&g+512&g+1024&g+8192&g+32768&g+65536
-r1024 r2048 r4096 r32768
-}
-$p3={
-$p2
-@{pulse:25} @e{fieldEnv3x115714} v8 o5 c16&c256&c1024&c8192
-r32
-@{pulse:25} @e{fieldEnv3x160714} v8 o4 a16&a32
-r32
-$p1
-@{pulse:25} @e{fieldEnv3x115714} v8 o4 f16&f256&f1024&f8192
-r32
-@{pulse:25} @e{fieldEnv3x160714} v8 o4 a16&a32
-r32
-$p2
-@{pulse:25} @e{fieldEnv3x276429} v8 o5 c8&c32&c256&c1024&c8192
-}
-$p4={
-r32
-@{pulse:25} @e{fieldEnv3x160714} v8 o4 f16&f32
-r32
-}
-$p5={
-@{pulse:25} @e{fieldEnv3x35357} v8 o4 f+64&f+256&f+1024&f+8192
-r64
-@{pulse:25} @e{fieldEnv3x80357} v8 o4 f+32&f+64
-r64
-@{pulse:25} @e{fieldEnv3x160714} v8 o5 c+16&c+32
-r32
-$p1
-@{pulse:25} @e{fieldEnv3x35357} v8 o4 b-64&b-256&b-1024&b-8192
-r64
-@{pulse:25} @e{fieldEnv3x80357} v8 o4 b-32&b-64
-r64
-@{pulse:25} @e{fieldEnv3x160714} v8 o5 c+16&c+32
-}
-$p6={
-$p2
-@{pulse:25} @e{fieldEnv3x115714} v8 o4 b-16&b-256&b-1024&b-8192
-r32
-@{pulse:25} @e{fieldEnv3x80357} v8 o4 b-32&b-64
-r64
-@{pulse:25} @e{fieldEnv3x80357} v8 o4 b-32&b-64
-r64
-$p1
-@{pulse:25} @e{fieldEnv3x115714} v8 o5 c+16&c+256&c+1024&c+8192
-$p4
-$p2
-@{pulse:12} @e{flat} v8 o5 c+16&c+256&c+1024&c+8192
-}
-$p7={
-$p2
-@{pulse:25} @e{fieldEnv3x35357} v8 o5 d+64&d+256&d+1024&d+8192
-r64
-@{pulse:25} @e{fieldEnv3x80357} v8 o5 d+32&d+64
-r64
-@{pulse:25} @e{fieldEnv3x160714} v8 o5 d+16&d+32
-r32
-$p1
-@{pulse:25} @e{fieldEnv3x115714} v8 o4 b16&b256&b1024&b8192
-r32
-@{pulse:25} @e{fieldEnv3x160714} v8 o5 d+16&d+32
-r32
-}
-$p8={
-$p2
-@{pulse:25} @e{fieldEnv3x115714} v8 o4 g+16&g+256&g+1024&g+8192
-r32
-@{pulse:25} @e{fieldEnv3x80357} v8 o4 g+32&g+64
-r64
-@{pulse:25} @e{fieldEnv3x80357} v8 o4 g+32&g+64
-r64
-$p1
-@{pulse:25} @e{fieldEnv3x115714} v8 o5 c16&c256&c1024&c8192
-$p4
-$p2
-@{pulse:12} @e{flat} v8 o5 c16&c256&c1024&c8192
-}
-$p9={
-$p2
-@{pulse:25} @e{fieldEnv3x35357} v8 o5 f64&f256&f1024&f8192
-r64
-@{pulse:25} @e{fieldEnv3x80357} v8 o5 f32&f64
-r64
-@{pulse:25} @e{fieldEnv3x160714} v8 o5 f16&f32
-r32
-$p1
-@{pulse:25} @e{fieldEnv3x115714} v8 o5 d16&d256&d1024&d8192
-r32
-@{pulse:25} @e{fieldEnv3x160714} v8 o5 f16&f32
-r32
-}
-$p10={
-$p7
-$p2
-@{pulse:12} @e{flat} v8 o4 b16&b256&b1024&b8192
-r32
-@{pulse:25} @e{fieldEnv3x80357} v8 o4 f+32&f+64
-r64
-@{pulse:25} @e{fieldEnv3x80357} v8 o4 b32&b64
-r64
-$p1
-@{pulse:25} @e{fieldEnv3x115714} v8 o5 d+16&d+256&d+1024&d+8192
-r32
-@{pulse:25} @e{fieldEnv3x160714} v8 o4 b16&b32
-}
-$p11={
-$p9
-$p2
-@{pulse:12} @e{flat} v8 o5 d16&d256&d1024&d8192
-r32
-@{pulse:25} @e{fieldEnv3x80357} v8 o4 b-32&b-64
-r64
-@{pulse:25} @e{fieldEnv3x80357} v8 o5 d32&d64
-r64
-$p1
-@{pulse:25} @e{fieldEnv3x115714} v8 o5 f16&f256&f1024&f8192
-r32
-@{pulse:25} @e{fieldEnv3x160714} v8 o5 d16&d32
-}
-$p12={
-@{pulse:25} @e{fieldEnv3x115714} v8 o4 g+16&g+256&g+1024&g+8192
-$p4
-$p2
-$p5
-r32
-$p2
-@{pulse:25} @e{fieldEnv3x276429} v8 o4 f+8&f+32&f+256&f+1024&f+8192
-r16
-$p1
-@{pulse:12} @e{flat} v8 o4 b-16&b-256&b-1024&b-8192
-r32
-@{pulse:12} @e{flat} v8 o5 c+16&c+32
-}
-$p13={
-$p10
-r32
-$p6
-r32
-@{pulse:12} @e{flat} v8 o4 b-32&b-64
-r64
-@{pulse:12} @e{flat} v8 o4 f32&f64
-r64
-$p1
-@{pulse:25} @e{fieldEnv3x115714} v8 o4 b-16&b-256&b-1024&b-8192
-$p4
-}
-$p14={
-@{pulse:25} @e{fieldEnv3x35357} v8 o4 g64&g256&g1024&g8192
-r64
-@{pulse:25} @e{fieldEnv3x80357} v8 o4 g32&g64
-r64
-@{pulse:25} @e{fieldEnv3x160714} v8 o5 e16&e32
-r32
-$p1
-@{pulse:25} @e{fieldEnv3x35357} v8 o5 c64&c256&c1024&c8192
-r64
-@{pulse:25} @e{fieldEnv3x80357} v8 o5 c32&c64
-r64
-@{pulse:25} @e{fieldEnv3x160714} v8 o5 e16&e32
-}
-$p15={
-$p2
-@{pulse:25} @e{fieldEnv3x115714} v8 o5 c+16&c+256&c+1024&c+8192
-r32
-@{pulse:25} @e{fieldEnv3x160714} v8 o4 g+16&g+32
-r32
-$p1
-@{pulse:25} @e{fieldEnv3x115714} v8 o4 f16&f256&f1024&f8192
-r32
-@{pulse:25} @e{fieldEnv3x160714} v8 o4 g+16&g+32
-r32
-$p2
-@{pulse:25} @e{fieldEnv3x276429} v8 o5 c+8&c+32&c+256&c+1024&c+8192
-}
-$p16={
-@{pulse:25} @e{fieldEnv3x160714} v8 o4 b-16&b-32
-r32
-}
-$p17={
-$p11
-r32
-$p8
-r32
-@{pulse:12} @e{flat} v8 o4 g+32&g+64
-r64
-@{pulse:12} @e{flat} v8 o4 f32&f64
-r64
-$p1
-$p12
-r32
-}
-$p18={
-$p13
-$p2
-$p14
-r32
-$p2
-@{pulse:25} @e{fieldEnv3x276429} v8 o4 g8&g32&g256&g1024&g8192
-r16
-$p1
-@{pulse:12} @e{flat} v8 o5 c16&c256&c1024&c8192
-r32
-@{pulse:12} @e{flat} v8 o5 e16&e32
-r32
-}
-$p19={
-@{pulse:25} @e{fieldEnv3x80357} v8 o4 f+32&f+64
-r64
-}
-$p20={
-r16
-$p1
-@{pulse:12} @e{flat} v8 o4 f8&f32&f256&f1024&f8192
-r16
-}
-$p21={
-@{pulse:25} @e{fieldEnv3x80357} v8 o4 a32&a64
-r64
-}
-$p22={
-$p3
-r16
-$p1
-@{pulse:12} @e{flat} v8 o4 a8&a32&a256&a1024&a8192
-r16
-}
-$p23={
-@{pulse:25} @e{fieldEnv3x115714} v8 o4 a16&a256&a1024&a8192
-}
-$p24={
-@{pulse:12} @e{flat} v8 o4 f+16&f+256&f+1024&f+8192
-r32
-}
-$p25={
-@{pulse:25} @e{fieldEnv3x80357} v8 o4 b-32&b-64
-r64
-}
-$p26={
-@{pulse:25} @e{fieldEnv3x80357} v8 o4 e32&e64
-r64
-}
-$p27={
-@{pulse:12} @e{flat} v8 o4 b-16&b-32
-r32
-}
+$p1={ @{fieldHit0x29000} @e{flat} v11 o4 d256&d512&d1024&d8192&d32768&d65536 r1024 r2048 r4096 r32768
+  @{fieldHit0x18000} @e{flat} v9 o3 f+256&f+512&f+1024&f+8192&f+32768&f+65536 r1024 r2048 r4096 r32768 r65536
+  @{fieldHit0x11800} @e{flat} v7 o2 b-256&b-512&b-1024&b-8192&b-32768&b-65536 r1024 r2048 r4096 r32768 }
+$p2={ @{fieldHit2x14500} @e{flat} v13 o3 d256&d512&d1024&d8192&d32768&d65536 r1024 r2048 r4096 r32768
+  @{fieldHit2x8200} @e{flat} v11 o2 e256&e512&e1024&e8192&e32768&e65536 r1024 r2048 r4096 r32768 r65536
+  @{fieldHit2x5200} @e{flat} v9 o1 g+256&g+512&g+1024&g+8192&g+32768&g+65536 r1024 r2048 r4096 r32768 }
+$p3={ $p2 @{pulse:25} @e{fieldEnv3x115714} v8 o5 c16&c256&c1024&c8192 r32 @{pulse:25} @e{fieldEnv3x160714} v8 o4
+  a16&a32 r32 $p1 @{pulse:25} @e{fieldEnv3x115714} v8 o4 f16&f256&f1024&f8192 r32 @{pulse:25}
+  @e{fieldEnv3x160714} v8 o4 a16&a32 r32 $p2 @{pulse:25} @e{fieldEnv3x276429} v8 o5 c8&c32&c256&c1024&c8192 }
+$p4={ r32 @{pulse:25} @e{fieldEnv3x160714} v8 o4 f16&f32 r32 }
+$p5={ @{pulse:25} @e{fieldEnv3x35357} v8 o4 f+64&f+256&f+1024&f+8192 r64 @{pulse:25} @e{fieldEnv3x80357} v8 o4
+  f+32&f+64 r64 @{pulse:25} @e{fieldEnv3x160714} v8 o5 c+16&c+32 r32 $p1 @{pulse:25} @e{fieldEnv3x35357} v8 o4
+  b-64&b-256&b-1024&b-8192 r64 @{pulse:25} @e{fieldEnv3x80357} v8 o4 b-32&b-64 r64 @{pulse:25}
+  @e{fieldEnv3x160714} v8 o5 c+16&c+32 }
+$p6={ $p2 @{pulse:25} @e{fieldEnv3x115714} v8 o4 b-16&b-256&b-1024&b-8192 r32 @{pulse:25} @e{fieldEnv3x80357} v8
+  o4 b-32&b-64 r64 @{pulse:25} @e{fieldEnv3x80357} v8 o4 b-32&b-64 r64 $p1 @{pulse:25} @e{fieldEnv3x115714} v8
+  o5 c+16&c+256&c+1024&c+8192 $p4 $p2 @{pulse:12} @e{flat} v8 o5 c+16&c+256&c+1024&c+8192 }
+$p7={ $p2 @{pulse:25} @e{fieldEnv3x35357} v8 o5 d+64&d+256&d+1024&d+8192 r64 @{pulse:25} @e{fieldEnv3x80357} v8
+  o5 d+32&d+64 r64 @{pulse:25} @e{fieldEnv3x160714} v8 o5 d+16&d+32 r32 $p1 @{pulse:25} @e{fieldEnv3x115714} v8
+  o4 b16&b256&b1024&b8192 r32 @{pulse:25} @e{fieldEnv3x160714} v8 o5 d+16&d+32 r32 }
+$p8={ $p2 @{pulse:25} @e{fieldEnv3x115714} v8 o4 g+16&g+256&g+1024&g+8192 r32 @{pulse:25} @e{fieldEnv3x80357} v8
+  o4 g+32&g+64 r64 @{pulse:25} @e{fieldEnv3x80357} v8 o4 g+32&g+64 r64 $p1 @{pulse:25} @e{fieldEnv3x115714} v8
+  o5 c16&c256&c1024&c8192 $p4 $p2 @{pulse:12} @e{flat} v8 o5 c16&c256&c1024&c8192 }
+$p9={ $p2 @{pulse:25} @e{fieldEnv3x35357} v8 o5 f64&f256&f1024&f8192 r64 @{pulse:25} @e{fieldEnv3x80357} v8 o5
+  f32&f64 r64 @{pulse:25} @e{fieldEnv3x160714} v8 o5 f16&f32 r32 $p1 @{pulse:25} @e{fieldEnv3x115714} v8 o5
+  d16&d256&d1024&d8192 r32 @{pulse:25} @e{fieldEnv3x160714} v8 o5 f16&f32 r32 }
+$p10={ $p7 $p2 @{pulse:12} @e{flat} v8 o4 b16&b256&b1024&b8192 r32 @{pulse:25} @e{fieldEnv3x80357} v8 o4
+  f+32&f+64 r64 @{pulse:25} @e{fieldEnv3x80357} v8 o4 b32&b64 r64 $p1 @{pulse:25} @e{fieldEnv3x115714} v8 o5
+  d+16&d+256&d+1024&d+8192 r32 @{pulse:25} @e{fieldEnv3x160714} v8 o4 b16&b32 }
+$p11={ $p9 $p2 @{pulse:12} @e{flat} v8 o5 d16&d256&d1024&d8192 r32 @{pulse:25} @e{fieldEnv3x80357} v8 o4
+  b-32&b-64 r64 @{pulse:25} @e{fieldEnv3x80357} v8 o5 d32&d64 r64 $p1 @{pulse:25} @e{fieldEnv3x115714} v8 o5
+  f16&f256&f1024&f8192 r32 @{pulse:25} @e{fieldEnv3x160714} v8 o5 d16&d32 }
+$p12={ @{pulse:25} @e{fieldEnv3x115714} v8 o4 g+16&g+256&g+1024&g+8192 $p4 $p2 $p5 r32 $p2 @{pulse:25}
+  @e{fieldEnv3x276429} v8 o4 f+8&f+32&f+256&f+1024&f+8192 r16 $p1 @{pulse:12} @e{flat} v8 o4
+  b-16&b-256&b-1024&b-8192 r32 @{pulse:12} @e{flat} v8 o5 c+16&c+32 }
+$p13={ $p10 r32 $p6 r32 @{pulse:12} @e{flat} v8 o4 b-32&b-64 r64 @{pulse:12} @e{flat} v8 o4 f32&f64 r64 $p1
+  @{pulse:25} @e{fieldEnv3x115714} v8 o4 b-16&b-256&b-1024&b-8192 $p4 }
+$p14={ @{pulse:25} @e{fieldEnv3x35357} v8 o4 g64&g256&g1024&g8192 r64 @{pulse:25} @e{fieldEnv3x80357} v8 o4
+  g32&g64 r64 @{pulse:25} @e{fieldEnv3x160714} v8 o5 e16&e32 r32 $p1 @{pulse:25} @e{fieldEnv3x35357} v8 o5
+  c64&c256&c1024&c8192 r64 @{pulse:25} @e{fieldEnv3x80357} v8 o5 c32&c64 r64 @{pulse:25} @e{fieldEnv3x160714} v8
+  o5 e16&e32 }
+$p15={ $p2 @{pulse:25} @e{fieldEnv3x115714} v8 o5 c+16&c+256&c+1024&c+8192 r32 @{pulse:25} @e{fieldEnv3x160714}
+  v8 o4 g+16&g+32 r32 $p1 @{pulse:25} @e{fieldEnv3x115714} v8 o4 f16&f256&f1024&f8192 r32 @{pulse:25}
+  @e{fieldEnv3x160714} v8 o4 g+16&g+32 r32 $p2 @{pulse:25} @e{fieldEnv3x276429} v8 o5
+  c+8&c+32&c+256&c+1024&c+8192 }
+$p16={ @{pulse:25} @e{fieldEnv3x160714} v8 o4 b-16&b-32 r32 }
+$p17={ $p11 r32 $p8 r32 @{pulse:12} @e{flat} v8 o4 g+32&g+64 r64 @{pulse:12} @e{flat} v8 o4 f32&f64 r64 $p1 $p12
+  r32 }
+$p18={ $p13 $p2 $p14 r32 $p2 @{pulse:25} @e{fieldEnv3x276429} v8 o4 g8&g32&g256&g1024&g8192 r16 $p1 @{pulse:12}
+  @e{flat} v8 o5 c16&c256&c1024&c8192 r32 @{pulse:12} @e{flat} v8 o5 e16&e32 r32 }
+$p19={ @{pulse:25} @e{fieldEnv3x80357} v8 o4 f+32&f+64 r64 }
+$p20={ r16 $p1 @{pulse:12} @e{flat} v8 o4 f8&f32&f256&f1024&f8192 r16 }
+$p21={ @{pulse:25} @e{fieldEnv3x80357} v8 o4 a32&a64 r64 }
+$p22={ $p3 r16 $p1 @{pulse:12} @e{flat} v8 o4 a8&a32&a256&a1024&a8192 r16 }
+$p23={ @{pulse:25} @e{fieldEnv3x115714} v8 o4 a16&a256&a1024&a8192 }
+$p24={ @{pulse:12} @e{flat} v8 o4 f+16&f+256&f+1024&f+8192 r32 }
+$p25={ @{pulse:25} @e{fieldEnv3x80357} v8 o4 b-32&b-64 r64 }
+$p26={ @{pulse:25} @e{fieldEnv3x80357} v8 o4 e32&e64 r64 }
+$p27={ @{pulse:12} @e{flat} v8 o4 b-16&b-32 r32 }
 
 #ch ベース
 #role bass
 t140 q8
 #label Intro
-$tone q8 o2 b-2 f4 b-4
-f2 c4 f4
-q8
+$tone q8 o2 b-2 f4 b-4 f2 c4 f4 q8
 #label LOOP
 #label 出発
-$p8
-$p1
-$p6
-$tone o2 g8
-$p7
+$p8 $p1 $p6 $tone o2 g8 $p7
 #label 遠望
-$p1
-$p1
-$p1
-$p5
-$p7
-$p9
-$p9
-$p9
-$p9
-$p9
-$tone o2 e16
-$tone o2 e16
-$tone o2 f+8
-$p9
-$p2
-$p2
-$p2
-$p2
-$tone o3 c16
-$tone o3 c16
-$tone o2 a8
-$p2
-$tone o2 a8
-$p9
-$p9
-$p9
-$p9
-$tone o2 f+8
-$p1
-$tone o2 f+8
-$p9
-$p7
+$p1 $p1 $p1 $p5 $p7 $p9 $p9 $p9 $p9 $p9 $tone o2 e16 $tone o2 e16 $tone o2 f+8 $p9 $p2 $p2 $p2 $p2 $tone o3 c16
+$tone o3 c16 $tone o2 a8 $p2 $tone o2 a8 $p9 $p9 $p9 $p9 $tone o2 f+8 $p1 $tone o2 f+8 $p9 $p7
 #label 飛翔
-$p4
-$p1
-$p6
-$tone o2 g8
-$p7
+$p4 $p1 $p6 $tone o2 g8 $p7
 #label OUTRO
-$p8
-$p1
-$tone o3 c+16
-$tone o3 c+16
-$p1
-$p2
-$p1
-$tone o3 f+8
-$tone o3 c+8
-$tone o3 f+8
-$tone o3 c+8
-$tone o3 d+8
-$p1
-$tone o3 f8
-$tone o3 c8
-$p1
-$tone o3 f8
-$tone o2 b-2
-r4
+$p8 $p1 $tone o3 c+16 $tone o3 c+16 $p1 $p2 $p1 $tone o3 f+8 $tone o3 c+8 $tone o3 f+8 $tone o3 c+8 $tone o3 d+8
+$p1 $tone o3 f8 $tone o3 c8 $p1 $tone o3 f8 $tone o2 b-2 r4
 
 $tone={@{fieldTriangle} @e{flat} v12}
-$p1={
-$tone o2 b-8
-}
-$p2={
-$tone o2 f8
-}
-$p3={
-$tone o2 g+8
-$tone o2 g+8
-$p2
-$tone o2 g+8
-$tone o3 c16
-$tone o3 c16
-$tone o2 g+8
-$p2
-$tone o2 g+8
-$tone o2 f+8
-$tone o2 f+8
-$tone o2 f+8
-}
-$p4={
-$tone o2 b8
-$tone o2 b8
-$tone o2 b8
-$tone o2 b8
-$tone o2 f+8
-$tone o2 f+16
-$tone o2 f+16
-$tone o2 b8
-$tone o2 f+8
-$p1
-$p1
-$p2
-}
-$p5={
-$p1
-$p1
-$tone o2 b-16
-$tone o2 b-16
-$tone o3 d8
-$p1
-$p3
-$tone o2 f+8
-$p1
-$tone o3 c+8
-$p1
-$tone o2 f+8
-}
-$p6={
-$tone o3 c+16
-$tone o3 c+16
-$p1
-$p2
-$p1
-$tone o2 c8
-$tone o2 c8
-$tone o2 g8
-$tone o2 c8
-$tone o3 c8
-$tone o3 e8
-$tone o3 c8
-}
-$p7={
-$p2
-$p2
-$p2
-$p2
-$tone o2 f4
-$tone o2 a8
-$p2
-}
-$p8={
-$p1
-$p1
-$p1
-$p5
-$tone o2 c+8
-$p2
-$tone o2 c+8
-$tone o2 c+8
-$tone o2 f4
-$tone o2 g+8
-$p2
-$p4
-}
-$p9={
-$tone o2 e8
-}
+$p1={ $tone o2 b-8 }
+$p2={ $tone o2 f8 }
+$p3={ $tone o2 g+8 $tone o2 g+8 $p2 $tone o2 g+8 $tone o3 c16 $tone o3 c16 $tone o2 g+8 $p2 $tone o2 g+8 $tone
+  o2 f+8 $tone o2 f+8 $tone o2 f+8 }
+$p4={ $tone o2 b8 $tone o2 b8 $tone o2 b8 $tone o2 b8 $tone o2 f+8 $tone o2 f+16 $tone o2 f+16 $tone o2 b8 $tone
+  o2 f+8 $p1 $p1 $p2 }
+$p5={ $p1 $p1 $tone o2 b-16 $tone o2 b-16 $tone o3 d8 $p1 $p3 $tone o2 f+8 $p1 $tone o3 c+8 $p1 $tone o2 f+8 }
+$p6={ $tone o3 c+16 $tone o3 c+16 $p1 $p2 $p1 $tone o2 c8 $tone o2 c8 $tone o2 g8 $tone o2 c8 $tone o3 c8 $tone
+  o3 e8 $tone o3 c8 }
+$p7={ $p2 $p2 $p2 $p2 $tone o2 f4 $tone o2 a8 $p2 }
+$p8={ $p1 $p1 $p1 $p5 $tone o2 c+8 $p2 $tone o2 c+8 $tone o2 c+8 $tone o2 f4 $tone o2 g+8 $p2 $p4 }
+$p9={ $tone o2 e8 }
 
 #ch ドラム
 #role noise
 t140 q8
 #label Intro
-$tone @e{percussive} v4 q3 o2 f+4 r4 f+4 r4
-f+4 r4 v5 f+8 r8 v4 f+16 f+16 v6 f+8
-q8
+$tone @e{percussive} v4 q3 o2 f+4 r4 f+4 r4 f+4 r4 v5 f+8 r8 v4 f+16 f+16 v6 f+8 q8
 #label LOOP
 #label 出発
-$p8
-$p8
+$p8 $p8
 #label 遠望
-$p8
-$p8
+$p8 $p8
 #label 飛翔
 $p8
 #label OUTRO
-$p8
-$p4
-$p7
-$p7
-$p7
-$p6
-$p6
-$p5
-r16 r64
-$tone @e{fieldEnv2x80357} v6 o4 c32&c64
-r2 r4 r8 r16 r64
+$p8 $p4 $p7 $p7 $p7 $p6 $p6 $p5 r16 r64 $tone @e{fieldEnv2x80357} v6 o4 c32&c64 r2 r4 r8 r16 r64
 
 $tone={@{noise:white}}
-$p1={
-$tone @e{fieldEnv2x32000} v4 o2 f+64&f+512&f+1024&f+16384&f+32768&f+65536
-r32 r128 r256 r2048 r4096 r8192 r65536
-$tone @e{fieldEnv2x32000} v3 o2 f+64&f+512&f+1024&f+16384&f+32768&f+65536
-r32 r128 r256 r2048 r4096 r8192 r65536
-}
-$p2={
-$tone @e{fieldEnv2x53571} v7 o2 f+32
-r16 r32
-$tone @e{fieldEnv2x32000} v4 o2 f+64&f+512&f+1024&f+16384&f+32768&f+65536
-r16 r32 r128 r256 r2048 r4096 r8192 r65536
-$tone @e{fieldEnv2x53571} v7 o2 f+32
-r32
-$tone @e{fieldEnv2x32000} v3 o2 f+64&f+512&f+1024&f+16384&f+32768&f+65536
-r32 r128 r256 r2048 r4096 r8192 r65536
-$tone @e{fieldEnv2x32000} v4 o2 f+64&f+512&f+1024&f+16384&f+32768&f+65536
-r32 r128 r256 r2048 r4096 r8192 r65536
-$tone @e{fieldEnv2x32000} v5 o2 f+64&f+512&f+1024&f+16384&f+32768&f+65536
-r32 r128 r256 r2048 r4096 r8192 r65536
-}
-$p3={
-$tone @e{fieldEnv2x53571} v7 o2 f+32
-r16 r32
-$p1
-$tone @e{fieldEnv2x17857} v7 o2 f+128&f+512&f+2048&f+8192&f+32768&f+65536
-r16 r32 r64 r256 r1024 r4096 r16384 r65536
-$tone @e{fieldEnv2x32000} v4 o2 f+64&f+512&f+1024&f+16384&f+32768&f+65536
-r16 r32 r128 r256 r2048 r4096 r8192 r65536
-$tone @e{fieldEnv2x53571} v7 o2 f+32
-r16 r32
-$p1
-$tone @e{fieldEnv2x53571} v7 o2 f+32
-r16 r32
-}
-$p4={
-$p3
-$p1
-$tone @e{fieldEnv2x53571} v7 o2 f+32
-r16 r32
-$tone @e{fieldEnv2x32000} v4 o2 f+64&f+512&f+1024&f+16384&f+32768&f+65536
-r16 r32 r128 r256 r2048 r4096 r8192 r65536
-$tone @e{fieldEnv2x17857} v7 o2 f+128&f+512&f+2048&f+8192&f+32768&f+65536
-r16 r32 r64 r256 r1024 r4096 r16384 r65536
-$p1
-$p2
-}
-$p5={
-$tone @e{fieldEnv2x80357} v5 o4 c32&c64
-}
-$p6={
-$tone @e{fieldEnv2x40179} v5 o4 c64&c128
-r32 r128
-}
-$p7={
-$p5
-r8 r16 r64
-}
-$p8={
-$p4
-$p4
-}
+$p1={ $tone @e{fieldEnv2x32000} v4 o2 f+64&f+512&f+1024&f+16384&f+32768&f+65536 r32 r128 r256 r2048 r4096 r8192
+  r65536 $tone @e{fieldEnv2x32000} v3 o2 f+64&f+512&f+1024&f+16384&f+32768&f+65536 r32 r128 r256 r2048 r4096
+  r8192 r65536 }
+$p2={ $tone @e{fieldEnv2x53571} v7 o2 f+32 r16 r32 $tone @e{fieldEnv2x32000} v4 o2
+  f+64&f+512&f+1024&f+16384&f+32768&f+65536 r16 r32 r128 r256 r2048 r4096 r8192 r65536 $tone @e{fieldEnv2x53571}
+  v7 o2 f+32 r32 $tone @e{fieldEnv2x32000} v3 o2 f+64&f+512&f+1024&f+16384&f+32768&f+65536 r32 r128 r256 r2048
+  r4096 r8192 r65536 $tone @e{fieldEnv2x32000} v4 o2 f+64&f+512&f+1024&f+16384&f+32768&f+65536 r32 r128 r256
+  r2048 r4096 r8192 r65536 $tone @e{fieldEnv2x32000} v5 o2 f+64&f+512&f+1024&f+16384&f+32768&f+65536 r32 r128
+  r256 r2048 r4096 r8192 r65536 }
+$p3={ $tone @e{fieldEnv2x53571} v7 o2 f+32 r16 r32 $p1 $tone @e{fieldEnv2x17857} v7 o2
+  f+128&f+512&f+2048&f+8192&f+32768&f+65536 r16 r32 r64 r256 r1024 r4096 r16384 r65536 $tone @e{fieldEnv2x32000}
+  v4 o2 f+64&f+512&f+1024&f+16384&f+32768&f+65536 r16 r32 r128 r256 r2048 r4096 r8192 r65536 $tone
+  @e{fieldEnv2x53571} v7 o2 f+32 r16 r32 $p1 $tone @e{fieldEnv2x53571} v7 o2 f+32 r16 r32 }
+$p4={ $p3 $p1 $tone @e{fieldEnv2x53571} v7 o2 f+32 r16 r32 $tone @e{fieldEnv2x32000} v4 o2
+  f+64&f+512&f+1024&f+16384&f+32768&f+65536 r16 r32 r128 r256 r2048 r4096 r8192 r65536 $tone @e{fieldEnv2x17857}
+  v7 o2 f+128&f+512&f+2048&f+8192&f+32768&f+65536 r16 r32 r64 r256 r1024 r4096 r16384 r65536 $p1 $p2 }
+$p5={ $tone @e{fieldEnv2x80357} v5 o4 c32&c64 }
+$p6={ $tone @e{fieldEnv2x40179} v5 o4 c64&c128 r32 r128 }
+$p7={ $p5 r8 r16 r64 }
+$p8={ $p4 $p4 }
