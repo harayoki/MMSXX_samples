@@ -1,0 +1,88 @@
+name: Import requested Git LFS asset
+
+on:
+  push:
+    branches:
+      - "codex/lfs-import-*"
+    paths:
+      - ".lfs-import/*.json"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: lfs-import-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  import:
+    if: ${{ !contains(github.event.head_commit.message, '[lfs-imported]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Validate request and push clean LFS commit
+        shell: bash
+        env:
+          REQUEST_COMMIT: ${{ github.sha }}
+          IMPORT_BRANCH: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          mapfile -d '' requests < <(
+            find .lfs-import -maxdepth 1 -type f -name '*.json' -print0
+          )
+          if [[ ${#requests[@]} -ne 1 ]]; then
+            echo "Exactly one .lfs-import/*.json request is required." >&2
+            exit 1
+          fi
+          request="${requests[0]}"
+          base_sha="$(jq -er '.base_sha' "$request")"
+          destination="$(jq -er '.path' "$request")"
+          expected_sha="$(jq -er '.sha256' "$request")"
+          expected_size="$(jq -er '.size' "$request")"
+
+          if [[ "$(git rev-parse HEAD^)" != "$base_sha" ]]; then
+            echo "base_sha must be the request commit parent." >&2
+            exit 1
+          fi
+          changed="$(git diff --name-only "$base_sha" HEAD)"
+          if [[ "$changed" != "$request" ]]; then
+            echo "The request commit may only add one request JSON file." >&2
+            exit 1
+          fi
+
+          canonical="$(realpath -m --relative-to="$GITHUB_WORKSPACE" "$GITHUB_WORKSPACE/$destination")"
+          if [[ "$canonical" != "$destination" || "$destination" == .git/* ]]; then
+            echo "Unsafe destination path: $destination" >&2
+            exit 1
+          fi
+          attribute="$(git check-attr --cached filter -- "$destination" | awk -F': ' '{print $3}')"
+          if [[ "$attribute" != lfs ]]; then
+            echo "Destination is not marked filter=lfs: $destination" >&2
+            exit 1
+          fi
+
+          payload="$RUNNER_TEMP/lfs-import-payload"
+          jq -er '.content_base64' "$request" | base64 --decode > "$payload"
+          actual_sha="$(sha256sum "$payload" | cut -d' ' -f1)"
+          actual_size="$(wc -c < "$payload" | tr -d ' ')"
+          if [[ "$actual_sha" != "$expected_sha" || "$actual_size" != "$expected_size" ]]; then
+            echo "Payload checksum or size mismatch." >&2
+            exit 1
+          fi
+
+          git reset --hard "$base_sha"
+          mkdir -p "$(dirname "$destination")"
+          cp "$payload" "$destination"
+          git lfs install --local
+          git add -- "$destination"
+          node scripts/check_lfs_pointers.cjs
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "LFS画像を追加 [lfs-imported]"
+          git push --force-with-lease="refs/heads/$IMPORT_BRANCH:$REQUEST_COMMIT" origin "HEAD:$IMPORT_BRANCH"
