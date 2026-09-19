@@ -1,6 +1,6 @@
 import { EditorState } from 'https://esm.sh/@codemirror/state@6.7.5';
 import {
-  EditorView, drawSelection, highlightActiveLine, keymap,
+  EditorView, highlightActiveLine, keymap,
 } from 'https://esm.sh/@codemirror/view@6.43.12';
 import {
   defaultKeymap, history, historyKeymap,
@@ -42,7 +42,6 @@ export function mountMMLEditor(host, source, options = {}) {
       doc: source,
       extensions: [
         history(),
-        drawSelection(),
         highlightActiveLine(),
         keymap.of([...defaultKeymap, ...historyKeymap]),
         mmlComments,
