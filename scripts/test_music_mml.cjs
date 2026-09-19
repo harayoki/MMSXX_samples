@@ -122,8 +122,10 @@ for (const { file, channels, marks, source } of sources) {
     index === 0 || mark.t > info.marks[index - 1].t), file + ': jump label order');
   if (file === '03_Windward-Crossing/windward-crossing.mml') {
     assert.equal(info.meta.version, '1.6', file + ': song version');
-    assert(info.meta.about.includes('CH3とCH4は発音が重ならないため統合可能。ファミコン準拠。'),
-      file + ': Famicom-compatible channel note');
+    assert(info.meta.about.includes('CH3とCH4は発音が重ならないため統合可能。'),
+      file + ': mergeable channel note');
+    assert(!info.meta.about.includes('ファミコン準拠'),
+      file + ': must not claim Famicom compliance');
     assert.deepEqual(info.tracks.map(track => track.name),
       ['主旋律', 'ベース', '副旋律', 'ドラム補佐'], file + ': channel names');
     assert.equal(info.tracks[0].voices, 1, file + ': channel 1 must use one voice');
