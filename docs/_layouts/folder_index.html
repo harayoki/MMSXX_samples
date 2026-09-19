@@ -27,12 +27,14 @@ layout: default
     {% if sub.size > 1 %}
       {% assign dirname = sub[0] %}
       {% unless seen contains dirname %}
-        <li style="list-style: none; padding-left: 0;">
-          <a href="{{ target_path | append: dirname | append:'/' | relative_url }}">
-            {{ dirname }}/
-          </a>
-        </li>
-        {% assign seen = seen | push: dirname %}
+        {% unless page.hidden_folders contains dirname %}
+          <li style="list-style: none; padding-left: 0;">
+            <a href="{{ target_path | append: dirname | append:'/' | relative_url }}">
+              {{ dirname }}/
+            </a>
+          </li>
+          {% assign seen = seen | push: dirname %}
+        {% endunless %}
       {% endunless %}
     {% endif %}
   {% endif %}
