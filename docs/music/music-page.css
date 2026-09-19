@@ -222,7 +222,7 @@ body {
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background-color: rgba(12, 16, 20, .42);
+  background-color: rgba(12, 16, 20, .28);
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;

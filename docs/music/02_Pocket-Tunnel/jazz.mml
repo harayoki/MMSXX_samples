@@ -9,7 +9,7 @@ $LOOP_END = { 1 }
 #license CC BY 4.0 (music, artwork and MML source; https://creativecommons.org/licenses/by/4.0/)
 
 // 使用音色：
-// 本編メロディは標準エコー @s6。イントロと終止は @s0。
+// 本編メロディは標準エコー @s{6,8}。イントロと終止は @s0。
 //   @{ptJazzLead}   おしゃれアレンジのメロディ用矩形波。ノーマルより音量を15%抑える。
 //   @{ptJazzBass}   おしゃれアレンジのベース用三角波。音量を25%増やす。
 //   @{ptJazzChord}   おしゃれアレンジの和音用三角波。短い減衰で鳴らす。
@@ -42,7 +42,7 @@ b16&b64&b640&b3200 r16 r80 r800 o5 d16&d40&d400 r16 r32 r320 r1600 o5 e16&e160&e
 // 本編
 #label 本編
 [ t120 o5 l4 v11 q8 @{ptJazzLeadHeld} @d0 @m0 @s0 @o0 @p{0,0,0}
-@s6 q6 o5 f16 o5 a16 q3 o6 c8 q6 o5 a16 o6 c16 o6 f8 o6 e16 o6 d16 o6 c8 o5 a8 o5 g8 o5 g16 o5 b16 q3 o6 d8 q6
+@s{6,8} q6 o5 f16 o5 a16 q3 o6 c8 q6 o5 a16 o6 c16 o6 f8 o6 e16 o6 d16 o6 c8 o5 a8 o5 g8 o5 g16 o5 b16 q3 o6 d8 q6
 o5 b16 o6 d16 o6 g8 o6 f16 o6 e16 o6 d8 q3 o5 b4 q6 o5 f16 o5 g16 q3 o6 c8 q6 o5 g16 o6 c16 o6 f8 o6 d16 o6
 c16 o5 g8 o5 f8 o5 g8 o5 e16 o5 g16 q3 o6 c8 q6 o5 g16 o5 e16 o5 d8 q3 o5 c2 q6 o5 f16 o5 a16 q3 o6 c8 q6 o5
 a16 o6 c16 o6 f8 o6 e16 o6 d16 o6 c8 q3 o5 a4 q6 o5 d16 o5 f16 q3 o5 a8 q6 o5 f16 o5 a16 o6 d8 o6 c16 o5 a16

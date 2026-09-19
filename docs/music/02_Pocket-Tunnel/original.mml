@@ -8,7 +8,7 @@ $LOOP_END = { 1 }
 #license CC BY 4.0 (music, artwork and MML source; https://creativecommons.org/licenses/by/4.0/)
 
 // 使用音色：
-//   @{ptLead}   メロディ用の矩形波。標準デチューン @d0 とエコー @s3 をMMLで指定。
+//   @{ptLead}   メロディ用の矩形波。標準デチューン @d0 とエコー @s{3,8} をMMLで指定。
 //   @{ptArp}   アルペジオ用ののこぎり波。
 //   @{ptBass}   ノーマルのベース用矩形波。
 //   @{ptChord}   ノーマルの和音用矩形波。持続と短い合いの手を切り替える。
@@ -33,11 +33,11 @@ $LOOP_END = { 1 }
 // パート 1 — メロディ。
 // イントロ
 #label イントロ
-t120 q8 @{ptLeadVoice} v11 @d0 @s3 q5 o3 c16 o3 d16 o3 e16 o3 f16 o3 g16 o3 a16 o3 b16 o4 c16 o4 d16 o4
+t120 q8 @{ptLeadVoice} v11 @d0 @s{3,8} q5 o3 c16 o3 d16 o3 e16 o3 f16 o3 g16 o3 a16 o3 b16 o4 c16 o4 d16 o4
 e16 o4 f16 o4 g16 o4 a16 o4 b16 o5 c16 r16
 // 本編
 #label 本編
-[ t120 o5 l4 v11 q5 @{ptLeadVoice} @d0 @m0 @s3 @o0 @p{0,0,0}
+[ t120 o5 l4 v11 q5 @{ptLeadVoice} @d0 @m0 @s{3,8} @o0 @p{0,0,0}
 q6 o5 f16 o5 a16 q3 o6 c8 q6 o5 a16 o6 c16 o6 f8 o6 e16 o6 d16 o6 c8 o5 a8 o5 g8 o5 g16 o5 b16 q3 o6 d8 q6 o5
 b16 o6 d16 o6 g8 o6 f16 o6 e16 o6 d8 q3 o5 b4 q6 o5 f16 o5 g16 q3 o6 c8 q6 o5 g16 o6 c16 o6 f8 o6 d16 o6 c16
 o5 g8 o5 f8 o5 g8 o5 e16 o5 g16 q3 o6 c8 q6 o5 g16 o5 e16 o5 d8 q3 o5 c2 q6 o5 f16 o5 a16 q3 o6 c8 q6 o5 a16

@@ -4,7 +4,7 @@
 #copyright 2026 harayoki
 #license CC BY 4.0 (music and MML source; https://creativecommons.org/licenses/by/4.0/)
 
-#bundle tapeLead  = @{beep:clean} @e{piano} @o+1 @s5
+#bundle tapeLead  = @{beep:clean} @e{piano} @o+1 @s{5,8}
 #bundle tapeSub   = @{beep:clean} @e{soft}
 #bundle tapeArp   = @{pulse:25} @e{flat}
 #bundle tapeBass  = @{triangle} @e{flat}
