@@ -93,7 +93,7 @@ function prepare(folderInput, imageInput, options = {}) {
   const canonical = 'https://harayoki.github.io/MMSXX_samples/music/' + pagePath + '/';
   const imageURL = 'https://media.githubusercontent.com/media/harayoki/'
     + 'MMSXX_samples/refs/heads/main/' + output.split('/').map(encodeURIComponent).join('/');
-  const socialTitle = 'MML楽曲「' + title + '」 ライブ再生';
+  const socialTitle = '「' + title + '」 MMLライブ再生';
   const description = aboutMatch[1].trim();
   const meta = [
     '  <!-- social-card:start -->',
