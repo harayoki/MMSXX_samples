@@ -261,7 +261,8 @@ body {
 .cm-mml-shell .cm-activeLine { background: rgba(255,255,255,.08); }
 .cm-mml-shell .cm-selectionBackground,
 .cm-mml-shell .cm-content ::selection {
-  background: color-mix(in srgb, var(--blue) 35%, #111) !important;
+  background: #252238 !important;
+  background: hsl(from var(--blue) calc(h + 55) 45% 20%) !important;
 }
 .cm-mml-shell .cm-focused { outline: 2px solid var(--blue); outline-offset: -2px; }
 .mix-tabs + .cm-mml-shell { border-radius: 0 0 8px 8px; }
