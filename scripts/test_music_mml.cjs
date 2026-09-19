@@ -60,7 +60,7 @@ const songs = [
     '戦闘 B（後半）', '戦闘 C（後半）', '敗北',
   ]],
   ['04_Grassland-Trinity/grassland-trinity.mml', 4],
-  ['05_Windward-Battle-Interactive/windward-battle-interactive.mml', 3],
+  ['05_Windward-Battle-Interactive/windward-battle-interactive.mml', 4],
   ['06_BEAT/beat.mml', 4, ['開始']],
 ];
 
@@ -154,6 +154,9 @@ for (const { file, channels, marks, source } of sources) {
       ['ブラス1', 'ブラス2', 'ブラス3'], file + ': chord lanes');
   }
   if (file.startsWith('05_Windward-Battle-Interactive/')) {
+    assert.equal(info.meta.version, '1.7', file + ': song version');
+    assert.deepEqual(info.tracks.map(track => track.name),
+      ['主旋律', 'ベース', '副旋律', 'ドラム'], file + ': channel names');
     assert.deepEqual(info.marks.map(mark => mark.name), ['エンカウント', 'LOOP', 'OUTRO'],
       file + ': encounter / loop / outro labels');
     assert.deepEqual(info.takes.map(take => ({
@@ -174,6 +177,12 @@ for (const { file, channels, marks, source } of sources) {
     assert.equal((source.match(/\/\/\s*#switch 0\s*\n\/\/\s*#takes 結末/g) || []).length,
       channels, file + ': #switch 0 immediately before every outcome takes block');
     assert.equal(info.switches.grid.length, 0, file + ': #switch 0 disables the grid');
+    const compiled = audio.bgmDefs.get('test');
+    const counter = compiled[2].events;
+    const drums = compiled[3].events;
+    assert(!counter.some(a => drums.some(b =>
+      a.t < b.t + b.gate - 1e-9 && b.t < a.t + a.gate - 1e-9)),
+    file + ': counter melody and drums must not overlap');
     const switchSeconds = 2 * 240 / 152;
     const battleCuts = info.switches.bars.filter(point => point <= info.outro + 1e-6);
     assert(battleCuts.slice(1).every((point, index) =>
