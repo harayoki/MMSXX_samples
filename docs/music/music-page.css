@@ -258,6 +258,30 @@ body {
 .cm-mml-shell .cm-activeLine { background: rgba(255,255,255,.08); }
 .cm-mml-shell .cm-selectionBackground,
 .cm-mml-shell .cm-content ::selection { background: rgba(38,141,245,.5) !important; }
+.cm-mml-shell .cm-panels {
+  color: #111;
+  background: rgba(248,248,248,.97);
+  font-size: .9375rem;
+  line-height: 1.5;
+  text-shadow: none;
+}
+.cm-mml-shell .cm-panel.cm-search { padding: 8px 40px 8px 10px; }
+.cm-mml-shell .cm-panel.cm-search input[name="search"],
+.cm-mml-shell .cm-panel.cm-search input[name="replace"] {
+  width: min(28rem, 45vw);
+  min-height: 2rem;
+  padding: 3px 7px;
+  font: inherit;
+  text-shadow: none;
+}
+.cm-mml-shell .cm-panel.cm-search button {
+  min-height: 2rem;
+  padding: 3px 9px;
+  font: inherit;
+  text-shadow: none;
+}
+.cm-mml-shell .cm-panel.cm-search label,
+.cm-mml-shell .cm-panel.cm-search input[type="checkbox"] { text-shadow: none; }
 .cm-mml-shell .cm-focused { outline: 2px solid var(--blue); outline-offset: -2px; }
 .mix-tabs + .cm-mml-shell { border-radius: 0 0 8px 8px; }
 
