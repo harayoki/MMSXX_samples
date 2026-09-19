@@ -113,6 +113,15 @@ jobs:
             echo "title=$title"
           } >> "$GITHUB_OUTPUT"
 
+      - name: Install ImageMagick when unavailable
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v magick >/dev/null 2>&1 && ! command -v convert >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install --no-install-recommends -y imagemagick
+          fi
+
       - name: Render 1200 x 630 card
         shell: bash
         env:
