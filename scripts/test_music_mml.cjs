@@ -59,9 +59,9 @@ const songs = [
     '勝利', 'フィールド（後半）', 'エンカウント（後半）',
     '戦闘 B（後半）', '戦闘 C（後半）', '敗北',
   ]],
+  ['03_Windward-Crossing/ch1-field/ch1-field.mml', 1, ['フィールド']],
   ['04_Grassland-Trinity/grassland-trinity.mml', 4],
   ['05_Windward-Battle-Interactive/windward-battle-interactive.mml', 4],
-  ['06_BEAT2/beat2.mml', 4, ['開始']],
 ];
 
 function splitMML(text) {
@@ -159,14 +159,42 @@ for (const { file, channels, marks, source } of sources) {
     assert(counter.some(event => event.echo !== null),
       file + ': channel 3 counter melody self echo');
   }
-  if (file === '06_BEAT2/beat2.mml') {
-    assert.deepEqual(info.tracks.map(track => track.name),
-      ['ベース1', 'ベース2', 'ドラム', 'ブラス'], file + ': channel names');
-    assert.deepEqual(info.tracks[2].lanes.map(lane => lane.label),
-      ['バスドラ', 'ハイハットC', 'ハイハットO', 'スネア', 'タム', 'タムLow'],
-      file + ': drum lanes');
-    assert.deepEqual(info.tracks[3].lanes.map(lane => lane.label),
-      ['ブラス1', 'ブラス2', 'ブラス3'], file + ': chord lanes');
+  if (file === '03_Windward-Crossing/ch1-field/ch1-field.mml') {
+    assert.deepEqual(info.tracks.map(track => track.name), ['主旋律'],
+      file + ': only channel 1');
+    assert.equal(info.tracks[0].voices, 1,
+      file + ': field lead self echo must stay within one voice');
+    const compiled = audio.bgmDefs.get('test');
+    assert(compiled[0].events.some(event => event.echo !== null),
+      file + ': field lead self echo');
+    const suiteSource = sources.find(song =>
+      song.file === '03_Windward-Crossing/windward-crossing.mml').source;
+    const suiteAudio = new E.ChipTuneSound();
+    assert(suiteAudio.defineBGM('suite', splitMML(suiteSource)).ok,
+      file + ': source suite compiles for comparison');
+    const suiteInfo = suiteAudio.bgmInfo('suite');
+    const fieldStart = suiteInfo.marks.find(mark => mark.name === 'フィールド').t;
+    const fieldDuration = 8 * 4 * 60 / 112;
+    const suiteField = suiteAudio.bgmDefs.get('suite')[0].events.filter(event =>
+      event.t >= fieldStart - 1e-9 && event.t < fieldStart + fieldDuration - 1e-9);
+    const comparable = (event, offset) => ({
+      t: +(event.t - offset).toFixed(9),
+      dur: +event.dur.toFixed(9),
+      gate: +event.gate.toFixed(9),
+      freq: +event.freq.toFixed(9),
+      vol: event.vol,
+      wave: event.wave,
+      env: event.env,
+      vibrato: event.vibrato,
+      echo: event.echo && {
+        delay: +event.echo.delay.toFixed(9), depth: event.echo.depth,
+      },
+      vib: event.vib,
+      open: event.open,
+    });
+    assert.deepEqual(compiled[0].events.map(event => comparable(event, 0)),
+      suiteField.map(event => comparable(event, fieldStart)),
+      file + ': notes and sound settings match the suite CH1 field');
   }
   if (file.startsWith('05_Windward-Battle-Interactive/')) {
     assert.equal(info.meta.version, '1.7', file + ': song version');
