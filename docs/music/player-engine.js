@@ -1,4 +1,4 @@
-// MMS/XX player and audio engine, source commit 4c4bd8cd97274d8642e9744bb7153340b22a2c74
+// MMS/XX player and audio engine, source commit d66bd8d26d928d927230707eb27f020063c63d2c
 (() => {
   var __defProp = Object.defineProperty;
   var __export = (target, all) => {
@@ -6,7 +6,7 @@
       __defProp(target, name, { get: all[name], enumerable: true });
   };
 
-  // engine-latest/sound/audio.js
+  // sound/audio.js
   var audio_exports = {};
   __export(audio_exports, {
     ChipTuneSound: () => ChipTuneSound,
@@ -16,7 +16,7 @@
     psgDiv: () => psgDiv
   });
 
-  // engine-latest/sound/mml.js
+  // sound/mml.js
   var mml_exports = {};
   __export(mml_exports, {
     DEFAULT_ENV: () => DEFAULT_ENV,
@@ -57,7 +57,7 @@
     waveRole: () => waveRole
   });
 
-  // engine-latest/sound/gm.js
+  // sound/gm.js
   var GM_NAMES = [
     "Acoustic Grand Piano",
     "Bright Acoustic Piano",
@@ -203,7 +203,7 @@
     return GM_NAMES.filter((n) => key(n).startsWith(head)).slice(0, limit);
   }
 
-  // engine-latest/sound/mml.js
+  // sound/mml.js
   var SEMI = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 };
   function beepFreq(n, us) {
     return 1e6 / (2 * Math.max(1, n) * Math.max(1, us));
@@ -1151,7 +1151,7 @@
         const bar = Number(sp < 0 ? val : val.slice(0, sp));
         if (Number.isFinite(bar)) sections.push({ bar, name: sp < 0 ? "" : val.slice(sp).trim() });
       } else if (key2 === "takes" || key2 === "take") {
-      } else if (key2 === "bundle" || key2 === "chord") {
+      } else if (key2 === "bundle" || key2 === "chord" || key2 === "drum") {
       } else if (key2 === "tempo") {
         const n = Number(val);
         if (Number.isFinite(n) && n > 0) meta.tempo = n;
@@ -1282,14 +1282,15 @@ ${val}`;
   }
   function readDrumPart(name, text, bundles) {
     const t = String(text).trim();
-    const m = /^@\{([^}]*)\}[ \t]*(?:v[ \t]*(\d+)\b)?[ \t]*(.*)$/.exec(t);
+    const m = /^@\{([^}]*)\}[ \t]*(?:v[ \t]*(\d+)\b)?[ \t]*(?:!([A-Za-z_]\w*)(?:[ \t]+(-?\d+))?)?[ \t]*(.*)$/.exec(t);
     if (!m) {
-      bad(`[MMSXX] MML: \u30C9\u30E9\u30E0 "${name}" \u306E "${t}" \u306F\u8AAD\u3081\u307E\u305B\u3093(\u66F8\u3051\u308B\u306E\u306F @{\u540D\u524D} \u3068 v \u3068\u547C\u3073\u540D\u3060\u3051\u3067\u3059\u3002\u9577\u3055\u3068\u9AD8\u3055\u306F\u66F8\u304D\u307E\u305B\u3093)`);
+      bad(`[MMSXX] MML: \u30C9\u30E9\u30E0 "${name}" \u306E "${t}" \u306F\u8AAD\u3081\u307E\u305B\u3093(\u66F8\u3051\u308B\u306E\u306F @{\u540D\u524D} \u3068 v \u3068\u5408\u56F3\u3068\u547C\u3073\u540D\u3060\u3051\u3067\u3059\u3002\u9577\u3055\u3068\u9AD8\u3055\u306F\u66F8\u304D\u307E\u305B\u3093)`);
     }
     const key2 = m[1].trim().toLowerCase();
     const vol = m[2] === void 0 ? null : clamp(parseInt(m[2], 10), 0, 15);
-    const label = looksLikeSetting(m[3].trim()) ? bad(`[MMSXX] MML: \u30C9\u30E9\u30E0 "${name}" \u306E "${m[3].trim()}" \u306F\u8AAD\u3081\u307E\u305B\u3093(\u9577\u3055\u3068\u9AD8\u3055\u306F\u66F8\u304D\u307E\u305B\u3093\u3002\u3046\u3057\u308D\u306B\u66F8\u3051\u308B\u306E\u306F\u547C\u3073\u540D\u3060\u3051\u3067\u3059)`) : m[3].trim() || m[1].trim();
-    if (bundles.has(key2)) return { parts: bundles.get(key2), vol, label };
+    const cue = m[3] ? { name: m[3], arg: m[4] === void 0 ? 0 : parseInt(m[4], 10) } : null;
+    const label = looksLikeSetting(m[5].trim()) ? bad(`[MMSXX] MML: \u30C9\u30E9\u30E0 "${name}" \u306E "${m[5].trim()}" \u306F\u8AAD\u3081\u307E\u305B\u3093(\u9577\u3055\u3068\u9AD8\u3055\u306F\u66F8\u304D\u307E\u305B\u3093\u3002\u3046\u3057\u308D\u306B\u66F8\u3051\u308B\u306E\u306F\u547C\u3073\u540D\u3060\u3051\u3067\u3059)`) : m[5].trim() || m[1].trim();
+    if (bundles.has(key2)) return { parts: bundles.get(key2), vol, label, cue };
     const w = findWave(key2);
     if (w < 0) {
       bad(`[MMSXX] MML: \u30C9\u30E9\u30E0 "${name}" \u306E "${m[1].trim()}" \u306F\u77E5\u3089\u306A\u3044\u540D\u524D\u3067\u3059`);
@@ -1302,7 +1303,7 @@ ${val}`;
       octave: 0,
       detune: 0,
       echo: void 0
-    }], vol, label };
+    }], vol, label, cue };
   }
   function lowerOutsideDrums(src) {
     const text = String(src);
@@ -1613,6 +1614,7 @@ ${val}`;
     let pos = 0;
     let octave = 4, defLen = 4, tempo = 120, vol = 10, gate = 7;
     let wave = findWave(DEFAULT_WAVE), env = 0, vibrato = 0;
+    let vibSpeed = null, vibDelay = null, vibSaid = false;
     let detune = 0, octShift = 0;
     let echo = null;
     let px = 0, py = 0, pz = 0, muted = 0;
@@ -1661,6 +1663,8 @@ ${val}`;
         pos: [px, py, pz],
         // 層の名前。付いていないものは付けない(基準の指紋を動かさないため)
         ...lane ? { lane } : {},
+        // `@m` を書いたときだけ載せる。鳴らす側はこれを音色の揺れより先に見る
+        ...vibSaid ? { vib: { depth: vibrato, speed: vibSpeed, delay: vibDelay } } : {},
         ...extra
       };
     };
@@ -1714,7 +1718,7 @@ ${val}`;
       const hit = () => {
         if (!names.length) return;
         const id = names.length > 1 ? chordSeq++ : null;
-        for (const nm of names) {
+        for (const { nm, bang } of names) {
           const d = table.get(nm);
           if (!d) {
             warn(`[MMSXX] MML: \u30C9\u30E9\u30E0 "${nm}" \u306F\u5272\u308A\u5F53\u3066\u304C\u3042\u308A\u307E\u305B\u3093(// #drum ` + nm + " = @{\u97F3\u8272} \u3068\u66F8\u304D\u307E\u3059)");
@@ -1723,12 +1727,20 @@ ${val}`;
           bundle = d.parts;
           lane = nm;
           if (d.label) laneLabels.set(nm, d.label);
+          if (bang) {
+            if (!d.cue) {
+              warn(`[MMSXX] MML: \u30C9\u30E9\u30E0 "${nm}" \u306B\u5408\u56F3\u306E\u540D\u524D\u304C\u3042\u308A\u307E\u305B\u3093(// #drum ${nm} = @{\u97F3\u8272} !\u540D\u524D \u3068\u66F8\u304D\u307E\u3059)`);
+            } else {
+              cues.push({ name: d.cue.name, arg: d.cue.arg, t: time });
+            }
+          }
           vol = d.vol === null ? base : Math.round(base * d.vol / 15);
           pushNote(step, freqOf(DRUM_MIDI), id === null ? void 0 : { chord: id });
         }
         time += step;
         names = [];
       };
+      const eatBang = () => src[pos] === "!" ? (pos++, true) : false;
       let depth = 1;
       while (pos < src.length) {
         const c = src[pos];
@@ -1768,18 +1780,18 @@ ${val}`;
           while (pos < src.length && src[pos] !== "}") s += src[pos++];
           pos++;
           depth--;
-          names.push(s.trim());
+          names.push({ nm: s.trim(), bang: eatBang() });
           continue;
         }
         if (/[A-Za-z]/.test(c)) {
-          names.push(c);
           pos++;
+          names.push({ nm: c, bang: eatBang() });
           continue;
         }
         if (c >= "0" && c <= "9") {
           bad(`[MMSXX] MML: \u30C9\u30E9\u30E0\u306E\u56F2\u307F\u306E\u4E2D\u306B\u6570\u5B57 "${c}" \u306F\u66F8\u3051\u307E\u305B\u3093(\u9577\u3055\u306F\u56F2\u307F\u304C\u6301\u3061\u307E\u3059\u3002\u97F3\u91CF\u306F v \u306E\u3046\u3057\u308D\u3060\u3051\u3067\u3059)`);
         }
-        warn(`[MMSXX] MML: \u30C9\u30E9\u30E0\u306E\u56F2\u307F\u306E\u4E2D\u306B "${c}" \u306F\u66F8\u3051\u307E\u305B\u3093(\u697D\u5668\u306E\u5B57\u3068 . \u3068 v \u3068 [ ] | \u3060\u3051\u3067\u3059)`);
+        warn(`[MMSXX] MML: \u30C9\u30E9\u30E0\u306E\u56F2\u307F\u306E\u4E2D\u306B "${c}" \u306F\u66F8\u3051\u307E\u305B\u3093(\u697D\u5668\u306E\u5B57\u3068 . \u3068 v \u3068 ! \u3068 [ ] | \u3060\u3051\u3067\u3059)`);
         pos++;
       }
       hit();
@@ -1859,6 +1871,24 @@ ${val}`;
       if (len === null) return now;
       if (len <= 0) return null;
       return { delay: 240 / tempo / len, depth };
+    };
+    const readVib = () => {
+      if (src[pos] !== "{") {
+        vibrato = clamp(readNumber() ?? vibrato, 0, 9);
+        vibSpeed = null;
+        vibDelay = null;
+        vibSaid = true;
+        return;
+      }
+      pos++;
+      let body = "";
+      while (pos < src.length && src[pos] !== "}") body += src[pos++];
+      pos++;
+      const n = body.split(",").map((v) => parseFloat(v));
+      vibrato = clamp(Number.isFinite(n[0]) ? n[0] : vibrato, 0, 9);
+      vibSpeed = Number.isFinite(n[1]) ? clamp(n[1], 0.1, 30) : null;
+      vibDelay = Number.isFinite(n[2]) ? clamp(n[2], 0, 600) : null;
+      vibSaid = true;
     };
     let durWritten = false;
     const readDuration = () => {
@@ -2284,7 +2314,7 @@ ${val}`;
             octShift = clamp(readSigned() ?? octShift, -4, 4);
           } else if (kind === "m") {
             pos++;
-            vibrato = clamp(readNumber() ?? vibrato, 0, 9);
+            readVib();
           } else if (kind === "s") {
             pos++;
             echo = readEcho(echo);
@@ -2620,7 +2650,7 @@ ${val}`;
     return { ok: errors.length === 0, errors, warnings, channels, total };
   }
 
-  // engine-latest/sound/wavetables.js
+  // sound/wavetables.js
   var N = 32;
   var build = (f) => Array.from({ length: N }, (_, i) => f(i / N, i));
   var norm = (w) => {
@@ -2766,7 +2796,7 @@ ${val}`;
     );
   }
 
-  // engine-latest/sound/fmpresets.js
+  // sound/fmpresets.js
   var FM_PRESETS = {
     // 1 バイオリン。弓のこすれを出すため、比を少しずらして倍音を残す
     fm2Violin: {
@@ -3109,7 +3139,7 @@ ${val}`;
     }
   }
 
-  // engine-latest/sound/beeppresets.js
+  // sound/beeppresets.js
   var BEEP_PRESETS = {
     // ---- 搬送波を刻む型。**音程を変える回路が無い機械** ----
     // 2.4kHz が鳴りっぱなしで、ソフトはそれを On/Off するだけ。
@@ -3290,7 +3320,7 @@ ${val}`;
     }
   }
 
-  // engine-latest/sound/fdspresets.js
+  // sound/fdspresets.js
   var FDS_LEN = 64;
   var FDS_BITS = 6;
   var build2 = (fn) => Array.from({ length: FDS_LEN }, (_, i) => fn(i / FDS_LEN));
@@ -3407,7 +3437,7 @@ ${val}`;
     }
   }
 
-  // engine-latest/sound/fm4.js
+  // sound/fm4.js
   var ALGORITHMS = [
     {
       mod: [[], [0], [1], [2]],
@@ -3643,7 +3673,7 @@ registerProcessor('mmsxx-fm4', Fm4Bank);
     };
   }
 
-  // engine-latest/sound/fm4presets.js
+  // sound/fm4presets.js
   var FM4_PRESETS = {
     "fm4Brass": {
       noteJa: "4 \u30AA\u30DA\u306E\u91D1\u7BA1\u3002\u30AA\u30DA\u30EC\u30FC\u30BF\u304C\u5897\u3048\u305F\u3076\u3093\u3001\u4F38\u3070\u3057\u3066\u3044\u308B\u3042\u3044\u3060\u306B\u500D\u97F3\u304C\u80B2\u3064\u3002\u672C\u7269\u306E\u91D1\u7BA1\u3068\u540C\u3058\u52D5\u304D\u3067\u30012 \u30AA\u30DA\u306B\u306F\u3067\u304D\u306A\u3044",
@@ -3774,7 +3804,7 @@ registerProcessor('mmsxx-fm4', Fm4Bank);
     });
   }
 
-  // engine-latest/sound/extrawaves.js
+  // sound/extrawaves.js
   var EXTRA_LEN = 32;
   var build3 = (fn) => Array.from({ length: EXTRA_LEN }, (_, i) => fn(i / EXTRA_LEN));
   var pulse = (n) => build3((p) => p < n / 16 ? 1 : -1);
@@ -3864,7 +3894,7 @@ registerProcessor('mmsxx-fm4', Fm4Bank);
     }
   }
 
-  // engine-latest/sound/tones.js
+  // sound/tones.js
   var tones_exports = {};
   __export(tones_exports, {
     TONE_FRAME: () => TONE_FRAME,
@@ -4420,7 +4450,7 @@ registerProcessor('mmsxx-fm4', Fm4Bank);
     }
   }
 
-  // engine-latest/sound/pcmbake.js
+  // sound/pcmbake.js
   var MIN_LOOP = 1024;
   function periodMultiple(ratios, maxM = 8) {
     for (let m = 1; m <= maxM; m++) {
@@ -4502,7 +4532,7 @@ registerProcessor('mmsxx-fm4', Fm4Bank);
     };
   }
 
-  // engine-latest/sound/duty.js
+  // sound/duty.js
   var DUTY_CODE = `
 const FRAME = ${TONE_FRAME};
 
@@ -4634,7 +4664,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     return Math.min(0.98, Math.max(0.02, x));
   };
 
-  // engine-latest/sound/demotunes.js
+  // sound/demotunes.js
   var SE_SYS_PAUSE = "sys.pause";
   var SYSTEM_SE = {
     [SE_SYS_PAUSE]: [
@@ -4722,7 +4752,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     BEAT_TOM_FILL
   ]);
 
-  // engine-latest/sound/se.js
+  // sound/se.js
   var SE_FRAME = 1 / 60;
   var SE_WHOLE = 64;
   var SE_TEMPO = Math.round(240 / (SE_WHOLE * SE_FRAME));
@@ -4871,7 +4901,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     }
   };
 
-  // engine-latest/sound/layerpresets.js
+  // sound/layerpresets.js
   var DETUNE_STEPS = [
     { key: "", c: 0 },
     {
@@ -5002,10 +5032,10 @@ registerProcessor('mmsxx-duty', DutyBank);
     }
   }
 
-  // engine-latest/sound/version.js
+  // sound/version.js
   var SOUND_VERSION = "0.21.0";
 
-  // engine-latest/sound/audio.js
+  // sound/audio.js
   registerDefaultWaves();
   registerDefaultFM();
   registerDefaultBeeps();
@@ -6007,7 +6037,8 @@ registerProcessor('mmsxx-tap', MmsxxTap);
      * @param {{hideSystem?:boolean}} [opts] hideSystem = 予約語を落とすか(既定 false)
      * @returns {{ok:boolean, active:boolean, errors:object[], warnings:object[],
      *            tracks:{ch:number,name:string|null,role:string|null,
-     *                    total:number,muted:boolean}[],
+     *                    total:number,muted:boolean,
+     *                    lanes:{name:string,label:string,muted:boolean}[]}[],
      *            marks:{name:string,t:number}[], meta:object,
      *            takes:{group:string,now:string,options:string[],
      *                   boxes:{ch:number,at:number,dur:number}[]}[],
@@ -7962,10 +7993,10 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       const fr = new Float32Array(n);
       const du = new Float32Array(n);
       const gv = tone.vol ? new Float32Array(n) : null;
-      const vib = tone.vib;
+      const vib = ev.vib || tone.vib;
       const depth = vib ? vib.depth : ev.vibrato;
-      const speed = vib ? vib.speed : 5 + ev.vibrato * 0.6;
-      const wait = vib ? vib.delay : 0;
+      const speed = vib && vib.speed != null ? vib.speed : 5 + depth * 0.6;
+      const wait = vib && vib.delay != null ? vib.delay : 0;
       for (let i = 0; i < n; i++) {
         const semi = readTable(tone.arp, i, tone.loop.arp);
         const cent = readTable(tone.pitch, i, tone.loop.pitch);
@@ -8122,12 +8153,12 @@ registerProcessor('mmsxx-tap', MmsxxTap);
           fm.mod.frequency.exponentialRampToValueAtTime(Math.max(1, to * fm.wf.ratio), t1);
         }
       }
-      const tvib = (WAVEFORMS[ev.wave] || {}).tone?.vib;
+      const tvib = ev.vib || (WAVEFORMS[ev.wave] || {}).tone?.vib;
       const vibDepth = tvib ? tvib.depth : ev.vibrato;
       if (vibDepth > 0 && src.frequency) {
         const lfo = ctx.createOscillator();
         const depth = ctx.createGain();
-        lfo.frequency.value = tvib ? tvib.speed : 5 + ev.vibrato * 0.6;
+        lfo.frequency.value = tvib && tvib.speed != null ? tvib.speed : 5 + vibDepth * 0.6;
         const peak = freq * 4e-3 * vibDepth;
         if (tvib && tvib.delay > 0) {
           const at = t0 + tvib.delay * TONE_FRAME;
@@ -8388,10 +8419,10 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out;
   }
 
-  // engine-latest/tool/ui/version.js
+  // tool/ui/version.js
   var PLAYER_VERSION = "1.0.0";
 
-  // engine-latest/tool/core/tomml.js
+  // tool/core/tomml.js
   var NAMES = ["c", "c+", "d", "d+", "e", "f", "f+", "g", "g+", "a", "a+", "b"];
   var LENS = [
     [16, "1"],
@@ -8471,7 +8502,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out.join("\n\n");
   }
 
-  // engine-latest/tool/core/wav.js
+  // tool/core/wav.js
   function writeWAV(samples, rate = 44100) {
     const n = samples.length;
     const out = new Uint8Array(44 + n * 2);
@@ -8499,7 +8530,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out;
   }
 
-  // engine-latest/tool/ui/player.js
+  // tool/ui/player.js
   var COPYRIGHT = "2026 harayoki";
   var PLAYER_CSS = `
 .mmsxx-player{ font-family:var(--mono); font-size:13px; line-height:1.55; color:var(--ink); }
@@ -8706,6 +8737,11 @@ registerProcessor('mmsxx-tap', MmsxxTap);
 /* \u984C\u3068\u89E3\u8AAC\u3002\u66F2\u304C\u540D\u4E57\u308B\u3082\u306E\u306A\u306E\u3067\u3001\u62BC\u3059\u3068\u3053\u308D\u306E\u5916\u306B\u7F6E\u304F */
 .mmsxx-player .about{ margin:0 0 9px; }
 .mmsxx-player .about b{ font-size:12px; font-weight:600; color:var(--ink); }
+/* \u66F2\u306E\u30D0\u30FC\u30B8\u30E7\u30F3(// #version)\u3002\u984C\u306E\u96A3\u306B\u5C0F\u3055\u304F\u51FA\u3059\u3002
+   \u540C\u3058\u66F2\u3092\u4F55\u5EA6\u3082\u76F4\u3059\u306E\u3067\u3001\u3044\u307E\u9CF4\u3063\u3066\u3044\u308B\u306E\u304C\u3069\u308C\u306A\u306E\u304B\u304C\u5206\u304B\u308B\u3088\u3046\u306B\u3059\u308B */
+.mmsxx-player .about .ver{
+  margin-left:6px; font-size:10px; font-weight:400; color:var(--dim);
+}
 .mmsxx-player .about p{
   margin:4px 0 0; font-size:11px; line-height:1.7; color:var(--dim);
   white-space:pre-line;
@@ -8800,7 +8836,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       </div>
     </div>
     <div class="about" data-p="about" hidden>
-      <b data-p="title"></b>
+      <b data-p="title"></b><span class="ver" data-p="songver" hidden></span>
       <p data-p="abouttext"></p>
     </div>
     <div class="deck">
@@ -8968,7 +9004,8 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       vollbl: $("vollbl"),
       about: $("about"),
       title: $("title"),
-      abouttext: $("abouttext")
+      abouttext: $("abouttext"),
+      songver: $("songver")
     };
     const showChs = opts.channels !== false;
     const showRept = opts.repeat !== false;
@@ -9071,9 +9108,11 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       }
       const meta = got.meta || {};
       el.title.textContent = meta.title || "";
+      el.songver.textContent = meta.version ? `ver ${meta.version}` : "";
+      el.songver.hidden = !meta.version;
       el.abouttext.textContent = meta.about || "";
       el.abouttext.hidden = !meta.about;
-      el.about.hidden = !showAbout || !(meta.title || meta.about);
+      el.about.hidden = !showAbout || !(meta.title || meta.about || meta.version);
       chNote = `${chans.length} channels`;
       sayCount();
       drawLoose(got.problems || []);
@@ -9887,7 +9926,7 @@ ChipTuneSound ${SOUND_VERSION}
     };
   }
 
-  // engine-latest/browser-entry.js
+  // browser-entry.js
   var sound = {
     ...audio_exports,
     ...mml_exports,

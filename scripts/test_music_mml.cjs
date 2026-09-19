@@ -8,6 +8,9 @@ require('../docs/music/player-engine.js');
 
 const E = MMSXX.sound;
 assert.equal(E.SOUND_VERSION, '0.21.0', 'bundled sound engine version');
+const vibratoProbe = E.compileMML('t120 @m{5,7,18} o4 c4').events[0];
+assert.deepEqual(vibratoProbe.vib, { depth: 5, speed: 7, delay: 18 },
+  'extended @m must keep depth, speed and delay');
 const nesTriangle = E.WAVEFORMS[E.findWave('wtNesTriangle')];
 assert(nesTriangle?.special?.includes('fixedvolume'),
   'wtNesTriangle must ignore every nonzero MML volume');
@@ -118,9 +121,15 @@ for (const { file, channels, marks, source } of sources) {
   if (marks) assert(info.marks.every((mark, index) =>
     index === 0 || mark.t > info.marks[index - 1].t), file + ': jump label order');
   if (file === '03_Windward-Crossing/windward-crossing.mml') {
+    assert.equal(info.meta.version, '1.6', file + ': song version');
+    assert(info.meta.about.includes('CH3とCH4は発音が重ならないため統合可能。ファミコン準拠。'),
+      file + ': Famicom-compatible channel note');
     assert.deepEqual(info.tracks.map(track => track.name),
       ['主旋律', 'ベース', '副旋律', 'ドラム補佐'], file + ': channel names');
+    assert.equal(info.tracks[0].voices, 1, file + ': channel 1 must use one voice');
     const compiled = audio.bgmDefs.get('test');
+    assert(compiled[0].events.every(event => event.echo === null),
+      file + ': channel 1 self echo is temporarily disabled');
     const counter = compiled[2].events;
     const drums = compiled[3].events;
     assert(!counter.some(a => drums.some(b =>
