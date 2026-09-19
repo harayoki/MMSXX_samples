@@ -19,8 +19,8 @@ function render(inputPath, leftPath, rightPath) {
     .replace(/\s+/g, ' ').trim();
   assert(source, 'MML source is empty: ' + inputPath);
 
-  const width = 38;
-  const rows = 42;
+  const width = 12;
+  const rows = 14;
   const fragments = [];
   for (let at = 0; fragments.length < rows * 2; at += width) {
     if (at >= source.length) at = 0;
