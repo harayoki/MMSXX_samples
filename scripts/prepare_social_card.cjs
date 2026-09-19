@@ -40,6 +40,28 @@ function publicPath(folder) {
     .map(encodeURIComponent).join('/');
 }
 
+function resolveMML(folder) {
+  const absoluteFolder = path.join(root, folder);
+  const playerPath = path.join(absoluteFolder, 'player.js');
+  const candidates = [];
+  if (fs.existsSync(playerPath)) {
+    const player = fs.readFileSync(playerPath, 'utf8');
+    for (const pattern of [
+      /file:\s*['"]([^'"]+\.mml)['"]/g,
+      /MusicAssets\.song\(['"]([^'"]+\.mml)['"]\)/g,
+    ]) {
+      for (const match of player.matchAll(pattern)) candidates.push(match[1]);
+    }
+  }
+  for (const name of fs.readdirSync(absoluteFolder).sort()) {
+    if (name.endsWith('.mml')) candidates.push(name);
+  }
+  const name = candidates.find(candidate =>
+    fs.existsSync(path.join(absoluteFolder, candidate)));
+  assert(name, 'MML source not found: ' + folder);
+  return safeRepoPath(path.posix.join(folder, name));
+}
+
 function prepare(folderInput, imageInput, options = {}) {
   const folder = resolveFolder(folderInput);
   const htmlPath = folder + '/index.html';
@@ -61,19 +83,25 @@ function prepare(folderInput, imageInput, options = {}) {
   }
   assert(fs.existsSync(path.join(root, source)), 'source image not found: ' + source);
 
+  const mml = resolveMML(folder);
+  const mmlText = fs.readFileSync(path.join(root, mml), 'utf8');
+  const aboutMatch = mmlText.match(/^#about\s+(.+)$/m);
+  assert(aboutMatch, '#about not found: ' + mml);
+
   const output = folder + '/social-card.png';
   const pagePath = publicPath(folder);
   const canonical = 'https://harayoki.github.io/MMSXX_samples/music/' + pagePath + '/';
   const imageURL = 'https://media.githubusercontent.com/media/harayoki/'
     + 'MMSXX_samples/refs/heads/main/' + output.split('/').map(encodeURIComponent).join('/');
-  const description = 'MMSXXで制作したMML楽曲「' + title + '」の試聴・ソースページ。';
+  const socialTitle = 'MML楽曲「' + title + '」 ライブ再生';
+  const description = aboutMatch[1].trim();
   const meta = [
     '  <!-- social-card:start -->',
     '  <meta name="description" content="' + escapeHTML(description) + '">',
     '  <link rel="canonical" href="' + canonical + '">',
     '  <meta property="og:type" content="website">',
     '  <meta property="og:site_name" content="MMSXX Samples">',
-    '  <meta property="og:title" content="' + escapeHTML(title) + '">',
+    '  <meta property="og:title" content="' + escapeHTML(socialTitle) + '">',
     '  <meta property="og:description" content="' + escapeHTML(description) + '">',
     '  <meta property="og:url" content="' + canonical + '">',
     '  <meta property="og:image" content="' + imageURL + '">',
@@ -82,7 +110,7 @@ function prepare(folderInput, imageInput, options = {}) {
     '  <meta property="og:image:height" content="630">',
     '  <meta property="og:image:alt" content="' + escapeHTML(title + ' cover art') + '">',
     '  <meta name="twitter:card" content="summary_large_image">',
-    '  <meta name="twitter:title" content="' + escapeHTML(title) + '">',
+    '  <meta name="twitter:title" content="' + escapeHTML(socialTitle) + '">',
     '  <meta name="twitter:description" content="' + escapeHTML(description) + '">',
     '  <meta name="twitter:image" content="' + imageURL + '">',
     '  <!-- social-card:end -->',
@@ -94,7 +122,8 @@ function prepare(folderInput, imageInput, options = {}) {
   assert(html.includes(meta), 'failed to update social metadata');
   if (!options.check) fs.writeFileSync(absoluteHTML, html);
 
-  return { folder, html: htmlPath, source, output, title, canonical, image_url: imageURL };
+  return { folder, html: htmlPath, source, mml, output, title, social_title: socialTitle,
+    description, canonical, image_url: imageURL };
 }
 
 if (require.main === module) {

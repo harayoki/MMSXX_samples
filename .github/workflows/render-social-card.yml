@@ -99,6 +99,7 @@ jobs:
           set -euo pipefail
           node scripts/prepare_social_card.cjs "$FOLDER" "$IMAGE_PATH" > "$RUNNER_TEMP/card.json"
           source="$(jq -r '.source' "$RUNNER_TEMP/card.json")"
+          mml="$(jq -r '.mml' "$RUNNER_TEMP/card.json")"
           output="$(jq -r '.output' "$RUNNER_TEMP/card.json")"
           html="$(jq -r '.html' "$RUNNER_TEMP/card.json")"
           title="$(jq -r '.title' "$RUNNER_TEMP/card.json")"
@@ -108,15 +109,26 @@ jobs:
 
           {
             echo "source=$source"
+            echo "mml=$mml"
             echo "output=$output"
             echo "html=$html"
             echo "title=$title"
           } >> "$GITHUB_OUTPUT"
 
+      - name: Install ImageMagick when unavailable
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v magick >/dev/null 2>&1 && ! command -v convert >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install --no-install-recommends -y imagemagick
+          fi
+
       - name: Render 1200 x 630 card
         shell: bash
         env:
           SOURCE: ${{ steps.metadata.outputs.source }}
+          MML: ${{ steps.metadata.outputs.mml }}
           OUTPUT: ${{ steps.metadata.outputs.output }}
         run: |
           set -euo pipefail
@@ -131,7 +143,17 @@ jobs:
             "$RUNNER_TEMP/card-background.png"
           "${image_magick[@]}" "$SOURCE" -auto-orient -resize '1120x570>' \
             "$RUNNER_TEMP/card-foreground.png"
+          node scripts/render_mml_overlay.cjs "$MML" \
+            "$RUNNER_TEMP/mml-left.txt" "$RUNNER_TEMP/mml-right.txt"
+          "${image_magick[@]}" -background none -fill 'rgba(114,255,192,0.64)' \
+            -font DejaVu-Sans-Mono -pointsize 33 -size 315x630 -gravity northwest \
+            caption:"$(cat "$RUNNER_TEMP/mml-left.txt")" "$RUNNER_TEMP/mml-left.png"
+          "${image_magick[@]}" -background none -fill 'rgba(114,255,192,0.64)' \
+            -font DejaVu-Sans-Mono -pointsize 33 -size 315x630 -gravity northeast \
+            caption:"$(cat "$RUNNER_TEMP/mml-right.txt")" "$RUNNER_TEMP/mml-right.png"
           "${image_magick[@]}" "$RUNNER_TEMP/card-background.png" \
+            "$RUNNER_TEMP/mml-left.png" -geometry +0+0 -composite \
+            "$RUNNER_TEMP/mml-right.png" -geometry +885+0 -composite \
             \( "$RUNNER_TEMP/card-foreground.png" \
               -bordercolor 'rgba(255,255,255,0.25)' -border 2 \) \
             -gravity center -composite -strip "$OUTPUT"
