@@ -97,7 +97,9 @@ jobs:
           IMAGE_PATH: ${{ steps.request.outputs.image_path }}
         run: |
           set -euo pipefail
-          node scripts/prepare_social_card.cjs "$FOLDER" "$IMAGE_PATH" > "$RUNNER_TEMP/card.json"
+          card_version="$(git rev-parse --short=12 HEAD)"
+          SOCIAL_CARD_VERSION="$card_version" \
+            node scripts/prepare_social_card.cjs "$FOLDER" "$IMAGE_PATH" > "$RUNNER_TEMP/card.json"
           source="$(jq -r '.source' "$RUNNER_TEMP/card.json")"
           mml="$(jq -r '.mml' "$RUNNER_TEMP/card.json")"
           output="$(jq -r '.output' "$RUNNER_TEMP/card.json")"

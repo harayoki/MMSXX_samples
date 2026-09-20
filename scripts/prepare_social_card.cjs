@@ -91,8 +91,12 @@ function prepare(folderInput, imageInput, options = {}) {
   const output = folder + '/social-card.png';
   const pagePath = publicPath(folder);
   const canonical = 'https://harayoki.github.io/MMSXX_samples/music/' + pagePath + '/';
+  const cardVersion = String(process.env.SOCIAL_CARD_VERSION || '').trim();
+  assert(!cardVersion || /^[a-zA-Z0-9._-]+$/.test(cardVersion),
+    'unsafe SOCIAL_CARD_VERSION');
   const imageURL = 'https://media.githubusercontent.com/media/harayoki/'
-    + 'MMSXX_samples/refs/heads/main/' + output.split('/').map(encodeURIComponent).join('/');
+    + 'MMSXX_samples/refs/heads/main/' + output.split('/').map(encodeURIComponent).join('/')
+    + (cardVersion ? '?v=' + encodeURIComponent(cardVersion) : '');
   const socialTitle = '「' + title + '」 MMLライブ再生';
   const description = aboutMatch[1].trim();
   const meta = [
