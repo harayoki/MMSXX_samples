@@ -140,6 +140,11 @@ jobs:
             image_magick=(convert)
           fi
 
+          average_color="$("${image_magick[@]}" "$SOURCE" -auto-orient \
+            -resize '1x1!' -alpha off -format '%[hex:p{0,0}]' info:)"
+          overlay_color="$(node scripts/select_social_card_color.cjs "$average_color")"
+          echo "MML overlay color: $overlay_color (cover average: #$average_color)"
+
           "${image_magick[@]}" "$SOURCE" -auto-orient -resize '1200x630^' \
             -gravity center -extent 1200x630 -blur 0x24 -modulate 68,95,100 \
             "$RUNNER_TEMP/card-background.png"
@@ -147,10 +152,10 @@ jobs:
             "$RUNNER_TEMP/card-foreground.png"
           node scripts/render_mml_overlay.cjs "$MML" \
             "$RUNNER_TEMP/mml-left.txt" "$RUNNER_TEMP/mml-right.txt"
-          "${image_magick[@]}" -background none -fill 'rgba(114,255,192,0.64)' \
+          "${image_magick[@]}" -background none -fill "$overlay_color" \
             -font DejaVu-Sans-Mono -pointsize 33 -size 315x630 -gravity northwest \
             caption:"$(cat "$RUNNER_TEMP/mml-left.txt")" "$RUNNER_TEMP/mml-left.png"
-          "${image_magick[@]}" -background none -fill 'rgba(114,255,192,0.64)' \
+          "${image_magick[@]}" -background none -fill "$overlay_color" \
             -font DejaVu-Sans-Mono -pointsize 33 -size 315x630 -gravity northeast \
             caption:"$(cat "$RUNNER_TEMP/mml-right.txt")" "$RUNNER_TEMP/mml-right.png"
           "${image_magick[@]}" "$RUNNER_TEMP/card-background.png" \
