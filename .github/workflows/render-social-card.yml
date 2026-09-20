@@ -97,7 +97,9 @@ jobs:
           IMAGE_PATH: ${{ steps.request.outputs.image_path }}
         run: |
           set -euo pipefail
-          node scripts/prepare_social_card.cjs "$FOLDER" "$IMAGE_PATH" > "$RUNNER_TEMP/card.json"
+          card_version="$(git rev-parse --short=12 HEAD)"
+          SOCIAL_CARD_VERSION="$card_version" \
+            node scripts/prepare_social_card.cjs "$FOLDER" "$IMAGE_PATH" > "$RUNNER_TEMP/card.json"
           source="$(jq -r '.source' "$RUNNER_TEMP/card.json")"
           mml="$(jq -r '.mml' "$RUNNER_TEMP/card.json")"
           output="$(jq -r '.output' "$RUNNER_TEMP/card.json")"
@@ -177,12 +179,21 @@ jobs:
           git add -- "$HTML" "$OUTPUT"
           node scripts/check_lfs_pointers.cjs
 
+          push_result() {
+            if [[ -n "$EXPECTED_SHA" ]]; then
+              git push --force-with-lease="refs/heads/$BRANCH:$EXPECTED_SHA" origin "HEAD:$BRANCH"
+            else
+              git push -u origin "HEAD:$BRANCH"
+            fi
+          }
+
+          if git diff --cached --quiet; then
+            echo "SNS card is already up to date."
+            push_result
+            exit 0
+          fi
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "SNSカードを生成: $TITLE [card-rendered]"
-
-          if [[ -n "$EXPECTED_SHA" ]]; then
-            git push --force-with-lease="refs/heads/$BRANCH:$EXPECTED_SHA" origin "HEAD:$BRANCH"
-          else
-            git push -u origin "HEAD:$BRANCH"
-          fi
+          push_result
