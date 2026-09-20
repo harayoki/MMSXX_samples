@@ -267,9 +267,78 @@ body {
 .cm-mml-shell .cm-focused { outline: 2px solid var(--blue); outline-offset: -2px; }
 .mix-tabs + .cm-mml-shell { border-radius: 0 0 8px 8px; }
 
+/* CodeMirror search panel: keep editor decoration out of form controls. */
+.cm-mml-shell .cm-panel.cm-search {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 34px 8px 8px;
+  color: var(--foreground);
+  background: var(--background);
+  border-bottom: 1px solid var(--border);
+  font-family: system-ui, sans-serif;
+  font-size: .875rem;
+  line-height: 1.2;
+  text-shadow: none;
+}
+.cm-mml-shell .cm-panel.cm-search br {
+  flex-basis: 100%;
+  width: 0;
+  height: 0;
+}
+.cm-mml-shell .cm-panel.cm-search input,
+.cm-mml-shell .cm-panel.cm-search button,
+.cm-mml-shell .cm-panel.cm-search label {
+  font: inherit;
+  text-shadow: none;
+}
+.cm-mml-shell .cm-panel.cm-search input[type="text"] {
+  width: min(20rem, 45vw);
+  min-width: 12rem;
+  height: 2rem;
+  padding: 4px 8px;
+  color: var(--foreground);
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+}
+.cm-mml-shell .cm-panel.cm-search button {
+  min-height: 2rem;
+  padding: 4px 10px;
+  color: var(--foreground);
+  background: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+}
+.cm-mml-shell .cm-panel.cm-search label {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
+}
+.cm-mml-shell .cm-panel.cm-search input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  accent-color: var(--blue);
+}
+.cm-mml-shell .cm-panel.cm-search button[name="close"] {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  min-width: 1.75rem;
+  padding-inline: 5px;
+}
+
 @media (max-width: 640px) {
   body { padding: 12px; }
   .music-player .track { flex-basis: 100%; order: 10; }
   .music-player [data-p="vollbl"] { margin-left: 0; }
   .cm-mml-shell .cm-editor { font-size: .8125rem; }
+  .cm-mml-shell .cm-panel.cm-search input[type="text"] {
+    width: min(16rem, 65vw);
+    min-width: 9rem;
+  }
 }
