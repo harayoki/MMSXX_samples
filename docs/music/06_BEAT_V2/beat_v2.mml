@@ -1,5 +1,5 @@
 #title BEAT_V2
-#about 2オペのFM音源をかっこよく。コード専用MMLとドラム専用MMLも利用。
+#about 2オペのFM音源をかっこよくするテスト曲。80年代の雰囲気で。コード進行記述MMLとドラム専用MMLも活用してソースを短くしました。
 #label 開始
 
 #bundle beatBass1  = @{wtRamp} @e{piano} @s{8,2}
