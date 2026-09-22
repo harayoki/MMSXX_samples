@@ -84,6 +84,79 @@ http://127.0.0.1:8000/06_BEAT_V2/
 
 `file://` ではMMLの `fetch()` が失敗するため、必ずHTTPサーバーを使う。
 
+## 4.1 チャット内MMLPLAYER
+
+ユーザーが「ここにPLAYERを貼る」「ここで再生」「MMLPLAYERを使う」と指示した場合は、公開ページやWAVリンクを渡すだけではなく、**その返答内に操作可能なMMLPLAYERを直接表示する**。
+
+過去の作曲セッションでは、`visualize` スキルを使い、HTML＋JavaScript＋Web Audio APIのインラインUIとして表示していた。実装は `Pico (MML Player)`／`ChipTuneSound` を使用し、外部MP3を鳴らす代用品ではない。
+
+### 必須手順
+
+1. そのセッションで利用可能な `visualize` スキルを全文読む。
+2. 最新 `main` から `docs/music/player-engine.js` と対象曲の `player.js`、MMLを取得する。
+3. `/workspace/mml-player-<曲slug>.html` にインライン表示用HTMLフラグメントを作る。
+4. `player-engine.js` の必要部分、曲固有の音色・エンベロープ登録、MML本文をフラグメント内へ埋め込む。
+5. JavaScriptの未定義参照、対象DOM、主要操作を確認する。
+6. 最終回答に次の形式を単独行で置き、そのターン内にPLAYERを表示する。
+
+```text
+visualize{"path":"/workspace/mml-player-<曲slug>.html"}
+```
+
+### visualize用HTMLの制約
+
+- 完全なHTML文書ではなくフラグメントにする。`<!doctype>`、`<html>`、`<head>`、`<body>` は書かない。
+- ルート要素に曲固有の一意なIDを付け、`document.getElementById()` で参照する。
+- `fetch`、XHR、WebSocketは使えない。GitHub上のJSやMMLを実行時に取りに行かず、必要な内容をフラグメントへ埋め込む。
+- 1MB未満に収める。PLAYERエンジン全体が大きい場合は、対象曲の再生に必要な部分だけを含める。
+- CSSはテーマ変数を使い、ライト／ダークの両方で読めるようにする。
+- 320px幅でも操作できる配置にする。
+- 自動再生しない。ユーザー操作後にAudioContextを開始する。
+- PLAYERを表示したターンでは、`sandbox:` のHTMLダウンロードリンクで代用しない。
+
+### PLAYERに必要な機能
+
+最低限:
+
+- Play／Pause／Stop
+- シークまたは再生位置表示
+- 音量
+- チャンネル別ON/OFF
+- MMLコンパイルエラー表示
+
+曲や比較作業に応じて追加:
+
+- ループ回数
+- Endless
+- To outro
+- ABリピート
+- TITLE／ABOUT表示
+- MML表示／コピー
+- WAV書き出し
+- 複数案のタブ切替
+
+過去のインラインPLAYERでは、チャンネル別ミュート、ループ回数、リピート範囲、音量、MML表示／コピー、WAV書き出しまで実装していた。
+
+### 音を一致させるための注意
+
+- MMLだけを渡しても、曲固有の音色は再現できない。
+- 対象曲の `player.js` にある `registerEnvelope`、`registerTone`、`registerFM` などをPLAYER初期化前に実行する。
+- `ChipTuneSound` の生成オプション、`psgTune`、`spatial`、音量補正も対象ページと揃える。
+- `MusicPage.splitMML()` 相当の処理で、先頭の共通マクロを各 `#ch` に引き継ぐ。
+- MMLが配列なら各要素を文字列化し、文字列ならチャンネル分割してからPLAYERへ渡す。
+- コンパイル後にチャンネル数、総時間、マーク、バンドル音色数、エラーの有無を確認する。
+- 試聴用の変更と、採用してリポジトリへ保存するMMLを混同しない。
+
+### やってはいけない対応
+
+- 「WAVを作ります」と返して、MMLPLAYERを表示しない。
+- 公開サイトのURLだけを返す。
+- HTMLファイルのダウンロードリンクだけを返す。
+- MMLを単純なOscillatorへ置き換え、現行 `ChipTuneSound` と違う音で済ませる。
+- PLAYERを表示すると宣言したまま、処理中表示でターンを終える。
+
+ユーザーがPLAYERを要求した場合、説明より先にそのターンで再生可能なUIを完成させる。WAVや公開ページは補助物であり、チャット内PLAYERの代替ではない。
+
 ## 5. 現在の構成
 
 公開曲フォルダ:
