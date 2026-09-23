@@ -1,3 +1,29 @@
+/*
+このMMLはJS側の音色・エンベロープ設定が必要です。
+設定JS: https://harayoki.github.io/MMSXX_samples/music/04_Grassland-Trinity/player.js
+
+音色:
+- fieldLeadAttack
+- fieldTriangle
+- fieldHit2x14500
+- fieldHit2x8200
+- fieldHit2x5200
+- fieldHit0x29000
+- fieldHit0x18000
+- fieldHit0x11800
+エンベロープ:
+- fieldEnv3x35357
+- fieldEnv3x80357
+- fieldEnv3x160714
+- fieldEnv3x115714
+- fieldEnv3x276429
+- fieldEnv2x53571
+- fieldEnv2x32000
+- fieldEnv2x17857
+- fieldEnv2x80357
+- fieldEnv2x40179
+*/
+
 #title 草原のトリニティ
 #about アクションRPGの草原BGMをイメージ。ファミコン4音に限定。
 #ch メロディ

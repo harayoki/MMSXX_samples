@@ -1,3 +1,23 @@
+/*
+このMMLはJS側の音色・エンベロープ設定が必要です。
+設定JS: https://harayoki.github.io/MMSXX_samples/music/03_Windward-Crossing/player.js
+
+音色:
+- wcFieldLead
+- wcBattleLead
+- wcCounterLead
+- wcFieldCounter
+- wcBattleBass
+- wcBass
+- wcArp
+- wcKick
+エンベロープ:
+- wcLeadEnv
+- wcPluckEnv
+- wcDrumEnv
+- wcBattleBassEnv
+*/
+
 #title 風渡りの境界 (RPG組曲)
 #version 1.8
 #about 王道RPGを意識した組曲。フィールド、エンカウント、戦闘（A/B/C）、勝利、敗北を連続再生。

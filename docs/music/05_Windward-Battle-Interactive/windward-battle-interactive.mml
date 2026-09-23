@@ -1,3 +1,22 @@
+/*
+このMMLはJS側の音色・エンベロープ設定が必要です。
+設定JS: https://harayoki.github.io/MMSXX_samples/music/05_Windward-Battle-Interactive/player.js
+
+音色:
+- wcFieldLead
+- wcBattleLead
+- wcCounterLead
+- wcBattleBass
+- wcBass
+- wcArp
+- wcKick
+エンベロープ:
+- wcLeadEnv
+- wcPluckEnv
+- wcDrumEnv
+- wcBattleBassEnv
+*/
+
 #title 調整中：風渡りの境界 戦闘曲(インタラクティブ)
 #version 1.7
 #about 風渡りの境界 の戦闘曲を動的に切り変え可能にしたものです。ゲームの展開に合わせて使います。CH3とCH4は発音が重ならないため統合可能。
