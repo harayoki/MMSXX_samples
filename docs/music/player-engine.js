@@ -526,16 +526,6 @@
       loop: 8,
       noteJa: "\u843D\u3061\u3066\u306F\u5C11\u3057\u623B\u308B\u3001\u3092\u7E70\u308A\u8FD4\u3057\u3066\u5C0F\u3055\u304F\u306A\u308A\u3001\u305D\u306E\u3042\u3068\u306F\u5C0F\u3055\u3044\u307E\u307E\u8DF3\u306D\u3064\u3065\u3051\u308B\u3002\u623B\u308B\u5148\u304C\u9014\u4E2D\u306A\u306E\u3067\u3001\u5927\u304D\u304F\u8DF3\u306D\u308B\u306E\u306F\u982D\u306E\u4F55\u56DE\u304B\u3060\u3051",
       note: "Falls, springs back a little, falls further \u2014 and once it is quiet it keeps bouncing at that size. The loop point sits partway in, so the big bounces only happen at the top."
-    },
-    {
-      id: 17,
-      name: "gradual",
-      a: 3e-3,
-      d: 0.65,
-      s: 0.65,
-      r: 0.06,
-      noteJa: "素早く立ち上がり、アタックのあとからゆっくり弱まり、音の終わりもなめらかに消える。",
-      note: "Quick attack, then a gradual fall with a smooth ending."
     }
   ];
   function registerEnvelope(name, spec = {}) {
@@ -5213,8 +5203,8 @@ registerProcessor('mmsxx-duty', DutyBank);
   }
   function envShape(e, len) {
     const a = Math.min(e.a, len * 0.5);
+    const d = Math.min(e.d, Math.max(0, len - a));
     const rel = Math.min(e.r, len * 0.5);
-    const d = Math.min(e.d, Math.max(0, len - a - rel));
     return { a, d, s: e.s, rel, hold: Math.max(a + d, len - rel) };
   }
   function envGains(e, len) {
