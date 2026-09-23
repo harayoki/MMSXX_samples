@@ -99,7 +99,7 @@ r8 o6e-8 o6d8 o5a-8 o5f8 o5e-8 o5d4
 #ch 副旋律 B
 #role counter
 t120 q7 v10 @{pulse:12.5} @e{gradual} @o-1
-// 別の歌い手が受け持つ副旋律。A/Bでは控えめに応答し、B′で3度・6度のハモリを増やす。小節頭の16分をキックへ譲る。
+// 基本は独立した応答。05・06・17・18・27・32小節は主旋律とリズムを揃え、長短6度（オクターブ差を除く）でハモる。
 // 01
 r16 o4f8. o4a4 o4e4 o4f4
 // 02
@@ -109,9 +109,9 @@ r16 o4c8. o4f4 o4e-4 o4c4
 // 04
 r16 o4a8. o4e4 o4c+8 o4b-8 r4
 // 05
-r16 o4f8. o4a4 o4g8 o4f8 o4a4
+r8 o4f8 o4g16 o4a8. r8 o4f8 o4e-8 o5c8
 // 06
-r16 o4g8. o4b-4 o4g4 o4b-4
+o4f8 o4g16 o4b-8. r8 o5d8 o4b-8 o4a8 r8
 // 07
 r16 o4a-8. o4b4 o4a-8 o4f8 o4d4
 // 08
@@ -133,9 +133,9 @@ r16 o4a-8. o4f4 o4d8 o4f8 o4a-4
 // 16
 r16 o4c+8. o4e4 o4g8 o4e8 o4c+4
 // 17
-r16 o4f8. o4a4 o4e4 o4f4
+r8 o4f8 o4g16 o4a8. r8 o4f8 o4e-8 r8
 // 18
-r16 o4b-8. o4g4 o4f8 o4e-8 o4g4
+r16 o4f8. o4g8 o4b-4 r8 o5d8 o4b-8
 // 19
 r16 o4c8. o4f4 o4e-4 o4c4
 // 20
@@ -153,7 +153,7 @@ v10 r16 o4b-8. o4b-4 o5d8 o5c8 o4b-4
 // 26
 r16 o4a8. o4a4 o5c8 o4b-8 o4a4
 // 27
-r16 o4b-8. o4b-4 o5d8 o5e-8 o5d4
+r16 o4b-8. o5c16 o5d8. r8 o5b-8 o5a8 o5g8
 // 28
 r16 o4a8. o4a4 o5c8 o5e-8 o5c4
 // 29
@@ -163,7 +163,7 @@ r16 o4b-8. o4b-4 o4a8 o4g8 o4f4
 // 31
 r16 o4b8. o4b4 o5d8 o5f8 o5d4
 // 32
-r16 o4a8. o4g8 o4f8 o4f2
+r8 o5g8 o5f8 o5c8 o4a8 o4g8 o4f4
 
 #ch ベース
 #role bass
