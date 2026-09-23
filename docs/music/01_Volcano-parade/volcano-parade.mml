@@ -1,7 +1,7 @@
 // この数値を直すと本編のループ回数が変わります（1以上）。
 // イントロとエンディングは1回ずつ。全パート共通で、再生とWAVの両方に適用。
 $LOOP_END = { 2 }
-// この曲用の音色 — プリセットに無い音色でやりたい事が特殊だったのでJavaScriptで計算で作っている(addWave / registerTone)。
+// この曲用の音色 — プリセットに無い音色でやりたい事が特殊だったのでJavaScriptで計算で作っている(mmsxx-mml-studio の addWave / registerTone)。
 //   @{vpLead}   メロディ部の矩形波。 0.30 秒遅れてビブラート(6Hz / 2%)が掛かる。
 //   @{saw}      アルペジオとハモリのパート用ののこぎり波。
 //   @{vpPiano}  合いの手。キンキンした硬いピアノ風(2 オペ FM)。
@@ -24,7 +24,7 @@ $LOOP_END = { 2 }
 #bundle vpSawSoft    = @{saw} @e{soft}
 #bundle vpHatVoice   = @{noise:white} @e{percussive}
 #bundle vpTomVoice   = @{vpTom} @e{percussive}
-// Powered by MMS/XX (engine license undecided; redistribution currently prohibited).
+// Powered by mmsxx-mml-studio (engine license undecided; redistribution currently prohibited).
 // K005289 arpeggio — MIDI ch.1 rhythm/contour, reharmonized
 // アルペジオの7セント重ねはplayer.jsのdynamic_effectsで指定。
 // ベースが半音〜全音ずつ下降するよう、各拍を転回形中心に再配置。
