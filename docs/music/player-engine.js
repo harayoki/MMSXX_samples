@@ -1,4 +1,4 @@
-// MMS/XX player and audio engine, source commit c689363fa61288455fd99c0d8ee4bd6b060b7a70
+// MMS/XX player and audio engine, source commit ad1d4bf5bc02b94a7f1d20efbd959c00b37e36f2
 (() => {
   var __defProp = Object.defineProperty;
   var __export = (target, all) => {
@@ -6,7 +6,7 @@
       __defProp(target, name, { get: all[name], enumerable: true });
   };
 
-  // sound/audio.js
+  // player-update/upstream/sound/audio.js
   var audio_exports = {};
   __export(audio_exports, {
     ChipTuneSound: () => ChipTuneSound,
@@ -16,7 +16,7 @@
     psgDiv: () => psgDiv
   });
 
-  // sound/mml.js
+  // player-update/upstream/sound/mml.js
   var mml_exports = {};
   __export(mml_exports, {
     DEFAULT_ENV: () => DEFAULT_ENV,
@@ -27,6 +27,7 @@
     NOISE_VARIANTS: () => NOISE_VARIANTS,
     ROLES: () => ROLES,
     SPECIALS: () => SPECIALS,
+    TUNINGS: () => TUNINGS,
     WAVE: () => WAVE,
     WAVEFORMS: () => WAVEFORMS,
     compileMML: () => compileMML,
@@ -58,7 +59,7 @@
     waveRole: () => waveRole
   });
 
-  // sound/gm.js
+  // player-update/upstream/sound/gm.js
   var GM_NAMES = [
     "Acoustic Grand Piano",
     "Bright Acoustic Piano",
@@ -204,8 +205,155 @@
     return GM_NAMES.filter((n) => key(n).startsWith(head)).slice(0, limit);
   }
 
-  // sound/mml.js
+  // player-update/upstream/sound/mml.js
   var SEMI = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 };
+  var LETTER = { c: 0, d: 1, e: 2, f: 3, g: 4, a: 5, b: 6 };
+  var LETTER_OF_SEMI = { 0: 0, 2: 1, 4: 2, 5: 3, 7: 4, 9: 5, 11: 6 };
+  var TUNINGS = {
+    equal: {
+      cents: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1e3, 1100],
+      note: "Twelve equal steps. The default, and what almost every chiptune uses.",
+      noteJa: "12 \u5E73\u5747\u5F8B\u3002\u65E2\u5B9A\u3002\u3075\u3064\u3046\u306E\u66F2\u306F\u3053\u308C\u3067\u3059\u3002"
+    },
+    pure: {
+      // 5 限の純正律。1/1 16/15 9/8 6/5 5/4 4/3 45/32 3/2 8/5 5/3 9/5 15/8
+      cents: [
+        0,
+        111.73,
+        203.91,
+        315.64,
+        386.31,
+        498.04,
+        590.22,
+        701.96,
+        813.69,
+        884.36,
+        1017.6,
+        1088.27
+      ],
+      note: "Five-limit just intonation. Thirds and fifths lock; distant keys do not.",
+      noteJa: "\u7D14\u6B63\u5F8B(5 \u9650)\u30023 \u5EA6\u3068 5 \u5EA6\u304C\u3074\u305F\u308A\u3068\u5408\u3044\u307E\u3059\u3002\u9060\u3044\u8ABF\u3078\u56DE\u3059\u3068\u6FC1\u308A\u307E\u3059\u3002"
+    },
+    pythagorean: {
+      // 5 度(3/2)を積んで作る。3 度が広い
+      cents: [
+        0,
+        90.22,
+        203.91,
+        294.13,
+        407.82,
+        498.04,
+        611.73,
+        701.96,
+        792.18,
+        905.87,
+        996.09,
+        1109.78
+      ],
+      note: "Built from stacked perfect fifths. Wide, bright thirds.",
+      noteJa: "\u30D4\u30BF\u30B4\u30E9\u30B9\u97F3\u5F8B\u30025 \u5EA6\u3092\u7A4D\u3093\u3067\u4F5C\u308A\u307E\u3059\u30023 \u5EA6\u304C\u5E83\u304F\u3001\u660E\u308B\u304F\u5F35\u308A\u307E\u3059\u3002"
+    },
+    "meantone:quarter": {
+      // 1/4 コンマ中全音。5 度を狭めて 3 度を純正に寄せる
+      cents: [
+        0,
+        76.05,
+        193.16,
+        310.26,
+        386.31,
+        503.42,
+        579.47,
+        696.58,
+        772.63,
+        889.74,
+        1006.84,
+        1082.89
+      ],
+      note: "Quarter-comma meantone. Pure thirds, narrow fifths, a wolf you must avoid.",
+      noteJa: "\u4E2D\u5168\u97F3(1/4 \u30B3\u30F3\u30DE)\u30023 \u5EA6\u304C\u7D14\u6B63\u3067\u30015 \u5EA6\u304C\u72ED\u304F\u306A\u308A\u307E\u3059\u3002\u4F7F\u3048\u306A\u3044\u8ABF\u304C\u51FA\u307E\u3059\u3002"
+    },
+    "meantone:sixth": {
+      // 1/6 コンマ。1/4 より 5 度の狭めかたがゆるい
+      cents: [
+        0,
+        88.59,
+        196.74,
+        305.33,
+        393.48,
+        501.63,
+        590.22,
+        698.37,
+        786.96,
+        895.11,
+        1003.26,
+        1091.85
+      ],
+      note: "Sixth-comma meantone. A gentler compromise than quarter-comma.",
+      noteJa: "\u4E2D\u5168\u97F3(1/6 \u30B3\u30F3\u30DE)\u30021/4 \u3088\u308A\u7A4F\u3084\u304B\u3067\u3001\u4F7F\u3048\u308B\u8ABF\u304C\u5E83\u304C\u308A\u307E\u3059\u3002"
+    },
+    slendro: {
+      // ジャワ・バリの 5 音。5 等分に近い。楽団ごとの差は小さい
+      cents: [0, 240, 480, 720, 960],
+      note: "Javanese slendro, five nearly equal steps. Values are a representative set.",
+      noteJa: "\u30B9\u30EC\u30F3\u30C9\u30ED\u3002\u307B\u307C 5 \u7B49\u5206\u306E 5 \u97F3\u3067\u3059\u3002\u5024\u306F\u4EE3\u8868\u7684\u306A\u3082\u306E\u3067\u3059\u3002"
+    },
+    pelog: {
+      // ジャワの 7 音。段の幅がばらばらなのがこの音階の顔
+      cents: [0, 120, 270, 540, 670, 785, 950],
+      note: "Javanese pelog, seven uneven steps. Values are a representative set.",
+      noteJa: "\u30DA\u30ED\u30C3\u30B0\u3002\u6BB5\u306E\u5E45\u304C\u4E0D\u63C3\u3044\u306A 7 \u97F3\u3067\u3059\u3002\u5024\u306F\u4EE3\u8868\u7684\u306A\u3082\u306E\u3067\u3059\u3002"
+    },
+    "pelog:bem": {
+      // 7 音のうち 1 2 3 5 6 を使う旋法
+      cents: [0, 120, 270, 670, 785],
+      note: "Pelog bem: the five degrees a Javanese piece in bem actually uses.",
+      noteJa: "\u30DA\u30ED\u30C3\u30B0\u306E\u30D6\u30E0\u30027 \u97F3\u306E\u3046\u3061\u5B9F\u969B\u306B\u4F7F\u3046 5 \u3064\u3060\u3051\u3092\u4E26\u3079\u305F\u3082\u306E\u3067\u3059\u3002"
+    },
+    "pelog:barang": {
+      // 2 3 5 6 7 を使う旋法。ブムと 2 音が入れ替わる
+      cents: [0, 150, 550, 665, 830],
+      note: "Pelog barang: the other five-degree mode, two tones apart from bem.",
+      noteJa: "\u30DA\u30ED\u30C3\u30B0\u306E\u30D0\u30E9\u30F3\u3002\u30D6\u30E0\u3068\u306F 2 \u97F3\u304C\u5165\u308C\u66FF\u308F\u308A\u307E\u3059\u3002"
+    }
+  };
+  function readTuning(text) {
+    const words2 = String(text ?? "").trim().split(/[\s,]+/).filter(Boolean);
+    if (!words2.length) return null;
+    let period = 1200;
+    const rest = [];
+    for (const w of words2) {
+      if (!w.startsWith("/")) {
+        rest.push(w);
+        continue;
+      }
+      const n = Number(w.slice(1));
+      if (!(n > 0)) bad(`[ChpTnSnd] MML: "#tuning" \u306E 1 \u5468\u306E\u5E45 "${w}" \u306F\u8AAD\u3081\u307E\u305B\u3093`);
+      period = n;
+    }
+    let root = "c";
+    const last = rest[rest.length - 1];
+    if (rest.length > 1 && last && LETTER[last.toLowerCase()] !== void 0) {
+      root = rest.pop().toLowerCase();
+    }
+    const isNum = (w) => /^-?[\d.]+$/.test(w);
+    if (rest.some(isNum) && rest.some((w) => !isNum(w))) {
+      bad('[ChpTnSnd] MML: "#tuning" \u306F\u540D\u524D\u304B\u30BB\u30F3\u30C8\u306E\u4E26\u3073\u306E\u3069\u3061\u3089\u304B\u3067\u3059(\u6DF7\u305C\u308B\u3068\u3001\u7F6E\u304D\u63DB\u3048\u306A\u306E\u304B\u8DB3\u3059\u306E\u304B\u8AAD\u3081\u307E\u305B\u3093)');
+    }
+    if (rest.every(isNum)) {
+      const cents = rest.map(Number);
+      if (cents.length < 2) bad('[ChpTnSnd] MML: "#tuning" \u306E\u30BB\u30F3\u30C8\u306F 2 \u3064\u4EE5\u4E0A\u66F8\u304D\u307E\u3059');
+      return { cents, period, root, name: null };
+    }
+    const name = rest.join(" ").toLowerCase();
+    const set = TUNINGS[name];
+    if (!set) {
+      bad(`[ChpTnSnd] MML: \u97F3\u5F8B "${name}" \u306F\u77E5\u3089\u306A\u3044\u540D\u524D\u3067\u3059(\u4F7F\u3048\u308B\u306E\u306F ${Object.keys(TUNINGS).join(" / ")})`);
+    }
+    if (name === "equal" && root !== "c") {
+      warn("[ChpTnSnd] MML: 12 \u5E73\u5747\u5F8B\u306B\u6839\u97F3\u306F\u3042\u308A\u307E\u305B\u3093\u3002\u3069\u3053\u304B\u3089\u6570\u3048\u3066\u3082\u540C\u3058\u3067\u3059");
+    }
+    return { cents: set.cents, period, root, name };
+  }
   function beepFreq(n, us) {
     return 1e6 / (2 * Math.max(1, n) * Math.max(1, us));
   }
@@ -581,6 +729,7 @@
       ...metaOf(opts)
     };
     if (opts.env !== void 0) entry.defaultEnv = envIndex(opts.env);
+    if (opts.gain > 0) entry.gain = Math.max(0.1, Math.min(4, Number(opts.gain)));
     const tone = toneOf(opts, "wave", name);
     if (tone) entry.tone = tone;
     if (opts.modRatio > 0 && opts.modDepth > 0) {
@@ -930,8 +1079,10 @@
     tape: {
       byVoice: "tape",
       chars: ["=", "?"],
+      // 音名を書いたら、その高さでデータ(`?`)を 1 つ置く。旋律はこれで書く
       notes: true,
       keys: {
+        // 音名でも書ける(`@baud o2a`)。書いた音は `=`(パイロット)の高さになる
         baud: { min: 1, max: 1e6, note: true },
         seed: { min: 0, max: 1e9 },
         // 以下 3 つは音色が持っている値の上書き。書かなければ音色のまま
@@ -1738,7 +1889,37 @@ ${val}`;
       wave = readName(WAVEFORMS, "\u6CE2\u5F62", wave);
       return false;
     };
-    const freqOf = (midi) => 440 * Math.pow(2, (midi - 69) / 12);
+    let tuning = meta.tuning ? readTuning(meta.tuning) : null;
+    const a4 = Number(meta.a4) > 0 ? Number(meta.a4) : 440;
+    let rootLetter = tuning ? LETTER[tuning.root] : 0;
+    let rootSemi = tuning ? SEMI[tuning.root] : 0;
+    let anchor = 1;
+    let saidHalf = false;
+    let saidKey = false;
+    let saidTurn = false;
+    const freqOf = (midi) => {
+      const plain = (m) => a4 * Math.pow(2, (m - 69) / 12);
+      if (!tuning) return plain(midi);
+      const hit = (hz) => hz * anchor;
+      const semi = (midi % 12 + 12) % 12;
+      if (tuning.cents.length === 12) {
+        const step = ((semi - rootSemi) % 12 + 12) % 12;
+        return hit(plain(midi - step) * Math.pow(2, tuning.cents[step] / 1200));
+      }
+      const letter = LETTER_OF_SEMI[semi];
+      if (letter === void 0) {
+        if (!saidHalf) {
+          saidHalf = true;
+          warn(`[ChpTnSnd] MML: \u3053\u306E\u97F3\u5F8B\u306B\u534A\u97F3\u306F\u3042\u308A\u307E\u305B\u3093(${tuning.cents.length} \u97F3\u3067 1 \u5468\u3057\u307E\u3059)\u3002\u5E73\u5747\u5F8B\u306E\u9AD8\u3055\u3067\u9CF4\u3089\u3057\u307E\u3059`);
+        }
+        return plain(midi);
+      }
+      const n = tuning.cents.length;
+      const at = (Math.floor(midi / 12) - 1) * 7 + letter - (4 * 7 + rootLetter);
+      const turn = Math.floor(at / n);
+      const base = plain((4 + 1) * 12 + rootSemi);
+      return hit(base * Math.pow(2, (turn * tuning.period + tuning.cents[at - turn * n]) / 1200));
+    };
     let chordSeq = 0;
     let drumSeq = 0;
     let inDrums = false;
@@ -1933,6 +2114,69 @@ ${val}`;
       }
       return (oct + 1) * 12 + semi;
     };
+    const readTuningAt = () => {
+      let body = "";
+      while (pos < src.length && src[pos] !== "}") body += src[pos++];
+      pos++;
+      const parts = body.split(",").map((w) => w.trim()).filter(Boolean);
+      const link = parts.some((w) => w.toLowerCase() === "link");
+      const text = parts.filter((w) => !["link", "pin"].includes(w.toLowerCase())).join(" ");
+      const next = readTuning(text);
+      if (!next) bad('[ChpTnSnd] MML: "@tuning" \u306E\u4E2D\u8EAB\u304C\u3042\u308A\u307E\u305B\u3093');
+      if (tuning && next.cents.length !== tuning.cents.length && !saidTurn) {
+        saidTurn = true;
+        warn(`[ChpTnSnd] MML: 1 \u5468\u306E\u97F3\u306E\u6570\u304C ${tuning.cents.length} \u304B\u3089 ${next.cents.length} \u306B\u5909\u308F\u308A\u307E\u3059\u3002\u3053\u3053\u304B\u3089\u97F3\u540D\u306E\u6307\u3059\u97F3\u304C\u305A\u308C\u307E\u3059`);
+      }
+      const ref = (4 + 1) * 12 + SEMI[next.root];
+      const was = tuning ? freqOf(ref) : null;
+      anchor = 1;
+      tuning = next;
+      rootSemi = SEMI[next.root];
+      rootLetter = LETTER[next.root];
+      if (link && was) anchor = was / freqOf(ref);
+    };
+    const readKey = () => {
+      let body = "";
+      while (pos < src.length && src[pos] !== "}") body += src[pos++];
+      pos++;
+      let link = false;
+      let name = null;
+      for (const w of body.split(",").map((x) => x.trim()).filter(Boolean)) {
+        if (w.toLowerCase() === "link") link = true;
+        else if (w.toLowerCase() === "pin") link = false;
+        else name = w;
+      }
+      if (!name || LETTER[name[0].toLowerCase()] === void 0) {
+        bad('[ChpTnSnd] MML: "@key" \u306B\u306F\u97F3\u540D\u3092\u66F8\u304D\u307E\u3059(`@key{a}` `@key{a,link}`)');
+      }
+      const letter = name[0].toLowerCase();
+      let semi = SEMI[letter];
+      for (const c of name.slice(1)) {
+        if (c === "+" || c === "#") semi++;
+        else if (c === "-") semi--;
+      }
+      if (!tuning || tuning.name === "equal") {
+        if (!saidKey) {
+          saidKey = true;
+          warn('[ChpTnSnd] MML: 12 \u5E73\u5747\u5F8B\u306B\u6839\u97F3\u306F\u3042\u308A\u307E\u305B\u3093\u3002"@key" \u306F\u4F55\u3082\u5909\u3048\u307E\u305B\u3093');
+        }
+        return;
+      }
+      const to = () => {
+        rootSemi = (semi % 12 + 12) % 12;
+        rootLetter = LETTER[letter];
+      };
+      if (!link) {
+        anchor = 1;
+        to();
+        return;
+      }
+      const ref = (4 + 1) * 12 + (semi % 12 + 12) % 12;
+      const was = freqOf(ref);
+      anchor = 1;
+      to();
+      anchor = was / freqOf(ref);
+    };
     const readEcho = (now) => {
       let len = null, depth = 5;
       if (src[pos] === "{") {
@@ -1942,7 +2186,7 @@ ${val}`;
         pos++;
         const n = body.split(",").map((v) => parseInt(v, 10));
         len = Number.isFinite(n[0]) ? n[0] : null;
-        if (Number.isFinite(n[1])) depth = clamp(n[1], 1, 9);
+        if (Number.isFinite(n[1])) depth = clamp(n[1], 1, 16);
       } else {
         len = readNumber();
       }
@@ -2034,10 +2278,7 @@ ${val}`;
           }
           const dur = readDuration();
           if (section === "tape") {
-            sec.baud = Math.max(1, Math.min(
-              1e6,
-              Math.round(freqOf((octave + 1) * 12 + semi) * 12)
-            ));
+            sec.baud = Math.max(1, Math.min(1e6, Math.round(freqOf((octave + 1) * 12 + semi) * 12)));
             pushTape(true, dur);
           } else {
             pushNote(dur, freqOf((octave + 1) * 12 + semi));
@@ -2395,6 +2636,12 @@ ${val}`;
             }
             const de = (WAVEFORMS[wave] || {}).defaultEnv;
             env = de !== void 0 ? de : envIndex(DEFAULT_ENV);
+          } else if (src.startsWith("key{", pos)) {
+            pos += 4;
+            readKey();
+          } else if (src.startsWith("tuning{", pos)) {
+            pos += 7;
+            readTuningAt();
           } else if (kind === "e" && src[pos + 1] === "{") {
             pos += 2;
             env = readName(ENVELOPES, "\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7", env);
@@ -2746,7 +2993,7 @@ ${val}`;
     return { ok: errors.length === 0, errors, warnings, channels, total };
   }
 
-  // sound/wavetables.js
+  // player-update/upstream/sound/wavetables.js
   var N = 32;
   var build = (f) => Array.from({ length: N }, (_, i) => f(i / N, i));
   var norm = (w) => {
@@ -2892,7 +3139,7 @@ ${val}`;
     );
   }
 
-  // sound/fmpresets.js
+  // player-update/upstream/sound/fmpresets.js
   var FM_PRESETS = {
     // 1 バイオリン。弓のこすれを出すため、比を少しずらして倍音を残す
     fm2Violin: {
@@ -3235,7 +3482,7 @@ ${val}`;
     }
   }
 
-  // sound/beeppresets.js
+  // player-update/upstream/sound/beeppresets.js
   var BEEP_PRESETS = {
     // ---- 搬送波を刻む型。**音程を変える回路が無い機械** ----
     // 2.4kHz が鳴りっぱなしで、ソフトはそれを On/Off するだけ。
@@ -3416,7 +3663,7 @@ ${val}`;
     }
   }
 
-  // sound/fdspresets.js
+  // player-update/upstream/sound/fdspresets.js
   var FDS_LEN = 64;
   var FDS_BITS = 6;
   var build2 = (fn) => Array.from({ length: FDS_LEN }, (_, i) => fn(i / FDS_LEN));
@@ -3533,7 +3780,7 @@ ${val}`;
     }
   }
 
-  // sound/fm4.js
+  // player-update/upstream/sound/fm4.js
   var ALGORITHMS = [
     {
       mod: [[], [0], [1], [2]],
@@ -3769,7 +4016,7 @@ registerProcessor('mmsxx-fm4', Fm4Bank);
     };
   }
 
-  // sound/fm4presets.js
+  // player-update/upstream/sound/fm4presets.js
   var FM4_PRESETS = {
     "fm4Brass": {
       noteJa: "4 \u30AA\u30DA\u306E\u91D1\u7BA1\u3002\u30AA\u30DA\u30EC\u30FC\u30BF\u304C\u5897\u3048\u305F\u3076\u3093\u3001\u4F38\u3070\u3057\u3066\u3044\u308B\u3042\u3044\u3060\u306B\u500D\u97F3\u304C\u80B2\u3064\u3002\u672C\u7269\u306E\u91D1\u7BA1\u3068\u540C\u3058\u52D5\u304D\u3067\u30012 \u30AA\u30DA\u306B\u306F\u3067\u304D\u306A\u3044",
@@ -3900,10 +4147,25 @@ registerProcessor('mmsxx-fm4', Fm4Bank);
     });
   }
 
-  // sound/extrawaves.js
+  // player-update/upstream/sound/extrawaves.js
   var EXTRA_LEN = 32;
   var build3 = (fn) => Array.from({ length: EXTRA_LEN }, (_, i) => fn(i / EXTRA_LEN));
   var pulse = (n) => build3((p) => p < n / 16 ? 1 : -1);
+  var TUNER = (() => {
+    const h = [0.5, 0.35, 0.4, 0.95, 1, 0.25];
+    const power = h.reduce((s, a) => s + a * a, 0);
+    const phase = h.map((_, k) => {
+      let acc = 0;
+      for (let j = 0; j <= k; j++) acc += (k + 1 - j) * h[j] * h[j] / power;
+      return -Math.PI * acc;
+    });
+    const raw = build3((p) => h.reduce(
+      (sum, a, i) => sum + a * Math.sin(2 * Math.PI * (i + 1) * p + phase[i]),
+      0
+    ));
+    const top = Math.max(...raw.map(Math.abs));
+    return raw.map((v) => v / top);
+  })();
   var SAW_STEP = build3((p) => {
     const step = Math.floor(p * 8);
     return step >= 7 ? -1 : step / 6 * 2 - 1;
@@ -3960,13 +4222,47 @@ registerProcessor('mmsxx-fm4', Fm4Bank);
     // **`special: ['fixedVolume']` を持つ。**実機ではこの声にだけ音量つまみが
     // 無かったので、`v` を受け付けない(0 で消音、それ以外は最大)。
     // 音量の目盛りそのものは 1 つのままで、**この音色が目盛りを見ない**だけ。
+    //
+    // **音量の下駄 1.65 倍は実機の比。**あちらは声を足すところが直線ではなくて、
+    // 三角のチャンネルだけ重みが違う。
+    //
+    //   パルス 1 本 最大 = 95.88 / (8128/15 + 100)  = 0.149
+    //   三角      最大 = 159.79 / (8227/15 + 100) = 0.246
+    //
+    // ピークで 1.65 倍。三角の形そのものは実効値が振幅の 1/√3(−4.8dB)なので、
+    // 掛けてようやくパルス 1 本と並ぶ。下駄を入れないと 4.4dB 小さく、
+    // 実機の記憶より引っ込んで聞こえる(2026-09-23)。
     wtNesTriangle: {
-      noteJa: "\u30D5\u30A1\u30DF\u30B3\u30F3\u306E\u4E09\u89D2\u6CE2\u3002\u306A\u3081\u3089\u304B\u3067\u306F\u306A\u304F 32 \u6BB5\u306E\u968E\u6BB5\u3067\u3001\u305D\u3053\u304B\u3089 31 \u500D\u97F3\u3068 33 \u500D\u97F3\u304C\u51FA\u308B\u3002\u3042\u306E\u300C\u30B8\u30FC\u300D\u3068\u3044\u3046\u8CEA\u611F\u306F\u3053\u308C\u3002\u5B9F\u6A5F\u3068\u540C\u3058\u304F\u97F3\u91CF\u3064\u307E\u307F\u304C\u52B9\u304B\u306A\u3044(v0 \u3067\u6D88\u97F3\u3001\u305D\u308C\u4EE5\u5916\u306F\u6700\u5927)",
+      noteJa: "\u30D5\u30A1\u30DF\u30B3\u30F3\u306E\u4E09\u89D2\u6CE2\u3002\u306A\u3081\u3089\u304B\u3067\u306F\u306A\u304F 32 \u6BB5\u306E\u968E\u6BB5\u3067\u3001\u305D\u3053\u304B\u3089 31 \u500D\u97F3\u3068 33 \u500D\u97F3\u304C\u51FA\u308B\u3002\u3042\u306E\u300C\u30B8\u30FC\u300D\u3068\u3044\u3046\u8CEA\u611F\u306F\u3053\u308C\u3002\u5B9F\u6A5F\u3068\u540C\u3058\u304F\u97F3\u91CF\u3064\u307E\u307F\u304C\u52B9\u304B\u306A\u3044(v0 \u3067\u6D88\u97F3\u3001\u305D\u308C\u4EE5\u5916\u306F\u6700\u5927)\u3002\u5B9F\u6A5F\u306F\u4E09\u89D2\u306E\u30C1\u30E3\u30F3\u30CD\u30EB\u3060\u3051\u8DB3\u3059\u3068\u304D\u306E\u91CD\u307F\u304C\u9055\u3046\u306E\u3067\u3001\u305D\u306E\u6BD4\u306E 1.65 \u500D\u3092\u4E0B\u99C4\u306B\u3057\u3066\u3042\u308B\u3002\u3053\u308C\u3067\u30D1\u30EB\u30B9 1 \u672C\u3068\u540C\u3058\u304F\u3089\u3044\u306E\u5927\u304D\u3055\u306B\u306A\u308B",
       role: "bass",
       wave: NES_TRI,
       bits: 4,
       special: ["fixedVolume"],
-      note: "The NES triangle. A thirty-two step staircase rather than a smooth ramp, which puts the 31st and 33rd harmonics into it \u2014 that is where the buzz comes from. As on the real chip, volume does nothing: v0 silences it, anything else plays full."
+      gain: 1.65,
+      note: "The NES triangle. A thirty-two step staircase rather than a smooth ramp, which puts the 31st and 33rd harmonics into it \u2014 that is where the buzz comes from. As on the real chip, volume does nothing: v0 silences it, anything else plays full. The real mixer weights the triangle channel more heavily than a pulse, so it carries that ratio as a 1.65x boost \u2014 without it the triangle sits 4.4dB below a pulse at full volume."
+    },
+    // **音律を確かめるためのもの。**楽器ではない。
+    //
+    // **`wt` の一族ではない。**あちらは実機の波形メモリらしさを集めたところで、
+    // 段が粗いことが売りになっている。これは 8 ビットで、倍音から作っていて、
+    // 分周の丸めからも外してある。性格が合わないので `tool` で始める。
+    // 素の `tuner` を取らないのは、短い語を 1 つ押さえてしまうため(2026-09-23)。
+    //
+    // 音律の違いは、倍音どうしがぶつかって出る「うなり」でしか聞こえない。
+    // 長 3 度なら下の音の 5 倍音と上の音の 4 倍音、5 度なら 3 倍音と 2 倍音。
+    // 矩形波には偶数倍音が無いので、4 倍音も 2 倍音も出ない。ぶつかる相手が
+    // いないので、どの音律で鳴らしても同じに聞こえる(2026-09-23)。
+    //
+    // そこで 2〜5 倍音を持たせて、**4 倍音と 5 倍音を basic より大きくした。**
+    // 3 度も 5 度も、ずれていればはっきりうなる。
+    toolTuner: {
+      noteJa: "\u97F3\u5F8B\u3092\u78BA\u304B\u3081\u308B\u305F\u3081\u306E\u3082\u306E\u3002\u697D\u5668\u3067\u306F\u306A\u3044\u30024 \u500D\u97F3\u3068 5 \u500D\u97F3\u3092\u5F37\u304F\u3057\u3066\u3042\u308B\u306E\u3067\u30013 \u5EA6\u3068 5 \u5EA6\u306E\u305A\u308C\u304C\u3046\u306A\u308A\u306B\u306A\u3063\u3066\u51FA\u308B\u3002\u97F3\u5F8B\u3092\u66FF\u3048\u3066\u9577\u304F\u306E\u3070\u3059\u3068\u3001\u3046\u306A\u308A\u306E\u901F\u3055\u304C\u5909\u308F\u308B\u306E\u304C\u5206\u304B\u308B\u3002\u77E9\u5F62\u6CE2\u3067\u306F\u5076\u6570\u500D\u97F3\u304C\u7121\u3044\u306E\u3067\u3001\u305D\u3082\u305D\u3082\u3046\u306A\u308A\u304C\u51FA\u306A\u3044\u3002\u5B9F\u6A5F\u306E\u5206\u5468\u306B\u306F\u4E57\u305B\u306A\u3044\u3002\u4E38\u3081\u308B\u3068\u7D14\u6B63\u306E 3 \u5EA6\u304C 1.5Hz \u3046\u306A\u3063\u3066\u3001\u5E73\u5747\u5F8B\u306E\u901F\u3044\u3046\u306A\u308A\u3088\u308A\u63FA\u308C\u3066\u805E\u3053\u3048\u3066\u3057\u307E\u3046\u3002\u5C71\u3092 1 \u306B\u5747\u3059\u3076\u3093\u5B9F\u52B9\u5024\u304C\u4E0B\u304C\u308B\u306E\u3067\u3001\u97F3\u91CF\u306E\u4E0B\u99C4\u3092 1.9 \u500D\u306F\u304B\u305B\u3066\u3001\u77E9\u5F62\u6CE2\u3068\u540C\u3058 v \u3067\u540C\u3058\u304F\u3089\u3044\u306E\u5927\u304D\u3055\u306B\u306A\u308B\u3088\u3046\u306B\u3057\u3066\u3042\u308B",
+      role: "lead",
+      wave: TUNER,
+      bits: 8,
+      special: ["exact"],
+      gain: 1.9,
+      note: "A ruler, not an instrument. The fourth and fifth harmonics are pushed up, so a third or a fifth that is out of tune beats audibly. Hold a dyad and switch tunings: the beat rate is the difference. A square wave has no even harmonics, so nothing beats there at all. This one is never rounded onto the real chip dividers: rounding leaves a pure third beating at 1.5Hz, which reads as more wobble than the fast one."
     },
     wtSawStep: {
       noteJa: "\u6BB5\u306E\u3042\u308B\u306E\u3053\u304E\u308A\u30027 \u6BB5\u306E\u307C\u3063\u3066 1 \u6BB5\u843D\u3061\u308B\u3002\u8DB3\u3057\u7B97\u5668\u3067\u4F5C\u308B\u30C1\u30C3\u30D7\u306F\u3053\u306E\u5F62\u306B\u306A\u308B\u3002\u7D20\u306E\u306A\u3060\u3089\u304B\u306A\u5742\u3088\u308A\u3056\u3089\u3064\u304F\u3002VRC6 \u306E\u306E\u3053\u304E\u308A\u306B\u305D\u306E\u307E\u307E\u5F53\u3066\u306F\u307E\u308B",
@@ -3984,13 +4280,20 @@ registerProcessor('mmsxx-fm4', Fm4Bank);
           name,
           p.wave,
           p.bits,
-          { role: p.role, note: p.note, noteJa: p.noteJa, alias: p.alias, special: p.special }
+          {
+            role: p.role,
+            note: p.note,
+            noteJa: p.noteJa,
+            alias: p.alias,
+            special: p.special,
+            gain: p.gain
+          }
         );
       }
     }
   }
 
-  // sound/tones.js
+  // player-update/upstream/sound/tones.js
   var tones_exports = {};
   __export(tones_exports, {
     TONE_FRAME: () => TONE_FRAME,
@@ -4546,7 +4849,7 @@ registerProcessor('mmsxx-fm4', Fm4Bank);
     }
   }
 
-  // sound/pcmbake.js
+  // player-update/upstream/sound/pcmbake.js
   var MIN_LOOP = 1024;
   function periodMultiple(ratios, maxM = 8) {
     for (let m = 1; m <= maxM; m++) {
@@ -4628,7 +4931,7 @@ registerProcessor('mmsxx-fm4', Fm4Bank);
     };
   }
 
-  // sound/duty.js
+  // player-update/upstream/sound/duty.js
   var DUTY_CODE = `
 const FRAME = ${TONE_FRAME};
 
@@ -4760,7 +5063,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     return Math.min(0.98, Math.max(0.02, x));
   };
 
-  // sound/demotunes.js
+  // player-update/upstream/sound/demotunes.js
   var SE_SYS_PAUSE = "sys.pause";
   var SYSTEM_SE = {
     [SE_SYS_PAUSE]: [
@@ -4848,7 +5151,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     BEAT_TOM_FILL
   ]);
 
-  // sound/se.js
+  // player-update/upstream/sound/se.js
   var SE_FRAME = 1 / 60;
   var SE_WHOLE = 64;
   var SE_TEMPO = Math.round(240 / (SE_WHOLE * SE_FRAME));
@@ -4997,7 +5300,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     }
   };
 
-  // sound/layerpresets.js
+  // player-update/upstream/sound/layerpresets.js
   var DETUNE_STEPS = [
     { key: "", c: 0 },
     {
@@ -5128,10 +5431,10 @@ registerProcessor('mmsxx-duty', DutyBank);
     }
   }
 
-  // sound/version.js
+  // player-update/upstream/sound/version.js
   var SOUND_VERSION = "0.21.0";
 
-  // sound/audio.js
+  // player-update/upstream/sound/audio.js
   registerDefaultWaves();
   registerDefaultFM();
   registerDefaultBeeps();
@@ -5176,6 +5479,7 @@ registerProcessor('mmsxx-duty', DutyBank);
   function psgDiv(wave) {
     const wf = WAVEFORMS[wave] || WAVEFORMS[2];
     if (wf.kind === "layer") return null;
+    if ((wf.special || []).includes("exact")) return 0;
     if (["fm", "fm4", "noise", "baked", "beep"].includes(wf.kind)) return 0;
     return wf.kind === "triangle" ? 32 : 16;
   }
@@ -5242,10 +5546,11 @@ registerProcessor('mmsxx-duty', DutyBank);
   }
   function ampFor(ev) {
     const w = WAVEFORMS[ev.wave];
+    const boost = w && w.gain > 0 ? w.gain : 1;
     if (w && (w.special || []).includes("fixedvolume")) {
-      return ev.vol > 0 ? volGain(15) * MASTER_VOL : 0;
+      return ev.vol > 0 ? volGain(15) * MASTER_VOL * boost : 0;
     }
-    return volGain(ev.vol) * MASTER_VOL;
+    return volGain(ev.vol) * MASTER_VOL * boost;
   }
   function volGain(v) {
     if (v <= 0) return 0;
@@ -5354,7 +5659,7 @@ registerProcessor('mmsxx-duty', DutyBank);
       if (!e.echo || !(e.echo.delay > 0) || !(e.vol > 0)) continue;
       const k = 0.12 + e.echo.depth * 0.05;
       let vol = e.vol;
-      for (let r = 1; r <= 8; r++) {
+      for (let r = 1; r <= 32; r++) {
         vol *= k;
         if (vol < 0.7) break;
         const at = e.t + e.echo.delay * r;
@@ -8543,10 +8848,10 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out;
   }
 
-  // tool/ui/version.js
+  // player-update/upstream/tool/ui/version.js
   var PLAYER_VERSION = "1.0.0";
 
-  // tool/core/tomml.js
+  // player-update/upstream/tool/core/tomml.js
   var NAMES = ["c", "c+", "d", "d+", "e", "f", "f+", "g", "g+", "a", "a+", "b"];
   var LENS = [
     [16, "1"],
@@ -8626,7 +8931,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out.join("\n\n");
   }
 
-  // tool/core/wav.js
+  // player-update/upstream/tool/core/wav.js
   function writeWAV(samples, rate = 44100) {
     const n = samples.length;
     const out = new Uint8Array(44 + n * 2);
@@ -8654,7 +8959,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out;
   }
 
-  // tool/ui/player.js
+  // player-update/upstream/tool/ui/player.js
   var COPYRIGHT = "2026 harayoki";
   var PLAYER_CSS = `
 .mmsxx-player{ font-family:var(--mono); font-size:13px; line-height:1.55; color:var(--ink); }
@@ -10102,16 +10407,8 @@ ChipTuneSound ${SOUND_VERSION}
     };
   }
 
-  // browser-entry.js
-  var sound = {
-    ...audio_exports,
-    ...mml_exports,
-    ...tones_exports,
-    mountPlayer,
-    PLAYER_CSS,
-    PLAYER_VERSION,
-    player: { mount: mountPlayer, CSS: PLAYER_CSS, version: PLAYER_VERSION }
-  };
+  // player-update/upstream/browser-entry.js
+  var sound = { ...audio_exports, ...mml_exports, ...tones_exports, mountPlayer, PLAYER_CSS, PLAYER_VERSION, player: { mount: mountPlayer, CSS: PLAYER_CSS, version: PLAYER_VERSION } };
   window.MMSXX = window.MMSXX || {};
   window.MMSXX.sound = sound;
 })();
