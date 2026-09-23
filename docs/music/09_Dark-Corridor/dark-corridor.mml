@@ -1,19 +1,11 @@
 /*
-JS側の音色・エンベロープ設定が必要です。
-MMLだけをコピーしても元の音色・鳴り方は再現できません。
-設定元: docs/music/09_Dark-Corridor/player.js
-独自音色: なし。
-独自エンベロープ: gradual。
-以下はJS側の設定コードです。コメント内なのでMMLからは実行されません。
-エンジン読込後、MMLを読み込む前に、利用先のJavaScriptへコピーしてください。
+このMMLはJS側の音色・エンベロープ設定が必要です。
+設定JS: https://harayoki.github.io/MMSXX_samples/music/09_Dark-Corridor/player.js
 
---- 設定コード（JavaScript） ---
-const E = MMSXX.sound;
-E.registerEnvelope('gradual', {
-  a: 0.003, d: 0.65, s: 0.65, r: 0.06,
-  note: 'Quick attack, then a gradual fall with a smooth ending.',
-  noteJa: '素早く立ち上がり、ゆっくり弱まり、音の終わりもなめらかに消える。',
-});
+音色:
+- なし
+エンベロープ:
+- gradual
 */
 
 #title 闇の回廊
