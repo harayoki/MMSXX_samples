@@ -9,7 +9,7 @@
 */
 
 #title 闇の回廊
-#version 8.0
+#version 8.1
 #about 4拍子のダンジョン探索曲。D短調を基調に、半音の緊張感と素直なハモリを織り交ぜる。8小節ごとのA→B→A→B′構成。
 #copyright 2026 harayoki
 #license CC BY 4.0 (music and MML source)
@@ -17,7 +17,7 @@
 // Aは和声音を中心に約2割の外音を混ぜ、Bは外音を積極的に強調して半音で解決する。
 // A: Dm(add9)→E♭maj7/D→A♭maj7(♯11)→A7(b9)。
 // B: Gm→B♭maj7/F→E♭maj7/G→F♯dim7/A→Fm→E♭maj7/D→Bdim7/F→A7(b9)。
-// B′は後半を変奏し、最後の小節をDm(add9)で閉じる。
+// B′は後半を変奏し、最後も8分・16分の動きを保って冒頭へつなぐ。
 
 #bundle exploreKick = @{noise:white} @e{snap} @o-2
 #bundle exploreSnare = @{noise:white} @e{tap} @o+1
@@ -58,9 +58,9 @@ r8 o5g16 o5b-16 o5a8 r8 o5g8 o5f8 o5f8 o5c8
 // 14 B Ebmaj7/D
 o5g8 r16 o5b-8. o5g4 r8 o5f16 o5e16 o5e-8
 // 15 B Bdim7/F
-r16 o5f8. o5g16 o5a-8. r8 o5f8 o5d8 o5f8
-// 16 B A7(b9)
-o5g8 o5b-16 o5a-16 r8 o5g8 o5e8 o5c+8 o5c+8 r8
+r16 o5f8. o5g16 o5a-8. r8 o5f8 o5d8 o5e8
+// 16 B A7
+o5g8 o5a16 o5g16 r8 o5e8 o5e8 o5d8 o5c+8 r8
 #label A_return
 // 17 A再現 Dm(add9)
 r8 o5d8 o5e16 o5f8. r8 o5d8 o5c8 r8
@@ -92,9 +92,9 @@ r8 o5g16 o5b-16 o5a8 r8 o6c8 o6d8 o6c8 o5f8
 // 30 B終結 Ebmaj7/D
 o5g8 r16 o5b-8. o5g4 r8 o5f16 o5e16 o5e-8
 // 31 B終結 Bdim7/F
-r16 o5f8. o5g16 o5a-8. r8 o6f8 o6d8 o6f8
+r16 o5f8. o5g16 o5a-8. r8 o5f8 o5d8 o5e8
 // 32 B終結 Dm(add9)
-r8 o6e-8 o6d8 o5a-8 o5f8 o5e-8 o5d4
+r8 o5f8 o5e16 o5d16 o5f8 r8 o5a8 o5e8 o5c+8
 
 
 #ch 副旋律 B
@@ -130,9 +130,9 @@ r8 o4b-16 o5d16 o5c8 r8 o4b-8 o4a8 o4a8 o4e8
 // 14
 o4b-8 r16 o5d8. o4b-4 r8 o4a16 o4g16 o4g8
 // 15
-r16 o4a-8. o4f4 o4d8 o4f8 o4a-4
+r16 o4a-8. o4f4 o4d8 o4f8 o4b4
 // 16
-r16 o4c+8. o4e4 o4g8 o4e8 o4c+4
+r16 o4c+8. o4e4 o4g8 o4f8 o4e4
 // 17
 r8 o4f8 o4g16 o4a8. r8 o4f8 o4e8 r8
 // 18
@@ -162,9 +162,9 @@ r8 o4b-16 o5d16 o5c8 r8 o5e8 o5f8 o5e8 o4a8
 // 30
 o4b-8 r16 o5d8. o4b-4 r8 o4a16 o4g16 o4g8
 // 31
-r16 o4b8. o4b4 o5d8 o5f8 o5d4
+r16 o4a-8. o4f4 o4d8 o4f8 o4b4
 // 32
-r8 o5g8 o5f8 o5c8 o4a8 o4g8 o4f4
+r8 o4a8 o4g16 o4f16 o4a8 r8 o5c8 o4g8 o4e8
 
 
 #ch ベース
@@ -272,7 +272,7 @@ r4 r8 o6b-16 r2 r16
 // 15
 r8 o6b16 r2 r4 r16
 // 16
-r4 r8 r16 o6b-16 r2
+r4 r8 r16 o6a16 r2
 // 17
 r8 r16 o6f16 r2 r4
 // 18
