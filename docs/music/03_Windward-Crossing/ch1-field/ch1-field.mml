@@ -1,3 +1,12 @@
+/*
+JS側の音色・エンベロープ設定が必要です。
+MMLだけをコピーしても元の音色・鳴り方は再現できません。
+設定元: docs/music/03_Windward-Crossing/ch1-field/player.js
+独自音色: wcFieldLead。
+独自エンベロープ: wcLeadEnv。
+再利用時は、上記JSの設定・適用処理も移植してください。
+*/
+
 #title Windward Crossing — CH1 Field
 #version 1.0
 #about Windward CrossingのCH1（主旋律）のフィールド部分だけを再生。

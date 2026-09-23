@@ -1,3 +1,13 @@
+/*
+JS側の音色・エンベロープ設定が必要です。
+MMLだけをコピーしても元の音色・鳴り方は再現できません。
+設定元: docs/music/02_Pocket-Tunnel/player.js
+独自音色: ptKick, ptLead, ptArp, ptBass, ptChord, ptHarmony。
+独自エンベロープ: ptHeld, ptDecay, ptEnv0…（ptHeld／ptDecayを音長に応じて変換・適用）。
+音色登録に加え、prepare() によるエンベロープ・音量等の補正も必要。
+再利用時は、上記JSの設定・適用処理も移植してください。
+*/
+
 // この数値を直すと本編のループ回数が変わります（1以上）。
 // イントロとエンディングは1回ずつ。全パート共通で、再生とWAVの両方に適用。
 $LOOP_END = { 1 }

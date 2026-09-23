@@ -1,3 +1,12 @@
+/*
+JS側の音色・エンベロープ設定が必要です。
+MMLだけをコピーしても元の音色・鳴り方は再現できません。
+設定元: docs/music/05_Windward-Battle-Interactive/player.js
+独自音色: wcFieldLead, wcBattleLead, wcCounterLead, wcBattleBass, wcBass, wcArp, wcKick。
+独自エンベロープ: wcLeadEnv, wcPluckEnv, wcDrumEnv, wcBattleBassEnv。
+再利用時は、上記JSの設定・適用処理も移植してください。
+*/
+
 #title 調整中：風渡りの境界 戦闘曲(インタラクティブ)
 #version 1.7
 #about 風渡りの境界 の戦闘曲を動的に切り変え可能にしたものです。ゲームの展開に合わせて使います。CH3とCH4は発音が重ならないため統合可能。
