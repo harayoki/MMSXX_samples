@@ -25,7 +25,7 @@
 
 #ch 主旋律 A
 #role lead
-t120 q7 v12 @{pulse:25} @e{gradual}
+t120 q7 v11 @{pulse:25} @e{gradual}
 // Aは「D-E♭-F」のフック。Bの表拍は和声音へ着地し、短い外音は主に裏拍に置く。
 #label A_start
 // 01 A Dm(add9)
@@ -98,7 +98,7 @@ r8 o6e-8 o6d8 o5a-8 o5f8 o5e-8 o5d4
 
 #ch 副旋律 B
 #role counter
-t120 q7 v7 @{pulse:12.5} @e{gradual}
+t120 q7 v10 @{pulse:12.5} @e{gradual} @o-1
 // 別の歌い手が受け持つ副旋律。A/Bでは控えめに応答し、B′で3度・6度のハモリを増やす。小節頭の16分をキックへ譲る。
 // 01
 r16 o4f8. o4a4 o4e4 o4f4
@@ -149,7 +149,7 @@ r16 o4a-8. o4b4 o4a-8 o4f8 o4d4
 // 24
 r16 o4c+8. o4e4 o4g8 o4e8 o4c+4
 // 25
-v8 r16 o4b-8. o4b-4 o5d8 o5c8 o4b-4
+v10 r16 o4b-8. o4b-4 o5d8 o5c8 o4b-4
 // 26
 r16 o4a8. o4a4 o5c8 o4b-8 o4a4
 // 27
