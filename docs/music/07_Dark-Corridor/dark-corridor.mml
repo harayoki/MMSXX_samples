@@ -98,7 +98,7 @@ r8 o6e-8 o6d8 o5a-8 o5f8 o5e-8 o5d4
 
 #ch 副旋律 B
 #role counter
-t120 q7 v10 @{pulse:12.5} @e{gradual} @o-1
+t120 q7 v10 @{pulse:12.5} @e{gradual}
 // 基本は独立した応答。05・06・17・18・27・32小節は主旋律とリズムを揃え、長短6度（オクターブ差を除く）でハモる。
 // 01
 r16 o4f8. o4a4 o4e4 o4f4
@@ -167,8 +167,8 @@ r8 o5g8 o5f8 o5c8 o4a8 o4g8 o4f4
 
 #ch ベース
 #role bass
-t120 q8 v11 @{wtNesTriangle} @e{flat}
-// 和音の根音は維持し、小節末に次の根音を半音で導く経過音を置く。v11はプレビューの固定ミックス値。
+t120 q8 v15 @{wtNesTriangle} @e{flat}
+// 和音の根音は維持し、小節末に次の根音を半音で導く経過音を置く。NES三角波は固定音量のためv15とする。
 // 01
 o2d8. r16 o2a8 o2d8 r8 o2f8 o2a8 o2f8
 // 02
