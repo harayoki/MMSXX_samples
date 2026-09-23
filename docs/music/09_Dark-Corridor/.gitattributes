@@ -1,5 +1,0 @@
-# Keep these four cover candidates directly readable by the sample page.
-dark-corridor-01.png -filter -diff -merge -text
-dark-corridor-02.png -filter -diff -merge -text
-dark-corridor-03.png -filter -diff -merge -text
-dark-corridor-04.png -filter -diff -merge -text

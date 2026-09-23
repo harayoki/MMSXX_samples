@@ -15,7 +15,7 @@ const songs = [
   ['05_Windward-Battle-Interactive', 'wbi-src',
     '../03_Windward-Crossing/windward-crossing.png',
     '風渡りの境界 戦闘曲(インタラクティブ)', true],
-  ['09_Dark-Corridor', 'dark-corridor-src', 'dark-corridor-01.png', '闇の回廊'],
+  ['09_Dark-Corridor', 'dark-corridor-src', null, '闇の回廊'],
 ];
 
 (async () => {
@@ -72,7 +72,7 @@ const songs = [
       }), true, 'title / version / upper-level navigation order');
       assert.equal(await player.locator('[data-p="showmml"]').isVisible(), false);
       assert.equal(await page.locator('#' + editorId).isEnabled(), true);
-      assert.equal(
+      if (image) assert.equal(
         await page.locator('[data-music-image]').getAttribute('href'),
         new URL(folder + '/' + image, published ? media : prefix).href,
       );
