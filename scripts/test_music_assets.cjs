@@ -15,6 +15,7 @@ const songs = [
   ['05_Windward-Battle-Interactive', 'wbi-src',
     '../03_Windward-Crossing/windward-crossing.png',
     '風渡りの境界 戦闘曲(インタラクティブ)', true],
+  ['09_Dark-Corridor', 'dark-corridor-src', 'dark-corridor-01.png', '闇の回廊'],
 ];
 
 (async () => {
