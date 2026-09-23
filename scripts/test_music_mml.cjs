@@ -82,7 +82,7 @@ const songs = [
   ['04_Grassland-Trinity/grassland-trinity.mml', 4],
   ['05_Windward-Battle-Interactive/windward-battle-interactive.mml', 4],
   ['06_BEAT_V2/beat_v2.mml', 4],
-  ['09_Dark-Corridor/dark-corridor.mml', 6,
+  ['07_Dark-Corridor/dark-corridor.mml', 6,
     ['A_start', 'B_start', 'A_return', 'B_final']],
   ['DUMMY/tape-load-melancholy.mml', 7],
 ];
