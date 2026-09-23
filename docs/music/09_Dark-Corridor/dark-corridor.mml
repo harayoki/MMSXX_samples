@@ -4,7 +4,16 @@ MMLだけをコピーしても元の音色・鳴り方は再現できません�
 設定元: docs/music/09_Dark-Corridor/player.js
 独自音色: なし。
 独自エンベロープ: gradual。
-再利用時は、上記JSの設定・適用処理も移植してください。
+以下はJS側の設定コードです。コメント内なのでMMLからは実行されません。
+エンジン読込後、MMLを読み込む前に、利用先のJavaScriptへコピーしてください。
+
+--- 設定コード（JavaScript） ---
+const E = MMSXX.sound;
+E.registerEnvelope('gradual', {
+  a: 0.003, d: 0.65, s: 0.65, r: 0.06,
+  note: 'Quick attack, then a gradual fall with a smooth ending.',
+  noteJa: '素早く立ち上がり、ゆっくり弱まり、音の終わりもなめらかに消える。',
+});
 */
 
 #title 闇の回廊

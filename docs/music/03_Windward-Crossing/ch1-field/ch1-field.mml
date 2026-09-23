@@ -4,7 +4,20 @@ MMLだけをコピーしても元の音色・鳴り方は再現できません�
 設定元: docs/music/03_Windward-Crossing/ch1-field/player.js
 独自音色: wcFieldLead。
 独自エンベロープ: wcLeadEnv。
-再利用時は、上記JSの設定・適用処理も移植してください。
+以下はJS側の設定コードです。コメント内なのでMMLからは実行されません。
+エンジン読込後、MMLを読み込む前に、利用先のJavaScriptへコピーしてください。
+
+--- 設定コード（JavaScript） ---
+const E = MMSXX.sound;
+E.registerEnvelope('wcLeadEnv', {
+  a: .004, d: .09, s: .68, r: .012,
+  note: 'Windward Crossing lead envelope.',
+  noteJa: 'Windward Crossingのリード用エンベロープ。',
+});
+E.registerTone('wcFieldLead', {
+  wave: 'wtNesTriangle', env: 'wcLeadEnv',
+  note: 'Field lead.', noteJa: 'フィールド用リード。',
+});
 */
 
 #title Windward Crossing — CH1 Field
