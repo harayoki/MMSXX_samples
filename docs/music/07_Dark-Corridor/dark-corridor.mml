@@ -99,7 +99,7 @@ r8 o6e-8 o6d8 o5a-8 o5f8 o5e-8 o5d4
 #ch 副旋律 B
 #role counter
 t120 q7 v10 @{pulse:12.5} @e{gradual}
-// 基本は独立した応答。05・06・17・18・27・32小節は主旋律とリズムを揃え、長短6度（オクターブ差を除く）でハモる。
+// 基本は独立した応答。05・06・09・10・13・14・17・18・25・26・27・29・30・32小節は主旋律とリズムを揃え、長短6度（オクターブ差を除く）でハモる。
 // 01
 r16 o4f8. o4a4 o4e4 o4f4
 // 02
@@ -117,17 +117,17 @@ r16 o4a-8. o4b4 o4a-8 o4f8 o4d4
 // 08
 r16 o4c+8. o4e4 o4g8 o4e8 o4c+4
 // 09
-r16 o4d8. o5c4 o4g4 o4f4
+r8 o4b-16 o5c16 o5d8 r8 o4b-8 o4a8 o4f8 o5d8
 // 10
-r16 o4f8. o4a4 o4f8 o4d8 o4g4
+o5c8 r16 o5d8. o5c4 r8 o4a16 o4g16 o4f8
 // 11
 r16 o4b-8. o4g4 o4b-4 o4g4
 // 12
 r16 o4e-8. o4c4 o4a4 o4f+4
 // 13
-r16 o4c8. o4f4 o5c8 o4f8 o5c4
+r8 o4b-16 o5d16 o5c8 r8 o4b-8 o4a8 o4a8 o4e-8
 // 14
-r16 o4b-8. o4g4 o4f8 o4e-8 o4g4
+o4b-8 r16 o5d8. o4b-4 r8 o4a16 o4g16 o4g8
 // 15
 r16 o4a-8. o4f4 o4d8 o4f8 o4a-4
 // 16
@@ -149,17 +149,17 @@ r16 o4a-8. o4b4 o4a-8 o4f8 o4d4
 // 24
 r16 o4c+8. o4e4 o4g8 o4e8 o4c+4
 // 25
-v10 r16 o4b-8. o4b-4 o5d8 o5c8 o4b-4
+r8 o4b-16 o5c16 o5d8 r8 o5f8 o5a8 o5f8 o5d8
 // 26
-r16 o4a8. o4a4 o5c8 o4b-8 o4a4
+o5c8 r16 o5d8. o5c4 r8 o5g16 o5g16 o5f8
 // 27
 r16 o4b-8. o5c16 o5d8. r8 o5b-8 o5a8 o5g8
 // 28
 r16 o4a8. o4a4 o5c8 o5e-8 o5c4
 // 29
-r16 o5c8. o5c4 o5e-8 o5d8 o5c4
+r8 o4b-16 o5d16 o5c8 r8 o5e-8 o5f8 o5e-8 o4a8
 // 30
-r16 o4b-8. o4b-4 o4a8 o4g8 o4f4
+o4b-8 r16 o5d8. o4b-4 r8 o4a16 o4g16 o4g8
 // 31
 r16 o4b8. o4b4 o5d8 o5f8 o5d4
 // 32
