@@ -1,14 +1,16 @@
+// Pin the shared state dependency for every CodeMirror module. Different copies
+// of @codemirror/state make extensions fail their instanceof checks.
 import { EditorState } from 'https://esm.sh/@codemirror/state@6.7.5';
 import {
   EditorView, highlightActiveLine, keymap,
-} from 'https://esm.sh/@codemirror/view@6.43.12';
+} from 'https://esm.sh/@codemirror/view@6.43.12?deps=@codemirror/state@6.7.5';
 import {
   defaultKeymap, history, historyKeymap,
-} from 'https://esm.sh/@codemirror/commands@6.11.1';
+} from 'https://esm.sh/@codemirror/commands@6.11.1?deps=@codemirror/state@6.7.5';
 import {
   HighlightStyle, StreamLanguage, syntaxHighlighting,
-} from 'https://esm.sh/@codemirror/language@6.12.4';
-import { search, searchKeymap } from 'https://esm.sh/@codemirror/search@6.5.11';
+} from 'https://esm.sh/@codemirror/language@6.12.4?deps=@codemirror/state@6.7.5';
+import { search, searchKeymap } from 'https://esm.sh/@codemirror/search@6.5.11?deps=@codemirror/state@6.7.5';
 import { tags } from 'https://esm.sh/@lezer/highlight@1.2.3';
 
 // 行頭（空白可）の # はシステム行。// と /* ... */ は通常コメント。
@@ -119,9 +121,30 @@ export function mountMMLTextarea(textarea, source, options = {}) {
   textarea.before(host);
   textarea.hidden = true;
   textarea.disabled = false;
-  return mountMMLEditor(host, source, {
-    ...options,
-    mirror: textarea,
-    label: textarea.getAttribute('aria-label') || 'MMLソース',
-  });
+  try {
+    return mountMMLEditor(host, source, {
+      ...options,
+      mirror: textarea,
+      label: textarea.getAttribute('aria-label') || 'MMLソース',
+    });
+  } catch (error) {
+    // Keep the song playable and editable if a CDN serves incompatible modules.
+    console.error('MML editor unavailable; using textarea', error);
+    host.remove();
+    textarea.value = source;
+    textarea.hidden = false;
+    let committed = source;
+    const onBlur = () => {
+      if (textarea.value === committed) return;
+      committed = textarea.value;
+      options.onCommit?.(committed);
+    };
+    textarea.addEventListener('blur', onBlur);
+    return {
+      getValue: () => textarea.value,
+      setValue(value) { textarea.value = committed = String(value ?? ''); },
+      focus: () => textarea.focus(),
+      destroy: () => textarea.removeEventListener('blur', onBlur),
+    };
+  }
 }
