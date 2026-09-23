@@ -1,14 +1,16 @@
+// Pin the shared state dependency for every CodeMirror module. Different copies
+// of @codemirror/state make extensions fail their instanceof checks.
 import { EditorState } from 'https://esm.sh/@codemirror/state@6.7.5';
 import {
   EditorView, highlightActiveLine, keymap,
-} from 'https://esm.sh/@codemirror/view@6.43.12';
+} from 'https://esm.sh/@codemirror/view@6.43.12?deps=@codemirror/state@6.7.5';
 import {
   defaultKeymap, history, historyKeymap,
-} from 'https://esm.sh/@codemirror/commands@6.11.1';
+} from 'https://esm.sh/@codemirror/commands@6.11.1?deps=@codemirror/state@6.7.5';
 import {
   HighlightStyle, StreamLanguage, syntaxHighlighting,
-} from 'https://esm.sh/@codemirror/language@6.12.4';
-import { search, searchKeymap } from 'https://esm.sh/@codemirror/search@6.5.11';
+} from 'https://esm.sh/@codemirror/language@6.12.4?deps=@codemirror/state@6.7.5';
+import { search, searchKeymap } from 'https://esm.sh/@codemirror/search@6.5.11?deps=@codemirror/state@6.7.5';
 import { tags } from 'https://esm.sh/@lezer/highlight@1.2.3';
 
 // 行頭（空白可）の # はシステム行。// と /* ... */ は通常コメント。
