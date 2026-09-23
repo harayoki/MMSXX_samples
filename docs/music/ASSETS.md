@@ -5,6 +5,14 @@
 `harayoki/mmsxx-mml-studio` の
 `c689363fa61288455fd99c0d8ee4bd6b060b7a70` をバンドルしたもの。
 
+## PLAYER更新・引継ぎルール
+
+- PLAYER／サウンドエンジンの更新元は [harayoki/mmsxx-mml-studio](https://github.com/harayoki/mmsxx-mml-studio)。更新調査では更新元の最新mainと、Sample側の取り込み済みコピーを比較する。
+- Sample側でエンジンを独自改造しない。`player-engine.js` の減衰計算、音量計算、MML解析、再生処理などを、曲の調整のために書き換えない。
+- 曲固有の音色・エンベロープ・音量設定は、公開APIを使って各曲の `player.js` またはMMLに記述する。
+- エンジン本体の修正が必要と思われる場合は、問題と根拠を報告する。明示指示なしにエンジンを変更しない。
+- 更新元リポジトリは参照のみとし、書き込まない。引継ぎ事項はこの文書に記載する。
+
 ## ファイル構成
 
 - 共通：`music-page.js`、`music-page.css`、`player-engine.js`
