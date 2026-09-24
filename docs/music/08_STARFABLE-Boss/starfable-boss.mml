@@ -9,11 +9,11 @@
 - sfPerc
 */
 
-#title STARFABLE ボス曲
+#title STARFABLE — BOSS
 #version 1.0
 #copyright 2026 harayoki
 #license CC BY 4.0 (music and MML source)
-#about 休みなく刻む16分ベースと、半音でぶつかる重いメロディ。
+#about MSX1風のSTG "STAR FABLE" のBGMをファミコン縛りの音構成で再現しました。
 
 // 168 BPM。Intro → 8小節×4回 → Finale。全体約55.24秒。
 // 裏メロとベース補強は交互に発音し、矩形波2を共用する。
