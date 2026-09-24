@@ -1,12 +1,4 @@
-/*
-このMMLはJS側の音色・エンベロープ設定が必要です。
-設定JS: https://harayoki.github.io/MMSXX_samples/music/07_Dark-Corridor/player.js
-
-音色:
-- なし
-エンベロープ:
-- gradual
-*/
+/* 組み込みエンベロープ gradual を使用。曲固有の音色・エンベロープ登録は不要です。 */
 
 #title 闇の回廊
 #version 8.1
