@@ -97,14 +97,13 @@
       if (wave.kind === 'pulse' && wave.duty === .5) event.vol *= Math.pow(.85, 1 / 1.8);
       const spec = legacyEnvelopes[event.env];
       if (!spec) continue;
-      const duration = Math.max(.02, event.gate);
-      const key = event.env + ':' + duration;
+      const key = event.env;
       if (!envelopeCache.has(key)) {
         const name = 'vpLegacy' + envelopeCache.size;
         E.registerEnvelope(name, {
-          ...spec, d: spec.d * duration,
-          note: 'Converted Volcano Parade envelope.',
-          noteJa: 'Volcano Paradeの旧音長比例エンベロープを秒指定へ変換。',
+          ...spec, d: `${spec.d * 100}%`,
+          note: 'Note-relative Volcano Parade envelope.',
+          noteJa: 'Volcano Paradeの音長比例エンベロープ。',
         });
         envelopeCache.set(key, E.ENVELOPES.findIndex(env => env.name === name));
       }
