@@ -6,6 +6,7 @@ const path = require('path');
 const assert = require('assert');
 const root = path.resolve(__dirname, '../docs/music');
 const songs = [
+  ['08_STARFABLE-Boss', 'starfable-boss-src', null, 'STARFABLE ボス曲'],
   ['01_Volcano-parade', 'vp-src', 'vol_par_crt_256.png', 'Volcano Parade'],
   ['02_Pocket-Tunnel', 'pt-src', 'pocket-tunnel.png', 'Pocket Tunnel'],
   ['03_Windward-Crossing', 'wc-src', 'windward-crossing.png', 'Windward Crossing'],
