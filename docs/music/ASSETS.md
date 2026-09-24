@@ -31,6 +31,7 @@
 | 草原のトリニティ | `04_Grassland-Trinity` |
 | 風渡りの境界 戦闘曲(インタラクティブ) | `05_Windward-Battle-Interactive` |
 | BEAT2 | `06_BEAT2` |
+| STARFABLE — BOSS | `08_STARFABLE-Boss` |
 
 草原のトリニティの `grassland-trinity.jpg` と
 `grassland-trinity.png` は未配置。リンク切れを許容している。

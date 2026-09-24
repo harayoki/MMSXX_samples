@@ -68,6 +68,7 @@ assert.equal(seekState.cursor, 0, 'seek must snap back to a note head within 5 m
 
 const root = path.resolve(__dirname, '../docs/music');
 const songs = [
+  ['08_STARFABLE-Boss/starfable-boss.mml', 6, ['Intro', 'Main', 'Finale']],
   ['01_Volcano-parade/volcano-parade.mml', 7,
     ['イントロ', 'Aメロ', 'Bメロ', 'Cメロ', '静かな区間', 'イントロ2', 'エンディング']],
   ['02_Pocket-Tunnel/original.mml', 12, ['イントロ', '本編', 'エンディング']],

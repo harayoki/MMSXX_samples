@@ -1,0 +1,160 @@
+/*
+このMMLはJS側のエンベロープ設定が必要です。
+設定JS: https://harayoki.github.io/MMSXX_samples/music/08_STARFABLE-Boss/player.js
+音色:
+- なし
+エンベロープ:
+- sfFlat
+- sfSoft
+- sfPerc
+*/
+
+#title STARFABLE — BOSS
+#version 1.0
+#copyright 2026 harayoki
+#license CC BY 4.0 (music and MML source)
+#about MSX1風のSTG "STAR FABLE" のBGMをファミコン縛りの音構成で再現しました。
+
+// 168 BPM。Intro → 8小節×3回 → Finale。全体約43.81秒。
+// 裏メロとベース補強は交互に発音し、矩形波2を共用する。
+// 主旋律v8〜12に対し、ベース補強はv12〜8。三角波の音量は固定。
+#ch 主旋律
+#role lead
+t168 q8 v11 l4 @{pulse:12.5} @e{sfSoft} @m5 @d12
+#label Intro
+o5 v11 d6 o4 v11 b-4 v11 a4 o4 v10 g+4 v9 a4 v9 b-4 v9 a4 o4 v9 d1
+#label Main
+// 8小節でv8からv12へ膨らみ、v8へ戻る
+[o4 v8 d4 v8 f4 v8 e-4 v9 d4 o4 v9 a2 v9 g+4 v9 a4 o4 v10 b-4 v11 a4 v11 g4 v11 f4 o4 v11 d2 r2 o4 v12 d4 v12 f4 v12 a4 >v11 c4< o4 >v11 d2< v11 b-4 v11 a4 o4 v10 g+4 v9 a4 v9 b-4 v9 a4 o4 v9 d1]3
+
+
+#label Finale
+// 元のメロディ後半を保ってフェードアウト
+o4 v12 d4 v12 f4 v12 a4 >v11 c4< o4 >v11 d2< v11 b-4 v11 a4 o4 v10 g+4 v9 a4 v9 b-4 v9 a4 o4 v9 d1
+
+#ch 裏メロ
+#role counter
+t168 q7 v7 @{pulse:25} @e{sfFlat}
+#label Intro
+q8 r64 o5d8&o5d192 r32 r192 o4b-6&o4b-32&o4b-192 r24 r192 o4a6&o4a32&o4a192 r24 r192 o4g+24&o4g+192 r64 o4g+24&o4g+192 r64 o4g+24&o4g+192 r64 o4g+64 r24 r192 o4a24&o4a192 r64 o4a24&o4a192 r64 o4a24&o4a192 r64 o4a64 r24 r192 o4b-24&o4b-192 r64 o4b-24&o4b-192 r64 o4b-24&o4b-192 r64 o4b-64 r24 r192 o4a24&o4a192 r64 o4a24&o4a192 r64 o4a24&o4a192 r64 o4a64 r24 r192 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r8
+q7
+
+#label Main
+// 矩形波2を短いベース補強へ譲る
+q8 [
+o4d16 r64 o4d32&o4d64 r64 o4d32&o4d64 r64 o4d64 r32 r64 o4f32&o4f64 r64 o4f32&o4f64 r64 o4f32&o4f64 r64 o4f64 r32 o4e-16 r64 o4e-32&o4e-64 r64 o4e-32&o4e-64 r64 o4e-64 r32 r64 o4d32&o4d64 r64 o4d32&o4d64 r64 o4d32&o4d64 r64 o4d64 r32 o4a16 r64 o4a32&o4a64 r64 o4a32&o4a64 r64 o4a32&o4a64 r64 o4a32&o4a64 r64 o4a32&o4a64 r64 o4a32&o4a64 r16 o4g+16 r64 o4g+32&o4g+64 r64 o4g+32&o4g+64 r64 o4g+64 r32 r64 o4a32&o4a64 r64 o4a32&o4a64 r64 o4a32&o4a64 r64 o4a64 r32 o4b-16 r64 o4b-32&o4b-64 r64 o4b-32&o4b-64 r64 o4b-64 r32 r64 o4a32&o4a64 r64 o4a32&o4a64 r64 o4a32&o4a64 r64 o4a64 r32 o4g16 r64 o4g32&o4g64 r64 o4g32&o4g64 r64 o4g64 r32 r64 o4f32&o4f64 r64 o4f32&o4f64 r64 o4f32&o4f64 r64 o4f64 r32 o4d16 r64 o4d32&o4d64 r64 o4d32&o4d64 r64 o4d32&o4d64 r64 o4d32&o4d64 r64 o4d32&o4d64 r64 o4d32&o4d64 r2 r16 o4d16 r64 o4d32&o4d64 r64 o4d32&o4d64 r64 o4d64 r32 r64 o4f32&o4f64 r64 o4f32&o4f64 r64 o4f32&o4f64 r64 o4f64 r32 o4a16 r64 o4a32&o4a64 r64 o4a32&o4a64 r64 o4a64 r32 r64 o5c32&o5c64 r64 o5c32&o5c64 r64 o5c32&o5c64 r64 o5c64 r32 o5d16 r64 o5d32&o5d64 r64 o5d32&o5d64 r64 o5d32&o5d64 r64 o5d32&o5d64 r64 o5d32&o5d64 r64 o5d32&o5d64 r16 o4b-16 r64 o4b-32&o4b-64 r64 o4b-32&o4b-64 r64 o4b-64 r32 r64 o4a32&o4a64 r64 o4a32&o4a64 r64 o4a32&o4a64 r64 o4a64 r32 o4g+16 r64 o4g+32&o4g+64 r64 o4g+32&o4g+64 r64 o4g+64 r32 r64 o4a32&o4a64 r64 o4a32&o4a64 r64 o4a32&o4a64 r64 o4a64 r32 o4b-16 r64 o4b-32&o4b-64 r64 o4b-32&o4b-64 r64 o4b-64 r32 r64 o4a32&o4a64 r64 o4a32&o4a64 r64 o4a32&o4a64 r64 o4a64 r32 o4d16 r64 o4d32&o4d64 r64 o4d32&o4d64 r64 o4d32&o4d64 r64 o4d32&o4d64 r64 o4d32&o4d64 r64 o4d32&o4d64 r64 o4d16&o4d32&o4d64 r64 o4d32&o4d64 r64 o4d32&o4d64 r64 o4d32&o4d64 r4
+]3
+q7
+
+#label Finale
+q8 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d64 r24 r192 o4f24&o4f192 r64 o4f24&o4f192 r64 o4f24&o4f192 r64 o4f64 r24 r192 o4a24&o4a192 r64 o4a24&o4a192 r64 o4a24&o4a192 r64 o4a64 r24 r192 o5c24&o5c192 r64 o5c24&o5c192 r64 o5c24&o5c192 r64 o5c64 r24 r192 o5d24&o5d192 r64 o5d24&o5d192 r64 o5d24&o5d192 r64 o5d24&o5d192 r64 o5d24&o5d192 r64 o5d24&o5d192 r64 o5d24&o5d192 r16 r64 o4b-24&o4b-192 r64 o4b-24&o4b-192 r64 o4b-24&o4b-192 r64 o4b-64 r24 r192 o4a24&o4a192 r64 o4a24&o4a192 r64 o4a24&o4a192 r64 o4a64 r24 r192 o4g+24&o4g+192 r64 o4g+24&o4g+192 r64 o4g+24&o4g+192 r64 o4g+64 r24 r192 o4a24&o4a192 r64 o4a24&o4a192 r64 o4a24&o4a192 r64 o4a64 r24 r192 o4b-24&o4b-192 r64 o4b-24&o4b-192 r64 o4b-24&o4b-192 r64 o4b-64 r24 r192 o4a24&o4a192 r64 o4a24&o4a192 r64 o4a24&o4a192 r64 o4a64 r24 r192 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r8
+q7
+
+#ch ベース補強
+#role bass
+t168 q7 v10 @{pulse:25} @e{sfFlat}
+#label Intro
+v9 o2c64 r8 r48 r192 v9 o2c64 r6 r16 r192 v9 o2c64 r6 r16 r192 v10 o2e-64 r24 r192 v10 o2e-64 r24 r192 v10 o2e-64 r24 r192 v10 o2e-64 r24 r192 v11 o2e-64 r24 r192 v11 o2e-64 r24 r192 v11 o2e-64 r24 r192 v11 o2e-64 r24 r192 v11 o2e-64 r24 r192 v11 o2e-64 r24 r192 v11 o2e-64 r24 r192 v11 o2e-64 r24 r192 v11 o2e-64 r24 r192 v11 o2e-64 r24 r192 v11 o2e-64 r24 r192 v11 o2e-64 r24 r192 v11 o2d64 r24 r192 v11 o2d64 r24 r192 v11 o2d64 r24 r192 v11 o2d64 r24 r192 v11 o2d64 r24 r192 v11 o2d64 r24 r192 v11 o2d64 r24 r192 v11 o2d64 r24 r192 v11 o2d64 r24 r192 v11 o2d64 r24 r192 v11 o2d64 r24 r192 v11 o2d64 r24 r192 v11 o2d64 r24 r192 v11 o2d64 r24 r192 v11 o2d64 r24 r192 v11 o2d64 r24 r192
+
+#label Main
+// 矩形波2。64分音符、5度位置は休符
+[
+r16 v12 o2d64 r64 r32 v12 o2d64 r64 r32 v12 o2d64 r64 r32 v12 o2d64 r64 r32 v12 o2d64 r64 r32 v12 o2d64 r64 r32 v12 o2d64 r64 r32 r16 v12 o2d64 r64 r32 v12 o2d64 r64 r32 v12 o2d64 r64 r32 v11 o2d64 r64 r32 v11 o2d64 r64 r32 v11 o2d64 r64 r32 v11 o2d64 r64 r32
+r16 v11 o2d64 r64 r32 v11 o2d64 r64 r32 v11 o2d64 r64 r32 v11 o2d64 r64 r32 v11 o2d64 r64 r32 v11 o2d64 r64 r32 v11 o2d64 r64 r32 r16 v11 o2d64 r64 r32 v11 o2d64 r64 r32 v11 o2d64 r64 r32 v11 o2d64 r64 r32 v11 o2d64 r64 r32 v11 o2d64 r64 r32 v11 o2d64 r64 r32
+r16 v10 o2e-64 r64 r32 v10 o2e-64 r64 r32 v10 o2e-64 r64 r32 v9 o2e-64 r64 r32 v9 o2e-64 r64 r32 v9 o2e-64 r64 r32 v9 o2e-64 r64 r32 r16 v9 o2e-64 r64 r32 v9 o2e-64 r64 r32 v9 o2e-64 r64 r32 v9 o2e-64 r64 r32 v9 o2e-64 r64 r32 v9 o2e-64 r64 r32 v9 o2e-64 r64 r32
+r16 v9 o2d64 r64 r32 v9 o2d64 r64 r32 v9 o2d64 r64 r32 v9 o2d64 r64 r32 v9 o2d64 r64 r32 v9 o2d64 r64 r32 v9 o2d64 r64 r32 r16 v9 o2d64 r64 r32 v9 o2d64 r64 r32 v9 o2d64 r64 r32 v9 o2d64 r64 r32 v9 o2d64 r64 r32 v9 o2d64 r64 r32 v9 o2d64 r64 r32
+r16 v8 o2d64 r64 r32 v8 o2d64 r64 r32 v8 o2d64 r64 r32 v8 o2d64 r64 r32 v8 o2d64 r64 r32 v8 o2d64 r64 r32 v8 o2d64 r64 r32 r16 v8 o2d64 r64 r32 v8 o2d64 r64 r32 v8 o2d64 r64 r32 v9 o2d64 r64 r32 v9 o2d64 r64 r32 v9 o2d64 r64 r32 v9 o2d64 r64 r32
+r16 v9 o2c64 r64 r32 v9 o2c64 r64 r32 v9 o2c64 r64 r32 v9 o2c64 r64 r32 v9 o2c64 r64 r32 v9 o2c64 r64 r32 v9 o2c64 r64 r32 r16 v9 o2c64 r64 r32 v9 o2c64 r64 r32 v9 o2c64 r64 r32 v9 o2c64 r64 r32 v9 o2c64 r64 r32 v9 o2c64 r64 r32 v9 o2c64 r64 r32
+r16 v10 o2e-64 r64 r32 v10 o2e-64 r64 r32 v10 o2e-64 r64 r32 v11 o2e-64 r64 r32 v11 o2e-64 r64 r32 v11 o2e-64 r64 r32 v11 o2e-64 r64 r32 r16 v11 o2e-64 r64 r32 v11 o2e-64 r64 r32 v11 o2e-64 r64 r32 v11 o2e-64 r64 r32 v11 o2e-64 r64 r32 v11 o2e-64 r64 r32 v11 o2e-64 r64 r32
+r16 v11 o2d64 r64 r32 v11 o2d64 r64 r32 v11 o2d64 r64 r32 v11 o2d64 r64 r32 v11 o2d64 r64 r32 v11 o2d64 r64 r32 v11 o2d64 r64 r32 r16 v11 o2d64 r64 r32 v11 o2d64 r64 r32 v11 o2d64 r64 r32 r4
+]3
+#label Finale
+v8 o2d64 r24 r192 v8 o2d64 r24 r192 v8 o2d64 r24 r192 v8 o2d64 r24 r192 v8 o2d64 r24 r192 v8 o2d64 r24 r192 v8 o2d64 r24 r192 v8 o2d64 r24 r192 v8 o2d64 r24 r192 v8 o2d64 r24 r192 v8 o2d64 r24 r192 v8 o2d64 r24 r192 v9 o2d64 r24 r192 v9 o2d64 r24 r192 v9 o2d64 r24 r192 v9 o2d64 r24 r192 v9 o2c64 r24 r192 v9 o2c64 r24 r192 v9 o2c64 r24 r192 v9 o2c64 r24 r192 v9 o2c64 r24 r192 v9 o2c64 r24 r192 v9 o2c64 r24 r192 v9 o2c64 r24 r192 v9 o2c64 r24 r192 v9 o2c64 r24 r192 v9 o2c64 r24 r192 v9 o2c64 r24 r192 v9 o2c64 r24 r192 v9 o2c64 r24 r192 v9 o2c64 r24 r192 v9 o2c64 r24 r192 v10 o2e-64 r24 r192 v10 o2e-64 r24 r192 v10 o2e-64 r24 r192 v10 o2e-64 r24 r192 v11 o2e-64 r24 r192 v11 o2e-64 r24 r192 v11 o2e-64 r24 r192 v11 o2e-64 r24 r192 v11 o2e-64 r24 r192 v11 o2e-64 r24 r192 v11 o2e-64 r24 r192 v11 o2e-64 r24 r192 v11 o2e-64 r24 r192 v11 o2e-64 r24 r192 v11 o2e-64 r24 r192 v11 o2e-64 r24 r192 v11 o2d64 r24 r192 v11 o2d64 r24 r192 v11 o2d64 r24 r192 v11 o2d64 r24 r192 v11 o2d64 r24 r192 v11 o2d64 r24 r192 v11 o2d64 r24 r192 v11 o2d64 r24 r192 v11 o2d64 r24 r192 v11 o2d64 r24 r192 v11 o2d64 r24 r192 v11 o2d64 r24 r192 v11 o2d64 r24 r192 v11 o2d64 r24 r192 v11 o2d64 r24 r192 v11 o2d64 r24 r192
+
+#ch ベース
+#role bass
+t168 q6 v15 @{wtNesTriangle} @e{flat}
+// 16分音符q6。各音の残り2/8は無音。高音合の手なし
+#label Intro
+q6 o2c6 o2c4 o2c4
+q6
+o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16
+o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16
+#label Main
+[
+o2a16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2a16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16
+o2a16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2a16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16
+o2b-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2b-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16
+o2a16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2a16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16
+o2a16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2a16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16
+o2g16 o2c16 o2c16 o2c16 o2c16 o2c16 o2c16 o2c16 o2g16 o2c16 o2c16 o2c16 o2c16 o2c16 o2c16 o2c16
+o2b-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2b-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16
+o2a16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2a16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16
+]3
+
+
+#label Finale
+o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16
+o2c16 o2c16 o2c16 o2c16 o2c16 o2c16 o2c16 o2c16 o2c16 o2c16 o2c16 o2c16 o2c16 o2c16 o2c16 o2c16
+o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16
+o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16
+
+#ch タム
+#role drums
+t168 q7 v11 @{seFall} @e{snap}
+#label Intro
+r1 r1 r2 r6
+#label Main
+[r1 r1 r1 r1 r1 r1 r1 r2 r4 o3g16 o3f16 o3d8]3
+#label Finale
+r1 r1 r1 r1
+
+#ch ドラム
+#bundle sfNoiseKick = @{noise:white} @e{sfPerc} @o-2 q7
+#bundle sfNoiseSnare = @{noise:white} @e{sfPerc} q7
+#bundle sfNoiseHat = @{noise:white} @e{sfPerc} @o+2 q7
+#drum K = @{sfNoiseKick} v15 バスドラ
+#drum S = @{sfNoiseSnare} v9 スネア
+#drum H = @{sfNoiseHat} v5 ハット
+t168 q8
+#label Intro
+r24
+@{drums 16}{
+v12 S v12 H v12 K v13 H v13 S v13 H v11 K v13 H v13 S v13 H v12 K v14 H v14 S v14 H v12 K v15 H v15 S v15 H v13 K v15 H v15 S v15 H v13 K v15 H v15 S v15 H v14 K v15 H v15 S v15 H v13 K v15 H v15 S v15 H v14 K v15 H v15 S v15 H v13 K v15 H v15 S v15 H
+}
+#label Main
+@{drums 16}{
+
+v15 K v15 H v15 S v15 H v14 K v15 H v15 S v15 H v15 K v15 H v15 S v15 H v13 K v15 H v15 S v15 H
+v14 K v15 H v15 S v15 H v13 K v15 H v15 S v15 H v13 K v15 H v15 S v15 H v12 K v15 H v15 S v15 H
+v12 K v14 H v14 S v14 H v11 K v13 H v13 S v13 H v12 K v13 H v13 S v13 H v10 K v12 H v12 S v12 H
+v11 K v12 H v12 S v12 H v10 K v12 H v12 S v12 H v11 K v12 H v12 S v12 H v10 K v12 H v12 S v12 H
+v10 K v11 H v11 S v11 H v9 K v11 H v11 S v11 H v10 K v11 H v11 S v11 H v10 K v12 H v12 S v12 H
+v11 K v12 H v12 S v12 H v10 K v12 H v12 S v12 H v12 K v13 H v13 S v13 H v11 K v13 H v13 S v13 H
+v12 K v14 H v14 S v14 H v12 K v15 H v15 S v15 H v13 K v15 H v15 S v15 H v13 K v15 H v15 S v15 H
+v14 K v15 H v15 S v15 H v13 K v15 H v15 S v15 H v14 K v15 H v15 S v15 H v13 K v15 H v15 S v15 H
+v15 K v15 H v15 S v15 H v14 K v15 H v15 S v15 H v15 K v15 H v15 S v15 H v13 K v15 H v15 S v15 H
+v14 K v15 H v15 S v15 H v13 K v15 H v15 S v15 H v13 K v15 H v15 S v15 H v12 K v15 H v15 S v15 H
+v12 K v14 H v14 S v14 H v11 K v13 H v13 S v13 H v12 K v13 H v13 S v13 H v10 K v12 H v12 S v12 H
+v11 K v12 H v12 S v12 H v10 K v12 H v12 S v12 H v11 K v12 H v12 S v12 H v10 K v12 H v12 S v12 H
+v10 K v11 H v11 S v11 H v9 K v11 H v11 S v11 H v10 K v11 H v11 S v11 H v10 K v12 H v12 S v12 H
+v11 K v12 H v12 S v12 H v10 K v12 H v12 S v12 H v12 K v13 H v13 S v13 H v11 K v13 H v13 S v13 H
+v12 K v14 H v14 S v14 H v12 K v15 H v15 S v15 H v13 K v15 H v15 S v15 H v13 K v15 H v15 S v15 H
+v14 K v15 H v15 S v15 H v13 K v15 H v15 S v15 H v14 K v15 H v15 S v15 H v13 K v15 H v15 S v15 H
+v15 K v15 H v15 S v15 H v14 K v15 H v15 S v15 H v15 K v15 H v15 S v15 H v13 K v15 H v15 S v15 H
+v14 K v15 H v15 S v15 H v13 K v15 H v15 S v15 H v13 K v15 H v15 S v15 H v12 K v15 H v15 S v15 H
+v12 K v14 H v14 S v14 H v11 K v13 H v13 S v13 H v12 K v13 H v13 S v13 H v10 K v12 H v12 S v12 H
+v11 K v12 H v12 S v12 H v10 K v12 H v12 S v12 H v11 K v12 H v12 S v12 H v10 K v12 H v12 S v12 H
+v10 K v11 H v11 S v11 H v9 K v11 H v11 S v11 H v10 K v11 H v11 S v11 H v10 K v12 H v12 S v12 H
+v11 K v12 H v12 S v12 H v10 K v12 H v12 S v12 H v12 K v13 H v13 S v13 H v11 K v13 H v13 S v13 H
+v12 K v14 H v14 S v14 H v12 K v15 H v15 S v15 H v13 K v15 H v15 S v15 H v13 K v15 H v15 S v15 H
+v14 K v15 H v15 S v15 H v13 K v15 H v15 S v15 H v14 K v15 H v15 S v15 H v13 K v15 H v15 S v15 H
+}
+#label Finale
+t168 @{drums 16}{
+v10 K v11 H v11 S v11 H v9 K v11 H v11 S v11 H v10 K v11 H v11 S v11 H v10 K v12 H v12 S v12 H
+v11 K v12 H v12 S v12 H v10 K v12 H v12 S v12 H v12 K v13 H v13 S v13 H v11 K v13 H v13 S v13 H
+v12 K v14 H v14 S v14 H v12 K v15 H v15 S v15 H v13 K v15 H v15 S v15 H v13 K v15 H v15 S v15 H
+v14 K v15 H v15 S v15 H v13 K v15 H v15 S v15 H v14 K v15 H v15 S v15 H v13 K v15 H v15 S v15 H
+}
+
