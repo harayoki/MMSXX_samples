@@ -1,13 +1,3 @@
-/*
-このMMLはJS側の音色・エンベロープ設定が必要です。
-設定JS: https://harayoki.github.io/MMSXX_samples/music/07_Dark-Corridor/player.js
-
-音色:
-- なし
-エンベロープ:
-- gradual
-*/
-
 #title 闇の回廊
 #version 8.1
 #about RPGのダンジョン徘徊をイメージした曲。6chですが事実上3ch＋ノイズなのでファミコン仕様で演奏できるはず。

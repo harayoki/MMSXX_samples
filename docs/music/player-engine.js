@@ -1,4 +1,4 @@
-// MMS/XX player and audio engine, source commit 6c0a4f9efa6fdac50918a1d96650d6644d5212bd
+// MMS/XX player and audio engine, source commit 850b3ce6e88e6cec0ab7971f20b91b6cb912067f
 (() => {
   var __defProp = Object.defineProperty;
   var __export = (target, all) => {
@@ -676,6 +676,24 @@
       loop: 8,
       noteJa: "\u843D\u3061\u3066\u306F\u5C11\u3057\u623B\u308B\u3001\u3092\u7E70\u308A\u8FD4\u3057\u3066\u5C0F\u3055\u304F\u306A\u308A\u3001\u305D\u306E\u3042\u3068\u306F\u5C0F\u3055\u3044\u307E\u307E\u8DF3\u306D\u3064\u3065\u3051\u308B\u3002\u623B\u308B\u5148\u304C\u9014\u4E2D\u306A\u306E\u3067\u3001\u5927\u304D\u304F\u8DF3\u306D\u308B\u306E\u306F\u982D\u306E\u4F55\u56DE\u304B\u3060\u3051",
       note: "Falls, springs back a little, falls further \u2014 and once it is quiet it keeps bouncing at that size. The loop point sits partway in, so the big bounces only happen at the top."
+    },
+    // **ADSR 型だが、番号は後ろに付ける。**曲も部品も名前で持っている
+    //(`@e{名前}`、`samples/songs/*.json` の `"env": "piano"`)ので、どこへ
+    // 入れても鳴り方は変わらない。それでも後ろに付けるのは、一覧に並ぶ順が
+    // 動かないほうが、前に見たものを探しやすいため(2026-09-24)。
+    //
+    // organ との違いは 3 つで、立ち上がりが 3 倍速く(3ms / 10ms)、
+    // 伸びる高さが低く(65% / 90%)、終わりが 2 倍長い(60ms / 30ms)。
+    // organ より沈んでいて、切れ際が柔らかい
+    {
+      id: 17,
+      name: "gradual",
+      a: 3e-3,
+      d: 0.05,
+      s: 0.65,
+      r: 0.06,
+      noteJa: "\u7D20\u65E9\u304F\u7ACB\u3061\u4E0A\u304C\u308A\u3001\u3059\u3050\u5C11\u3057\u6C88\u3093\u3067\u3001\u305D\u3053\u3067\u4F38\u3073\u308B\u3002organ \u3088\u308A\u4F4E\u3044\u3068\u3053\u308D\u3067\u4F38\u3073\u308B\u306E\u3067\u524D\u306B\u51FA\u3059\u304E\u305A\u3001\u97F3\u306E\u7D42\u308F\u308A\u3082\u306A\u3081\u3089\u304B\u306B\u6D88\u3048\u308B",
+      note: "Up at once, a quick settle, then it holds \u2014 lower than organ, so it sits back in the mix rather than pushing forward, and it releases softly."
     }
   ];
   function envSec(v, len) {
@@ -2674,7 +2692,8 @@ ${val}`;
             env = readName(ENVELOPES, "\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7", env);
           } else if (kind === "e") {
             pos++;
-            env = clamp(readNumber() ?? env, 0, ENVELOPES.length - 1);
+            const n = readNumber();
+            bad(`[ChpTnSnd] MML: "@e${n ?? ""}" \u2014 \u756A\u53F7\u3067\u306F\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u3092\u9078\u3079\u307E\u305B\u3093\u3002@e{\u540D\u524D} \u3067\u66F8\u3044\u3066\u304F\u3060\u3055\u3044(\u756A\u53F7\u306F\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u3092\u8DB3\u3059\u3068\u305A\u308C\u308B\u306E\u3067\u901A\u3057\u3066\u3044\u307E\u305B\u3093)`);
           } else if (kind === "d") {
             pos++;
             detune = clamp(readSigned() ?? detune, -2400, 2400);

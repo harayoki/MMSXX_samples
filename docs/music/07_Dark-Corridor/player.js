@@ -1,11 +1,6 @@
 // 闇の回廊。共通プレイヤーと6パートMMLを使用する。
 (() => {
   const E = MMSXX.sound;
-  E.registerEnvelope('gradual', {
-    a: 0.003, d: 0.05, s: 0.65, r: 0.06,
-    note: 'Quick attack, short decay, and a smooth ending.',
-    noteJa: '素早く立ち上がり、短く減衰し、音の終わりはなめらかに消える。',
-  });
   const editor = document.getElementById('dark-corridor-src');
   const status = document.querySelector('[data-music-status]');
   const audio = new E.ChipTuneSound(null, { spatial: 'mono' });
