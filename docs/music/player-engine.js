@@ -1,4 +1,4 @@
-// MMS/XX player and audio engine, source commit 721d39da3dd95136e9fbb24d9348c1825b4290d5
+// MMS/XX player and audio engine, source commit 6c0a4f9efa6fdac50918a1d96650d6644d5212bd
 (() => {
   var __defProp = Object.defineProperty;
   var __export = (target, all) => {
@@ -32,6 +32,7 @@
     WAVEFORMS: () => WAVEFORMS,
     compileMML: () => compileMML,
     countOldStyle: () => countOldStyle,
+    envSec: () => envSec,
     findWave: () => findWave,
     isSystemMark: () => isSystemMark,
     listEnvelopes: () => listEnvelopes,
@@ -677,6 +678,13 @@
       note: "Falls, springs back a little, falls further \u2014 and once it is quiet it keeps bouncing at that size. The loop point sits partway in, so the big bounces only happen at the top."
     }
   ];
+  function envSec(v, len) {
+    if (typeof v === "string") {
+      const n = parseFloat(v);
+      return Number.isFinite(n) ? Math.max(0, n / 100 * len) : 0;
+    }
+    return Math.max(0, Number(v) || 0);
+  }
   function registerEnvelope(name, spec = {}) {
     const at = ENVELOPES.findIndex((e) => e.name.toLowerCase() === String(name).toLowerCase());
     if (at >= 0 && !spec.overwrite) {
@@ -701,10 +709,23 @@
       entry.s = table[table.length - 1];
       entry.r = 0;
     } else {
-      entry.a = Math.max(0, spec.a ?? 5e-3);
-      entry.d = Math.max(0, spec.d ?? 0);
+      const time = (v, dflt, key2) => {
+        if (typeof v !== "string") return Math.max(0, Number(v ?? dflt) || 0);
+        const m = /^\s*(\d*\.?\d+)\s*%\s*$/.exec(v);
+        if (!m) {
+          warn(`[ChpTnSnd] \u30A8\u30F3\u30D9\u30ED\u30FC\u30D7 "${name}": ${key2} "${v}" \u306F\u8AAD\u3081\u307E\u305B\u3093(\u79D2\u306E\u6570\u304B\u3001"25%" \u306E\u3088\u3046\u306A\u5272\u5408\u3067\u66F8\u304D\u307E\u3059)`);
+          return Math.max(0, Number(dflt) || 0);
+        }
+        const n = Number(m[1]);
+        if (n > 100) {
+          warn(`[ChpTnSnd] \u30A8\u30F3\u30D9\u30ED\u30FC\u30D7 "${name}": ${key2} ${n}% \u306F\u97F3\u306E\u9577\u3055\u3088\u308A\u9577\u3044\u306E\u3067\u3001\u9CF4\u3063\u3066\u3044\u308B\u3042\u3044\u3060\u306F\u6700\u5F8C\u307E\u3067\u9032\u307F\u307E\u305B\u3093`);
+        }
+        return `${n}%`;
+      };
+      entry.a = time(spec.a, 5e-3, "a");
+      entry.d = time(spec.d, 0, "d");
       entry.s = Math.max(0, Math.min(1, spec.s ?? 1));
-      entry.r = Math.max(0, spec.r ?? 0.01);
+      entry.r = time(spec.r, 0.01, "r");
       entry.table = null;
       entry.loop = null;
     }
@@ -1405,7 +1426,8 @@ ${val}`;
       return e.loop === null || e.loop === void 0 ? Math.max(fallback, e.table.length / 60) : fallback;
     }
     if (!(e.s === 0)) return fallback;
-    return Math.max(fallback, (e.a ?? 0) + (e.d ?? 0) + (e.r ?? 0));
+    const sec = (v) => envSec(v, fallback);
+    return Math.max(fallback, sec(e.a) + sec(e.d) + sec(e.r));
   }
   function readDrums(raw, bundles = readBundles(raw)) {
     const mml = normalizeDirectives(raw);
@@ -5536,13 +5558,13 @@ registerProcessor('mmsxx-duty', DutyBank);
   }
   function envOf(ev) {
     const e = ENVELOPES[ev.env] || ENVELOPES[0];
-    const base = ev.tail && !e.table ? { ...e, a: Math.min(e.a, 4e-3), d: 99, s: 0 } : e;
+    const base = ev.tail && !e.table ? { ...e, a: typeof e.a === "string" ? 4e-3 : Math.min(e.a, 4e-3), d: 99, s: 0 } : e;
     return ev.legato && !base.table ? { ...base, a: 0 } : base;
   }
   function envShape(e, len) {
-    const a = Math.min(e.a, len * 0.5);
-    const d = Math.min(e.d, Math.max(0, len - a));
-    const rel = Math.min(e.r, len * 0.5);
+    const a = Math.min(envSec(e.a, len), len * 0.5);
+    const d = Math.min(envSec(e.d, len), Math.max(0, len - a));
+    const rel = Math.min(envSec(e.r, len), len * 0.5);
     return { a, d, s: e.s, rel, hold: Math.max(a + d, len - rel) };
   }
   function envGains(e, len) {
@@ -8570,16 +8592,15 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       }
       const wf4 = WAVEFORMS[ev.wave];
       if (wf4 && wf4.kind === "fm4") {
-        const e = envOf(ev);
         const len = Math.max(0.02, t1 - t0);
-        const ea = Math.min(e.a, len * 0.5);
+        const { a, d, rel, s } = envShape(envOf(ev), len);
         this._wkPush("fm4", dest, {
           t: t0,
           dur: Math.max(0.01, t1 - t0),
           freq,
           vol: amp,
           patch: wf4.patch,
-          env: { a: ea, d: Math.min(e.d * len, len - ea), s: e.s, r: Math.min(e.r, len * 0.5) }
+          env: { a, d, s, r: rel }
         });
         return;
       }
