@@ -1,4 +1,4 @@
-// MMS/XX player and audio engine, source commit ad1d4bf5bc02b94a7f1d20efbd959c00b37e36f2
+// MMS/XX player and audio engine, source commit 721d39da3dd95136e9fbb24d9348c1825b4290d5
 (() => {
   var __defProp = Object.defineProperty;
   var __export = (target, all) => {
@@ -6,7 +6,7 @@
       __defProp(target, name, { get: all[name], enumerable: true });
   };
 
-  // player-update/upstream/sound/audio.js
+  // sound/audio.js
   var audio_exports = {};
   __export(audio_exports, {
     ChipTuneSound: () => ChipTuneSound,
@@ -16,7 +16,7 @@
     psgDiv: () => psgDiv
   });
 
-  // player-update/upstream/sound/mml.js
+  // sound/mml.js
   var mml_exports = {};
   __export(mml_exports, {
     DEFAULT_ENV: () => DEFAULT_ENV,
@@ -52,6 +52,7 @@
     roleOf: () => roleOf,
     sealPresets: () => sealPresets,
     shareBundles: () => shareBundles,
+    songParts: () => songParts,
     splitVoices: () => splitVoices,
     toneOf: () => toneOf,
     validateMML: () => validateMML,
@@ -59,7 +60,7 @@
     waveRole: () => waveRole
   });
 
-  // player-update/upstream/sound/gm.js
+  // sound/gm.js
   var GM_NAMES = [
     "Acoustic Grand Piano",
     "Bright Acoustic Piano",
@@ -205,7 +206,7 @@
     return GM_NAMES.filter((n) => key(n).startsWith(head)).slice(0, limit);
   }
 
-  // player-update/upstream/sound/mml.js
+  // sound/mml.js
   var SEMI = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 };
   var LETTER = { c: 0, d: 1, e: 2, f: 3, g: 4, a: 5, b: 6 };
   var LETTER_OF_SEMI = { 0: 0, 2: 1, 4: 2, 5: 3, 7: 4, 9: 5, 11: 6 };
@@ -1308,6 +1309,10 @@
       } else if (key2 === "tempo") {
         const n = Number(val);
         if (Number.isFinite(n) && n > 0) meta.tempo = n;
+      } else if (key2 === "looptimes") {
+        const n = Number(val);
+        if (Number.isFinite(n) && n > 0) meta.loopTimes = Math.floor(n);
+        else warn(`[ChpTnSnd] MML: #looptimes "${val}" \u306F\u6570\u3067\u306F\u3042\u308A\u307E\u305B\u3093\u3002\u8AAD\u307F\u98DB\u3070\u3057\u307E\u3059`);
       } else if (val !== "") {
         if (STACKED.includes(key2) && meta[key2]) meta[key2] += `
 ${val}`;
@@ -1662,7 +1667,7 @@ ${val}`;
     "q(?<gate>\\d+)",
     "\\s+"
   ].join("|"), "giy");
-  var SONG_WIDE = ["title", "tempo", "meter", "about"];
+  var SONG_WIDE = ["title", "tempo", "meter", "about", "loopTimes"];
   var STACKED = ["about"];
   function splitVoices(raw) {
     const text = normalizeDirectives(raw);
@@ -2687,7 +2692,11 @@ ${val}`;
     const back = marks.find((m) => isLoopMark(m.name.trim().toLowerCase()));
     const tail = marks.find((m) => isOutroMark(m.name.trim().toLowerCase()));
     const outro = tail ? tail.t : null;
-    const loop = back || tail ? { from: back ? back.t : 0, to: outro ?? time } : null;
+    const times = meta.loopTimes > 0 ? meta.loopTimes : null;
+    const loop = back || tail ? { from: back ? back.t : 0, to: outro ?? time, ...times ? { times } : {} } : null;
+    if (times && !loop) {
+      warn("[ChpTnSnd] MML: #looptimes \u3092\u66F8\u3044\u3066\u3044\u307E\u3059\u304C\u3001\u623B\u308B\u5148\u304C\u3042\u308A\u307E\u305B\u3093(`#label LOOP` \u304B `#label OUTRO` \u304C\u8981\u308A\u307E\u3059)");
+    }
     try {
       for (const m of marks) {
         const name = m.name.trim();
@@ -2877,14 +2886,16 @@ ${val}`;
     const back = marks.find((m) => isLoopMark(m.name.trim().toLowerCase()));
     const tail = marks.find((m) => isOutroMark(m.name.trim().toLowerCase()));
     const outro = tail ? tail.t : null;
-    const loop = back || tail ? { from: back ? back.t : 0, to: outro ?? at } : null;
+    const meta2 = readDirectives(mml);
+    const times = meta2.loopTimes > 0 ? meta2.loopTimes : null;
+    const loop = back || tail ? { from: back ? back.t : 0, to: outro ?? at, ...times ? { times } : {} } : null;
     return {
       events,
       total: at,
       loop,
       outro,
       ending: outro,
-      meta: readDirectives(mml),
+      meta: meta2,
       marks,
       takes,
       bars,
@@ -2892,6 +2903,29 @@ ${val}`;
       laneLabels,
       problems: here()
     };
+  }
+  function songParts(tracks, opts = {}) {
+    const list = Array.isArray(tracks) ? tracks : [tracks];
+    const total = Math.max(...list.map((t) => t.total ?? 0), 0.01);
+    const back = list.map((t) => t.loop).find(Boolean) ?? null;
+    const endAt = list.map((t) => t.outro).find((v) => v != null) ?? null;
+    const want = list.map((t) => t.loop && t.loop.times).find((v) => v > 0) ?? 2;
+    const laps = back || endAt != null;
+    const loops = laps ? Math.max(1, Math.floor(opts.loops ?? want)) : 1;
+    const from = back ? back.from : 0;
+    const lapEnd = endAt != null ? Math.min(endAt, total) : total;
+    const parts = [];
+    let at = 0;
+    const push = (a, b) => {
+      parts.push({ from: a, to: b, at });
+      at += b - a;
+    };
+    if (opts.intro !== false && from > 0) push(0, from);
+    for (let i = 0; i < loops; i++) push(from, lapEnd);
+    const wantOutro = opts.outro !== false && lapEnd < total;
+    const outroAt = wantOutro ? at : null;
+    if (wantOutro) push(lapEnd, total);
+    return { parts, span: at, loops, outroAt, total };
   }
   function validateMML(text, mode) {
     const errors = [];
@@ -2993,7 +3027,7 @@ ${val}`;
     return { ok: errors.length === 0, errors, warnings, channels, total };
   }
 
-  // player-update/upstream/sound/wavetables.js
+  // sound/wavetables.js
   var N = 32;
   var build = (f) => Array.from({ length: N }, (_, i) => f(i / N, i));
   var norm = (w) => {
@@ -3139,7 +3173,7 @@ ${val}`;
     );
   }
 
-  // player-update/upstream/sound/fmpresets.js
+  // sound/fmpresets.js
   var FM_PRESETS = {
     // 1 バイオリン。弓のこすれを出すため、比を少しずらして倍音を残す
     fm2Violin: {
@@ -3482,7 +3516,7 @@ ${val}`;
     }
   }
 
-  // player-update/upstream/sound/beeppresets.js
+  // sound/beeppresets.js
   var BEEP_PRESETS = {
     // ---- 搬送波を刻む型。**音程を変える回路が無い機械** ----
     // 2.4kHz が鳴りっぱなしで、ソフトはそれを On/Off するだけ。
@@ -3663,7 +3697,7 @@ ${val}`;
     }
   }
 
-  // player-update/upstream/sound/fdspresets.js
+  // sound/fdspresets.js
   var FDS_LEN = 64;
   var FDS_BITS = 6;
   var build2 = (fn) => Array.from({ length: FDS_LEN }, (_, i) => fn(i / FDS_LEN));
@@ -3780,7 +3814,7 @@ ${val}`;
     }
   }
 
-  // player-update/upstream/sound/fm4.js
+  // sound/fm4.js
   var ALGORITHMS = [
     {
       mod: [[], [0], [1], [2]],
@@ -4016,7 +4050,7 @@ registerProcessor('mmsxx-fm4', Fm4Bank);
     };
   }
 
-  // player-update/upstream/sound/fm4presets.js
+  // sound/fm4presets.js
   var FM4_PRESETS = {
     "fm4Brass": {
       noteJa: "4 \u30AA\u30DA\u306E\u91D1\u7BA1\u3002\u30AA\u30DA\u30EC\u30FC\u30BF\u304C\u5897\u3048\u305F\u3076\u3093\u3001\u4F38\u3070\u3057\u3066\u3044\u308B\u3042\u3044\u3060\u306B\u500D\u97F3\u304C\u80B2\u3064\u3002\u672C\u7269\u306E\u91D1\u7BA1\u3068\u540C\u3058\u52D5\u304D\u3067\u30012 \u30AA\u30DA\u306B\u306F\u3067\u304D\u306A\u3044",
@@ -4147,7 +4181,7 @@ registerProcessor('mmsxx-fm4', Fm4Bank);
     });
   }
 
-  // player-update/upstream/sound/extrawaves.js
+  // sound/extrawaves.js
   var EXTRA_LEN = 32;
   var build3 = (fn) => Array.from({ length: EXTRA_LEN }, (_, i) => fn(i / EXTRA_LEN));
   var pulse = (n) => build3((p) => p < n / 16 ? 1 : -1);
@@ -4293,7 +4327,7 @@ registerProcessor('mmsxx-fm4', Fm4Bank);
     }
   }
 
-  // player-update/upstream/sound/tones.js
+  // sound/tones.js
   var tones_exports = {};
   __export(tones_exports, {
     TONE_FRAME: () => TONE_FRAME,
@@ -4849,7 +4883,7 @@ registerProcessor('mmsxx-fm4', Fm4Bank);
     }
   }
 
-  // player-update/upstream/sound/pcmbake.js
+  // sound/pcmbake.js
   var MIN_LOOP = 1024;
   function periodMultiple(ratios, maxM = 8) {
     for (let m = 1; m <= maxM; m++) {
@@ -4931,7 +4965,7 @@ registerProcessor('mmsxx-fm4', Fm4Bank);
     };
   }
 
-  // player-update/upstream/sound/duty.js
+  // sound/duty.js
   var DUTY_CODE = `
 const FRAME = ${TONE_FRAME};
 
@@ -5063,7 +5097,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     return Math.min(0.98, Math.max(0.02, x));
   };
 
-  // player-update/upstream/sound/demotunes.js
+  // sound/demotunes.js
   var SE_SYS_PAUSE = "sys.pause";
   var SYSTEM_SE = {
     [SE_SYS_PAUSE]: [
@@ -5151,7 +5185,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     BEAT_TOM_FILL
   ]);
 
-  // player-update/upstream/sound/se.js
+  // sound/se.js
   var SE_FRAME = 1 / 60;
   var SE_WHOLE = 64;
   var SE_TEMPO = Math.round(240 / (SE_WHOLE * SE_FRAME));
@@ -5300,7 +5334,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     }
   };
 
-  // player-update/upstream/sound/layerpresets.js
+  // sound/layerpresets.js
   var DETUNE_STEPS = [
     { key: "", c: 0 },
     {
@@ -5431,10 +5465,10 @@ registerProcessor('mmsxx-duty', DutyBank);
     }
   }
 
-  // player-update/upstream/sound/version.js
+  // sound/version.js
   var SOUND_VERSION = "0.21.0";
 
-  // player-update/upstream/sound/audio.js
+  // sound/audio.js
   registerDefaultWaves();
   registerDefaultFM();
   registerDefaultBeeps();
@@ -5792,7 +5826,8 @@ registerProcessor('mmsxx-duty', DutyBank);
       this.spatial = opts.spatial ?? "auto";
       this.ignoreSongLoop = !!opts.ignoreSongLoop;
       this.playOutro = opts.playOutro !== false;
-      this.loopTimes = Infinity;
+      this.loopTimes = 2;
+      this._loopTimesFromSong = 2;
       this._range = null;
       this._chMute = /* @__PURE__ */ new Set();
       this._laneMute = /* @__PURE__ */ new Set();
@@ -6698,6 +6733,9 @@ registerProcessor('mmsxx-tap', MmsxxTap);
           }
         });
       }
+      const want = tracks.map((t) => t.loop && t.loop.times).find((v) => v > 0) ?? null;
+      if (want && this.loopTimes === this._loopTimesFromSong) this.loopTimes = want;
+      if (want) this._loopTimesFromSong = want;
       const wants = loop || !!mark;
       state.chGains = tracks.map((t, i) => {
         const g = this.ctx.createGain();
@@ -6771,7 +6809,8 @@ registerProcessor('mmsxx-tap', MmsxxTap);
             continue;
           }
           state.laps++;
-          const more = replay && !state.leaving && state.laps < this.loopTimes;
+          const laps = !!mark || endAt != null;
+          const more = laps && !state.leaving && state.laps < this.loopTimes;
           if (!more) {
             if (state.endAt != null && this.playOutro) {
               state.inEnding = true;
@@ -6961,10 +7000,11 @@ registerProcessor('mmsxx-tap', MmsxxTap);
      * @param {string} name `defineBGM()` で登録した名前(音声ファイルの BGM は不可)
      * @param {{loops?:number, intro?:boolean, outro?:boolean, mute?:number[],
      *          tail?:number, sampleRate?:number, channels?:number}} [opts]
-     *   loops = 本編を何周ぶん並べるか(既定 1)。
+     *   loops = 本編を何周ぶん並べるか。書かなければ曲の `#looptimes`、
+     *   それも無ければ 2(鳴らすときの `loopTimes` と揃えてある)。
      *   intro = 前奏(`REPEAT` より手前)を入れるか(既定 true)。
      *   outro = 後奏(`OUTRO` より後ろ)を入れるか(既定 true。前の名前 `ending` も効く)。
-     *   鳴らすときの `loopTimes` は見ない。あちらは `Infinity` を取るので、
+     *   鳴らすときの `loopTimes` は見ない。あちらは `Infinity` を取れるので、
      *   何周ぶん焼くかは書き出す側が決める。
      *   mute = 黙らせるチャンネルの番号。省くと、いま黙らせてあるものに従う。
      *   `[]` を渡せば全部鳴る。画面で作った音がそのまま落ちるようにするため
@@ -6990,22 +7030,17 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       if (!OAC) {
         throw new Error("[ChpTnSnd] OfflineAudioContext \u304C\u3042\u308A\u307E\u305B\u3093(\u66F8\u304D\u51FA\u3057\u306B\u306F\u30D6\u30E9\u30A6\u30B6\u304C\u8981\u308A\u307E\u3059\u3002\u753B\u9762\u306F\u7121\u304F\u3066\u304B\u307E\u3044\u307E\u305B\u3093)");
       }
-      const loops = Math.max(1, Math.floor(opts.loops ?? 1));
       const tail = Math.max(0, opts.tail ?? 0.5);
       const rate = opts.sampleRate ?? 44100;
       const channels = opts.channels ?? 1;
-      const loopLen = Math.max(...def.map((t) => t.total), 0.01);
-      const back = def.map((t) => t.loop).find(Boolean) ?? null;
-      const endAt = def.map((t) => t.outro).find((v) => v != null) ?? null;
-      const from = back ? back.from : 0;
-      const lapEnd = endAt != null ? Math.min(endAt, loopLen) : loopLen;
-      const parts = [];
-      if (opts.intro !== false && from > 0) parts.push([0, from]);
-      for (let i = 0; i < loops; i++) parts.push([from, lapEnd]);
-      const wantOutro = (opts.outro ?? opts.ending) !== false;
-      if (wantOutro && lapEnd < loopLen) parts.push([lapEnd, loopLen]);
-      const span = parts.reduce((n, [a, b]) => n + (b - a), 0);
-      const frames = Math.ceil((span + tail) * rate);
+      const cut = songParts(def, {
+        loops: opts.loops,
+        intro: opts.intro,
+        // `ending` は前の名前。どちらで書いても効く
+        outro: opts.outro ?? opts.ending
+      });
+      const parts = cut.parts.map((p) => [p.from, p.to]);
+      const frames = Math.ceil((cut.span + tail) * rate);
       const off = new Set(opts.mute ?? this.mutedTracks());
       const ctx = new OAC(channels, frames, rate);
       const saved = {
@@ -7054,7 +7089,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         let quit = false;
         const stopped = new Promise((done) => {
           if (!opts.onProgress && !opts.stop) return;
-          const span2 = Math.max(0.25, secs / 60);
+          const span = Math.max(0.25, secs / 60);
           const tick = (v) => Math.round(v * rate / 128) * 128 / rate;
           const next = (at2) => {
             const t = tick(at2);
@@ -7066,12 +7101,12 @@ registerProcessor('mmsxx-tap', MmsxxTap);
                 return;
               }
               if (opts.onProgress) opts.onProgress(t / secs);
-              next(t + span2);
+              next(t + span);
               ctx.resume();
             }).catch(() => {
             });
           };
-          next(span2);
+          next(span);
         });
         const buf = await Promise.race([ctx.startRendering(), stopped]);
         if (quit) return null;
@@ -8848,10 +8883,10 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out;
   }
 
-  // player-update/upstream/tool/ui/version.js
+  // tool/ui/version.js
   var PLAYER_VERSION = "1.0.0";
 
-  // player-update/upstream/tool/core/tomml.js
+  // tool/core/tomml.js
   var NAMES = ["c", "c+", "d", "d+", "e", "f", "f+", "g", "g+", "a", "a+", "b"];
   var LENS = [
     [16, "1"],
@@ -8931,7 +8966,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out.join("\n\n");
   }
 
-  // player-update/upstream/tool/core/wav.js
+  // tool/core/wav.js
   function writeWAV(samples, rate = 44100) {
     const n = samples.length;
     const out = new Uint8Array(44 + n * 2);
@@ -8959,7 +8994,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out;
   }
 
-  // player-update/upstream/tool/ui/player.js
+  // tool/ui/player.js
   var COPYRIGHT = "2026 harayoki";
   var PLAYER_CSS = `
 .mmsxx-player{ font-family:var(--mono); font-size:13px; line-height:1.55; color:var(--ink); }
@@ -9507,7 +9542,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       el.open.setAttribute("aria-pressed", String(open));
       el.open.setAttribute("aria-expanded", String(open));
     };
-    audio.loopTimes = opts.loops ?? 3;
+    if (opts.loops > 0) audio.loopTimes = opts.loops;
     audio.ignoreSongLoop = opts.repeatAll !== true;
     let marks = [];
     let cuts = { grid: [], bars: [] };
@@ -10407,7 +10442,7 @@ ChipTuneSound ${SOUND_VERSION}
     };
   }
 
-  // player-update/upstream/browser-entry.js
+  // browser-entry.js
   var sound = { ...audio_exports, ...mml_exports, ...tones_exports, mountPlayer, PLAYER_CSS, PLAYER_VERSION, player: { mount: mountPlayer, CSS: PLAYER_CSS, version: PLAYER_VERSION } };
   window.MMSXX = window.MMSXX || {};
   window.MMSXX.sound = sound;
