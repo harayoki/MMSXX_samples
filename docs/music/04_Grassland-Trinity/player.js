@@ -12,21 +12,15 @@
     fieldHit0x11800: { wave: 'pulse:12', env: 'flat', pitch: [21.540003004618065] },
   };
   const envelopes = {
-    fieldEnv3x35357: { a: .004, d: .014142857142826416, s: .35, r: .12 },
-    fieldEnv3x80357: { a: .004, d: .03214285714285714, s: .35, r: .12 },
-    fieldEnv3x160714: { a: .004, d: .06428571428571428, s: .35, r: .12 },
-    fieldEnv3x115714: { a: .004, d: .046285714285664886, s: .35, r: .12 },
-    fieldEnv3x276429: { a: .004, d: .11057142857139582, s: .35, r: .12 },
-    fieldEnv2x53571: { a: .002, d: .013392857142857142, s: 0, r: .05 },
-    fieldEnv2x32000: { a: .002, d: .008, s: 0, r: .05 },
-    fieldEnv2x17857: { a: .002, d: .004464285714285714, s: 0, r: .05 },
-    fieldEnv2x80357: { a: .002, d: .020089285714285712, s: 0, r: .05 },
-    fieldEnv2x40179: { a: .002, d: .010044642857142856, s: 0, r: .05 },
+    fieldBody: { a: .004, d: '40%', s: .35, r: .12 },
+    fieldHit: { a: .002, d: '25%', s: 0, r: .05 },
+    // 20msより短い打音は、従来の減衰時間を維持する。
+    fieldShortHit: { a: .002, d: .004464285714285714, s: 0, r: .05 },
   };
   for (const [name, spec] of Object.entries(envelopes)) {
     E.registerEnvelope(name, {
       ...spec,
-      note: 'Grassland Trinity converted envelope.',
+      note: 'Grassland Trinity note-relative envelope.',
       noteJa: '草原のトリニティの音長に合わせたエンベロープ。',
     });
   }

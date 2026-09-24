@@ -57,20 +57,22 @@
   const envelopeCache = new Map();
 
   function convertedEnvelope(gate, sustain, legacy) {
-    const key = [gate, sustain, legacy].join('_');
-    if (envelopeCache.has(key)) return envelopeCache.get(key);
-    const name = 'ptEnv' + envelopeCache.size;
+    if (sustain) return E.ENVELOPES.findIndex(env => env.name === 'ptHeld');
+    // 70%から3msを引く減衰は秒指定を維持。余韻だけを割合にする。
+    // 20ms未満ではエンジンの下限による変化を避けるため秒指定を残す。
     const spec = legacy
-      ? { a: .002, d: .25 * Math.max(.02, gate), s: 0, r: .05 }
-      : sustain
-        ? { a: .003, d: 0, s: 1, r: .004 }
-        : { a: .003, d: Math.max(0, gate * .7 - .003), s: .32, r: gate * .3 };
+      ? { a: .002, d: '25%', s: 0, r: .05 }
+      : { a: .003, d: Math.max(0, gate * .7 - .003), s: .32,
+          r: gate >= .02 ? '30%' : gate * .3 };
+    const key = JSON.stringify(spec);
+    if (envelopeCache.has(key)) return envelopeCache.get(key);
+    const name = legacy ? 'ptLegacy' : 'ptDecayShape' + envelopeCache.size;
     E.registerEnvelope(name, {
       ...spec,
-      note: 'Converted Pocket Tunnel envelope.',
+      note: 'Pocket Tunnel envelope shared by shape.',
       noteJa: legacy
-        ? '旧Fusionの音長比例エンベロープを秒指定へ変換。'
-        : 'Pocket Tunnelの旧エンベロープを秒指定へ変換。',
+        ? '旧Fusionの音長比例エンベロープ。'
+        : '減衰は秒指定、余韻は音長に対する割合。短音は秒指定。',
     });
     const index = E.ENVELOPES.findIndex(env => env.name === name);
     envelopeCache.set(key, index);
