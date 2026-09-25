@@ -17,6 +17,7 @@
 // イントロとエンディングは1回ずつ。全パート共通で、再生とWAVの両方に適用。
 $LOOP_END = { 1 }
 #title Pocket Tunnel
+#version 5.0
 #about ノーマル · メニュー画面や始まりの街をイメージしたBGM
 #copyright 2026 harayoki
 #license CC BY 4.0 (music, artwork and MML source; https://creativecommons.org/licenses/by/4.0/)

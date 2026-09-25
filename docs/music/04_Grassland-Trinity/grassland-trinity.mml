@@ -18,6 +18,7 @@
 */
 
 #title 草原のトリニティ
+#version 2.0
 #about アクションRPGの草原BGMをイメージ。ファミコン4音に限定。
 #ch メロディ
 #role lead
