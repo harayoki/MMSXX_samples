@@ -5,7 +5,7 @@
 音色:
 - ptChipPulse
 エンベロープ:
-- ptLegacy（減衰を音長の25％で指定）
+- ptPercussive
 */
 
 // この数値を直すと本編のループ回数が変わります（1以上）。
@@ -19,209 +19,211 @@ $LOOP_END = { 1 }
 #license CC BY 4.0 (music, artwork and MML source; https://creativecommons.org/licenses/by/4.0/)
 
 // 使用音色：
-//   @{ptChipPulse}   チップチューン アレンジの矩形波。標準pulse:50の音量を補正。
+//   @{ptChipPulse}   チップチューン アレンジの矩形波。強弱はMMLのvで指定。
 //   @{noise:white}   標準ノイズによるドラム。
-// @e{percussive} は元の音長に合わせて共通JSで減衰時間を換算。
+// @e{ptPercussive} は打楽器向けに減衰時間を調整。
 
-#bundle ptChipVoice  = @{ptChipPulse} @e{percussive}
-#bundle ptNoiseVoice = @{noise:white} @e{percussive}
+#bundle ptChipVoice  = @{ptChipPulse} @e{ptPercussive}
+#bundle ptNoiseVoice = @{noise:white} @e{ptPercussive}
 
 #ch メロディ
 #role lead
 // パート 1 — メロディ
 // イントロ
 #label イントロ
-t120o5 l8 q6 v9 @{ptChipVoice} o4 v8 q5 d8 f16 a16 r8 >c8 <b16 >d16 f8 e8 d8 o5 v8 q5 b8 a16 g16 r8 f8 e16 d16
+t120o5 l8 q6 v15 @{ptChipVoice} v13 o4 v12 q5 d8 f16 a16 r8 >c8 <b16 >d16 f8 e8 d8 o5 v12 q5 b8 a16 g16 r8 f8 e16 d16
   <b8 >d8 r8
 // 本編
 #label 本編
-[ t120 o5 l8 v8 q5 @{ptChipVoice} @d0 @m0 @o0 @p{0,0,0} o5 v9 q6 f16 a16 >c16 r16 <a16 >c16 f8 e16 d16 c8 <a8 g8
-  o5 v9 q6 g16 b16 >d16 r16 <b16 >d16 g8 f16 e16 d8 <b8 r8 o5 v9 q6 f16 g16 >c16 r16 <g16 >c16 f8 d16 c16 <g8 f8
-  g8 o5 v9 q6 e16 g16 >c16 r16 <g16 e16 d8 c4 r4 o5 v9 q6 f16 a16 >c16 r16 <a16 >c16 f8 e16 d16 c8 <a8 r8 o5 v9
-  q6 d16 f16 a16 r16 f16 a16 >d8 c16 <a16 g8 f8 e8 o5 v9 q6 g16 b16 >d16 r16 <b16 >d16 g8 f16 e16 d8 <b8 a8 o5
-  v9 q6 e16 g16 >c16 r16 <g16 e16 d8 c4 r4 o5 v9 q6 a16 >c16 e16 r16 c16 e16 a8 g16 e16 d8 c8 <b8 o5 v9 q6 g16
-  b16 >e16 r16 <b16 g16 f+8 e4 r4 o5 v9 q6 f16 a16 >c16 r16 <a16 >c16 f8 e16 d16 c8 <a8 g8 o5 v9 q6 g16 b16 >d16
-  r16 <b16 >d16 g8 f16 e16 d8 <b8 r8 o5 v9 q6 d16 f16 a16 r16 f16 a16 >d8 c16 <a16 g8 f8 e8 o5 v9 q6 e16 a16
-  >c16 r16 <a16 >c16 e8 d16 c16 <b8 a8 r8 o5 v9 q6 f16 a16 >c16 r16 <a16 >c16 f8 e16 d16 c8 <a8 g8 o5 v9 q6 g16
-  b16 >d16 r16 f16 d16 c8 <b4 r4 o5 v9 q6 f16 a16 >c16 r16 <a16 >c16 f8 e16 d16 c8 <a8 g8 o5 v9 q6 g16 b16 >d16
-  r16 <b16 >d16 g8 f16 e16 d8 <b8 r8 o5 v9 q6 e16 g16 b16 r16 g16 b16 >e8 d16 c16 <b8 g8 f+8 o5 v9 q6 a16 >c16
-  e16 r16 c16 <a16 g8 e4 r4 o5 v9 q6 d16 f16 a16 r16 f16 a16 >d8 c16 <a16 g8 f8 e8 o5 v9 q6 g16 b16 >d16 r16
-  <b16 >d16 g8 f16 e16 d8 <b8 r8 o5 v9 q6 f16 g16 >c16 r16 <g16 >c16 f8 d16 c16 <g8 f8 g8 o5 v9 q7 e16 g16 >c16
+[ t120 o5 l8 v12 q5 @{ptChipVoice} v12 @d0 @m0 @o0 @p{0,0,0} o5 v13 q6 f16 a16 >c16 r16 <a16 >c16 f8 e16 d16 c8 <a8 g8
+  o5 v13 q6 g16 b16 >d16 r16 <b16 >d16 g8 f16 e16 d8 <b8 r8 o5 v13 q6 f16 g16 >c16 r16 <g16 >c16 f8 d16 c16 <g8 f8
+  g8 o5 v13 q6 e16 g16 >c16 r16 <g16 e16 d8 c4 r4 o5 v13 q6 f16 a16 >c16 r16 <a16 >c16 f8 e16 d16 c8 <a8 r8 o5 v13
+  q6 d16 f16 a16 r16 f16 a16 >d8 c16 <a16 g8 f8 e8 o5 v13 q6 g16 b16 >d16 r16 <b16 >d16 g8 f16 e16 d8 <b8 a8 o5
+  v13 q6 e16 g16 >c16 r16 <g16 e16 d8 c4 r4 o5 v13 q6 a16 >c16 e16 r16 c16 e16 a8 g16 e16 d8 c8 <b8 o5 v13 q6 g16
+  b16 >e16 r16 <b16 g16 f+8 e4 r4 o5 v13 q6 f16 a16 >c16 r16 <a16 >c16 f8 e16 d16 c8 <a8 g8 o5 v13 q6 g16 b16 >d16
+  r16 <b16 >d16 g8 f16 e16 d8 <b8 r8 o5 v13 q6 d16 f16 a16 r16 f16 a16 >d8 c16 <a16 g8 f8 e8 o5 v13 q6 e16 a16
+  >c16 r16 <a16 >c16 e8 d16 c16 <b8 a8 r8 o5 v13 q6 f16 a16 >c16 r16 <a16 >c16 f8 e16 d16 c8 <a8 g8 o5 v13 q6 g16
+  b16 >d16 r16 f16 d16 c8 <b4 r4 o5 v13 q6 f16 a16 >c16 r16 <a16 >c16 f8 e16 d16 c8 <a8 g8 o5 v13 q6 g16 b16 >d16
+  r16 <b16 >d16 g8 f16 e16 d8 <b8 r8 o5 v13 q6 e16 g16 b16 r16 g16 b16 >e8 d16 c16 <b8 g8 f+8 o5 v13 q6 a16 >c16
+  e16 r16 c16 <a16 g8 e4 r4 o5 v13 q6 d16 f16 a16 r16 f16 a16 >d8 c16 <a16 g8 f8 e8 o5 v13 q6 g16 b16 >d16 r16
+  <b16 >d16 g8 f16 e16 d8 <b8 r8 o5 v13 q6 f16 g16 >c16 r16 <g16 >c16 f8 d16 c16 <g8 f8 g8 o5 v13 q7 e16 g16 >c16
   r16 <g16 e16 d8 c4 r4 ]$LOOP_END
 // エンディング
 #label エンディング
-o5 v8 q5 g8 f16 d16 r8 c8 <b8 g8 f8 r8 o5 v8 q7 e8 g8 a8 >c8 q8 v7 c2
+o5 v12 q5 g8 f16 d16 r8 c8 <b8 g8 f8 r8 o5 v12 q7 e8 g8 a8 >c8 q8 v10 c2
 
 #ch 伴奏
 #role arp
 // パート 2 — 伴奏
 // イントロ
-t120o3 l8 q4 v4 @{ptChipVoice} v4 r8 o3 f16 o3 a16 o4 c8 r8 o4 e8 o4 c16 o3 a16 r8 o3 f8 v4 r8 o3 f16 o3 b16 o4
+t120o3 l8 q4 v7 @{ptChipVoice} v6 v6 r8 o3 f16 o3 a16 o4 c8 r8 o4 e8 o4 c16 o3 a16 r8 o3 f8 v6 r8 o3 f16 o3 b16 o4
   e8 r8 o4 a8 o4 e16 o3 b16 r8 o3 f8
 // 本編
-[ t120 o3 l8 v4 q4 @{ptChipVoice} @d0 @m0 @o0 @p{0,0,0} v4 r8 o3 f16 o3 a16 o4 c8 r8 o4 e8 o4 c16 o3 a16 r8 o3
-  f8 v4 r8 o3 g16 o3 b16 o4 d8 r8 o4 e8 o4 d16 o3 b16 r8 o3 g8 v4 r8 o3 f16 o3 a+16 o4 d8 r8 o4 g8 o4 d16 o3
-  a+16 r8 o3 f8 v4 r8 o3 e16 o3 b16 o4 d8 r8 o4 g8 o4 d16 o3 b16 r8 o3 e8 v4 r8 o3 f16 o3 a16 o4 c8 r8 o4 e8 o4
-  c16 o3 a16 r8 o3 f8 v4 r8 o3 f16 o3 a16 o4 c8 r8 o4 d8 o4 c16 o3 a16 r8 o3 f8 v4 r8 o3 f16 o3 b16 o4 e8 r8 o4
-  a8 o4 e16 o3 b16 r8 o3 f8 v4 r8 o3 e16 o3 a16 o4 d8 r8 o4 g8 o4 d16 o3 a16 r8 o3 e8 v4 r8 o3 a16 o4 c16 o4 e8
-  r8 o4 g8 o4 e16 o4 c16 r8 o3 a8 v4 r8 o3 g16 o3 b16 o4 d8 r8 o4 f+8 o4 d16 o3 b16 r8 o3 g8 v4 r8 o3 f16 o3 a16
-  o4 c8 r8 o4 e8 o4 c16 o3 a16 r8 o3 f8 v4 r8 o3 f16 o3 b16 o4 d8 r8 o4 g8 o4 d16 o3 b16 r8 o3 f8 v4 r8 o3 f16
-  o3 a16 o4 c8 r8 o4 d8 o4 c16 o3 a16 r8 o3 f8 v4 r8 o3 g16 o3 b16 o4 c8 r8 o4 e8 o4 c16 o3 b16 r8 o3 g8 v4 r8
-  o3 g16 o4 c16 o4 d+8 r8 o4 f8 o4 d+16 o4 c16 r8 o3 g8 v4 r8 o3 f16 o3 b16 o4 e8 r8 o4 a8 o4 e16 o3 b16 r8 o3
-  f8 v4 r8 o3 f16 o3 a16 o4 c8 r8 o4 e8 o4 c16 o3 a16 r8 o3 f8 v4 r8 o3 b16 o4 d16 o4 f+8 r8 o4 a8 o4 f+16 o4
-  d16 r8 o3 b8 v4 r8 o3 g16 o3 b16 o4 d8 r8 o4 f+8 o4 d16 o3 b16 r8 o3 g8 v4 r8 o3 a16 o4 c16 o4 e8 r8 o4 g8 o4
-  e16 o4 c16 r8 o3 a8 v4 r8 o3 f16 o3 a16 o4 c8 r8 o4 d8 o4 c16 o3 a16 r8 o3 f8 v4 r8 o3 f16 o3 b16 o4 d8 r8 o4
-  g8 o4 d16 o3 b16 r8 o3 f8 v4 r8 o3 f16 o3 a+16 o4 d8 r8 o4 g8 o4 d16 o3 a+16 r8 o3 f8 v4 r8 o3 e16 o3 a16 o4
+[ t120 o3 l8 v6 q4 @{ptChipVoice} v6 @d0 @m0 @o0 @p{0,0,0} v6 r8 o3 f16 o3 a16 o4 c8 r8 o4 e8 o4 c16 o3 a16 r8 o3
+  f8 v6 r8 o3 g16 o3 b16 o4 d8 r8 o4 e8 o4 d16 o3 b16 r8 o3 g8 v6 r8 o3 f16 o3 a+16 o4 d8 r8 o4 g8 o4 d16 o3
+  a+16 r8 o3 f8 v6 r8 o3 e16 o3 b16 o4 d8 r8 o4 g8 o4 d16 o3 b16 r8 o3 e8 v6 r8 o3 f16 o3 a16 o4 c8 r8 o4 e8 o4
+  c16 o3 a16 r8 o3 f8 v6 r8 o3 f16 o3 a16 o4 c8 r8 o4 d8 o4 c16 o3 a16 r8 o3 f8 v6 r8 o3 f16 o3 b16 o4 e8 r8 o4
+  a8 o4 e16 o3 b16 r8 o3 f8 v6 r8 o3 e16 o3 a16 o4 d8 r8 o4 g8 o4 d16 o3 a16 r8 o3 e8 v6 r8 o3 a16 o4 c16 o4 e8
+  r8 o4 g8 o4 e16 o4 c16 r8 o3 a8 v6 r8 o3 g16 o3 b16 o4 d8 r8 o4 f+8 o4 d16 o3 b16 r8 o3 g8 v6 r8 o3 f16 o3 a16
+  o4 c8 r8 o4 e8 o4 c16 o3 a16 r8 o3 f8 v6 r8 o3 f16 o3 b16 o4 d8 r8 o4 g8 o4 d16 o3 b16 r8 o3 f8 v6 r8 o3 f16
+  o3 a16 o4 c8 r8 o4 d8 o4 c16 o3 a16 r8 o3 f8 v6 r8 o3 g16 o3 b16 o4 c8 r8 o4 e8 o4 c16 o3 b16 r8 o3 g8 v6 r8
+  o3 g16 o4 c16 o4 d+8 r8 o4 f8 o4 d+16 o4 c16 r8 o3 g8 v6 r8 o3 f16 o3 b16 o4 e8 r8 o4 a8 o4 e16 o3 b16 r8 o3
+  f8 v6 r8 o3 f16 o3 a16 o4 c8 r8 o4 e8 o4 c16 o3 a16 r8 o3 f8 v6 r8 o3 b16 o4 d16 o4 f+8 r8 o4 a8 o4 f+16 o4
+  d16 r8 o3 b8 v6 r8 o3 g16 o3 b16 o4 d8 r8 o4 f+8 o4 d16 o3 b16 r8 o3 g8 v6 r8 o3 a16 o4 c16 o4 e8 r8 o4 g8 o4
+  e16 o4 c16 r8 o3 a8 v6 r8 o3 f16 o3 a16 o4 c8 r8 o4 d8 o4 c16 o3 a16 r8 o3 f8 v6 r8 o3 f16 o3 b16 o4 d8 r8 o4
+  g8 o4 d16 o3 b16 r8 o3 f8 v6 r8 o3 f16 o3 a+16 o4 d8 r8 o4 g8 o4 d16 o3 a+16 r8 o3 f8 v6 r8 o3 e16 o3 a16 o4
   d8 r8 o4 g8 o4 d16 o3 a16 r8 o3 e8 ]$LOOP_END
 // エンディング
-v4 r8 o3 f16 o3 b16 o4 d8 r8 o4 g8 o4 d16 o3 b16 r8 o3 f8 v4 o3 e8 o3 a8 o4 d8 o4 g8 r2
+v6 r8 o3 f16 o3 b16 o4 d8 r8 o4 g8 o4 d16 o3 b16 r8 o3 f8 v6 o3 e8 o3 a8 o4 d8 o4 g8 r2
 
 #ch ベース
 #role bass
 // パート 3 — ベース
 // イントロ
-t120o2 l8 q6 v9 @{ptChipVoice} o2 v9 q6 d8 r16 d16 a8 r8 o3 d8 o2 a8 d8 g8 o2 v9 q6 g8 r16 g16 d8 r8 o3 g8 o2 d8
+t120o2 l8 q6 v15 @{ptChipVoice} v13 o2 v13 q6 d8 r16 d16 a8 r8 o3 d8 o2 a8 d8 g8 o2 v13 q6 g8 r16 g16 d8 r8 o3 g8 o2 d8
   g8 d8
 // 本編
-[ t120 o2 l8 v9 q6 @{ptChipVoice} @d0 @m0 @o0 @p{0,0,0} o2 v9 q6 d8 r16 d16 a8 r8 o3 d8 o2 a8 d8 e8 o2 v9 q6 e8
-  r16 e16 b8 r8 o3 e8 o2 b8 e8 c8 o2 v9 q6 c8 r16 c16 g8 r8 o3 c8 o2 g8 c8 c8 o2 v9 q6 c8 r16 c16 g8 r8 o3 c8 o2
-  g8 c8 d8 o2 v9 q6 d8 r16 d16 a8 r8 o3 d8 o2 a8 d8 a+8 o2 v9 q6 a+8 r16 a+16 f8 r8 o3 a+8 o2 f8 a+8 g8 o2 v9 q6
-  g8 r16 g16 d8 r8 o3 g8 o2 d8 g8 c8 o2 v9 q6 c8 r16 c16 g8 r8 o3 c8 o2 g8 c8 f8 o2 v9 q6 f8 r16 f16 c8 r8 o3 f8
-  o2 c8 f8 e8 o2 v9 q6 e8 r16 e16 b8 r8 o3 e8 o2 b8 e8 d8 o2 v9 q6 d8 r16 d16 a8 r8 o3 d8 o2 a8 d8 c+8 o2 v9 q6
-  c+8 r16 c+16 g+8 r8 o3 c+8 o2 g+8 c+8 a+8 o2 v9 q6 a+8 r16 a+16 f8 r8 o3 a+8 o2 f8 a+8 a8 o2 v9 q6 a8 r16 a16
-  e8 r8 o3 a8 o2 e8 a8 g+8 o2 v9 q6 g+8 r16 g+16 d+8 r8 o3 g+8 o2 d+8 g+8 g8 o2 v9 q6 g8 r16 g16 d8 r8 o3 g8 o2
-  d8 g8 d8 o2 v9 q6 d8 r16 d16 a8 r8 o3 d8 o2 a8 d8 g8 o2 v9 q6 g8 r16 g16 d8 r8 o3 g8 o2 d8 g8 e8 o2 v9 q6 e8
-  r16 e16 b8 r8 o3 e8 o2 b8 e8 f8 o2 v9 q6 f8 r16 f16 c8 r8 o3 f8 o2 c8 f8 a+8 o2 v9 q6 a+8 r16 a+16 f8 r8 o3
-  a+8 o2 f8 a+8 c+8 o2 v9 q6 c+8 r16 c+16 g+8 r8 o3 c+8 o2 g+8 c+8 c8 o2 v9 q6 c8 r16 c16 g8 r8 o3 c8 o2 g8 c8
-  c8 o2 v9 q6 c8 r16 c16 g8 r8 o3 c8 o2 g8 c8 c+8 ]$LOOP_END
+[ t120 o2 l8 v13 q6 @{ptChipVoice} v13 @d0 @m0 @o0 @p{0,0,0} o2 v13 q6 d8 r16 d16 a8 r8 o3 d8 o2 a8 d8 e8 o2 v13 q6 e8
+  r16 e16 b8 r8 o3 e8 o2 b8 e8 c8 o2 v13 q6 c8 r16 c16 g8 r8 o3 c8 o2 g8 c8 c8 o2 v13 q6 c8 r16 c16 g8 r8 o3 c8 o2
+  g8 c8 d8 o2 v13 q6 d8 r16 d16 a8 r8 o3 d8 o2 a8 d8 a+8 o2 v13 q6 a+8 r16 a+16 f8 r8 o3 a+8 o2 f8 a+8 g8 o2 v13 q6
+  g8 r16 g16 d8 r8 o3 g8 o2 d8 g8 c8 o2 v13 q6 c8 r16 c16 g8 r8 o3 c8 o2 g8 c8 f8 o2 v13 q6 f8 r16 f16 c8 r8 o3 f8
+  o2 c8 f8 e8 o2 v13 q6 e8 r16 e16 b8 r8 o3 e8 o2 b8 e8 d8 o2 v13 q6 d8 r16 d16 a8 r8 o3 d8 o2 a8 d8 c+8 o2 v13 q6
+  c+8 r16 c+16 g+8 r8 o3 c+8 o2 g+8 c+8 a+8 o2 v13 q6 a+8 r16 a+16 f8 r8 o3 a+8 o2 f8 a+8 a8 o2 v13 q6 a8 r16 a16
+  e8 r8 o3 a8 o2 e8 a8 g+8 o2 v13 q6 g+8 r16 g+16 d+8 r8 o3 g+8 o2 d+8 g+8 g8 o2 v13 q6 g8 r16 g16 d8 r8 o3 g8 o2
+  d8 g8 d8 o2 v13 q6 d8 r16 d16 a8 r8 o3 d8 o2 a8 d8 g8 o2 v13 q6 g8 r16 g16 d8 r8 o3 g8 o2 d8 g8 e8 o2 v13 q6 e8
+  r16 e16 b8 r8 o3 e8 o2 b8 e8 f8 o2 v13 q6 f8 r16 f16 c8 r8 o3 f8 o2 c8 f8 a+8 o2 v13 q6 a+8 r16 a+16 f8 r8 o3
+  a+8 o2 f8 a+8 c+8 o2 v13 q6 c+8 r16 c+16 g+8 r8 o3 c+8 o2 g+8 c+8 c8 o2 v13 q6 c8 r16 c16 g8 r8 o3 c8 o2 g8 c8
+  c8 o2 v13 q6 c8 r16 c16 g8 r8 o3 c8 o2 g8 c8 c+8 ]$LOOP_END
 // エンディング
-o2 v9 q6 c+8 r16 c+16 g+8 r8 o3 c+8 o2 g+8 c+8 c8 o2 v9 q8 c1
+o2 v13 q6 c+8 r16 c+16 g+8 r8 o3 c+8 o2 g+8 c+8 c8 o2 v13 q8 c1
 
 #ch キック
 #role perc
 // パート 4 — キック
 // イントロ
-t120o2 l8 q1 v10 @{ptChipVoice} v10 c8 r8 r8 v7 c8 v10 c8 r16 v6 c16 r8 v8 c8 v10 c8 r8 r8 v7 c8 v10 c8 r16 v6
-  c16 r8 v8 c8
+t120o2 l8 q1 v15 @{ptChipVoice} v15 v15 c8 r8 r8 v10 c8 v15 c8 r16 v9 c16 r8 v12 c8 v15 c8 r8 r8 v10 c8 v15 c8 r16 v9
+  c16 r8 v12 c8
 // 本編
-[ t120 o2 l8 v8 q1 @{ptChipVoice} @d0 @m0 @o0 @p{0,0,0} v10 c8 r8 r8 v7 c8 v10 c8 r16 v6 c16 r8 v8 c8 v10 c8 r8
-  r8 v7 c8 v10 c8 r16 v6 c16 r8 v8 c8 v10 c8 r8 r8 v7 c8 v10 c8 r16 v6 c16 r8 v8 c8 v10 c8 r8 r8 v7 c8 v10 c8
-  r16 v6 c16 r8 v8 c8 v10 c8 r8 r8 v7 c8 v10 c8 r16 v6 c16 r8 v8 c8 v10 c8 r8 r8 v7 c8 v10 c8 r16 v6 c16 r8 v8
-  c8 v10 c8 r8 r8 v7 c8 v10 c8 r16 v6 c16 r8 v8 c8 v10 c8 r8 r8 v7 c8 v10 c8 r16 v6 c16 r8 v8 c8 v10 c8 r8 r8 v7
-  c8 v10 c8 r16 v6 c16 r8 v8 c8 v10 c8 r8 r8 v7 c8 v10 c8 r16 v6 c16 r8 v8 c8 v10 c8 r8 r8 v7 c8 v10 c8 r16 v6
-  c16 r8 v8 c8 v10 c8 r8 r8 v7 c8 v10 c8 r16 v6 c16 r8 v8 c8 v10 c8 r8 r8 v7 c8 v10 c8 r16 v6 c16 r8 v8 c8 v10
-  c8 r8 r8 v7 c8 v10 c8 r16 v6 c16 r8 v8 c8 v10 c8 r8 r8 v7 c8 v10 c8 r16 v6 c16 r8 v8 c8 v10 c8 r8 r8 v7 c8 v10
-  c8 r16 v6 c16 r8 v8 c8 v10 c8 r8 r8 v7 c8 v10 c8 r16 v6 c16 r8 v8 c8 v10 c8 r8 r8 v7 c8 v10 c8 r16 v6 c16 r8
-  v8 c8 v10 c8 r8 r8 v7 c8 v10 c8 r16 v6 c16 r8 v8 c8 v10 c8 r8 r8 v7 c8 v10 c8 r16 v6 c16 r8 v8 c8 v10 c8 r8 r8
-  v7 c8 v10 c8 r16 v6 c16 r8 v8 c8 v10 c8 r8 r8 v7 c8 v10 c8 r16 v6 c16 r8 v8 c8 v10 c8 r8 r8 v7 c8 v10 c8 r16
-  v6 c16 r8 v8 c8 v10 c8 r8 r8 v7 c8 v10 c8 r16 v6 c16 r8 v8 c8 ]$LOOP_END
+[ t120 o2 l8 v12 q1 @{ptChipVoice} v12 @d0 @m0 @o0 @p{0,0,0} v15 c8 r8 r8 v10 c8 v15 c8 r16 v9 c16 r8 v12 c8 v15 c8 r8
+  r8 v10 c8 v15 c8 r16 v9 c16 r8 v12 c8 v15 c8 r8 r8 v10 c8 v15 c8 r16 v9 c16 r8 v12 c8 v15 c8 r8 r8 v10 c8 v15 c8
+  r16 v9 c16 r8 v12 c8 v15 c8 r8 r8 v10 c8 v15 c8 r16 v9 c16 r8 v12 c8 v15 c8 r8 r8 v10 c8 v15 c8 r16 v9 c16 r8 v12
+  c8 v15 c8 r8 r8 v10 c8 v15 c8 r16 v9 c16 r8 v12 c8 v15 c8 r8 r8 v10 c8 v15 c8 r16 v9 c16 r8 v12 c8 v15 c8 r8 r8 v10
+  c8 v15 c8 r16 v9 c16 r8 v12 c8 v15 c8 r8 r8 v10 c8 v15 c8 r16 v9 c16 r8 v12 c8 v15 c8 r8 r8 v10 c8 v15 c8 r16 v9
+  c16 r8 v12 c8 v15 c8 r8 r8 v10 c8 v15 c8 r16 v9 c16 r8 v12 c8 v15 c8 r8 r8 v10 c8 v15 c8 r16 v9 c16 r8 v12 c8 v15
+  c8 r8 r8 v10 c8 v15 c8 r16 v9 c16 r8 v12 c8 v15 c8 r8 r8 v10 c8 v15 c8 r16 v9 c16 r8 v12 c8 v15 c8 r8 r8 v10 c8 v15
+  c8 r16 v9 c16 r8 v12 c8 v15 c8 r8 r8 v10 c8 v15 c8 r16 v9 c16 r8 v12 c8 v15 c8 r8 r8 v10 c8 v15 c8 r16 v9 c16 r8
+  v12 c8 v15 c8 r8 r8 v10 c8 v15 c8 r16 v9 c16 r8 v12 c8 v15 c8 r8 r8 v10 c8 v15 c8 r16 v9 c16 r8 v12 c8 v15 c8 r8 r8
+  v10 c8 v15 c8 r16 v9 c16 r8 v12 c8 v15 c8 r8 r8 v10 c8 v15 c8 r16 v9 c16 r8 v12 c8 v15 c8 r8 r8 v10 c8 v15 c8 r16
+  v9 c16 r8 v12 c8 v15 c8 r8 r8 v10 c8 v15 c8 r16 v9 c16 r8 v12 c8 ]$LOOP_END
 // エンディング
-v10 c8 r8 r8 v7 c8 v10 c8 r16 v6 c16 r8 v8 c8 v8 c8 r8 r2 r4
+v15 c8 r8 r8 v10 c8 v15 c8 r16 v9 c16 r8 v12 c8 v12 c8 r8 r2 r4
 
 #ch スネア
 #role perc
 // パート 5 — スネア
 // イントロ
-t120o3 l8 q2 v7 @{ptNoiseVoice} r4 v7 c8 r8 r4 v8 c8 r8 r4 v7 c8 r8 r8 v3 c16 v4 c16 v8 c8 v4 c16 v6 c16
+t120o3 l8 q2 v11 @{ptNoiseVoice} v11 r4 v11 c8 r8 r4 v13 c8 r8 r4 v11 c8 r8 r8 v5 c16 v7 c16 v13 c8 v7 c16 v10 c16
 // 本編
-[ t120 o3 l8 v6 q2 @{ptNoiseVoice} @d0 @m0 @o0 @p{0,0,0} r4 v7 c8 r8 r4 v8 c8 r8 r4 v7 c8 r8 r4 v8 c8 r8 r4 v7
-  c8 r8 r4 v8 c8 r8 r4 v7 c8 r8 r8 v3 c16 v4 c16 v8 c8 v4 c16 v6 c16 r4 v7 c8 r8 r4 v8 c8 r8 r4 v7 c8 r8 r4 v8
-  c8 r8 r4 v7 c8 r8 r4 v8 c8 r8 r4 v7 c8 r8 r8 v3 c16 v4 c16 v8 c8 v4 c16 v6 c16 r4 v7 c8 r8 r4 v8 c8 r8 r4 v7
-  c8 r8 r4 v8 c8 r8 r4 v7 c8 r8 r4 v8 c8 r8 r4 v7 c8 r8 r8 v3 c16 v4 c16 v8 c8 v4 c16 v6 c16 r4 v7 c8 r8 r4 v8
-  c8 r8 r4 v7 c8 r8 r4 v8 c8 r8 r4 v7 c8 r8 r4 v8 c8 r8 r4 v7 c8 r8 r8 v3 c16 v4 c16 v8 c8 v4 c16 v6 c16 r4 v7
-  c8 r8 r4 v8 c8 r8 r4 v7 c8 r8 r4 v8 c8 r8 r4 v7 c8 r8 r4 v8 c8 r8 r4 v7 c8 r8 r8 v3 c16 v4 c16 v8 c8 v4 c16 v6
-  c16 r4 v7 c8 r8 r4 v8 c8 r8 r4 v7 c8 r8 r4 v8 c8 r8 r4 v7 c8 r8 r4 v8 c8 r8 r4 v7 c8 r8 r8 v3 c16 v4 c16 v8 c8
-  v4 c16 v6 c16 ]$LOOP_END
+[ t120 o3 l8 v10 q2 @{ptNoiseVoice} v10 @d0 @m0 @o0 @p{0,0,0} r4 v11 c8 r8 r4 v13 c8 r8 r4 v11 c8 r8 r4 v13 c8 r8 r4 v11
+  c8 r8 r4 v13 c8 r8 r4 v11 c8 r8 r8 v5 c16 v7 c16 v13 c8 v7 c16 v10 c16 r4 v11 c8 r8 r4 v13 c8 r8 r4 v11 c8 r8 r4 v13
+  c8 r8 r4 v11 c8 r8 r4 v13 c8 r8 r4 v11 c8 r8 r8 v5 c16 v7 c16 v13 c8 v7 c16 v10 c16 r4 v11 c8 r8 r4 v13 c8 r8 r4 v11
+  c8 r8 r4 v13 c8 r8 r4 v11 c8 r8 r4 v13 c8 r8 r4 v11 c8 r8 r8 v5 c16 v7 c16 v13 c8 v7 c16 v10 c16 r4 v11 c8 r8 r4 v13
+  c8 r8 r4 v11 c8 r8 r4 v13 c8 r8 r4 v11 c8 r8 r4 v13 c8 r8 r4 v11 c8 r8 r8 v5 c16 v7 c16 v13 c8 v7 c16 v10 c16 r4 v11
+  c8 r8 r4 v13 c8 r8 r4 v11 c8 r8 r4 v13 c8 r8 r4 v11 c8 r8 r4 v13 c8 r8 r4 v11 c8 r8 r8 v5 c16 v7 c16 v13 c8 v7 c16 v10
+  c16 r4 v11 c8 r8 r4 v13 c8 r8 r4 v11 c8 r8 r4 v13 c8 r8 r4 v11 c8 r8 r4 v13 c8 r8 r4 v11 c8 r8 r8 v5 c16 v7 c16 v13 c8
+  v7 c16 v10 c16 ]$LOOP_END
 // エンディング
-r4 v7 c8 r8 r4 v8 c8 r8 r1
+r4 v11 c8 r8 r4 v13 c8 r8 r1
 
 #ch ハイハット
 #role perc
 // パート 6 — ハイハット
 // イントロ
-t120o4 l8 q1 v3 @{ptNoiseVoice} v3 a8 v4 a8 v2 a8 v4 a8 v3 a8 v4 a8 v2 a16 v3 a16 v4 a8 v3 a8 v4 a8 v2 a8 v4 a8
-  v3 a8 v4 a8 v2 a16 v3 a16 v4 a8
+t120o4 l8 q1 v5 @{ptNoiseVoice} v5 v5 a8 v7 a8 v3 a8 v7 a8 v5 a8 v7 a8 v3 a16 v5 a16 v7 a8 v5 a8 v7 a8 v3 a8 v7 a8
+  v5 a8 v7 a8 v3 a16 v5 a16 v7 a8
 // 本編
-[ t120 o4 l8 v4 q1 @{ptNoiseVoice} @d0 @m0 @o0 @p{0,0,0} v3 a8 v4 a8 v2 a8 v4 a8 v3 a8 v4 a8 v2 a16 v3 a16 v4 a8
-  v3 a8 v4 a8 v2 a8 v4 a8 v3 a8 v4 a8 v2 a16 v3 a16 v4 a8 v3 a8 v4 a8 v2 a8 v4 a8 v3 a8 v4 a8 v2 a16 v3 a16 v4
-  a8 v3 a8 v4 a8 v2 a8 v4 a8 v3 a8 v4 a8 v2 a16 v3 a16 v4 a8 v3 a8 v4 a8 v2 a8 v4 a8 v3 a8 v4 a8 v2 a16 v3 a16
-  v4 a8 v3 a8 v4 a8 v2 a8 v4 a8 v3 a8 v4 a8 v2 a16 v3 a16 v4 a8 v3 a8 v4 a8 v2 a8 v4 a8 v3 a8 v4 a8 v2 a16 v3
-  a16 v4 a8 v3 a8 v4 a8 v2 a8 v4 a8 v3 a8 v4 a8 v2 a16 v3 a16 v4 a8 v3 a8 v4 a8 v2 a8 v4 a8 v3 a8 v4 a8 v2 a16
-  v3 a16 v4 a8 v3 a8 v4 a8 v2 a8 v4 a8 v3 a8 v4 a8 v2 a16 v3 a16 v4 a8 v3 a8 v4 a8 v2 a8 v4 a8 v3 a8 v4 a8 v2
-  a16 v3 a16 v4 a8 v3 a8 v4 a8 v2 a8 v4 a8 v3 a8 v4 a8 v2 a16 v3 a16 v4 a8 v3 a8 v4 a8 v2 a8 v4 a8 v3 a8 v4 a8
-  v2 a16 v3 a16 v4 a8 v3 a8 v4 a8 v2 a8 v4 a8 v3 a8 v4 a8 v2 a16 v3 a16 v4 a8 v3 a8 v4 a8 v2 a8 v4 a8 v3 a8 v4
-  a8 v2 a16 v3 a16 v4 a8 v3 a8 v4 a8 v2 a8 v4 a8 v3 a8 v4 a8 v2 a16 v3 a16 v4 a8 v3 a8 v4 a8 v2 a8 v4 a8 v3 a8
-  v4 a8 v2 a16 v3 a16 v4 a8 v3 a8 v4 a8 v2 a8 v4 a8 v3 a8 v4 a8 v2 a16 v3 a16 v4 a8 v3 a8 v4 a8 v2 a8 v4 a8 v3
-  a8 v4 a8 v2 a16 v3 a16 v4 a8 v3 a8 v4 a8 v2 a8 v4 a8 v3 a8 v4 a8 v2 a16 v3 a16 v4 a8 v3 a8 v4 a8 v2 a8 v4 a8
-  v3 a8 v4 a8 v2 a16 v3 a16 v4 a8 v3 a8 v4 a8 v2 a8 v4 a8 v3 a8 v4 a8 v2 a16 v3 a16 v4 a8 v3 a8 v4 a8 v2 a8 v4
-  a8 v3 a8 v4 a8 v2 a16 v3 a16 v4 a8 v3 a8 v4 a8 v2 a8 v4 a8 v3 a8 v4 a8 v2 a16 v3 a16 v4 a8 ]$LOOP_END
+[ t120 o4 l8 v7 q1 @{ptNoiseVoice} v7 @d0 @m0 @o0 @p{0,0,0} v5 a8 v7 a8 v3 a8 v7 a8 v5 a8 v7 a8 v3 a16 v5 a16 v7 a8
+  v5 a8 v7 a8 v3 a8 v7 a8 v5 a8 v7 a8 v3 a16 v5 a16 v7 a8 v5 a8 v7 a8 v3 a8 v7 a8 v5 a8 v7 a8 v3 a16 v5 a16 v7
+  a8 v5 a8 v7 a8 v3 a8 v7 a8 v5 a8 v7 a8 v3 a16 v5 a16 v7 a8 v5 a8 v7 a8 v3 a8 v7 a8 v5 a8 v7 a8 v3 a16 v5 a16
+  v7 a8 v5 a8 v7 a8 v3 a8 v7 a8 v5 a8 v7 a8 v3 a16 v5 a16 v7 a8 v5 a8 v7 a8 v3 a8 v7 a8 v5 a8 v7 a8 v3 a16 v5
+  a16 v7 a8 v5 a8 v7 a8 v3 a8 v7 a8 v5 a8 v7 a8 v3 a16 v5 a16 v7 a8 v5 a8 v7 a8 v3 a8 v7 a8 v5 a8 v7 a8 v3 a16
+  v5 a16 v7 a8 v5 a8 v7 a8 v3 a8 v7 a8 v5 a8 v7 a8 v3 a16 v5 a16 v7 a8 v5 a8 v7 a8 v3 a8 v7 a8 v5 a8 v7 a8 v3
+  a16 v5 a16 v7 a8 v5 a8 v7 a8 v3 a8 v7 a8 v5 a8 v7 a8 v3 a16 v5 a16 v7 a8 v5 a8 v7 a8 v3 a8 v7 a8 v5 a8 v7 a8
+  v3 a16 v5 a16 v7 a8 v5 a8 v7 a8 v3 a8 v7 a8 v5 a8 v7 a8 v3 a16 v5 a16 v7 a8 v5 a8 v7 a8 v3 a8 v7 a8 v5 a8 v7
+  a8 v3 a16 v5 a16 v7 a8 v5 a8 v7 a8 v3 a8 v7 a8 v5 a8 v7 a8 v3 a16 v5 a16 v7 a8 v5 a8 v7 a8 v3 a8 v7 a8 v5 a8
+  v7 a8 v3 a16 v5 a16 v7 a8 v5 a8 v7 a8 v3 a8 v7 a8 v5 a8 v7 a8 v3 a16 v5 a16 v7 a8 v5 a8 v7 a8 v3 a8 v7 a8 v5
+  a8 v7 a8 v3 a16 v5 a16 v7 a8 v5 a8 v7 a8 v3 a8 v7 a8 v5 a8 v7 a8 v3 a16 v5 a16 v7 a8 v5 a8 v7 a8 v3 a8 v7 a8
+  v5 a8 v7 a8 v3 a16 v5 a16 v7 a8 v5 a8 v7 a8 v3 a8 v7 a8 v5 a8 v7 a8 v3 a16 v5 a16 v7 a8 v5 a8 v7 a8 v3 a8 v7
+  a8 v5 a8 v7 a8 v3 a16 v5 a16 v7 a8 v5 a8 v7 a8 v3 a8 v7 a8 v5 a8 v7 a8 v3 a16 v5 a16 v7 a8 ]$LOOP_END
 // エンディング
-v3 a8 v4 a8 v2 a8 v4 a8 v3 a8 v4 a8 v2 a16 v3 a16 v4 a8 v3 a8 r8 r2 r4
+v5 a8 v7 a8 v3 a8 v7 a8 v5 a8 v7 a8 v3 a16 v5 a16 v7 a8 v5 a8 r8 r2 r4
 
 #ch 和音 1
 #role chord
 // パート 7 — 和音
 // イントロ
-t120o3 l8 q6 v6 @{ptChipVoice} v6 q6 r8 o3 f4 o3 f8 r8 o3 f4 r8 v6 q6 o3 f4 r8 o3 f8 r4 o3 f8 r8
+t120o3 l8 q6 v10 @{ptChipVoice} v9 v9 q6 r8 o3 f4 o3 f8 r8 o3 f4 r8 v9 q6 o3 f4 r8 o3 f8 r4 o3 f8 r8
 // 本編
-[ t120 o3 l8 v6 q6 @{ptChipVoice} @d0 @m0 @o0 @p{0,0,0} v6 q6 r8 o3 f4 o3 f8 r8 o3 f4 r8 v6 q6 o3 g4 r8 o3 g8 r4
-  o3 g8 r8 v6 q6 r8 o3 f4 o3 f8 r8 o3 f4 r8 v6 q6 o3 e4 r8 o3 e8 r4 o3 e8 r8 v6 q6 r8 o3 f4 o3 f8 r8 o3 f4 r8 v6
-  q6 o3 f4 r8 o3 f8 r4 o3 f8 r8 v6 q6 r8 o3 f4 o3 f8 r8 o3 f4 r8 v6 q6 o3 e4 r8 o3 e8 r4 o3 e8 r8 v6 q6 r8 o3 a4
-  o3 a8 r8 o3 a4 r8 v6 q6 o3 g4 r8 o3 g8 r4 o3 g8 r8 v6 q6 r8 o3 f4 o3 f8 r8 o3 f4 r8 v6 q6 o3 f4 r8 o3 f8 r4 o3
-  f8 r8 v6 q6 r8 o3 f4 o3 f8 r8 o3 f4 r8 v6 q6 o3 g4 r8 o3 g8 r4 o3 g8 r8 v6 q6 r8 o3 g4 o3 g8 r8 o3 g4 r8 v6 q6
-  o3 f4 r8 o3 f8 r4 o3 f8 r8 v6 q6 r8 o3 f4 o3 f8 r8 o3 f4 r8 v6 q6 o3 b4 r8 o3 b8 r4 o3 b8 r8 v6 q6 r8 o3 g4 o3
-  g8 r8 o3 g4 r8 v6 q6 o3 a4 r8 o3 a8 r4 o3 a8 r8 v6 q6 r8 o3 f4 o3 f8 r8 o3 f4 r8 v6 q6 o3 f4 r8 o3 f8 r4 o3 f8
-  r8 v6 q6 r8 o3 f4 o3 f8 r8 o3 f4 r8 v6 q6 o3 e4 r8 o3 e8 r4 o3 e8 r8 ]$LOOP_END
+[ t120 o3 l8 v9 q6 @{ptChipVoice} v9 @d0 @m0 @o0 @p{0,0,0} v9 q6 r8 o3 f4 o3 f8 r8 o3 f4 r8 v9 q6 o3 g4 r8 o3 g8 r4
+  o3 g8 r8 v9 q6 r8 o3 f4 o3 f8 r8 o3 f4 r8 v9 q6 o3 e4 r8 o3 e8 r4 o3 e8 r8 v9 q6 r8 o3 f4 o3 f8 r8 o3 f4 r8 v9
+  q6 o3 f4 r8 o3 f8 r4 o3 f8 r8 v9 q6 r8 o3 f4 o3 f8 r8 o3 f4 r8 v9 q6 o3 e4 r8 o3 e8 r4 o3 e8 r8 v9 q6 r8 o3 a4
+  o3 a8 r8 o3 a4 r8 v9 q6 o3 g4 r8 o3 g8 r4 o3 g8 r8 v9 q6 r8 o3 f4 o3 f8 r8 o3 f4 r8 v9 q6 o3 f4 r8 o3 f8 r4 o3
+  f8 r8 v9 q6 r8 o3 f4 o3 f8 r8 o3 f4 r8 v9 q6 o3 g4 r8 o3 g8 r4 o3 g8 r8 v9 q6 r8 o3 g4 o3 g8 r8 o3 g4 r8 v9 q6
+  o3 f4 r8 o3 f8 r4 o3 f8 r8 v9 q6 r8 o3 f4 o3 f8 r8 o3 f4 r8 v9 q6 o3 b4 r8 o3 b8 r4 o3 b8 r8 v9 q6 r8 o3 g4 o3
+  g8 r8 o3 g4 r8 v9 q6 o3 a4 r8 o3 a8 r4 o3 a8 r8 v9 q6 r8 o3 f4 o3 f8 r8 o3 f4 r8 v9 q6 o3 f4 r8 o3 f8 r4 o3 f8
+  r8 v9 q6 r8 o3 f4 o3 f8 r8 o3 f4 r8 v9 q6 o3 e4 r8 o3 e8 r4 o3 e8 r8 ]$LOOP_END
 // エンディング
-v6 q6 r8 o3 f4 o3 f8 r8 o3 f4 r8 v6 q8 o3 e1
+v9 q6 r8 o3 f4 o3 f8 r8 o3 f4 r8 v9 q8 o3 e1
 
 #ch 和音 2
 #role chord
 // パート 8 — 和音
 // イントロ
-t120o3 l8 q6 v6 @{ptChipVoice} v6 q6 r8 o3 a4 o3 a8 r8 o3 a4 r8 v6 q6 o3 b4 r8 o3 b8 r4 o3 b8 r8
+t120o3 l8 q6 v10 @{ptChipVoice} v9 v9 q6 r8 o3 a4 o3 a8 r8 o3 a4 r8 v9 q6 o3 b4 r8 o3 b8 r4 o3 b8 r8
 // 本編
-[ t120 o3 l8 v6 q6 @{ptChipVoice} @d0 @m0 @o0 @p{0,0,0} v6 q6 r8 o3 a4 o3 a8 r8 o3 a4 r8 v6 q6 o3 b4 r8 o3 b8 r4
-  o3 b8 r8 v6 q6 r8 o3 a+4 o3 a+8 r8 o3 a+4 r8 v6 q6 o3 b4 r8 o3 b8 r4 o3 b8 r8 v6 q6 r8 o3 a4 o3 a8 r8 o3 a4 r8
-  v6 q6 o3 a4 r8 o3 a8 r4 o3 a8 r8 v6 q6 r8 o3 b4 o3 b8 r8 o3 b4 r8 v6 q6 o3 a4 r8 o3 a8 r4 o3 a8 r8 v6 q6 r8 o4
-  c4 o4 c8 r8 o4 c4 r8 v6 q6 o3 b4 r8 o3 b8 r4 o3 b8 r8 v6 q6 r8 o3 a4 o3 a8 r8 o3 a4 r8 v6 q6 o3 b4 r8 o3 b8 r4
-  o3 b8 r8 v6 q6 r8 o3 a4 o3 a8 r8 o3 a4 r8 v6 q6 o3 b4 r8 o3 b8 r4 o3 b8 r8 v6 q6 r8 o4 c4 o4 c8 r8 o4 c4 r8 v6
-  q6 o3 b4 r8 o3 b8 r4 o3 b8 r8 v6 q6 r8 o3 a4 o3 a8 r8 o3 a4 r8 v6 q6 o4 d4 r8 o4 d8 r4 o4 d8 r8 v6 q6 r8 o3 b4
-  o3 b8 r8 o3 b4 r8 v6 q6 o4 c4 r8 o4 c8 r4 o4 c8 r8 v6 q6 r8 o3 a4 o3 a8 r8 o3 a4 r8 v6 q6 o3 b4 r8 o3 b8 r4 o3
-  b8 r8 v6 q6 r8 o3 a+4 o3 a+8 r8 o3 a+4 r8 v6 q6 o3 a4 r8 o3 a8 r4 o3 a8 r8 ]$LOOP_END
+[ t120 o3 l8 v9 q6 @{ptChipVoice} v9 @d0 @m0 @o0 @p{0,0,0} v9 q6 r8 o3 a4 o3 a8 r8 o3 a4 r8 v9 q6 o3 b4 r8 o3 b8 r4
+  o3 b8 r8 v9 q6 r8 o3 a+4 o3 a+8 r8 o3 a+4 r8 v9 q6 o3 b4 r8 o3 b8 r4 o3 b8 r8 v9 q6 r8 o3 a4 o3 a8 r8 o3 a4 r8
+  v9 q6 o3 a4 r8 o3 a8 r4 o3 a8 r8 v9 q6 r8 o3 b4 o3 b8 r8 o3 b4 r8 v9 q6 o3 a4 r8 o3 a8 r4 o3 a8 r8 v9 q6 r8 o4
+  c4 o4 c8 r8 o4 c4 r8 v9 q6 o3 b4 r8 o3 b8 r4 o3 b8 r8 v9 q6 r8 o3 a4 o3 a8 r8 o3 a4 r8 v9 q6 o3 b4 r8 o3 b8 r4
+  o3 b8 r8 v9 q6 r8 o3 a4 o3 a8 r8 o3 a4 r8 v9 q6 o3 b4 r8 o3 b8 r4 o3 b8 r8 v9 q6 r8 o4 c4 o4 c8 r8 o4 c4 r8 v9
+  q6 o3 b4 r8 o3 b8 r4 o3 b8 r8 v9 q6 r8 o3 a4 o3 a8 r8 o3 a4 r8 v9 q6 o4 d4 r8 o4 d8 r4 o4 d8 r8 v9 q6 r8 o3 b4
+  o3 b8 r8 o3 b4 r8 v9 q6 o4 c4 r8 o4 c8 r4 o4 c8 r8 v9 q6 r8 o3 a4 o3 a8 r8 o3 a4 r8 v9 q6 o3 b4 r8 o3 b8 r4 o3
+  b8 r8 v9 q6 r8 o3 a+4 o3 a+8 r8 o3 a+4 r8 v9 q6 o3 a4 r8 o3 a8 r4 o3 a8 r8 ]$LOOP_END
 // エンディング
-v6 q6 r8 o3 b4 o3 b8 r8 o3 b4 r8 v6 q8 o3 a1
+v9 q6 r8 o3 b4 o3 b8 r8 o3 b4 r8 v9 q8 o3 a1
 
 #ch 和音 3
 #role chord
 // パート 9 — 和音
 // イントロ
-t120o3 l8 q6 v6 @{ptChipVoice} v6 q6 r8 o4 c4 o4 c8 r8 o4 c4 r8 v6 q6 o4 e4 r8 o4 e8 r4 o4 e8 r8
+t120o3 l8 q6 v10 @{ptChipVoice} v9 v9 q6 r8 o4 c4 o4 c8 r8 o4 c4 r8 v9 q6 o4 e4 r8 o4 e8 r4 o4 e8 r8
 // 本編
-[ t120 o4 l8 v6 q6 @{ptChipVoice} @d0 @m0 @o0 @p{0,0,0} v6 q6 r8 o4 c4 o4 c8 r8 o4 c4 r8 v6 q6 o4 d4 r8 o4 d8 r4
-  o4 d8 r8 v6 q6 r8 o4 d4 o4 d8 r8 o4 d4 r8 v6 q6 o4 d4 r8 o4 d8 r4 o4 d8 r8 v6 q6 r8 o4 c4 o4 c8 r8 o4 c4 r8 v6
-  q6 o4 c4 r8 o4 c8 r4 o4 c8 r8 v6 q6 r8 o4 e4 o4 e8 r8 o4 e4 r8 v6 q6 o4 d4 r8 o4 d8 r4 o4 d8 r8 v6 q6 r8 o4 e4
-  o4 e8 r8 o4 e4 r8 v6 q6 o4 d4 r8 o4 d8 r4 o4 d8 r8 v6 q6 r8 o4 c4 o4 c8 r8 o4 c4 r8 v6 q6 o4 d4 r8 o4 d8 r4 o4
-  d8 r8 v6 q6 r8 o4 c4 o4 c8 r8 o4 c4 r8 v6 q6 o4 c4 r8 o4 c8 r4 o4 c8 r8 v6 q6 r8 o4 d+4 o4 d+8 r8 o4 d+4 r8 v6
-  q6 o4 e4 r8 o4 e8 r4 o4 e8 r8 v6 q6 r8 o4 c4 o4 c8 r8 o4 c4 r8 v6 q6 o4 f+4 r8 o4 f+8 r4 o4 f+8 r8 v6 q6 r8 o4
-  d4 o4 d8 r8 o4 d4 r8 v6 q6 o4 e4 r8 o4 e8 r4 o4 e8 r8 v6 q6 r8 o4 c4 o4 c8 r8 o4 c4 r8 v6 q6 o4 d4 r8 o4 d8 r4
-  o4 d8 r8 v6 q6 r8 o4 d4 o4 d8 r8 o4 d4 r8 v6 q6 o4 d4 r8 o4 d8 r4 o4 d8 r8 ]$LOOP_END
+[ t120 o4 l8 v9 q6 @{ptChipVoice} v9 @d0 @m0 @o0 @p{0,0,0} v9 q6 r8 o4 c4 o4 c8 r8 o4 c4 r8 v9 q6 o4 d4 r8 o4 d8 r4
+  o4 d8 r8 v9 q6 r8 o4 d4 o4 d8 r8 o4 d4 r8 v9 q6 o4 d4 r8 o4 d8 r4 o4 d8 r8 v9 q6 r8 o4 c4 o4 c8 r8 o4 c4 r8 v9
+  q6 o4 c4 r8 o4 c8 r4 o4 c8 r8 v9 q6 r8 o4 e4 o4 e8 r8 o4 e4 r8 v9 q6 o4 d4 r8 o4 d8 r4 o4 d8 r8 v9 q6 r8 o4 e4
+  o4 e8 r8 o4 e4 r8 v9 q6 o4 d4 r8 o4 d8 r4 o4 d8 r8 v9 q6 r8 o4 c4 o4 c8 r8 o4 c4 r8 v9 q6 o4 d4 r8 o4 d8 r4 o4
+  d8 r8 v9 q6 r8 o4 c4 o4 c8 r8 o4 c4 r8 v9 q6 o4 c4 r8 o4 c8 r4 o4 c8 r8 v9 q6 r8 o4 d+4 o4 d+8 r8 o4 d+4 r8 v9
+  q6 o4 e4 r8 o4 e8 r4 o4 e8 r8 v9 q6 r8 o4 c4 o4 c8 r8 o4 c4 r8 v9 q6 o4 f+4 r8 o4 f+8 r4 o4 f+8 r8 v9 q6 r8 o4
+  d4 o4 d8 r8 o4 d4 r8 v9 q6 o4 e4 r8 o4 e8 r4 o4 e8 r8 v9 q6 r8 o4 c4 o4 c8 r8 o4 c4 r8 v9 q6 o4 d4 r8 o4 d8 r4
+  o4 d8 r8 v9 q6 r8 o4 d4 o4 d8 r8 o4 d4 r8 v9 q6 o4 d4 r8 o4 d8 r4 o4 d8 r8 ]$LOOP_END
 // エンディング
-v6 q6 r8 o4 d4 o4 d8 r8 o4 d4 r8 v6 q8 o4 d1
+v9 q6 r8 o4 d4 o4 d8 r8 o4 d4 r8 v9 q8 o4 d1
 
 #ch 和音 4
 #role chord
 // パート 10 — 和音
 // イントロ
-t120o3 l8 q6 v6 @{ptChipVoice} v6 q6 r8 o4 e4 o4 e8 r8 o4 e4 r8 v6 q6 o4 a4 r8 o4 a8 r4 o4 a8 r8
+t120o3 l8 q6 v10 @{ptChipVoice} v9 v9 q6 r8 o4 e4 o4 e8 r8 o4 e4 r8 v9 q6 o4 a4 r8 o4 a8 r4 o4 a8 r8
 // 本編
-[ t120 o4 l8 v6 q6 @{ptChipVoice} @d0 @m0 @o0 @p{0,0,0} v6 q6 r8 o4 e4 o4 e8 r8 o4 e4 r8 v6 q6 o4 e4 r8 o4 e8 r4
-  o4 e8 r8 v6 q6 r8 o4 g4 o4 g8 r8 o4 g4 r8 v6 q6 o4 g4 r8 o4 g8 r4 o4 g8 r8 v6 q6 r8 o4 e4 o4 e8 r8 o4 e4 r8 v6
-  q6 o4 d4 r8 o4 d8 r4 o4 d8 r8 v6 q6 r8 o4 a4 o4 a8 r8 o4 a4 r8 v6 q6 o4 g4 r8 o4 g8 r4 o4 g8 r8 v6 q6 r8 o4 g4
-  o4 g8 r8 o4 g4 r8 v6 q6 o4 f+4 r8 o4 f+8 r4 o4 f+8 r8 v6 q6 r8 o4 e4 o4 e8 r8 o4 e4 r8 v6 q6 o4 g4 r8 o4 g8 r4
-  o4 g8 r8 v6 q6 r8 o4 d4 o4 d8 r8 o4 d4 r8 v6 q6 o4 e4 r8 o4 e8 r4 o4 e8 r8 v6 q6 r8 o4 f4 o4 f8 r8 o4 f4 r8 v6
-  q6 o4 a4 r8 o4 a8 r4 o4 a8 r8 v6 q6 r8 o4 e4 o4 e8 r8 o4 e4 r8 v6 q6 o4 a4 r8 o4 a8 r4 o4 a8 r8 v6 q6 r8 o4
-  f+4 o4 f+8 r8 o4 f+4 r8 v6 q6 o4 g4 r8 o4 g8 r4 o4 g8 r8 v6 q6 r8 o4 d4 o4 d8 r8 o4 d4 r8 v6 q6 o4 g4 r8 o4 g8
-  r4 o4 g8 r8 v6 q6 r8 o4 g4 o4 g8 r8 o4 g4 r8 v6 q6 o4 g4 r8 o4 g8 r4 o4 g8 r8 ]$LOOP_END
+[ t120 o4 l8 v9 q6 @{ptChipVoice} v9 @d0 @m0 @o0 @p{0,0,0} v9 q6 r8 o4 e4 o4 e8 r8 o4 e4 r8 v9 q6 o4 e4 r8 o4 e8 r4
+  o4 e8 r8 v9 q6 r8 o4 g4 o4 g8 r8 o4 g4 r8 v9 q6 o4 g4 r8 o4 g8 r4 o4 g8 r8 v9 q6 r8 o4 e4 o4 e8 r8 o4 e4 r8 v9
+  q6 o4 d4 r8 o4 d8 r4 o4 d8 r8 v9 q6 r8 o4 a4 o4 a8 r8 o4 a4 r8 v9 q6 o4 g4 r8 o4 g8 r4 o4 g8 r8 v9 q6 r8 o4 g4
+  o4 g8 r8 o4 g4 r8 v9 q6 o4 f+4 r8 o4 f+8 r4 o4 f+8 r8 v9 q6 r8 o4 e4 o4 e8 r8 o4 e4 r8 v9 q6 o4 g4 r8 o4 g8 r4
+  o4 g8 r8 v9 q6 r8 o4 d4 o4 d8 r8 o4 d4 r8 v9 q6 o4 e4 r8 o4 e8 r4 o4 e8 r8 v9 q6 r8 o4 f4 o4 f8 r8 o4 f4 r8 v9
+  q6 o4 a4 r8 o4 a8 r4 o4 a8 r8 v9 q6 r8 o4 e4 o4 e8 r8 o4 e4 r8 v9 q6 o4 a4 r8 o4 a8 r4 o4 a8 r8 v9 q6 r8 o4
+  f+4 o4 f+8 r8 o4 f+4 r8 v9 q6 o4 g4 r8 o4 g8 r4 o4 g8 r8 v9 q6 r8 o4 d4 o4 d8 r8 o4 d4 r8 v9 q6 o4 g4 r8 o4 g8
+  r4 o4 g8 r8 v9 q6 r8 o4 g4 o4 g8 r8 o4 g4 r8 v9 q6 o4 g4 r8 o4 g8 r4 o4 g8 r8 ]$LOOP_END
 // エンディング
-v6 q6 r8 o4 g4 o4 g8 r8 o4 g4 r8 v6 q8 o4 g1
+v9 q6 r8 o4 g4 o4 g8 r8 o4 g4 r8 v9 q8 o4 g1
+
+
