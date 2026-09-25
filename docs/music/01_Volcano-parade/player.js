@@ -25,6 +25,14 @@
   }
 
   function registerVoices(audio) {
+    E.registerLayer('vpArp', {
+      layers: [
+        { wave: 'saw', gain: 1 },
+        { wave: 'saw', gain: .6, cents: 7 },
+      ],
+      role: 'arp',
+      noteJa: 'のこぎり波に7セント上・音量60%の層を重ねる。',
+    });
     audio.volume = 10 ** (12.56 / 20);
     E.registerTone('vpLead', {
       wave: 'pulse:50',
@@ -68,6 +76,7 @@
 
   const CHANNELS = { ARP: 0, MELODY: 1, BASS: 2, CALL: 3, CALL_LOW: 4, HAT: 5 };
   const VOICE_GAINS = {
+    vpArp: { f: .065, cap: .24, comp: 1.078 },
     saw: { f: .065, cap: .24, comp: 1.078 },
     'pulse:50': { f: .055, cap: .24, comp: 1.079 },
     vpLead: { f: .055, cap: .24, comp: 1.079 },
@@ -77,39 +86,12 @@
   };
   const DEFAULT_GAIN = { f: .055, cap: .24, comp: 1 };
   const CHANNEL_GAINS = [.98, 1.049, 1.233, 1.063, 1.09, 1, 1, .98];
-  const legacyEnvelopes = [
-    { a: .005, d: 0, s: 1, r: .01 },
-    { a: .08, d: .1, s: .8, r: .15 },
-    { a: .002, d: .25, s: 0, r: .05 },
-    { a: .004, d: .4, s: .35, r: .12 },
-    { a: .25, d: .2, s: .7, r: .4 },
-    { a: .002, d: .12, s: .15, r: .08 },
-  ];
-  const envelopeCache = new Map();
+  E.registerEnvelope('vpFlat', { a: .005, d: 0, s: 1, r: .01 });
+  E.registerEnvelope('vpSoft', { a: .08, d: '10%', s: .8, r: .15 });
+  E.registerEnvelope('vpPercussive', { a: .002, d: '25%', s: 0, r: .05 });
 
   function legacyVolume(value) {
     return Math.max(0, Math.min(15, 15 * Math.pow(Math.max(0, 3 * value), 1 / 1.8)));
-  }
-
-  function adaptEnvelopes(tracks) {
-    for (const track of tracks) for (const event of track.events) {
-      const wave = E.WAVEFORMS[event.wave];
-      if (wave.kind === 'pulse' && wave.duty === .5) event.vol *= Math.pow(.85, 1 / 1.8);
-      const spec = legacyEnvelopes[event.env];
-      if (!spec) continue;
-      const key = event.env;
-      if (!envelopeCache.has(key)) {
-        const name = 'vpLegacy' + envelopeCache.size;
-        E.registerEnvelope(name, {
-          ...spec, d: `${spec.d * 100}%`,
-          note: 'Note-relative Volcano Parade envelope.',
-          noteJa: 'Volcano Paradeの音長比例エンベロープ。',
-        });
-        envelopeCache.set(key, E.ENVELOPES.findIndex(env => env.name === name));
-      }
-      event.env = envelopeCache.get(key);
-      event.open = false;
-    }
   }
 
   function balanceTracks(tracks) {
@@ -127,12 +109,6 @@
       event.__g *= Math.abs(phase - .5) < .09 ? 1.38 : .84;
     }
     events(CHANNELS.HAT).forEach((event, index) => { event.__open = index % 16 === 15; });
-    const gateTail = [.0041, .0014, .0011, .0022, .0014, .0016];
-    for (const [ch, track] of tracks.entries()) {
-      if (ch !== CHANNELS.HAT) {
-        for (const event of track.events) event.gate += gateTail[event.env] ?? .0014;
-      }
-    }
     for (const [ch, track] of tracks.entries()) for (const event of track.events) {
       const linear = event.vol / 15 * event.__g;
       let gain;
@@ -144,6 +120,8 @@
         gain = Math.min(spec.cap, linear * spec.f) * spec.comp;
       }
       event.vol = legacyVolume(gain) * (CHANNEL_GAINS[ch] ?? 1);
+      const wave = E.WAVEFORMS[event.wave];
+      if (wave.kind === 'pulse' && wave.duty === .5) event.vol *= Math.pow(.85, 1 / 1.8);
       delete event.__g;
     }
   }
@@ -152,7 +130,6 @@
     const tracks = audio.bgmDefs.get('__player__');
     if (!Array.isArray(tracks)) return;
     balanceTracks(tracks);
-    adaptEnvelopes(tracks);
   }
 
   const editor = document.getElementById('vp-src');
@@ -160,8 +137,7 @@
   const audio = new E.ChipTuneSound(null, { psgTune: false, spatial: 'mono' });
   audio.psgTune = false;
   registerVoices(audio);
-  // 旧版がアルペジオを複製して7セントずらしていた処理は、現行の動的エフェクトへ移動。
-  audio.dynamic_effects[CHANNELS.ARP] = { detune: 7 };
+
 
   fetch(MusicAssets.song('volcano-parade.mml'))
     .then(response => {
@@ -183,3 +159,4 @@
     })
     .catch(error => { status.textContent = 'MML loading error: ' + error.message; });
 })();
+
