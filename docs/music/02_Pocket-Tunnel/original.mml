@@ -12,7 +12,6 @@
 エンベロープ:
 - ptHeld
 - ptDecay
-- ptDecayShape0…（減衰形状ごとに共有。余韻は割合指定、短音は秒指定）
 */
 
 // この数値を直すと本編のループ回数が変わります（1以上）。
@@ -33,13 +32,13 @@ $LOOP_END = { 1 }
 //   @{ptKick}   キック用2オペFM。125Hzから45Hzへ0.12秒で下降。
 //   @{noise:white}   スネアとハイハット用の標準ノイズ。a4／a6と発音長で鳴りを分ける。
 // @e{ptHeld} は持続、@e{ptDecay} は音長に応じた減衰。
-// 音量の換算とADSRの秒数調整だけを共通JS処理で行う。
+// エンベロープは音色定義の割合指定を使用。キックの調律はバンドルで指定。
 
 #bundle ptLeadVoice    = @{ptLead} @e{ptHeld}
 #bundle ptArpVoice     = @{ptArp} @e{ptDecay}
 #bundle ptBassDecay    = @{ptBass} @e{ptDecay}
 #bundle ptBassHeld     = @{ptBass} @e{ptHeld}
-#bundle ptKickVoice    = @{ptKick} @e{ptDecay}
+#bundle ptKickVoice    = @{ptKick} @e{ptDecay} @d-47
 #bundle ptNoiseDecay   = @{noise:white} @e{ptDecay}
 #bundle ptChordHeld    = @{ptChord} @e{ptHeld}
 #bundle ptHarmonyHeld  = @{ptHarmony} @e{ptHeld}
@@ -331,3 +330,4 @@ t120 q8 r1
   o5 b16 o5 g16 o5 f8 o5 e4 r4 ]$LOOP_END
 // エンディング
 r2 r4 r1 r4
+
