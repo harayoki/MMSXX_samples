@@ -5,7 +5,7 @@
 音色:
 - ptChipPulse
 エンベロープ:
-- ptLegacy（減衰を音長の25％で指定）
+- ptPercussive
 */
 
 // この数値を直すと本編のループ回数が変わります（1以上）。
@@ -21,10 +21,10 @@ $LOOP_END = { 1 }
 // 使用音色：
 //   @{ptChipPulse}   チップチューン アレンジの矩形波。標準pulse:50の音量を補正。
 //   @{noise:white}   標準ノイズによるドラム。
-// @e{ptLegacy} は元の音長に合わせて共通JSで減衰時間を換算。
+// @e{ptPercussive} は打楽器向けに減衰時間を調整。
 
-#bundle ptChipVoice  = @{ptChipPulse} @e{ptLegacy}
-#bundle ptNoiseVoice = @{noise:white} @e{ptLegacy}
+#bundle ptChipVoice  = @{ptChipPulse} @e{ptPercussive}
+#bundle ptNoiseVoice = @{noise:white} @e{ptPercussive}
 
 #ch メロディ
 #role lead
