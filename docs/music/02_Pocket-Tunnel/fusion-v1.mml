@@ -21,10 +21,10 @@ $LOOP_END = { 1 }
 // 使用音色：
 //   @{ptChipPulse}   チップチューン アレンジの矩形波。標準pulse:50の音量を補正。
 //   @{noise:white}   標準ノイズによるドラム。
-// @e{percussive} は元の音長に合わせて共通JSで減衰時間を換算。
+// @e{ptLegacy} は元の音長に合わせて共通JSで減衰時間を換算。
 
-#bundle ptChipVoice  = @{ptChipPulse} @e{percussive}
-#bundle ptNoiseVoice = @{noise:white} @e{percussive}
+#bundle ptChipVoice  = @{ptChipPulse} @e{ptLegacy}
+#bundle ptNoiseVoice = @{noise:white} @e{ptLegacy}
 
 #ch メロディ
 #role lead
@@ -225,3 +225,4 @@ t120o3 l8 q6 v6 @{ptChipVoice} v6 q6 r8 o4 e4 o4 e8 r8 o4 e4 r8 v6 q6 o4 a4 r8 o
   r4 o4 g8 r8 v6 q6 r8 o4 g4 o4 g8 r8 o4 g4 r8 v6 q6 o4 g4 r8 o4 g8 r4 o4 g8 r8 ]$LOOP_END
 // エンディング
 v6 q6 r8 o4 g4 o4 g8 r8 o4 g4 r8 v6 q8 o4 g1
+
