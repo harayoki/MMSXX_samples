@@ -7,10 +7,11 @@
     noteJa: 'Pocket Tunnelの保持音用エンベロープ。',
   });
   E.registerEnvelope('ptDecay', {
-    a: .003, d: .1, s: .32, r: .04,
+    a: .003, d: '70%', s: .32, r: '30%',
     note: 'Pocket Tunnel short decay.',
     noteJa: 'Pocket Tunnelの短い減衰音。',
   });
+  E.registerEnvelope('ptLegacy', { a: .002, d: '25%', s: 0, r: .05 });
   E.registerFM('ptKick', {
     ratio: 1, depth: 0, attack: .003, decay: .12, sustain: 0,
     drop: 125 / 45 - 1, dropTime: .12,
@@ -54,31 +55,6 @@
       gain: 10 ** (13.10 / 20), tune: true,
     },
   ];
-  const envelopeCache = new Map();
-
-  function convertedEnvelope(gate, sustain, legacy) {
-    if (sustain) return E.ENVELOPES.findIndex(env => env.name === 'ptHeld');
-    // 70%から3msを引く減衰は秒指定を維持。余韻だけを割合にする。
-    // 20ms未満ではエンジンの下限による変化を避けるため秒指定を残す。
-    const spec = legacy
-      ? { a: .002, d: '25%', s: 0, r: .05 }
-      : { a: .003, d: Math.max(0, gate * .7 - .003), s: .32,
-          r: gate >= .02 ? '30%' : gate * .3 };
-    const key = JSON.stringify(spec);
-    if (envelopeCache.has(key)) return envelopeCache.get(key);
-    const name = legacy ? 'ptLegacy' : 'ptDecayShape' + envelopeCache.size;
-    E.registerEnvelope(name, {
-      ...spec,
-      note: 'Pocket Tunnel envelope shared by shape.',
-      noteJa: legacy
-        ? '旧Fusionの音長比例エンベロープ。'
-        : '減衰は秒指定、余韻は音長に対する割合。短音は秒指定。',
-    });
-    const index = E.ENVELOPES.findIndex(env => env.name === name);
-    envelopeCache.set(key, index);
-    return index;
-  }
-
   function nativeVolume(linear) {
     return 15 * Math.pow(Math.max(0, linear) / .14, 1 / 1.8);
   }
@@ -98,23 +74,12 @@
       const name = E.WAVEFORMS[event.wave].name;
       const spec = tones[name];
       if (legacy) {
-        if (E.ENVELOPES[event.env].name === 'percussive') {
-          event.env = convertedEnvelope(event.gate, false, true);
-          event.open = false;
-        }
         if (name === 'ptChipPulse') {
           event.vol = nativeVolume(Math.pow(event.vol / 15, 1.8) * .14 * .85);
         }
       } else {
-        const envName = E.ENVELOPES[event.env].name;
-        const sustain = envName === 'ptHeld';
-        if (envName === 'ptHeld' || envName === 'ptDecay') {
-          event.env = convertedEnvelope(event.gate, sustain, false);
-        }
-        if (name === 'ptKick') event.freq = 45;
         event.vol = nativeVolume(event.vol * (spec?.unit ?? 1) / 15 *
           (spec?.wave === 'pulse:50' ? .85 : 1));
-        event.open = false;
       }
     }
     audio.psgTune = song.tune;
@@ -196,3 +161,4 @@
     status.textContent = '';
   }).catch(error => { status.textContent = 'MML読み込みエラー：' + error.message; });
 })();
+
