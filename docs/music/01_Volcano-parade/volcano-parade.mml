@@ -3,12 +3,15 @@
 設定JS: https://harayoki.github.io/MMSXX_samples/music/01_Volcano-parade/player.js
 
 音色:
+- vpArp
 - vpLead
 - vpPiano
 - vpTom
 - vpBass
 エンベロープ:
-- vpLegacy0…（エンベロープ種別ごとに登録・適用。減衰は音長に対する割合）
+- vpFlat
+- vpSoft
+- vpPercussive
 */
 
 // この数値を直すと本編のループ回数が変わります（1以上）。
@@ -21,25 +24,23 @@ $LOOP_END = { 2 }
 //   @{vpTom}    合いの手に重ねるタム。音階を聞かせる。
 //   @{vpBass}   ベース。三角波に、ローパスを通した矩形波を混ぜている。
 //   @{noise:white}    ハイハット。o4 の a で鳴らすと白色ノイズになる。
-// 音量とグルーヴ(重なったときの引き / 8 分の裏の張り / 16 打ごとのオープン)調整は
-// 現在のMMLでは書けないので、動的にJavaScript処理が音量を書き換えている。
+// 音量とアクセントの移行は未完了。現時点では個別JSの音量補正が残っています。
 
 #title Volcano Parade
 #about 明るい循環進行と下降ベースを使った、タイトル／エンディング向けの曲。
 #copyright 2026 harayoki
 #license CC BY 4.0 (music, artwork and MML source; https://creativecommons.org/licenses/by/4.0/)
 
-#bundle vpArpVoice   = @{saw} @e{flat}
-#bundle vpLeadVoice  = @{vpLead} @e{soft}
-#bundle vpPulseSoft  = @{pulse:50} @e{soft}
-#bundle vpBassVoice  = @{vpBass} @e{flat}
-#bundle vpPianoVoice = @{vpPiano} @e{percussive}
-#bundle vpSawSoft    = @{saw} @e{soft}
-#bundle vpHatVoice   = @{noise:white} @e{percussive}
-#bundle vpTomVoice   = @{vpTom} @e{percussive}
+#bundle vpLeadVoice  = @{vpLead} @e{vpSoft}
+#bundle vpPulseSoft  = @{pulse:50} @e{vpSoft}
+#bundle vpBassVoice  = @{vpBass} @e{vpFlat}
+#bundle vpPianoVoice = @{vpPiano} @e{vpPercussive}
+#bundle vpSawSoft    = @{saw} @e{vpSoft}
+#bundle vpHatVoice   = @{noise:white} @e{vpPercussive}
+#bundle vpTomVoice   = @{vpTom} @e{vpPercussive}
 // Powered by mmsxx-mml-studio (engine license undecided; redistribution currently prohibited).
 // K005289 arpeggio — MIDI ch.1 rhythm/contour, reharmonized
-// アルペジオの7セント重ねはplayer.jsのdynamic_effectsで指定。
+// アルペジオは合成音色で7セント上・音量60%の層を重ねる。
 // ベースが半音〜全音ずつ下降するよう、各拍を転回形中心に再配置。
 // D-A/C#-Bm-D/A → A-E/G#-F#m-A/E → Bm-F#m/A-G-D/F# → G-D/F#-Em-A/C#。
 // dim・9th・強いジャズテンションは使わず、明るい循環感を優先する。
@@ -79,7 +80,7 @@ $QUIET = { r1 r1 o5 d2 a2  r2 e4 a4 }
 $INTRO2 = { r1 o5 a8. f+16 d8 e8 f+4 e8 c+8 }
 #ch アルペジオ
 #role arp
-t135 l16 q7 v8 @{vpArpVoice} @d0
+t135 l16 q7 v8 @{vpArp} @e{vpFlat} @d0
 // 小節別主役: M M A F | M B M F | M B A M（M=メロディ、A=アルペジオ、B=ベース、F=合いの手）
 #label イントロ
 [ v6 $INTRO
@@ -95,7 +96,7 @@ v4 $QUIET
 v6 $INTRO2 ]$LOOP_END
 // Ending: 後半で和音全体を半音ずつ駆け上がり、1オクターブ上へ到達する。
 #label エンディング
-o5 v7 @{vpArpVoice} d2 d8 d+32 e32 f32 f+32 g32 g+32 a32 b-32 b32 >c32 c+32 d32
+o5 v7 @{vpArp} @e{vpFlat} d2 d8 d+32 e32 f32 f+32 g32 g+32 a32 b-32 b32 >c32 c+32 d32
 
 #ch メロディ
 #role lead
@@ -103,7 +104,7 @@ o5 v7 @{vpArpVoice} d2 d8 d+32 e32 f32 f+32 g32 g+32 a32 b-32 b32 >c32 c+32 d32
 // この旋律ではポルタメントを使わず、音階の順次進行で滑らかに聞かせる。
 // 4・8小節目は全休符にして合いの手へ渡す。
 // イントロだけは全パートが同じフレーズをユニゾンで演奏する。
-// デチューン高音に埋もれないようv12。@e{soft}で80%まで穏やかに減衰する。
+// デチューン高音に埋もれないようv12。@e{vpSoft}で80%まで穏やかに減衰する。
 // 2分音符だけ@{vpLead}へ切替。約0.3秒はビブラートなしの直進音、その後ビブラートが立ち上がる。
 t135 l16 q8 v12 @{vpPulseSoft}
 // 1小節イントロ共通フレーズ。
@@ -220,3 +221,4 @@ $REST8 = { r1 r1 r1 r1 r1 r1 r1 r1 }
 t135 o3 l8 q5 v8 @{vpTomVoice} r1 [ o3 r1 r1 r1 v9 r8 g8 b8 >d8 <a8 f+8 e8 c+8 r1 r1 r1 v9 r8 a8 >c+8 e8 <b8 a8
   f+8 e8 $REST8 $REST8 $REST4 r1 o3 v8 a8. f+16 d8 e8 f+4 e8 c+8 ]$LOOP_END o4 l16 q8 v6 @{vpTomVoice} a2 a8
   b-32 b32 >c32 c+32 d32 d+32 e32 f32 f+32 g32 g+32 a32
+
