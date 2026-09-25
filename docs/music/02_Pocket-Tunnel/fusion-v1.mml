@@ -11,6 +11,7 @@
 // イントロとエンディングは1回ずつ。全パート共通で、再生とWAVの両方に適用。
 $LOOP_END = { 1 }
 #title Pocket Tunnel
+#version 5.0
 #about チップチューン アレンジ · 8BITゲーム感を強めたBGM
 #arrangement チップチューン アレンジ
 #copyright 2026 harayoki

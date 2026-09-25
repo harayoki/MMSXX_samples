@@ -25,6 +25,7 @@ $LOOP_END = { 2 }
 // 現在のMMLでは書けないので、動的にJavaScript処理が音量を書き換えている。
 
 #title Volcano Parade
+#version 5.0
 #about 明るい循環進行と下降ベースを使った、タイトル／エンディング向けの曲。
 #copyright 2026 harayoki
 #license CC BY 4.0 (music, artwork and MML source; https://creativecommons.org/licenses/by/4.0/)

@@ -17,6 +17,7 @@
 // イントロとエンディングは1回ずつ。全パート共通で、再生とWAVの両方に適用。
 $LOOP_END = { 1 }
 #title Pocket Tunnel
+#version 5.0
 #about おしゃれアレンジ · テンションを強調した大人向けのゲームBGM
 #arrangement おしゃれアレンジ
 #copyright 2026 harayoki
