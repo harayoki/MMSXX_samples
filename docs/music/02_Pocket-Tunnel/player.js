@@ -11,7 +11,7 @@
     note: 'Pocket Tunnel short decay.',
     noteJa: 'Pocket Tunnelの短い減衰音。',
   });
-  E.registerEnvelope('ptLegacy', { a: .002, d: '25%', s: 0, r: .05 });
+  E.registerEnvelope('ptPercussive', { a: .002, d: '25%', s: 0, r: .05 });
   E.registerFM('ptKick', {
     ratio: 1, depth: 0, attack: .003, decay: .12, sustain: 0,
     drop: 125 / 45 - 1, dropTime: .12,
