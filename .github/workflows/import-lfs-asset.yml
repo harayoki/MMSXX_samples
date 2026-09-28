@@ -1,0 +1,148 @@
+name: Import requested Git LFS assets
+
+on:
+  push:
+    branches:
+      - "codex/lfs-import-*"
+    paths:
+      - ".lfs-import/*.json"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: lfs-import-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  import:
+    if: ${{ !contains(github.event.head_commit.message, '[lfs-imported]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          lfs: false
+
+      - name: Validate request and push clean LFS commit
+        shell: bash
+        env:
+          REQUEST_COMMIT: ${{ github.sha }}
+          IMPORT_BRANCH: ${{ github.ref_name }}
+        run: |
+          python3 - <<'PY'
+          #!/usr/bin/env python3
+          """Validate every payload before staging a single Git LFS import commit."""
+          import base64
+          import hashlib
+          import json
+          import os
+          from pathlib import Path, PurePosixPath
+          import re
+          import subprocess
+          import tempfile
+          
+          
+          def git(*args, **kwargs):
+              return subprocess.check_output(['git', *args], **kwargs)
+          
+          
+          def stage_batch(request_path, request_commit):
+              request = json.loads(Path(request_path).read_text())
+              base = request['base_sha']
+              if not isinstance(base, str) or not re.fullmatch(r'[0-9a-f]{40}', base):
+                  raise ValueError('Invalid base_sha')
+              if git('rev-parse', 'HEAD').decode().strip() != request_commit:
+                  raise ValueError('HEAD must be the request commit')
+              parents = git('rev-list', '--parents', '-n', '1', 'HEAD').decode().split()[1:]
+              if parents != [base]:
+                  raise ValueError('base_sha must be the only request commit parent')
+              changed = git('diff', '--name-only', '-z', base, 'HEAD').decode().split('\0')[:-1]
+              if changed != [request_path]:
+                  raise ValueError('Request commit must change only its request JSON')
+              files = request.get('files')
+              if files is None:  # Accept existing single-file requests too.
+                  files = [request]
+              if not isinstance(files, list) or not files or len(files) > 1000:
+                  raise ValueError('files must contain 1–1000 entries')
+              root = Path.cwd().resolve()
+              seen, oids, paths = set(), [], []
+              with tempfile.TemporaryDirectory(prefix='lfs-import-', dir=os.environ.get('RUNNER_TEMP')) as temp:
+                  payloads = []
+                  for index, item in enumerate(files):
+                      name = item['path']
+                      if not isinstance(name, str) or not name or '\\' in name or any(ord(c) < 32 for c in name):
+                          raise ValueError('Invalid destination')
+                      parts = PurePosixPath(name).parts
+                      if name.startswith('/') or name != '/'.join(parts) or any(p in ('.', '..') or p.lower() == '.git' for p in parts):
+                          raise ValueError('Unsafe destination: ' + name)
+                      if name in seen:
+                          raise ValueError('Duplicate destination: ' + name)
+                      seen.add(name)
+                      destination = root / name
+                      for ancestor in (destination, *destination.parents):
+                          if ancestor == root:
+                              break
+                          if ancestor.is_symlink():
+                              raise ValueError('Symlink destination: ' + name)
+                      attr = git('check-attr', '--cached', '-z', 'filter', '--', name).decode().split('\0')
+                      if attr[2] != 'lfs':
+                          raise ValueError('Destination is not marked filter=lfs: ' + name)
+                      digest, size = item['sha256'], item['size']
+                      if not isinstance(digest, str) or not re.fullmatch(r'[0-9a-f]{64}', digest):
+                          raise ValueError('Invalid SHA-256: ' + name)
+                      if type(size) is not int or size < 0:
+                          raise ValueError('Invalid size: ' + name)
+                      data = base64.b64decode(item['content_base64'], validate=True)
+                      if len(data) != size or hashlib.sha256(data).hexdigest() != digest:
+                          raise ValueError('Payload checksum or size mismatch: ' + name)
+                      payload = Path(temp) / str(index)
+                      payload.write_bytes(data)
+                      payloads.append((payload, destination))
+                      paths.append(name)
+                      oids.append(digest)
+                  # No repository files have changed until every payload has passed.
+                  subprocess.run(['git', 'reset', '--hard', base], check=True,
+                                 env={**os.environ, 'GIT_LFS_SKIP_SMUDGE': '1'})
+                  subprocess.run(['git', 'lfs', 'install', '--local'], check=True)
+                  for payload, destination in payloads:
+                      destination.parent.mkdir(parents=True, exist_ok=True)
+                      destination.write_bytes(payload.read_bytes())
+                  subprocess.run(['git', 'add', '--', *paths], check=True)
+                  for item in files:
+                      pointer = git('show', ':' + item['path']).decode('ascii')
+                      expected = ('version https://git-lfs.github.com/spec/v1\n'
+                                  + 'oid sha256:' + item['sha256'] + '\n'
+                                  + 'size ' + str(item['size']) + '\n')
+                      if pointer != expected:
+                          raise ValueError('Staged file is not the expected LFS pointer: ' + item['path'])
+              return list(dict.fromkeys(oids)), len(paths)
+          
+          
+          def main():
+              branch = os.environ['IMPORT_BRANCH']
+              request_commit = os.environ['REQUEST_COMMIT']
+              if not branch.startswith('codex/lfs-import-') or not re.fullmatch(r'[0-9a-f]{40}', request_commit):
+                  raise ValueError('Invalid import branch or request commit')
+              requests = sorted(Path('.lfs-import').glob('*.json'))
+              if len(requests) != 1:
+                  raise ValueError('Exactly one request JSON is required (use files for a batch)')
+              oids, count = stage_batch(requests[0].as_posix(), request_commit)
+              git('config', 'user.name', 'github-actions[bot]')
+              git('config', 'user.email', '41898282+github-actions[bot]@users.noreply.github.com')
+              diff = subprocess.run(['git', 'diff', '--cached', '--quiet'])
+              if diff.returncode == 1:
+                  subprocess.run(['git', 'commit', '-m', f'LFS assets imported ({count} files) [lfs-imported]'], check=True)
+              elif diff.returncode != 0:
+                  raise RuntimeError('Cannot inspect staged changes')
+              # Explicitly upload even if copied pointers were already present in base.
+              subprocess.run(['git', 'lfs', 'push', '--object-id', 'origin', *oids], check=True)
+              subprocess.run(['git', 'push', f'--force-with-lease=refs/heads/{branch}:{request_commit}',
+                              'origin', f'HEAD:refs/heads/{branch}'], check=True)
+              print(f'Imported {count} files; request removed from branch history.')
+          
+          
+          if __name__ == '__main__':
+              main()
+          PY
