@@ -49,8 +49,11 @@ jobs:
           
           
           def stage_batch(request_path, request_commit):
-              request = json.loads(Path(request_path).read_text())
-              base = request['base_sha']
+              request_paths = [request_path] if isinstance(request_path, str) else request_path
+              requests = [json.loads(Path(p).read_text()) for p in request_paths]
+              base = requests[0]['base_sha']
+              if any(r['base_sha'] != base for r in requests):
+                  raise ValueError('All request parts must have the same base_sha')
               if not isinstance(base, str) or not re.fullmatch(r'[0-9a-f]{40}', base):
                   raise ValueError('Invalid base_sha')
               if git('rev-parse', 'HEAD').decode().strip() != request_commit:
@@ -59,13 +62,16 @@ jobs:
               if parents != [base]:
                   raise ValueError('base_sha must be the only request commit parent')
               changed = git('diff', '--name-only', '-z', base, 'HEAD').decode().split('\0')[:-1]
-              if changed != [request_path]:
-                  raise ValueError('Request commit must change only its request JSON')
-              files = request.get('files')
-              if files is None:  # Accept existing single-file requests too.
-                  files = [request]
-              if not isinstance(files, list) or not files or len(files) > 1000:
-                  raise ValueError('files must contain 1–1000 entries')
+              if sorted(changed) != sorted(request_paths):
+                  raise ValueError('Request commit must change only its request JSON parts')
+              files = []
+              for request in requests:
+                  items = request.get('files', [request])
+                  if not isinstance(items, list) or not items:
+                      raise ValueError('Every request part must contain files')
+                  files.extend(items)
+              if len(files) > 1000:
+                  raise ValueError('At most 1000 files per batch')
               root = Path.cwd().resolve()
               seen, oids, paths = set(), [], []
               with tempfile.TemporaryDirectory(prefix='lfs-import-', dir=os.environ.get('RUNNER_TEMP')) as temp:
@@ -126,9 +132,9 @@ jobs:
               if not branch.startswith('codex/lfs-import-') or not re.fullmatch(r'[0-9a-f]{40}', request_commit):
                   raise ValueError('Invalid import branch or request commit')
               requests = sorted(Path('.lfs-import').glob('*.json'))
-              if len(requests) != 1:
-                  raise ValueError('Exactly one request JSON is required (use files for a batch)')
-              oids, count = stage_batch(requests[0].as_posix(), request_commit)
+              if not requests:
+                  raise ValueError('Request JSON is required')
+              oids, count = stage_batch([p.as_posix() for p in requests], request_commit)
               git('config', 'user.name', 'github-actions[bot]')
               git('config', 'user.email', '41898282+github-actions[bot]@users.noreply.github.com')
               diff = subprocess.run(['git', 'diff', '--cached', '--quiet'])
