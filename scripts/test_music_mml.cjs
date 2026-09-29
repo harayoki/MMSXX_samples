@@ -7,7 +7,7 @@ global.window = global;
 require('../docs/music/player-engine.js');
 
 const E = MMSXX.sound;
-assert.equal(E.SOUND_VERSION, '0.21.0', 'bundled sound engine version');
+assert.equal(E.SOUND_VERSION, '0.22.0', 'bundled sound engine version');
 assert(E.compileMML('@{tape(worn)}{ o2 a1 f1 c1 g1 }').events.every(event => event.tape?.data),
   'tape sections must accept note names as data bursts');
 const echoProbeAudio = new E.ChipTuneSound();
@@ -66,6 +66,20 @@ seekProbe.bgmState = seekState;
 seekProbe.seekBGM(0.004);
 assert.equal(seekState.cursor, 0, 'seek must snap back to a note head within 5 ms');
 
+// Every voice in a bundle must receive the glide, including its pitch offset.
+const bundleGlideAudio = new E.ChipTuneSound();
+assert(bundleGlideAudio.defineBGM('bundle-glide', E.splitVoices([
+  '#bundle brass = @{opllHorn}, @{opllTrumpet} @d696 v6, @{opllTrumpet} @d5 v9',
+  '#ch test', 't125 l96 q7 @{brass} @e{flat} o3 v10 a+24*a &a8. r4',
+].join('\n'))).ok);
+const bundleGlides = bundleGlideAudio.bgmDefs.get('bundle-glide')[0].events.slice(0, 3);
+for (const [i, cents] of [0, 696, 5].entries()) {
+  assert(Math.abs(bundleGlides[i].glide - 220 * 2 ** (cents / 1200)) < 1e-8,
+    'bundle glide must preserve each voice pitch offset');
+  assert(Math.abs(bundleGlides[i].gate - .08) < 1e-9,
+    'every bundled glide must reach its destination without a gap');
+}
+
 const root = path.resolve(__dirname, '../docs/music');
 const songs = [
   ['08_STARFABLE-Boss/starfable-boss.mml', 6, ['Intro', 'Main', 'Finale']],
@@ -85,6 +99,7 @@ const songs = [
   ['06_BEAT_V2/beat_v2.mml', 4],
   ['07_Dark-Corridor/dark-corridor.mml', 6,
     ['A_start', 'B_start', 'A_return', 'B_final']],
+  ['DUMMY/tape-load-melancholy.mml', 7],
 ];
 
 function splitMML(text) {
@@ -269,5 +284,12 @@ for (const { file, channels, marks, source } of sources) {
       }
     }
   }
+  if (file === 'DUMMY/tape-load-melancholy.mml') {
+    assert.deepEqual(info.tracks.map(track => track.name),
+      ['テープ', '旋律', '対旋律', 'アルペジオ', 'ベース', 'ドラム', 'ビープ'],
+      file + ': channel names');
+    assert.equal(E.readBundles(source).size, 9, file + ': bundled voice count');
+  }
   console.log('PASS', file, channels + 'ch', info.total.toFixed(3) + 's');
 }
+
