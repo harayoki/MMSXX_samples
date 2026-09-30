@@ -1,53 +1,21 @@
 // Volcano Parade 専用音色と、旧ミックスの音量補正。
 (() => {
   const E = MMSXX.sound;
-  const sampleCycle = fn => Array.from({ length: 32 }, (_, i) => fn(i / 32));
-  const triangleAt = x => 1 - 4 * Math.abs(x - .5);
-
-  function filteredSquare(cutoff, resonance, mix) {
-    return sampleCycle(x => {
-      let sum = 0;
-      for (let harmonic = 1; harmonic <= 15; harmonic += 2) {
-        const n = harmonic * cutoff / resonance;
-        const gain = 1 / Math.hypot(1 - n * n, n / mix);
-        const phase = -Math.atan2(n / mix, 1 - n * n);
-        sum += 4 / Math.PI / harmonic *
-          Math.sin(2 * Math.PI * harmonic * x + phase) * gain;
-      }
-      return sum;
-    });
-  }
-
-  function bassCycle(cutoff, squareMix) {
-    const square = filteredSquare(cutoff, Math.max(360, 900 - cutoff * 2.5), .45);
-    return Array.from({ length: 32 }, (_, i) =>
-      triangleAt(i / 32) + squareMix * square[i]);
-  }
+  // vpBassはMMLの #wave。計算式はscripts/volcano_bass_wave.cjsへ保存。
 
   function registerVoices(audio) {
-    E.registerLayer('vpArp', {
-      layers: [
-        { wave: 'saw', gain: 1 },
-        { wave: 'saw', gain: .6, cents: 7 },
-      ],
-      role: 'arp',
-      noteJa: 'のこぎり波に7セント上・音量60%の層を重ねる。',
-    });
-    audio.volume = 10 ** (12.56 / 20);
     E.registerTone('vpLead', {
       wave: 'pulse(50)',
       vib: { depth: 5, speed: 6, delay: 18 },
       overwrite: true,
       role: 'lead',
       note: 'Square lead; vibrato starts after 18 frames.',
-      noteJa: '18フレーム後からビブラートが入る矩形波リード。',
     });
     audio.addFM('vpPiano', {
       ratio: 3, depth: 3, attack: .001, decay: .07, sustain: .1, wave: 'sine',
     }, {
       overwrite: true, role: 'chord',
       note: 'Bright, rounded short piano.',
-      noteJa: '明るく丸い短いピアノ。',
     });
     audio.addFM('vpTom', {
       ratio: 1, depth: 3, attack: .002, decay: .1, sustain: .06,
@@ -55,22 +23,6 @@
     }, {
       overwrite: true, role: 'perc',
       note: 'Tom-like body with a shallow pitch drop.',
-      noteJa: '浅く音程が落ちるタム風の音。',
-    });
-    audio.addWave('vpBass', bassCycle(120, .36), 8, {
-      overwrite: true, role: 'bass',
-      note: 'Triangle and filtered pulse bass.',
-      noteJa: '三角波とフィルター矩形波を混ぜたベース。',
-    });
-    audio.addWave('vpBassLow', bassCycle(92, .45), 8, {
-      overwrite: true, role: 'bass',
-      note: 'Low triangle and filtered pulse bass.',
-      noteJa: '低域用の三角波とフィルター矩形波のベース。',
-    });
-    audio.addWave('vpBassHi', bassCycle(180, .24), 8, {
-      overwrite: true, role: 'bass',
-      note: 'High triangle and filtered pulse bass.',
-      noteJa: '高域用の三角波とフィルター矩形波のベース。',
     });
   }
 
@@ -86,9 +38,6 @@
   };
   const DEFAULT_GAIN = { f: .055, cap: .24, comp: 1 };
   const CHANNEL_GAINS = [.98, 1.049, 1.233, 1.063, 1.09, 1, 1, .98];
-  E.registerEnvelope('vpFlat', { a: .005, d: 0, s: 1, r: .01 });
-  E.registerEnvelope('vpSoft', { a: .08, d: '10%', s: .8, r: .15 });
-  E.registerEnvelope('vpPercussive', { a: .002, d: '25%', s: 0, r: .05 });
 
   function legacyVolume(value) {
     return Math.max(0, Math.min(15, 15 * Math.pow(Math.max(0, 3 * value), 1 / 1.8)));
@@ -137,6 +86,7 @@
   const audio = new E.ChipTuneSound(null, { psgTune: false, spatial: 'mono' });
   audio.psgTune = false;
   registerVoices(audio);
+  audio.volume = 10 ** (12.56 / 20);
 
 
   fetch(MusicAssets.song('volcano-parade.mml'))

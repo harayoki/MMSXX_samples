@@ -1,4 +1,4 @@
-// MMS/XX player and audio engine, source commit 8a78397c351d4bbe12b665b4a30c7bf86a568642
+// MMS/XX player and audio engine, source commit 93ee34792923367e6853b0642957a5282508d774
 (() => {
   var __defProp = Object.defineProperty;
   var __export = (target, all) => {
@@ -6,7 +6,7 @@
       __defProp(target, name, { get: all[name], enumerable: true });
   };
 
-  // engine-v23/sound/audio.js
+  // engine-v25/sound/audio.js
   var audio_exports = {};
   __export(audio_exports, {
     ChipTuneSound: () => ChipTuneSound,
@@ -16,7 +16,7 @@
     psgDiv: () => psgDiv
   });
 
-  // engine-v23/sound/mml.js
+  // engine-v25/sound/mml.js
   var mml_exports = {};
   __export(mml_exports, {
     DEFAULT_ENV: () => DEFAULT_ENV,
@@ -46,6 +46,7 @@
     readDirectives: () => readDirectives,
     readDrums: () => readDrums,
     readVoices: () => readVoices,
+    readWaves: () => readWaves,
     registerBaked: () => registerBaked,
     registerBeep: () => registerBeep,
     registerCoreFamilies: () => registerCoreFamilies,
@@ -73,7 +74,7 @@
     waveRole: () => waveRole
   });
 
-  // engine-v23/sound/gm.js
+  // engine-v25/sound/gm.js
   var GM_NAMES = [
     "Acoustic Grand Piano",
     "Bright Acoustic Piano",
@@ -219,7 +220,7 @@
     return GM_NAMES.filter((n) => key(n).startsWith(head)).slice(0, limit);
   }
 
-  // engine-v23/sound/opllvoice.js
+  // engine-v25/sound/opllvoice.js
   var OP_FIELDS = {
     mul: {
       at: "ml",
@@ -373,7 +374,7 @@
     return toBytes(m, c);
   }
 
-  // engine-v23/sound/tones.js
+  // engine-v25/sound/tones.js
   var tones_exports = {};
   __export(tones_exports, {
     TONE_FRAME: () => TONE_FRAME,
@@ -947,7 +948,7 @@
     }
   }
 
-  // engine-v23/sound/mml.js
+  // engine-v25/sound/mml.js
   var SEMI = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 };
   var LETTER = { c: 0, d: 1, e: 2, f: 3, g: 4, a: 5, b: 6 };
   var LETTER_OF_SEMI = { 0: 0, 2: 1, 4: 2, 5: 3, 7: 4, 9: 5, 11: 6 };
@@ -2386,7 +2387,7 @@
         const bar = Number(sp < 0 ? val : val.slice(0, sp));
         if (Number.isFinite(bar)) sections.push({ bar, name: sp < 0 ? "" : val.slice(sp).trim() });
       } else if (key2 === "takes" || key2 === "take") {
-      } else if (key2 === "bundle" || key2 === "chord" || key2 === "drum" || key2 === "voice") {
+      } else if (key2 === "bundle" || key2 === "chord" || key2 === "drum" || key2 === "voice" || key2 === "wave") {
       } else if (key2 === "group") {
         const words2 = val.split(/[ \t]+/).filter(Boolean);
         if (!words2.length) {
@@ -2445,6 +2446,54 @@ ${val}`;
   }
   var BUNDLE_LINE = /^[ \t*]*#[ \t]*bundle[ \t]+([A-Za-z][\w-]*)[ \t]*=[ \t]*(.*)$/i;
   var CHORD_LINE = /^[ \t*]*#[ \t]*chord[ \t]+([A-Za-z][\w-]*)[ \t]*=[ \t]*(.*)$/i;
+  function readWaves(mml) {
+    const out = /* @__PURE__ */ new Map();
+    for (const line of commentLines(String(mml ?? ""))) {
+      const m = WAVE_LINE.exec(line);
+      if (!m) continue;
+      const name = m[1].trim();
+      let rest = m[2].trim();
+      let bits = 8;
+      let role;
+      for (let o = WAVE_OPT.exec(rest); o; o = WAVE_OPT.exec(rest)) {
+        const word = o[2].trim();
+        if (o[1].toLowerCase() === "bits") {
+          bits = Number(word);
+          if (!Number.isInteger(bits) || bits < 1 || bits > 16) {
+            bad(`[ChpTnSnd] MML: \u6CE2\u5F62 "${name}" \u306E @bits "${word}" \u306F 1\u301C16 \u306E\u6574\u6570\u3067\u3059`);
+          }
+        } else {
+          role = word;
+        }
+        rest = rest.slice(o[0].length);
+      }
+      const words2 = rest.split(/[\s,]+/).filter(Boolean);
+      if (words2.length < 2 || words2.length > 1024) {
+        bad(`[ChpTnSnd] MML: \u6CE2\u5F62 "${name}" \u306F 2\u301C1024 \u500B\u306E\u6570\u3067\u3059(${words2.length} \u500B\u3042\u308A\u307E\u3057\u305F)`);
+      }
+      const samples = words2.map((w) => {
+        const v = waveNum(w);
+        if (!Number.isFinite(v)) {
+          bad(`[ChpTnSnd] MML: \u6CE2\u5F62 "${name}" \u306E "${w}" \u306F\u8AAD\u3081\u307E\u305B\u3093(-1\u301C1 \u306E\u6570\u304B\u30013/4 \u306E\u3088\u3046\u306A\u5206\u6570\u3067\u3059)`);
+        }
+        return v;
+      });
+      tellIfTaken(name, findWave(name) >= 0, "\u6CE2\u5F62");
+      registerWave(name, samples, bits, { overwrite: true, role });
+      out.set(name.toLowerCase(), samples.length);
+    }
+    return out;
+  }
+  var WAVE_LINE = /^[ \t*]*#[ \t]*wave[ \t]+([A-Za-z][\w-]*)[ \t]*=[ \t]*(.*)$/i;
+  var WAVE_OPT = /^@[ \t]*(bits|role)[ \t]*\{([^}]*)\}[ \t]*/i;
+  function waveNum(word) {
+    const at = word.indexOf("/");
+    if (at < 0) return Number(word);
+    const a = Number(word.slice(0, at));
+    const b = Number(word.slice(at + 1));
+    if (b === 0) return NaN;
+    return a / b;
+  }
   function readVoices(mml) {
     const out = /* @__PURE__ */ new Map();
     for (const line of commentLines(String(mml ?? ""))) {
@@ -2467,6 +2516,7 @@ ${val}`;
   var VOICE_PART = new RegExp([
     "@\\{(?<wave>[^}]*)\\}",
     "@e\\{(?<env>[^}]*)\\}",
+    "@role\\{(?<role>[^}]*)\\}",
     "@adsr\\{(?<adsr>[^}]*)\\}",
     "@arp\\{(?<arp>[^}]*)\\}",
     "@pitch\\{(?<pitch>[^}]*)\\}",
@@ -2486,6 +2536,30 @@ ${val}`;
     }
     return list;
   }
+  function readAdsr(text, name) {
+    const words2 = String(text).split(/[\s,]+/).filter(Boolean);
+    if (words2.length !== 4) {
+      bad(`[ChpTnSnd] MML: \u97F3\u8272 "${name}" \u306E @adsr \u306F 4 \u3064\u3067\u3059(\u7ACB\u3061\u4E0A\u304C\u308A, \u6E1B\u308A, \u4F38\u3070\u3059\u9AD8\u3055, \u96E2\u3057\u3002${words2.length} \u500B\u3042\u308A\u307E\u3057\u305F)`);
+    }
+    const time = (w, key2) => {
+      if (/^\d*\.?\d+\s*%$/.test(w)) return w.replace(/\s+/g, "");
+      const n = Number(w);
+      if (!Number.isFinite(n) || n < 0) {
+        bad(`[ChpTnSnd] MML: \u97F3\u8272 "${name}" \u306E @adsr \u306E ${key2} "${w}" \u306F\u8AAD\u3081\u307E\u305B\u3093(\u79D2\u306E\u6570\u304B\u3001"25%" \u306E\u3088\u3046\u306A\u5272\u5408\u3067\u66F8\u304D\u307E\u3059)`);
+      }
+      return n;
+    };
+    const level = Number(words2[2]);
+    if (!Number.isFinite(level)) {
+      bad(`[ChpTnSnd] MML: \u97F3\u8272 "${name}" \u306E @adsr \u306E\u4F38\u3070\u3059\u9AD8\u3055 "${words2[2]}" \u306F0\u301C1 \u306E\u6570\u3067\u3059(\u5272\u5408\u3067\u306F\u66F8\u3051\u307E\u305B\u3093)`);
+    }
+    return {
+      a: time(words2[0], "\u7ACB\u3061\u4E0A\u304C\u308A"),
+      d: time(words2[1], "\u6E1B\u308A"),
+      s: level,
+      r: time(words2[3], "\u96E2\u3057")
+    };
+  }
   function readVoicePart(name, text) {
     const part = {
       wave: null,
@@ -2499,14 +2573,15 @@ ${val}`;
       delay: null,
       gain: null,
       octave: 0,
-      detune: 0
+      detune: 0,
+      role: null
     };
     let at = 0;
     while (at < text.length) {
       VOICE_PART.lastIndex = at;
       const m = VOICE_PART.exec(text);
       if (!m) {
-        bad(`[ChpTnSnd] MML: \u97F3\u8272 "${name}" \u306E "${text.slice(at)}" \u306F\u8AAD\u3081\u307E\u305B\u3093(\u66F8\u3051\u308B\u306E\u306F @{\u97F3\u8272} @e{\u5F62} @adsr @arp @pitch @vol @duty @loop @delay @gain @o @d \u3060\u3051\u3067\u3059)`);
+        bad(`[ChpTnSnd] MML: \u97F3\u8272 "${name}" \u306E "${text.slice(at)}" \u306F\u8AAD\u3081\u307E\u305B\u3093(\u66F8\u3051\u308B\u306E\u306F @{\u97F3\u8272} @e{\u5F62} @role @adsr @arp @pitch @vol @duty @loop @delay @gain @o @d \u3060\u3051\u3067\u3059)`);
       }
       at = VOICE_PART.lastIndex;
       const g = m.groups;
@@ -2518,12 +2593,12 @@ ${val}`;
         part.env = g.env.trim();
         continue;
       }
+      if (g.role !== void 0) {
+        part.role = g.role.trim();
+        continue;
+      }
       if (g.adsr !== void 0) {
-        const n = voiceNums(g.adsr, name, "adsr");
-        if (n.length !== 4) {
-          bad(`[ChpTnSnd] MML: \u97F3\u8272 "${name}" \u306E @adsr \u306F 4 \u3064\u3067\u3059(\u7ACB\u3061\u4E0A\u304C\u308A, \u6E1B\u308A, \u4F38\u3070\u3059\u9AD8\u3055, \u96E2\u3057\u3002${n.length} \u500B\u3042\u308A\u307E\u3057\u305F)`);
-        }
-        part.adsr = { a: n[0], d: n[1], s: n[2], r: n[3] };
+        part.adsr = readAdsr(g.adsr, name);
         continue;
       }
       if (g.arp !== void 0) {
@@ -2595,6 +2670,7 @@ ${val}`;
         }
         refuse(name, p, [
           "env",
+          "role",
           "arp",
           "pitch",
           "vol",
@@ -2628,13 +2704,22 @@ ${val}`;
         vol: p.vol,
         duty: p.duty,
         loop: p.loop,
+        ...p.role === null ? {} : { role: p.role },
         overwrite: true
       });
       return "tone";
     }
-    const layers = parts.map((p) => {
+    const layers = parts.map((p, i) => {
       if (p.wave === null) {
         bad(`[ChpTnSnd] MML: \u97F3\u8272 "${name}" \u306E\u91CD\u306D\u308B\u4E2D\u8EAB\u306B @{\u540D\u524D} \u304C\u3042\u308A\u307E\u305B\u3093`);
+      }
+      if (i > 0) {
+        refuse(
+          name,
+          p,
+          ["role"],
+          "@role \u306F\u97F3\u8272\u305C\u3093\u3076\u306B\u639B\u304B\u308B\u306E\u3067\u3001\u3044\u3061\u3070\u3093\u521D\u3081\u306E\u4E2D\u8EAB\u306B\u3060\u3051\u66F8\u3051\u307E\u3059"
+        );
       }
       refuse(
         name,
@@ -2652,7 +2737,11 @@ ${val}`;
       };
     });
     tellIfTaken(name, findWave(name) >= 0, "\u97F3\u8272");
-    registerLayer(name, { layers }, { overwrite: true });
+    registerLayer(
+      name,
+      { layers, ...parts[0].role === null ? {} : { role: parts[0].role } },
+      { overwrite: true }
+    );
     return "layer";
   }
   function readChordSets(mml, bundles = readBundles(mml)) {
@@ -3126,6 +3215,7 @@ ${val}`;
   }
   function compileOne(mml, again = null) {
     const meta = readDirectives(mml);
+    readWaves(mml);
     readVoices(mml);
     const bundles = readBundles(mml);
     const chordSets = readChordSets(mml, bundles);
@@ -4707,7 +4797,7 @@ ${val}`;
     return { ok: errors.length === 0, errors, warnings, channels, total };
   }
 
-  // engine-v23/sound/chipset.js
+  // engine-v25/sound/chipset.js
   var ROLE_RANK = {
     lead: 6,
     // 旋律。いちばん前に出るもの
@@ -4728,7 +4818,7 @@ ${val}`;
   };
   var ROLES_COVERED = ROLES.every((r) => ROLE_RANK[r] !== void 0);
 
-  // engine-v23/sound/mask.js
+  // engine-v25/sound/mask.js
   function groupsOf(tracks) {
     const out = [];
     for (const t of tracks ?? []) {
@@ -4764,7 +4854,7 @@ ${val}`;
     return { group: now ? now.name : null, sets, silent, machine };
   }
 
-  // engine-v23/sound/wavetables.js
+  // engine-v25/sound/wavetables.js
   var N = 32;
   var build = (f) => Array.from({ length: N }, (_, i) => f(i / N, i));
   var norm = (w) => {
@@ -4933,7 +5023,7 @@ ${val}`;
     );
   }
 
-  // engine-v23/sound/fmpresets.js
+  // engine-v25/sound/fmpresets.js
   var FM_PRESETS = {
     // 1 バイオリン。弓のこすれを出すため、比を少しずらして倍音を残す
     // 2 ギター。はじいた瞬間だけ硬く、あとは丸くなる
@@ -5016,7 +5106,7 @@ ${val}`;
     }
   }
 
-  // engine-v23/sound/beeppresets.js
+  // engine-v25/sound/beeppresets.js
   var BEEP_PRESETS = {
     // ---- 搬送波を刻む型。**音程を変える回路が無い機械** ----
     // 2.4kHz が鳴りっぱなしで、ソフトはそれを On/Off するだけ。
@@ -5208,7 +5298,7 @@ ${val}`;
     }
   }
 
-  // engine-v23/sound/fdspresets.js
+  // engine-v25/sound/fdspresets.js
   var FDS_LEN = 64;
   var FDS_BITS = 6;
   var build2 = (fn) => Array.from({ length: FDS_LEN }, (_, i) => fn(i / FDS_LEN));
@@ -5325,7 +5415,7 @@ ${val}`;
     }
   }
 
-  // engine-v23/sound/ym2151.js
+  // engine-v25/sound/ym2151.js
   var OPM_CLOCK = 3579545;
   var OPM_RATE = OPM_CLOCK / 64;
   var OPM_CODE = `
@@ -6698,7 +6788,7 @@ registerProcessor('mmsxx-opm', OpmBank);
     };
   }
 
-  // engine-v23/sound/fm4presets.js
+  // engine-v25/sound/fm4presets.js
   var FM4_PRESETS = {
     "fm4Brass": {
       noteJa: "4 \u30AA\u30DA\u306E\u91D1\u7BA1\u3002\u30AA\u30DA\u30EC\u30FC\u30BF\u304C\u5897\u3048\u305F\u3076\u3093\u3001\u4F38\u3070\u3057\u3066\u3044\u308B\u3042\u3044\u3060\u306B\u500D\u97F3\u304C\u80B2\u3064\u3002\u672C\u7269\u306E\u91D1\u7BA1\u3068\u540C\u3058\u52D5\u304D\u3067\u30012 \u30AA\u30DA\u306B\u306F\u3067\u304D\u306A\u3044",
@@ -6823,7 +6913,7 @@ registerProcessor('mmsxx-opm', OpmBank);
     });
   }
 
-  // engine-v23/sound/extrawaves.js
+  // engine-v25/sound/extrawaves.js
   var EXTRA_LEN = 32;
   var build3 = (fn) => Array.from({ length: EXTRA_LEN }, (_, i) => fn(i / EXTRA_LEN));
   var pulse = (n) => build3((p) => p < n / 16 ? 1 : -1);
@@ -7172,7 +7262,7 @@ registerProcessor('mmsxx-opm', OpmBank);
     }
   }
 
-  // engine-v23/sound/pcmbake.js
+  // engine-v25/sound/pcmbake.js
   var MIN_LOOP = 1024;
   function periodMultiple(ratios, maxM = 8) {
     for (let m = 1; m <= maxM; m++) {
@@ -7254,7 +7344,7 @@ registerProcessor('mmsxx-opm', OpmBank);
     };
   }
 
-  // engine-v23/sound/opll.js
+  // engine-v25/sound/opll.js
   var OPLL_INST = [
     0,
     0,
@@ -8500,7 +8590,7 @@ class OpllBank extends AudioWorkletProcessor {
 registerProcessor('mmsxx-opll', OpllBank);
 `;
 
-  // engine-v23/sound/opllpresets.js
+  // engine-v25/sound/opllpresets.js
   var OPLL_PRESETS = [
     [
       1,
@@ -8833,7 +8923,7 @@ registerProcessor('mmsxx-opll', OpllBank);
     }
   }
 
-  // engine-v23/sound/duty.js
+  // engine-v25/sound/duty.js
   var DUTY_CODE = `
 const FRAME = ${TONE_FRAME};
 
@@ -8968,7 +9058,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     return Math.min(0.98, Math.max(0.02, x));
   };
 
-  // engine-v23/sound/demotunes.js
+  // engine-v25/sound/demotunes.js
   var SE_SYS_PAUSE = "sys.pause";
   var SYSTEM_SE = {
     [SE_SYS_PAUSE]: [
@@ -9056,7 +9146,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     BEAT_TOM_FILL
   ]);
 
-  // engine-v23/sound/se.js
+  // engine-v25/sound/se.js
   var SE_FRAME = 1 / 60;
   var SE_WHOLE = 64;
   var SE_TEMPO = Math.round(240 / (SE_WHOLE * SE_FRAME));
@@ -9205,7 +9295,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     }
   };
 
-  // engine-v23/sound/layerpresets.js
+  // engine-v25/sound/layerpresets.js
   var DETUNE_STEPS = [
     { key: "", value: "none", c: 0, en: "no detune" },
     {
@@ -9366,10 +9456,10 @@ registerProcessor('mmsxx-duty', DutyBank);
     }
   }
 
-  // engine-v23/sound/version.js
-  var SOUND_VERSION = "0.23.0";
+  // engine-v25/sound/version.js
+  var SOUND_VERSION = "0.25.0";
 
-  // engine-v23/sound/audio.js
+  // engine-v25/sound/audio.js
   registerDefaultWaves();
   registerDefaultFM();
   registerDefaultBeeps();
@@ -13330,10 +13420,10 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out;
   }
 
-  // engine-v23/tool/ui/version.js
+  // engine-v25/tool/ui/version.js
   var PLAYER_VERSION = "1.0.0";
 
-  // engine-v23/tool/core/tomml.js
+  // engine-v25/tool/core/tomml.js
   var NAMES = ["c", "c+", "d", "d+", "e", "f", "f+", "g", "g+", "a", "a+", "b"];
   var LENS = [
     [16, "1"],
@@ -13413,7 +13503,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out.join("\n\n");
   }
 
-  // engine-v23/tool/core/wav.js
+  // engine-v25/tool/core/wav.js
   function writeWAV(samples, rate = 44100) {
     const n = samples.length;
     const out = new Uint8Array(44 + n * 2);
@@ -13441,7 +13531,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out;
   }
 
-  // engine-v23/tool/ui/player.js
+  // engine-v25/tool/ui/player.js
   var COPYRIGHT = "2026 harayoki";
   var PLAYER_CSS = `
 .mmsxx-player{ font-family:var(--mono); font-size:13px; line-height:1.55; color:var(--ink); }
@@ -15055,7 +15145,7 @@ ChipTuneSound ${SOUND_VERSION}
     };
   }
 
-  // engine-v23/samples-entry.js
+  // engine-v25/samples-entry.js
   var sound = { ...audio_exports, ...mml_exports, ...tones_exports, mountPlayer, PLAYER_CSS, PLAYER_VERSION, player: { mount: mountPlayer, CSS: PLAYER_CSS, version: PLAYER_VERSION } };
   window.MMSXX = window.MMSXX || {};
   window.MMSXX.sound = sound;

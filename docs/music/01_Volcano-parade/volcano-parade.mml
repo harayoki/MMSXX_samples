@@ -1,23 +1,22 @@
-/*
-このMMLはJS側の音色・エンベロープ設定が必要です。
-設定JS: https://harayoki.github.io/MMSXX_samples/music/01_Volcano-parade/player.js
+#wave vpBass = @bits{8} @role{bass} -1.356 -1.064 -0.713 -0.450 -0.239 -0.071 0.082 0.218 0.352 0.479 0.608 0.733 0.860 0.983 1.111 1.233 1.356 1.064 0.713 0.450 0.239 0.071 -0.082 -0.218 -0.352 -0.479 -0.608 -0.733 -0.860 -0.983 -1.111 -1.233
 
-音色:
-- vpArp
-- vpLead
-- vpPiano
-- vpTom
-- vpBass
-エンベロープ:
-- vpFlat
-- vpSoft
-- vpPercussive
+#voice vpSoft = @adsr{0.08, 10%, 0.8, 0.15}
+#voice vpPercussive = @adsr{0.002, 25%, 0, 0.05}
+
+/*
+このMMLにはJS側に残る設定があります。
+設定JS: https://harayoki.github.io/MMSXX_samples/music/01_Volcano-parade/player.js
+残る定義: vpLead, vpPiano, vpTom
 */
+
+#voice vpFlat = @adsr{0.005, 0, 1, 0.01}
+#voice vpArp = @{saw} @role{arp} @gain{1}, @{saw} @gain{0.6} @d7
 
 // この数値を直すと本編のループ回数が変わります（1以上）。
 // イントロとエンディングは1回ずつ。全パート共通で、再生とWAVの両方に適用。
 $LOOP_END = { 2 }
-// この曲用の音色 — プリセットに無い音色でやりたい事が特殊だったのでJavaScriptで計算で作っている(mmsxx-mml-studio の addWave / registerTone)。
+// vpBassは計算済み32サンプルを上の #wave で定義。生成元: scripts/volcano_bass_wave.cjs。
+// vpLead・vpPiano・vpTomはJS定義が必要。
 //   @{vpLead}   メロディ部の矩形波。 0.30 秒遅れてビブラート(6Hz / 2%)が掛かる。
 //   @{saw}      アルペジオとハモリのパート用ののこぎり波。
 //   @{vpPiano}  合いの手。キンキンした硬いピアノ風(2 オペ FM)。
@@ -27,7 +26,7 @@ $LOOP_END = { 2 }
 // 音量とアクセントの移行は未完了。現時点では個別JSの音量補正が残っています。
 
 #title Volcano Parade
-#version 5.0
+#version 5.5
 #about 明るい循環進行と下降ベースを使った、タイトル／エンディング向けの曲。
 #copyright 2026 harayoki
 #license CC BY 4.0 (music, artwork and MML source; https://creativecommons.org/licenses/by/4.0/)
