@@ -5,7 +5,7 @@
   const editor = document.getElementById('starfable-boss-src');
   const status = document.querySelector('[data-music-status]');
   const audio = new E.ChipTuneSound(null, { spatial: 'mono' });
-  audio.volume = 0.5;
+
   audio.dynamic_effects = {};
   fetch(MusicAssets.song('starfable-boss.mml'))
     .then(response => {
@@ -25,4 +25,5 @@
     })
     .catch(error => { status.textContent = 'MML読み込みエラー：' + error.message; });
 })();
+
 

@@ -1,4 +1,4 @@
-// MMS/XX player and audio engine, source commit 93ee34792923367e6853b0642957a5282508d774
+// MMS/XX player and audio engine, source commit 46e98c2d97bd93bb77c38f4e8a30389fcad98e79
 (() => {
   var __defProp = Object.defineProperty;
   var __export = (target, all) => {
@@ -6,7 +6,7 @@
       __defProp(target, name, { get: all[name], enumerable: true });
   };
 
-  // engine-v25/sound/audio.js
+  // ../../../tmp/volume-update/studio/sound/audio.js
   var audio_exports = {};
   __export(audio_exports, {
     ChipTuneSound: () => ChipTuneSound,
@@ -16,7 +16,7 @@
     psgDiv: () => psgDiv
   });
 
-  // engine-v25/sound/mml.js
+  // ../../../tmp/volume-update/studio/sound/mml.js
   var mml_exports = {};
   __export(mml_exports, {
     DEFAULT_ENV: () => DEFAULT_ENV,
@@ -74,7 +74,7 @@
     waveRole: () => waveRole
   });
 
-  // engine-v25/sound/gm.js
+  // ../../../tmp/volume-update/studio/sound/gm.js
   var GM_NAMES = [
     "Acoustic Grand Piano",
     "Bright Acoustic Piano",
@@ -220,7 +220,7 @@
     return GM_NAMES.filter((n) => key(n).startsWith(head)).slice(0, limit);
   }
 
-  // engine-v25/sound/opllvoice.js
+  // ../../../tmp/volume-update/studio/sound/opllvoice.js
   var OP_FIELDS = {
     mul: {
       at: "ml",
@@ -374,7 +374,7 @@
     return toBytes(m, c);
   }
 
-  // engine-v25/sound/tones.js
+  // ../../../tmp/volume-update/studio/sound/tones.js
   var tones_exports = {};
   __export(tones_exports, {
     TONE_FRAME: () => TONE_FRAME,
@@ -399,38 +399,31 @@
       loop: {},
       vib: null
     };
+    const {
+      id: _id,
+      name: _name,
+      tone: _tone,
+      role: _role,
+      preset: _preset,
+      note: _note,
+      noteJa: _noteJa,
+      tags: _tags,
+      genre: _genre,
+      dev: _dev,
+      ...inherited
+    } = base;
     const entry = {
+      ...inherited,
       id: at >= 0 ? at : WAVEFORMS.length,
       name,
-      kind: base.kind,
-      duty: base.duty,
-      samples: base.samples,
-      bits: base.bits,
-      modRatio: base.modRatio,
-      modDepth: base.modDepth,
-      modTable: base.modTable,
-      patch: base.patch,
-      // 2 オペ FM の設定も写す。写していなかったので、`wave: 'opllViolin'` の
-      // ように FM を土台にすると `ratio` が undefined になって落ちていた
-      // (`freq * undefined` が NaN になり、AudioParam が受け取らない)。
-      // 下流は `kind` を見て分岐するので、`kind` を継ぐなら中身も継ぐ
-      ratio: base.ratio,
-      depth: base.depth,
-      attack: base.attack,
-      decay: base.decay,
-      sustain: base.sustain,
-      drop: base.drop,
-      dropTime: base.dropTime,
-      // FM の変調側に使う波形。`spec.wave` は土台の名前なので、
-      // ここは土台が持っているものをそのまま渡す
-      ...base.kind === "fm" ? { wave: base.wave } : {},
-      // 焼いて使う音色の元
-      from: base.from,
       // ロール。書いていなければ元の形のものを継ぐ
       role: roleOf(spec.role, name) ?? base.role ?? null,
       ...metaOf(spec),
       tone
     };
+    if (!entry.special.length && base.special && base.special.length) {
+      entry.special = [...base.special];
+    }
     if (tone.duty) {
       entry.special = [...new Set((entry.special || []).concat("worklet"))];
     }
@@ -948,7 +941,7 @@
     }
   }
 
-  // engine-v25/sound/mml.js
+  // ../../../tmp/volume-update/studio/sound/mml.js
   var SEMI = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 };
   var LETTER = { c: 0, d: 1, e: 2, f: 3, g: 4, a: 5, b: 6 };
   var LETTER_OF_SEMI = { 0: 0, 2: 1, 4: 2, 5: 3, 7: 4, 9: 5, 11: 6 };
@@ -2407,6 +2400,18 @@
       } else if (key2 === "tempo") {
         const n = Number(val);
         if (Number.isFinite(n) && n > 0) meta.tempo = n;
+      } else if (key2 === "gain") {
+        const words2 = val.split(/[ \t]+/).filter(Boolean);
+        const n = Number(words2[0]);
+        if (!Number.isFinite(n) || n < 0) {
+          warn(`[ChpTnSnd] MML: #gain "${val}" \u306F 0 \u4EE5\u4E0A\u306E\u6570\u3067\u306F\u3042\u308A\u307E\u305B\u3093\u3002\u8AAD\u307F\u98DB\u3070\u3057\u307E\u3059`);
+          continue;
+        }
+        if (n > 8) {
+          warn(`[ChpTnSnd] MML: #gain ${n} \u306F\u4E0A\u9650\u306E 8 \u3092\u8D8A\u3048\u3066\u3044\u307E\u3059\u30028 \u3067\u9CF4\u3089\u3057\u307E\u3059`);
+        }
+        meta.gain = Math.min(8, n);
+        if (words2[1]) meta.gainBy = words2[1].toLowerCase();
       } else if (key2 === "looptimes") {
         const n = Number(val);
         if (Number.isFinite(n) && n > 0) meta.loopTimes = Math.floor(n);
@@ -3231,6 +3236,7 @@ ${val}`;
     let wave = findWave(DEFAULT_WAVE), env = 0, vibrato = 0;
     let vibSpeed = null, vibDelay = null, vibSaid = false;
     let detune = 0, octShift = 0;
+    let volShift = 0;
     let echo = null;
     let fade = null;
     if (again && again.head) {
@@ -3322,7 +3328,7 @@ ${val}`;
     const oneNote = (dur, freq, m, extra) => {
       const shift = shiftOf(m);
       const g = m && m.gate !== null ? m.gate : gate;
-      const base = m && m.vol !== null ? m.vol : vol;
+      const base = clamp((m && m.vol !== null ? m.vol : vol) + volShift, 0, 15);
       let v = base;
       let fd = null;
       if (fade) {
@@ -3556,6 +3562,15 @@ ${val}`;
         while (pos < src.length && src[pos] >= "0" && src[pos] <= "9") n += src[pos++];
       }
       return n === "" ? null : parseFloat(n);
+    };
+    const readSignedVol = () => {
+      let sign = 1;
+      if (src[pos] === "-") {
+        sign = -1;
+        pos++;
+      } else if (src[pos] === "+") pos++;
+      const n = readVol();
+      return n === null ? null : sign * n;
     };
     const readSigned = () => {
       let sign = 1;
@@ -4244,7 +4259,13 @@ ${val}`;
         } else if (ch === "t") {
           tempo = readNumber() ?? tempo;
         } else if (ch === "v") {
-          vol = Math.max(0, Math.min(15, readVol() ?? vol));
+          if (src[pos] === "+" || src[pos] === "-") {
+            const sign = src[pos++] === "-" ? -1 : 1;
+            const d = readVol() ?? 1;
+            vol = Math.max(0, Math.min(15, vol + sign * d));
+          } else {
+            vol = Math.max(0, Math.min(15, readVol() ?? vol));
+          }
         } else if (ch === "q") {
           gate = Math.max(1, Math.min(8, readNumber() ?? gate));
         } else if (ch === "=" || ch === "?") {
@@ -4402,6 +4423,9 @@ ${val}`;
           } else if (kind === "o") {
             pos++;
             octShift = clamp(readSigned() ?? octShift, -4, 4);
+          } else if (kind === "v") {
+            pos++;
+            volShift = clamp(readSignedVol() ?? volShift, -15, 15);
           } else if (kind === "m") {
             pos++;
             readVib();
@@ -4431,6 +4455,18 @@ ${val}`;
     for (let i = 0; i < events.length; i++) {
       const e = events[i], next = events[i + 1];
       e.open = !!(next && next.t < e.t + e.gate + 1e-6);
+    }
+    for (let i = 0; i < events.length; i++) {
+      if (events[i].legato) continue;
+      let j = i;
+      while (events[j + 1] && events[j + 1].legato) j++;
+      if (j === i) continue;
+      const head = events[i];
+      const span = events[j].t + events[j].gate - head.t;
+      for (let k = i; k <= j; k++) {
+        events[k].tieSpan = span;
+        events[k].tieAt = events[k].t - head.t;
+      }
     }
     const back = marks.find((m) => isLoopMark(m.name.trim().toLowerCase()));
     const tail = marks.find((m) => isOutroMark(m.name.trim().toLowerCase()));
@@ -4797,7 +4833,7 @@ ${val}`;
     return { ok: errors.length === 0, errors, warnings, channels, total };
   }
 
-  // engine-v25/sound/chipset.js
+  // ../../../tmp/volume-update/studio/sound/chipset.js
   var ROLE_RANK = {
     lead: 6,
     // 旋律。いちばん前に出るもの
@@ -4818,7 +4854,7 @@ ${val}`;
   };
   var ROLES_COVERED = ROLES.every((r) => ROLE_RANK[r] !== void 0);
 
-  // engine-v25/sound/mask.js
+  // ../../../tmp/volume-update/studio/sound/mask.js
   function groupsOf(tracks) {
     const out = [];
     for (const t of tracks ?? []) {
@@ -4854,7 +4890,7 @@ ${val}`;
     return { group: now ? now.name : null, sets, silent, machine };
   }
 
-  // engine-v25/sound/wavetables.js
+  // ../../../tmp/volume-update/studio/sound/wavetables.js
   var N = 32;
   var build = (f) => Array.from({ length: N }, (_, i) => f(i / N, i));
   var norm = (w) => {
@@ -5023,7 +5059,7 @@ ${val}`;
     );
   }
 
-  // engine-v25/sound/fmpresets.js
+  // ../../../tmp/volume-update/studio/sound/fmpresets.js
   var FM_PRESETS = {
     // 1 バイオリン。弓のこすれを出すため、比を少しずらして倍音を残す
     // 2 ギター。はじいた瞬間だけ硬く、あとは丸くなる
@@ -5106,7 +5142,7 @@ ${val}`;
     }
   }
 
-  // engine-v25/sound/beeppresets.js
+  // ../../../tmp/volume-update/studio/sound/beeppresets.js
   var BEEP_PRESETS = {
     // ---- 搬送波を刻む型。**音程を変える回路が無い機械** ----
     // 2.4kHz が鳴りっぱなしで、ソフトはそれを On/Off するだけ。
@@ -5298,7 +5334,7 @@ ${val}`;
     }
   }
 
-  // engine-v25/sound/fdspresets.js
+  // ../../../tmp/volume-update/studio/sound/fdspresets.js
   var FDS_LEN = 64;
   var FDS_BITS = 6;
   var build2 = (fn) => Array.from({ length: FDS_LEN }, (_, i) => fn(i / FDS_LEN));
@@ -5415,7 +5451,7 @@ ${val}`;
     }
   }
 
-  // engine-v25/sound/ym2151.js
+  // ../../../tmp/volume-update/studio/sound/ym2151.js
   var OPM_CLOCK = 3579545;
   var OPM_RATE = OPM_CLOCK / 64;
   var OPM_CODE = `
@@ -6788,7 +6824,7 @@ registerProcessor('mmsxx-opm', OpmBank);
     };
   }
 
-  // engine-v25/sound/fm4presets.js
+  // ../../../tmp/volume-update/studio/sound/fm4presets.js
   var FM4_PRESETS = {
     "fm4Brass": {
       noteJa: "4 \u30AA\u30DA\u306E\u91D1\u7BA1\u3002\u30AA\u30DA\u30EC\u30FC\u30BF\u304C\u5897\u3048\u305F\u3076\u3093\u3001\u4F38\u3070\u3057\u3066\u3044\u308B\u3042\u3044\u3060\u306B\u500D\u97F3\u304C\u80B2\u3064\u3002\u672C\u7269\u306E\u91D1\u7BA1\u3068\u540C\u3058\u52D5\u304D\u3067\u30012 \u30AA\u30DA\u306B\u306F\u3067\u304D\u306A\u3044",
@@ -6913,7 +6949,7 @@ registerProcessor('mmsxx-opm', OpmBank);
     });
   }
 
-  // engine-v25/sound/extrawaves.js
+  // ../../../tmp/volume-update/studio/sound/extrawaves.js
   var EXTRA_LEN = 32;
   var build3 = (fn) => Array.from({ length: EXTRA_LEN }, (_, i) => fn(i / EXTRA_LEN));
   var pulse = (n) => build3((p) => p < n / 16 ? 1 : -1);
@@ -7262,7 +7298,7 @@ registerProcessor('mmsxx-opm', OpmBank);
     }
   }
 
-  // engine-v25/sound/pcmbake.js
+  // ../../../tmp/volume-update/studio/sound/pcmbake.js
   var MIN_LOOP = 1024;
   function periodMultiple(ratios, maxM = 8) {
     for (let m = 1; m <= maxM; m++) {
@@ -7344,7 +7380,7 @@ registerProcessor('mmsxx-opm', OpmBank);
     };
   }
 
-  // engine-v25/sound/opll.js
+  // ../../../tmp/volume-update/studio/sound/opll.js
   var OPLL_INST = [
     0,
     0,
@@ -8590,7 +8626,7 @@ class OpllBank extends AudioWorkletProcessor {
 registerProcessor('mmsxx-opll', OpllBank);
 `;
 
-  // engine-v25/sound/opllpresets.js
+  // ../../../tmp/volume-update/studio/sound/opllpresets.js
   var OPLL_PRESETS = [
     [
       1,
@@ -8917,13 +8953,13 @@ registerProcessor('mmsxx-opll', OpllBank);
     }
     for (const [name, spec, note] of OPLL_USER_DRUMS) {
       try {
-        registerOPLLVoice(name, spec, { role: "perc", note });
+        registerOPLLVoice(name, spec, { role: "perc", note, dev: ["check"] });
       } catch (e) {
       }
     }
   }
 
-  // engine-v25/sound/duty.js
+  // ../../../tmp/volume-update/studio/sound/duty.js
   var DUTY_CODE = `
 const FRAME = ${TONE_FRAME};
 
@@ -9058,7 +9094,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     return Math.min(0.98, Math.max(0.02, x));
   };
 
-  // engine-v25/sound/demotunes.js
+  // ../../../tmp/volume-update/studio/sound/demotunes.js
   var SE_SYS_PAUSE = "sys.pause";
   var SYSTEM_SE = {
     [SE_SYS_PAUSE]: [
@@ -9146,7 +9182,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     BEAT_TOM_FILL
   ]);
 
-  // engine-v25/sound/se.js
+  // ../../../tmp/volume-update/studio/sound/se.js
   var SE_FRAME = 1 / 60;
   var SE_WHOLE = 64;
   var SE_TEMPO = Math.round(240 / (SE_WHOLE * SE_FRAME));
@@ -9295,7 +9331,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     }
   };
 
-  // engine-v25/sound/layerpresets.js
+  // ../../../tmp/volume-update/studio/sound/layerpresets.js
   var DETUNE_STEPS = [
     { key: "", value: "none", c: 0, en: "no detune" },
     {
@@ -9456,10 +9492,10 @@ registerProcessor('mmsxx-duty', DutyBank);
     }
   }
 
-  // engine-v25/sound/version.js
-  var SOUND_VERSION = "0.25.0";
+  // ../../../tmp/volume-update/studio/sound/version.js
+  var SOUND_VERSION = "0.26.2";
 
-  // engine-v25/sound/audio.js
+  // ../../../tmp/volume-update/studio/sound/audio.js
   registerDefaultWaves();
   registerDefaultFM();
   registerDefaultBeeps();
@@ -9798,6 +9834,13 @@ registerProcessor('mmsxx-duty', DutyBank);
   function tidy(list) {
     return [...new Set(list.map((t) => Math.round(t * 1e6) / 1e6))].sort((a, b) => a - b);
   }
+  function songGain(tracks) {
+    if (!Array.isArray(tracks)) return 1;
+    const v = tracks.map((t) => t && t.meta && t.meta.gain).find((x) => x != null);
+    if (v == null) return 1;
+    const n = Number(v);
+    return Number.isFinite(n) && n >= 0 ? Math.min(8, n) : 1;
+  }
   function switchParts(tracks) {
     if (!tracks.length) return { grid: [], bars: [] };
     const span = Math.max(...tracks.map((t) => t.total), 0);
@@ -9891,6 +9934,7 @@ registerProcessor('mmsxx-duty', DutyBank);
       this.playOutro = opts.playOutro !== false;
       this.loopTimes = 2;
       this._loopTimesFromSong = 2;
+      this._songGain = 1;
       this._range = null;
       this._chMute = /* @__PURE__ */ new Set();
       this._chLevel = /* @__PURE__ */ new Map();
@@ -10875,6 +10919,13 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       const want = tracks.map((t) => t.loop && t.loop.times).find((v) => v > 0) ?? null;
       if (want && this.loopTimes === this._loopTimesFromSong) this.loopTimes = want;
       if (want) this._loopTimesFromSong = want;
+      this._songGain = songGain(tracks);
+      if (this._master) {
+        const t0 = this.ctx.currentTime;
+        this._master.gain.cancelScheduledValues(t0);
+        this._master.gain.setValueAtTime(this._master.gain.value, t0);
+        this._master.gain.linearRampToValueAtTime(this._outGain(), t0 + 0.05);
+      }
       const wants = loop || !!mark;
       state.chGains = tracks.map((t, i) => {
         const g = this.ctx.createGain();
@@ -11205,6 +11256,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         keepSec: this._keepSec,
         muted: this._muted,
         spatial: this.spatial,
+        songGain: this._songGain,
         regLog: this._regLog,
         opllFixed: this._opllFixed
       };
@@ -11220,6 +11272,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         this.spatial = opts.spatial ?? (channels >= 2 ? "stereo" : "mono");
         this._keepSec = 0;
         this._muted = false;
+        this._songGain = songGain(def);
         this._regLog = typeof opts.regs === "function";
         this._opllFixed = !!opts.opllFixed;
         const rand = seededRandom(opts.seed ?? 1);
@@ -11287,6 +11340,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         this._wkReady = saved.wkReady;
         this._keepSec = saved.keepSec;
         this._muted = saved.muted;
+        this._songGain = saved.songGain;
         this.spatial = saved.spatial;
         this._regLog = saved.regLog;
         this._opllFixed = saved.opllFixed;
@@ -12801,6 +12855,8 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       const tail = Math.max(0, Math.min(ev.relTail || 0, t1 - t0 - 0.01));
       const off = t1 - tail;
       const len = Math.max(0.02, off - t0);
+      const span = ev.tieSpan > 0 ? Math.max(0.02, ev.tieSpan - tail) : len;
+      const since = ev.tieAt > 0 ? ev.tieAt : 0;
       const r2 = tail > 0 && !e.table && e.s > 0 ? Math.min(envSec(e.r, len), tail) : 0;
       if (e.table) {
         gain.gain.setValueAtTime(0, t0);
@@ -12812,40 +12868,51 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         gain.gain.linearRampToValueAtTime(0, off);
         return;
       }
-      const { a, d, rel } = envShape(e, len);
+      const { a, d, rel } = envShape(e, span);
       const w = WAVEFORMS[ev.wave];
       if ((ev.vsteps ?? (w ? w.vsteps : 0)) > 0) {
         const room2 = tail > 0 ? 0 : ev.open ? 2e-3 : rel;
-        const hold = Math.max(a + d, len - room2);
+        const hold = Math.max(a + d, span - room2);
         const end = len + r2;
         const n = Math.max(1, Math.ceil(end / TONE_FRAME));
-        gain.gain.setValueAtTime(ev.legato ? ampAt(ev, 1) : 0, t0);
+        const shapeAt = (age) => {
+          const at = since + age;
+          if (at < a) return a > 0 ? at / a : 1;
+          if (at < a + d) return 1 - (1 - e.s) * ((at - a) / Math.max(1e-6, d));
+          if (at < hold) return e.s;
+          return Math.max(0, e.s * (1 - (at - hold) / Math.max(1e-6, span + r2 - hold)));
+        };
+        gain.gain.setValueAtTime(ev.legato ? ampAt(ev, shapeAt(0)) : 0, t0);
         for (let i = 0; i < n; i++) {
           const age = i * TONE_FRAME;
-          let f;
-          if (age < a) f = ev.legato ? 1 : a > 0 ? age / a : 1;
-          else if (age < a + d) f = 1 - (1 - e.s) * ((age - a) / Math.max(1e-6, d));
-          else if (age < hold) f = e.s;
-          else f = e.s * (1 - (age - hold) / Math.max(1e-6, end - hold));
-          gain.gain.setValueAtTime(Math.max(1e-4, ampAt(ev, f, age)), t0 + age);
+          gain.gain.setValueAtTime(Math.max(1e-4, ampAt(ev, shapeAt(age), age)), t0 + age);
         }
         gain.gain.setValueAtTime(1e-4, t0 + end);
         return;
       }
       const sustain = amp * e.s;
-      gain.gain.setValueAtTime(ev.legato ? amp : 0, t0);
-      if (!ev.legato) gain.gain.linearRampToValueAtTime(amp, t0 + a);
-      if (d > 0) gain.gain.linearRampToValueAtTime(Math.max(1e-4, sustain), t0 + a + d);
-      else gain.gain.setValueAtTime(amp, t0 + a);
+      const hAt = (at) => at < a ? a > 0 ? at / a : 1 : at < a + d ? 1 - (1 - e.s) * ((at - a) / Math.max(1e-6, d)) : e.s;
+      if (ev.legato) {
+        gain.gain.setValueAtTime(Math.max(1e-4, amp * hAt(since)), t0);
+        if (since < a + d) {
+          gain.gain.linearRampToValueAtTime(Math.max(1e-4, sustain), t0 + (a + d - since));
+        }
+      } else {
+        gain.gain.setValueAtTime(0, t0);
+        gain.gain.linearRampToValueAtTime(amp, t0 + a);
+        if (d > 0) gain.gain.linearRampToValueAtTime(Math.max(1e-4, sustain), t0 + a + d);
+        else gain.gain.setValueAtTime(amp, t0 + a);
+      }
       if (r2 > 0) {
-        gain.gain.setValueAtTime(Math.max(1e-4, sustain), Math.max(t0 + a + d, off));
+        gain.gain.setValueAtTime(Math.max(1e-4, sustain), Math.max(t0 + a + d - since, off));
         gain.gain.linearRampToValueAtTime(0, off + r2);
         return;
       }
       const room = ev.open ? 2e-3 : rel;
-      gain.gain.setValueAtTime(
-        Math.max(1e-4, e.s > 0 ? sustain : 1e-4),
-        Math.max(t0 + a + d, off - room)
+      const relAt = Math.max(t0, off - room);
+      gain.gain.linearRampToValueAtTime(
+        Math.max(1e-4, amp * hAt(since + (relAt - t0))),
+        relAt
       );
       gain.gain.linearRampToValueAtTime(0, off);
     }
@@ -13308,7 +13375,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       if (!this.ctx) return null;
       if (!this._bus) {
         this._master = this.ctx.createGain();
-        this._master.gain.value = this._muted ? 0 : this.volume;
+        this._master.gain.value = this._outGain();
         this._master.connect(this.ctx.destination);
         this._bus = this.ctx.createGain();
         this._bus.gain.value = 1;
@@ -13331,7 +13398,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         const t = this.ctx.currentTime;
         out.gain.cancelScheduledValues(t);
         out.gain.setValueAtTime(out.gain.value, t);
-        out.gain.linearRampToValueAtTime(this._muted ? 0 : this.volume, t + 0.05);
+        out.gain.linearRampToValueAtTime(this._outGain(), t + 0.05);
       }
       return this._muted;
     }
@@ -13358,6 +13425,18 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       this.bgmState.leaving = true;
       return true;
     }
+    /**
+     * 出口に入れる数。**掛け算を 1 か所にまとめてある。**
+     *
+     * 聴く人のつまみ(`volume`)と、曲が名乗る大きさ(`#gain`)は別のもので、
+     * 出口ではどちらも掛かる。3 か所(出口を作る・消す・つまみを回す)で
+     * 別々に書くと、片方だけ直したときに音が食い違う。
+     * @returns {number}
+     * @private
+     */
+    _outGain() {
+      return this._muted ? 0 : this.volume * this._songGain;
+    }
     get volume() {
       return this._vol == null ? 1 : this._vol;
     }
@@ -13367,7 +13446,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         const t = this.ctx.currentTime;
         this._master.gain.cancelScheduledValues(t);
         this._master.gain.setValueAtTime(this._master.gain.value, t);
-        this._master.gain.linearRampToValueAtTime(this._vol, t + 0.05);
+        this._master.gain.linearRampToValueAtTime(this._outGain(), t + 0.05);
       }
     }
     /** いま音を消しているか */
@@ -13420,10 +13499,10 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out;
   }
 
-  // engine-v25/tool/ui/version.js
+  // ../../../tmp/volume-update/studio/tool/ui/version.js
   var PLAYER_VERSION = "1.0.0";
 
-  // engine-v25/tool/core/tomml.js
+  // ../../../tmp/volume-update/studio/tool/core/tomml.js
   var NAMES = ["c", "c+", "d", "d+", "e", "f", "f+", "g", "g+", "a", "a+", "b"];
   var LENS = [
     [16, "1"],
@@ -13503,7 +13582,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out.join("\n\n");
   }
 
-  // engine-v25/tool/core/wav.js
+  // ../../../tmp/volume-update/studio/tool/core/wav.js
   function writeWAV(samples, rate = 44100) {
     const n = samples.length;
     const out = new Uint8Array(44 + n * 2);
@@ -13531,7 +13610,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out;
   }
 
-  // engine-v25/tool/ui/player.js
+  // ../../../tmp/volume-update/studio/tool/ui/player.js
   var COPYRIGHT = "2026 harayoki";
   var PLAYER_CSS = `
 .mmsxx-player{ font-family:var(--mono); font-size:13px; line-height:1.55; color:var(--ink); }
@@ -15145,7 +15224,7 @@ ChipTuneSound ${SOUND_VERSION}
     };
   }
 
-  // engine-v25/samples-entry.js
+  // ../../../tmp/volume-update/studio/samples-entry.js
   var sound = { ...audio_exports, ...mml_exports, ...tones_exports, mountPlayer, PLAYER_CSS, PLAYER_VERSION, player: { mount: mountPlayer, CSS: PLAYER_CSS, version: PLAYER_VERSION } };
   window.MMSXX = window.MMSXX || {};
   window.MMSXX.sound = sound;

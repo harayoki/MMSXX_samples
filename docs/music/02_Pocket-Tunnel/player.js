@@ -1,29 +1,19 @@
 // Pocket Tunnel 3アレンジ共通プレイヤー。
 (() => {
   const E = MMSXX.sound;
-  // MMLで未対応の設定だけをJSに残す。
-  E.registerFM('ptKick', {
-    ratio: 1, depth: 0, attack: .003, decay: .12, sustain: 0,
-    drop: 125 / 45 - 1, dropTime: .12,
-  }, {
-    role: 'perc',
-    note: 'Pocket Tunnel kick.',
-    noteJa: 'Pocket Tunnelのキック。',
-  });
-
-  // タブ切替時のマスター音量とチューニング設定。音符の強弱はMMLのvで指定。
+  // タブ切替時のチューニング設定。曲全体のバランスと強弱はMMLのvで指定。
   const songs = [
     {
       id: 'original', title: 'ノーマル', file: 'original.mml',
-      volume: 0.870156, tune: false,
+      tune: false,
     },
     {
       id: 'jazz', title: 'おしゃれアレンジ', file: 'jazz.mml',
-      volume: 1.199816, tune: false,
+      tune: false,
     },
     {
       id: 'fusion-v1', title: 'チップチューン アレンジ', file: 'fusion-v1.mml',
-      volume: 1.851206, tune: true,
+      tune: true,
     },
   ];
   function configureDynamicEffects(song, audio) {
@@ -35,7 +25,7 @@
   function applyMixSettings(song, audio) {
     configureDynamicEffects(song, audio);
     audio.psgTune = song.tune;
-    audio.volume = song.volume;
+
   }
 
   const editor = document.getElementById('pt-src');
@@ -113,5 +103,6 @@
     status.textContent = '';
   }).catch(error => { status.textContent = 'MML読み込みエラー：' + error.message; });
 })();
+
 
 

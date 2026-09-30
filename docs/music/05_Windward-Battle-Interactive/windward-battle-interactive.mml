@@ -1,9 +1,6 @@
-/*
-このMMLにはJS側に残る設定があります。
-設定JS: https://harayoki.github.io/MMSXX_samples/music/05_Windward-Battle-Interactive/player.js
-残る定義: wcKick
-*/
-
+#voice wcKickPulse = @{pulse(50)} @pitch{1782,1386,990,594,198,0}
+#voice wcKickEnv = @adsr{0.001, 0.065, 0, 0.004}
+#voice wcKickNoiseEnv = @adsr{0.001, 0.018, 0, 0.003}
 #voice wcLeadEnv = @adsr{0.004, 0.09, 0.68, 0.012}
 #voice wcPluckEnv = @adsr{0.003, 0.08, 0.18, 0.008}
 #voice wcDrumEnv = @adsr{0.001, 0.045, 0, 0.004}
@@ -16,7 +13,8 @@
 #voice wcArp = @{pulse(50)} @e{wcPluckEnv}
 
 #title 調整中：風渡りの境界 戦闘曲(インタラクティブ)
-#version 1.9
+#version 1.11
+// 全体音量はMMLのvで指定（上限15）。JSによる曲別増幅は使わない。
 #about 風渡りの境界 の戦闘曲を動的に切り変え可能にしたものです。ゲームの展開に合わせて使います。CH3とCH4は発音が重ならないため統合可能。
 #arrangement Interactive Battle — 風渡りの境界
 #tempo 152
@@ -33,9 +31,9 @@
 // @{wcBass} エンカウント・勝敗の短く減衰する三角波ベース。
 // @{wcBattleBass} 戦闘用の矩形波ベース。大ピンチは8分3連符（l12相当）。
 // @{wcArp} エンカウント・勝敗の隙間に入る矩形波アルペジオ。
-// @{wcKick} ピッチが急降下する標準FMのキック。
+// キックはMMLの矩形波＋ノイズ。副旋律の休符を使用。
 // @{noise(white)} 打楽器。@e{wcDrumEnv}で短く減衰する。
-// 音色はplayer.jsの標準APIで登録。@m1は標準ビブラート。
+// 音色と音量はMML内で定義。
 
 // 曲内で使う音色セット。音色にエコーやエンベロープを着せ、宣言をここへ集約。
 #bundle fieldLeadDry = @{wcFieldLead}
@@ -44,24 +42,24 @@
 #bundle fieldBass    = @{wcBass}
 #bundle battleBass   = @{wcBattleBass}
 #bundle fieldArp     = @{wcArp}
-#bundle kick         = @{wcKick}
+#bundle kick         = @{wcKickPulse} @e{wcKickEnv}, @{noise(white)} @e{wcKickNoiseEnv} v4
 #bundle drumNoise    = @{noise(white)} @e{wcDrumEnv}
 
 // 各曲の先頭で状態を初期化。その後、曲固有の設定を指定します。
-$RESET = { o4 l4 t120 v10 q7 p3 @{pulse(50)} @e{flat} @d0 @m0 @o0 }
+$RESET = { o4 l4 t120 v15 q7 p3 @{pulse(50)} @e{flat} @d0 @m0 @o0 }
 
 #ch 主旋律
 #role lead
 // 戦闘の主旋律。勝利・敗退までを担当します。
-$sound2 = { @m0 t152 @{battleLead} @m1 v7 q6 o4 }
-$sound3 = { @m0 t152 @{battleLead} @m1 v7 q6 o5 }
-$sound4 = { @m0 t152 @{battleLead} @m1 v9 q6 o5 }
-$sound5 = { @m0 t152 @{battleLead} @m1 v8 q7 o5 }
-$sound6 = { @m0 t132 @{battleLead} @m1 v9 q6 o5 }
-$sound7 = { @m0 t96 @{fieldLeadDry} @m1 v9 q6 o5 }
-$sound8 = { @m0 t96 @{fieldLeadDry} @m1 v9 q6 o4 }
+$sound2 = { @m0 t152 @{battleLead} @m1 v10.984 q6 o4 }
+$sound3 = { @m0 t152 @{battleLead} @m1 v10.984 q6 o5 }
+$sound4 = { @m0 t152 @{battleLead} @m1 v14.122 q6 o5 }
+$sound5 = { @m0 t152 @{battleLead} @m1 v12.553 q7 o5 }
+$sound6 = { @m0 t132 @{battleLead} @m1 v14.122 q6 o5 }
+$sound7 = { @m0 t96 @{fieldLeadDry} @m1 v14.122 q6 o5 }
+$sound8 = { @m0 t96 @{fieldLeadDry} @m1 v14.122 q6 o4 }
 $encounter = {
-$RESET @m0 t152 @{battleLead} @m1 v9 q6 o4 b-16 c+16 e16 g16 b-16 o5 c+16 e16 g16 b-8 g8 e8 c+8 $sound4 e16 g16
+$RESET @m0 t152 @{battleLead} @m1 v14.122 q6 o4 b-16 c+16 e16 g16 b-16 o5 c+16 e16 g16 b-8 g8 e8 c+8 $sound4 e16 g16
   a16 b-16 a8 e8 c+4 o4 a8 r8
 }
 $good = {
@@ -83,7 +81,7 @@ $RESET $sound4 r8 a8 o6 d4 o5 a8 r8 f8 e8 $sound4 d8. f16 a8 d8 r8 a8 f4 | $soun
   e8 a4 g8 r8 e8 c+8 $sound4 a8. g16 e8 c+8 r8 e8 a4 |
 }
 $win = {
-$RESET $sound6 d8 f+16 a16 o6 d4 o5 a8 b8 o6 d4 @m0 t132 @{battleLead} @m1 v9 q6 o6 d8 o5 b8 g4 a8 b8 o6 d4
+$RESET $sound6 d8 f+16 a16 o6 d4 o5 a8 b8 o6 d4 @m0 t132 @{battleLead} @m1 v14.122 q6 o6 d8 o5 b8 g4 a8 b8 o6 d4
   $sound6 c+8 e8 a4 g8 e8 c+4 $sound6 d2 r2
 }
 $lose = {
@@ -112,60 +110,60 @@ $lose |
 #ch ベース
 #role bass
 // 戦闘時は専用矩形波、エンカウントと勝敗では三角波を使います。
-$sound2 = { @m0 t152 @{fieldBass} v13 q6 o1 }
-$sound3 = { @m0 t132 @{fieldBass} v13 q6 o1 }
-$sound4 = { @m0 t96 @{fieldBass} v13 q6 o2 }
-$phrase1 = { @m0 t152 @{battleBass} q5 v10 o3 d12 v8 o4 d12 v8 o3 a12 v10 o3 d12 v8 o4 d12 v8 o3 a12 v10 o3 d12
-  v8 o4 d12 v8 o3 a12 v10 o4 d12 v8 o3 a12 v8 o3 d12 }
-$phrase2 = { @m0 t152 @{battleBass} q5 v10 o2 a+12 v8 o3 a+12 v8 o3 f12 v10 o2 a+12 v8 o3 a+12 v8 o3 f12 v10 o2
-  a+12 v8 o3 a+12 v8 o3 f12 v10 o3 a+12 v8 o3 f12 v8 o2 a+12 }
-$phrase3 = { @m0 t152 @{battleBass} q5 v10 o2 a12 v8 o3 a12 v8 o3 e12 v10 o2 a12 v8 o3 a12 v8 o3 e12 v10 o2 a12
-  v8 o3 a12 v8 o3 e12 v10 o3 a12 v8 o3 e12 v8 o2 a12 }
-$phrase8 = { @m0 t152 @{battleBass} q6 v8 o3 d8 v6 o3 d8 v8 o3 d8 v6 o3 a8 v8 o3 d8 v6 o3 d8 v8 o4 d8 v6 o3 a8 }
-$phrase9 = { @m0 t152 @{battleBass} q6 v8 o2 a8 v6 o2 a8 v8 o2 a8 v6 o3 e8 v8 o2 a8 v6 o2 a8 v8 o3 a8 v6 o3 e8 }
-$phrase10 = { @m0 t152 @{battleBass} q6 v8 o2 g8 v6 o2 g8 v8 o2 g8 v6 o3 d8 v8 o2 g8 v6 o2 g8 v8 o3 g8 v6 o3 d8
+$sound2 = { @m0 t152 @{fieldBass} v15 q6 o1 }
+$sound3 = { @m0 t132 @{fieldBass} v15 q6 o1 }
+$sound4 = { @m0 t96 @{fieldBass} v15 q6 o2 }
+$phrase1 = { @m0 t152 @{battleBass} q5 v15 o3 d12 v12.553 o4 d12 v12.553 o3 a12 v15 o3 d12 v12.553 o4 d12 v12.553 o3 a12 v15 o3 d12
+  v12.553 o4 d12 v12.553 o3 a12 v15 o4 d12 v12.553 o3 a12 v12.553 o3 d12 }
+$phrase2 = { @m0 t152 @{battleBass} q5 v15 o2 a+12 v12.553 o3 a+12 v12.553 o3 f12 v15 o2 a+12 v12.553 o3 a+12 v12.553 o3 f12 v15 o2
+  a+12 v12.553 o3 a+12 v12.553 o3 f12 v15 o3 a+12 v12.553 o3 f12 v12.553 o2 a+12 }
+$phrase3 = { @m0 t152 @{battleBass} q5 v15 o2 a12 v12.553 o3 a12 v12.553 o3 e12 v15 o2 a12 v12.553 o3 a12 v12.553 o3 e12 v15 o2 a12
+  v12.553 o3 a12 v12.553 o3 e12 v15 o3 a12 v12.553 o3 e12 v12.553 o2 a12 }
+$phrase8 = { @m0 t152 @{battleBass} q6 v12.553 o3 d8 v9.415 o3 d8 v12.553 o3 d8 v9.415 o3 a8 v12.553 o3 d8 v9.415 o3 d8 v12.553 o4 d8 v9.415 o3 a8 }
+$phrase9 = { @m0 t152 @{battleBass} q6 v12.553 o2 a8 v9.415 o2 a8 v12.553 o2 a8 v9.415 o3 e8 v12.553 o2 a8 v9.415 o2 a8 v12.553 o3 a8 v9.415 o3 e8 }
+$phrase10 = { @m0 t152 @{battleBass} q6 v12.553 o2 g8 v9.415 o2 g8 v12.553 o2 g8 v9.415 o3 d8 v12.553 o2 g8 v9.415 o2 g8 v12.553 o3 g8 v9.415 o3 d8
   }
-$phrase11 = { @m0 t152 @{battleBass} q6 v8 o2 b8 v6 o2 b8 v8 o2 b8 v6 o3 f+8 v8 o2 b8 v6 o2 b8 v8 o3 b8 v6 o3
+$phrase11 = { @m0 t152 @{battleBass} q6 v12.553 o2 b8 v9.415 o2 b8 v12.553 o2 b8 v9.415 o3 f+8 v12.553 o2 b8 v9.415 o2 b8 v12.553 o3 b8 v9.415 o3
   f+8 }
-$phrase12 = { @m0 t152 @{battleBass} q6 v10 o3 d+8 v8 o3 d+8 v10 o3 d+8 v8 o3 a+8 v10 o3 d+8 v8 o3 d+8 v10 o4
-  d+8 v8 o3 a+8 }
-$phrase13 = { @m0 t152 @{battleBass} q6 v10 o2 a+8 v8 o2 a+8 v10 o2 a+8 v8 o3 e8 v10 o2 a+8 v8 o2 a+8 v10 o3 a+8
-  v8 o3 e8 }
-$phrase14 = { @m0 t152 @{battleBass} q6 v10 o2 a8 v8 o2 a8 v10 o2 a8 v8 o3 e8 v10 o2 a8 v8 o2 a8 v10 o3 a8 v8 o3
+$phrase12 = { @m0 t152 @{battleBass} q6 v15 o3 d+8 v12.553 o3 d+8 v15 o3 d+8 v12.553 o3 a+8 v15 o3 d+8 v12.553 o3 d+8 v15 o4
+  d+8 v12.553 o3 a+8 }
+$phrase13 = { @m0 t152 @{battleBass} q6 v15 o2 a+8 v12.553 o2 a+8 v15 o2 a+8 v12.553 o3 e8 v15 o2 a+8 v12.553 o2 a+8 v15 o3 a+8
+  v12.553 o3 e8 }
+$phrase14 = { @m0 t152 @{battleBass} q6 v15 o2 a8 v12.553 o2 a8 v15 o2 a8 v12.553 o3 e8 v15 o2 a8 v12.553 o2 a8 v15 o3 a8 v12.553 o3
   e8 }
 $encounter = {
-$RESET $sound2 a+8 r8 @{fieldArp} v5 q5 o3 a+16 o4 c+16 o4 e16 o4 g16 @{fieldBass} v12 q6 o2 f8 r8 @{fieldArp}
-  v5 q5 o4 g16 o4 e16 o4 c+16 o3 a+16 $sound2 a8 r8 @{fieldArp} v5 q5 o4 c+16 o4 e16 o4 g16 o4 a16 @{fieldBass}
-  v12 q6 o2 e8 r8 @{fieldArp} v5 q5 o4 a16 o4 g16 o4 e16 o4 c+16
+$RESET $sound2 a+8 r8 @{fieldArp} v7.846 q5 o3 a+16 o4 c+16 o4 e16 o4 g16 @{fieldBass} v15 q6 o2 f8 r8 @{fieldArp}
+  v7.846 q5 o4 g16 o4 e16 o4 c+16 o3 a+16 $sound2 a8 r8 @{fieldArp} v7.846 q5 o4 c+16 o4 e16 o4 g16 o4 a16 @{fieldBass}
+  v15 q6 o2 e8 r8 @{fieldArp} v7.846 q5 o4 a16 o4 g16 o4 e16 o4 c+16
 }
 $good = {
 $RESET $phrase8 $phrase9 | $phrase10 $phrase9 | $phrase8 $phrase9 | $phrase10 $phrase9 | $phrase11 $phrase10 |
-  $phrase9 $phrase11 | $phrase10 $phrase9 | $phrase8 @m0 t152 @{battleBass} q6 v8 o3 d4 v6 a4 v8 d4 v6 d4 |
+  $phrase9 $phrase11 | $phrase10 $phrase9 | $phrase8 @m0 t152 @{battleBass} q6 v12.553 o3 d4 v9.415 a4 v12.553 d4 v9.415 d4 |
 }
 $bad = {
-$RESET @m0 t152 @{battleBass} q6 v10 o3 d8 v8 o3 d8 v10 o3 d8 v8 o3 a8 v10 o3 d8 v8 o3 d8 v10 o4 d8 v8 o3 a8
-  $phrase12 | $phrase13 $phrase14 | @m0 t152 @{battleBass} q6 v10 o2 g8 v8 o2 g8 v10 o2 g8 v8 o3 d8 v10 o2 g8 v8
-  o2 g8 v10 o3 g8 v8 o3 d8 $phrase12 | $phrase13 $phrase14 |
+$RESET @m0 t152 @{battleBass} q6 v15 o3 d8 v12.553 o3 d8 v15 o3 d8 v12.553 o3 a8 v15 o3 d8 v12.553 o3 d8 v15 o4 d8 v12.553 o3 a8
+  $phrase12 | $phrase13 $phrase14 | @m0 t152 @{battleBass} q6 v15 o2 g8 v12.553 o2 g8 v15 o2 g8 v12.553 o3 d8 v15 o2 g8 v12.553
+  o2 g8 v15 o3 g8 v12.553 o3 d8 $phrase12 | $phrase13 $phrase14 |
 }
 $crisis = {
-$RESET $phrase1 $phrase1 | $phrase2 $phrase2 | @m0 t152 @{battleBass} q5 v10 o2 g12 v8 o3 g12 v8 o3 d12 v10 o2
-  g12 v8 o3 g12 v8 o3 d12 v10 o2 g12 v8 o3 g12 v8 o3 d12 v10 o3 g12 v8 o3 d12 v8 o2 g12 @m0 t152 @{battleBass}
-  q5 v10 o2 a+12 v8 o3 a+12 v8 o3 e12 v10 o2 a+12 v8 o3 a+12 v8 o3 e12 v10 o2 a+12 v8 o3 a+12 v8 o3 e12 v10 o3
-  a+12 v8 o3 e12 v8 o2 a+12 | $phrase3 $phrase3 |
+$RESET $phrase1 $phrase1 | $phrase2 $phrase2 | @m0 t152 @{battleBass} q5 v15 o2 g12 v12.553 o3 g12 v12.553 o3 d12 v15 o2
+  g12 v12.553 o3 g12 v12.553 o3 d12 v15 o2 g12 v12.553 o3 g12 v12.553 o3 d12 v15 o3 g12 v12.553 o3 d12 v12.553 o2 g12 @m0 t152 @{battleBass}
+  q5 v15 o2 a+12 v12.553 o3 a+12 v12.553 o3 e12 v15 o2 a+12 v12.553 o3 a+12 v12.553 o3 e12 v15 o2 a+12 v12.553 o3 a+12 v12.553 o3 e12 v15 o3
+  a+12 v12.553 o3 e12 v12.553 o2 a+12 | $phrase3 $phrase3 |
 }
 $win = {
-$RESET @m0 t132 @{fieldBass} v13 q6 o2 d8 r8 @{fieldArp} v5 q5 o4 d16 o4 f+16 o4 a16 o5 d16 @{fieldBass} v12 q6
-  o2 a8 r8 @{fieldArp} v5 q5 o5 d16 o4 a16 o4 f+16 o4 d16 $sound3 g8 r8 @{fieldArp} v5 q5 o3 b16 o4 d16 o4 g16
-  o4 b16 @{fieldBass} v12 q6 o2 d8 r8 @{fieldArp} v5 q5 o4 b16 o4 g16 o4 d16 o3 b16 $sound3 a8 r8 @{fieldArp} v5
-  q5 o4 c+16 o4 e16 o4 a16 o5 c+16 @{fieldBass} v12 q6 o2 e8 r8 @{fieldArp} v5 q5 o5 c+16 o4 a16 o4 e16 o4 c+16
-  @m0 t132 @{fieldBass} v12 q6 o2 d2 r2
+$RESET @m0 t132 @{fieldBass} v15 q6 o2 d8 r8 @{fieldArp} v7.846 q5 o4 d16 o4 f+16 o4 a16 o5 d16 @{fieldBass} v15 q6
+  o2 a8 r8 @{fieldArp} v7.846 q5 o5 d16 o4 a16 o4 f+16 o4 d16 $sound3 g8 r8 @{fieldArp} v7.846 q5 o3 b16 o4 d16 o4 g16
+  o4 b16 @{fieldBass} v15 q6 o2 d8 r8 @{fieldArp} v7.846 q5 o4 b16 o4 g16 o4 d16 o3 b16 $sound3 a8 r8 @{fieldArp} v7.846
+  q5 o4 c+16 o4 e16 o4 a16 o5 c+16 @{fieldBass} v15 q6 o2 e8 r8 @{fieldArp} v7.846 q5 o5 c+16 o4 a16 o4 e16 o4 c+16
+  @m0 t132 @{fieldBass} v15 q6 o2 d2 r2
 }
 $lose = {
-$RESET $sound4 d8 r8 @{fieldArp} v5 q5 o4 d16 o4 f16 o4 a16 o5 d16 @{fieldBass} v12 q6 o2 a8 r8 @{fieldArp} v5
-  q5 o5 d16 o4 a16 o4 f16 o4 d16 $sound4 d+8 r8 @{fieldArp} v5 q5 o4 d+16 o4 g16 o4 a+16 o5 d+16 @{fieldBass}
-  v12 q6 o2 a+8 r8 @{fieldArp} v5 q5 o5 d+16 o4 a+16 o4 g16 o4 d+16 @m0 t96 @{fieldBass} v13 q6 o1 a8 r8
-  @{fieldArp} v5 q5 o4 c+16 o4 e16 o4 g16 o4 a16 @{fieldBass} v12 q6 o2 e8 r8 @{fieldArp} v5 q5 o4 a16 o4 g16 o4
-  e16 o4 c+16 @m0 t96 @{fieldBass} v12 q6 o2 d2 r2
+$RESET $sound4 d8 r8 @{fieldArp} v7.846 q5 o4 d16 o4 f16 o4 a16 o5 d16 @{fieldBass} v15 q6 o2 a8 r8 @{fieldArp} v7.846
+  q5 o5 d16 o4 a16 o4 f16 o4 d16 $sound4 d+8 r8 @{fieldArp} v7.846 q5 o4 d+16 o4 g16 o4 a+16 o5 d+16 @{fieldBass}
+  v15 q6 o2 a+8 r8 @{fieldArp} v7.846 q5 o5 d+16 o4 a+16 o4 g16 o4 d+16 @m0 t96 @{fieldBass} v15 q6 o1 a8 r8
+  @{fieldArp} v7.846 q5 o4 c+16 o4 e16 o4 g16 o4 a16 @{fieldBass} v15 q6 o2 e8 r8 @{fieldArp} v7.846 q5 o4 a16 o4 g16 o4
+  e16 o4 c+16 @m0 t96 @{fieldBass} v15 q6 o2 d2 r2
 }
 #label エンカウント
 $encounter
@@ -190,7 +188,7 @@ $lose |
 #ch 副旋律
 #role counter
 // ドラムの休符位置だけを担当します。
-$battle = { @m0 t152 q6 @{counterLead} v4 }
+$battle = { @m0 t152 q6 @{counterLead} v6.276 }
 $fullFD = { $battle o4 [r16 f16]4 [r16 d16]4 }
 $fullAG = { $battle o3 [r16 a+16]4 [r16 g16]4 }
 $fullCsAs = { $battle o4 [r16 c+16]4 o3 [r16 a+16]4 }
@@ -237,15 +235,15 @@ $lose |
 
 #ch ドラム
 // DRUMS用の音程と強弱。C4を基準に元の各打楽器の高さへ移す。
-#bundle wcDrumsKick = @{wcKick} @s0 @o-2
+#bundle wcDrumsKick = @{wcKickPulse} @e{wcKickEnv} @s0 @o-2, @{noise(white)} @e{wcKickNoiseEnv} @s0 @o-2 v4
 #bundle wcDrumsSnare = @{noise(white)} @e{wcDrumEnv} @s0 @d900
 #bundle wcDrumsHat = @{noise(white)} @e{wcDrumEnv} @s0 @o+2 @d900
-#drum K = @{wcDrumsKick} v10 キック（強）
-#drum k = @{wcDrumsKick} v9 キック（弱）
-#drum E = @{wcDrumsKick} v8 キック（終止）
-#drum S = @{wcDrumsSnare} v6 スネア
-#drum H = @{wcDrumsHat} v3 ハイハット
-#drum h = @{wcDrumsHat} v2 ハイハット（弱）
+#drum K = @{wcDrumsKick} v13 キック（強）
+#drum k = @{wcDrumsKick} v12 キック（弱）
+#drum E = @{wcDrumsKick} v11 キック（終止）
+#drum S = @{wcDrumsSnare} v9 スネア
+#drum H = @{wcDrumsHat} v5 ハイハット
+#drum h = @{wcDrumsHat} v3 ハイハット（弱）
 #role perc
 // 副旋律の休符位置だけを担当します。
 $battleDrums = { @m0 t152 q6 v15 @{drums 16}{ K . H . S . H . k . H . S . H . } }
@@ -280,3 +278,4 @@ $win t132 r1 r2 |
 #take 敗北
 $lose |
 #takes
+

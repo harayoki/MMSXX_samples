@@ -7,9 +7,11 @@ global.window = global;
 require('../docs/music/player-engine.js');
 
 const E = MMSXX.sound;
-assert.equal(E.SOUND_VERSION, '0.22.0', 'bundled sound engine version');
+assert.equal(E.SOUND_VERSION, '0.26.2', 'bundled sound engine version');
 assert(E.compileMML('@{tape(worn)}{ o2 a1 f1 c1 g1 }').events.every(event => event.tape?.data),
   'tape sections must accept note names as data bursts');
+assert(E.findWave('waveRamp') >= 0, 'renamed waveRamp must exist');
+assert.equal(E.findWave('wtRamp'), -1, 'legacy wtRamp must not mask migration errors');
 const echoProbeAudio = new E.ChipTuneSound();
 assert(echoProbeAudio.defineBGM('echo-probe', ['t120 @s8 c8 r2']).ok,
   'echo probe must compile');
@@ -80,6 +82,15 @@ for (const [i, cents] of [0, 696, 5].entries()) {
     'every bundled glide must reach its destination without a gap');
 }
 
+// Relative composition volume must remain in the hardware v range.
+assert.deepEqual(E.compileMML('v10 c v+2 c v-3 c').events.map(e => e.vol), [10,12,9]);
+assert.deepEqual(E.compileMML('@v+2 v14 c v4 c').events.map(e => e.vol), [15,6]);
+for (const name of ['01_Volcano-parade', 'DUMMY/pink-panther']) {
+  const playerSource = fs.readFileSync(path.resolve(__dirname, '../docs/music', name, 'player.js'), 'utf8');
+  assert(!/\.volume\s*=|balanceTracks|event\.vol\s*=/.test(playerSource),
+    name + ': composition volume belongs in MML');
+}
+
 const root = path.resolve(__dirname, '../docs/music');
 const songs = [
   ['08_STARFABLE-Boss/starfable-boss.mml', 6, ['Intro', 'Main', 'Finale']],
@@ -100,6 +111,8 @@ const songs = [
   ['07_Dark-Corridor/dark-corridor.mml', 6,
     ['A_start', 'B_start', 'A_return', 'B_final']],
   ['DUMMY/tape-load-melancholy.mml', 7],
+  ['DUMMY/pink-panther/pink-panther.mml.txt', 7],
+  ['DUMMY/msx-fm/msx-fm.mml', 1],
 ];
 
 function splitMML(text) {
@@ -124,19 +137,19 @@ for (const { file, source } of sources) {
 }
 
 for (const file of [
-  '03_Windward-Crossing/player.js',
-  '04_Grassland-Trinity/player.js',
+  '03_Windward-Crossing/windward-crossing.mml',
+  '04_Grassland-Trinity/grassland-trinity.mml',
 ]) {
   const source = fs.readFileSync(path.join(root, file), 'utf8');
-  assert(source.includes("wave: 'nesTriangle'"), file + ': NES triangle');
-  assert(!/wave:\s*['"]triangle['"]/.test(source), file + ': no volume-sensitive triangle');
+  assert(source.includes('@{nesTriangle}'), file + ': NES triangle');
+  assert(!/@\{triangle\}/.test(source), file + ': no volume-sensitive triangle');
 }
 
 // Page-specific timbres are registered by each player.js. Placeholder voices
 // are enough here because this test validates notation and arrangement shape.
 for (const { source } of sources) {
   const declaredTones = new Set(
-    [...source.matchAll(/^\s*#(?:bundle|chord)\s+([\w-]+)/gim)]
+    [...source.matchAll(/^\s*#(?:bundle|chord|voice|wave)\s+([\w-]+)/gim)]
       .map(match => match[1].toLowerCase()),
   );
   for (const match of source.matchAll(/@\{([^}]+)\}/g)) {
@@ -145,6 +158,7 @@ for (const { source } of sources) {
     if (E.findWave(name) < 0) E.registerTone(name, { wave: 'pulse(50)' });
   }
   for (const match of source.matchAll(/@e\{([^}]+)\}/g)) {
+    if (declaredTones.has(match[1].toLowerCase())) continue;
     if (!E.ENVELOPES.some(env =>
       env.name.toLowerCase() === match[1].toLowerCase())) {
       E.registerEnvelope(match[1], { a: .001, d: 0, s: 1, r: .001 });
@@ -159,6 +173,8 @@ const expectedBundleCounts = new Map([
   ['02_Pocket-Tunnel/fusion-v1.mml', 2],
 ]);
 for (const { file, source } of sources) {
+  E.readWaves(source);
+  E.readVoices(source);
   if (expectedBundleCounts.has(file)) {
     assert.equal(E.readBundles(source).size, expectedBundleCounts.get(file),
       file + ': bundled voice count');
@@ -177,7 +193,7 @@ for (const { file, channels, marks, source } of sources) {
   if (marks) assert(info.marks.every((mark, index) =>
     index === 0 || mark.t > info.marks[index - 1].t), file + ': jump label order');
   if (file === '03_Windward-Crossing/windward-crossing.mml') {
-    assert.equal(info.meta.version, '1.9', file + ': song version');
+    assert.equal(info.meta.version, '1.12', file + ': song version');
     assert(!info.meta.about.includes('CH3とCH4は発音が重ならないため統合可能。'),
       file + ': echoed counter melody is no longer mergeable with drums');
     assert(!info.meta.about.includes('ファミコン準拠'),
@@ -238,7 +254,7 @@ for (const { file, channels, marks, source } of sources) {
       file + ': notes and sound settings match the suite CH1 field');
   }
   if (file.startsWith('05_Windward-Battle-Interactive/')) {
-    assert.equal(info.meta.version, '1.8', file + ': song version');
+    assert.equal(info.meta.version, '1.11', file + ': song version');
     assert.deepEqual(info.tracks.map(track => track.name),
       ['主旋律', 'ベース', '副旋律', 'ドラム'], file + ': channel names');
     assert.deepEqual(info.marks.map(mark => mark.name), ['エンカウント', 'LOOP', 'OUTRO'],
@@ -293,3 +309,11 @@ for (const { file, channels, marks, source } of sources) {
   console.log('PASS', file, channels + 'ch', info.total.toFixed(3) + 's');
 }
 
+
+
+
+// Song-specific amplification belongs in MML, not page JavaScript.
+for (const relative of ['02_Pocket-Tunnel/player.js', '03_Windward-Crossing/player.js', '03_Windward-Crossing/ch1-field/player.js', '05_Windward-Battle-Interactive/player.js', '08_STARFABLE-Boss/player.js', 'DUMMY/player.js', 'CodeMirror-MML-Prototype/player.js']) {
+  const code = fs.readFileSync(path.join(__dirname, "../docs/music", relative), "utf8");
+  assert(!/\baudio\.volume\s*=/.test(code), relative + ": use MML volume");
+}

@@ -8,7 +8,7 @@
   const status = document.querySelector('[data-music-status]');
   const audio = new E.ChipTuneSound(null, { psgTune: false, spatial: 'mono' });
   audio.psgTune = false;
-  audio.volume = 2.25;
+
 
   fetch(MusicAssets.song('ch1-field.mml'))
     .then(response => {
@@ -29,3 +29,4 @@
         ' — Please use an HTTP server.';
     });
 })();
+

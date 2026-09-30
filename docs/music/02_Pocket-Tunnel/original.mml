@@ -1,10 +1,7 @@
 #voice ptDecay = @adsr{0.003, 70%, 0.32, 30%}
 
-/*
-このMMLにはJS側に残る設定があります。
-設定JS: https://harayoki.github.io/MMSXX_samples/music/02_Pocket-Tunnel/player.js
-残る定義: ptKick
-*/
+// キックは正弦波と音程表でMML内に定義。
+#voice ptKick = @{sine} @pitch{1769,1516,1264,1011,758,505,253,0}
 
 #voice ptHeld = @adsr{0.003, 0, 1, 0.004}
 #voice ptLead = @{pulse(50)} @e{ptHeld}
@@ -17,7 +14,8 @@
 // イントロとエンディングは1回ずつ。全パート共通で、再生とWAVの両方に適用。
 $LOOP_END = { 1 }
 #title Pocket Tunnel
-#version 5.3
+#version 5.5
+// 全体音量はMMLのvで指定（上限15）。JSによる曲別増幅は使わない。
 #about ノーマル · メニュー画面や始まりの街をイメージしたBGM
 #copyright 2026 harayoki
 #license CC BY 4.0 (music, artwork and MML source; https://creativecommons.org/licenses/by/4.0/)
@@ -27,7 +25,7 @@ $LOOP_END = { 1 }
 //   @{ptBass}   ノーマルのベース用矩形波。
 //   @{ptChord}   ノーマルの和音用矩形波。持続と短い合いの手を切り替える。
 //   @{ptHarmony}   メロディに重ねるハモリ用矩形波。エコーなし。
-//   @{ptKick}   キック用2オペFM。125Hzから45Hzへ0.12秒で下降。
+//   @{ptKick}   正弦波キック。約2.78倍から本来の音程へ7フレーム（約117ms）で下降。
 //   @{noise(white)}   スネアとハイハット用の標準ノイズ。a4／a6と発音長で鳴りを分ける。
 // @e{ptHeld} は持続、@e{ptDecay} は音長に応じた減衰。
 // エンベロープは音色定義の割合指定を使用。キックの調律はバンドルで指定。
@@ -45,12 +43,12 @@ $LOOP_END = { 1 }
 // パート 1 — メロディ。
 // イントロ
 #label イントロ
-t120 q8 @{ptLeadVoice} v9 @d0 @s{3,8} q5 o3 c16 o3 d16 o3 e16 o3 f16 o3 g16 o3 a16 o3 b16 o4 c16 o4
+t120 q8 @{ptLeadVoice} v8.331 @d0 @s{3,8} q5 o3 c16 o3 d16 o3 e16 o3 f16 o3 g16 o3 a16 o3 b16 o4 c16 o4
 d16 o4 e16 o4 f16 o4 g16 o4 a16 o4 b16 o5 c16 r16
 // 本編
 #label 本編
 [
-t120 o5 l4 q5 @{ptLeadVoice} v9 @d0 @m0 @s{3,8} @o0 @p{0,0,0} q6 o5 f16 o5 a16 q3 o6 c8 q6 o5 a16 o6
+t120 o5 l4 q5 @{ptLeadVoice} v8.331 @d0 @m0 @s{3,8} @o0 @p{0,0,0} q6 o5 f16 o5 a16 q3 o6 c8 q6 o5 a16 o6
 c16 o6 f8 o6 e16 o6 d16 o6 c8 o5 a8 o5 g8 o5 g16 o5 b16 q3 o6 d8 q6 o5 b16 o6 d16 o6 g8 o6 f16 o6
 e16 o6 d8 q3 o5 b4 q6 o5 f16 o5 g16 q3 o6 c8 q6 o5 g16 o6 c16 o6 f8 o6 d16 o6 c16 o5 g8 o5 f8 o5 g8
 o5 e16 o5 g16 q3 o6 c8 q6 o5 g16 o5 e16 o5 d8 q3 o5 c2 q6 o5 f16 o5 a16 q3 o6 c8 q6 o5 a16 o6 c16 o6
@@ -81,7 +79,7 @@ o4 b8 & b20 r16 r80 o6 c2 & c8 & c20 r4 r16 r80
 t120 q8 r1
 // 本編
 [
-t120 o4 l4 q8 @{ptBaseVoice} @d0 @m0 @s0 @o0 @p{0,0,0} @{ptArpVoice} v13 @d0 @s0 q5 [ o3 f16 o3 a16
+t120 o4 l4 q8 @{ptBaseVoice} @d0 @m0 @s0 @o0 @p{0,0,0} @{ptArpVoice} v12.033 @d0 @s0 q5 [ o3 f16 o3 a16
 o4 c16 o3 a16 o3 f16 o3 a16 o4 e16 o4 c16 ]2 [ o3 g16 o3 b16 o4 d16 o3 b16 o3 g16 o3 b16 o4 g16 o4
 d16 ]2 [ o3 c16 o3 f16 o3 g16 o3 f16 o3 c16 o3 f16 o4 c16 o3 g16 ]2 [ o3 c16 o3 e16 o3 g16 o3 e16 o3
 c16 o3 e16 o4 c16 o3 g16 ]2 [ o3 f16 o3 a16 o4 c16 o3 a16 o3 f16 o3 a16 o4 e16 o4 c16 ]2 [ o3 d16 o3
@@ -104,10 +102,10 @@ r1 r1
 #role bass
 // パート 3 — ベース。
 // イントロ
-t120 q8 @{ptBassDecay} v13 @d0 @s0 q6 o2 c2 o2 g2
+t120 q8 @{ptBassDecay} v12.033 @d0 @s0 q6 o2 c2 o2 g2
 // 本編
 [
-t120 o2 l4 q6 @{ptBassDecay} v13 @d0 @m0 @s0 @o0 @p{0,0,0} q4 o2 f8. q6 o2 f16 o3 c8 q3 o2 f8 q6 o2
+t120 o2 l4 q6 @{ptBassDecay} v12.033 @d0 @m0 @s0 @o0 @p{0,0,0} q4 o2 f8. q6 o2 f16 o3 c8 q3 o2 f8 q6 o2
 a8 o3 c16 o2 a16 o3 c8 o2 f8 q4 o2 g8. q6 o2 g16 o3 d8 q3 o2 g8 q6 o2 b8 o3 d16 o2 b16 o3 d8 o2 g8
 q4 o2 c8. q6 o2 c16 o2 g8 q3 o2 c8 q6 o2 f8 o2 g16 o2 f16 o2 g8 o2 c8 q4 o2 c8. q6 o2 c16 o2 g8 q3
 o2 c8 q6 o2 e8 o2 g16 o2 e16 o2 g8 o2 c8 q4 o2 f8. q6 o2 f16 o3 c8 q3 o2 f8 q6 o2 a8 o3 c16 o2 a16
@@ -126,34 +124,34 @@ g8 q3 o2 c8 q6 o2 f8 o2 g16 o2 f16 o2 g8 o2 c8 q4 o2 c8. q6 o2 c16 o2 g8 q3 o2 c
 e16 o2 g8 o2 c8
 ]$LOOP_END
 // エンディング
-@{ptBassHeld} v11 q8 o3 c4 & c16 & c80 r8 r20 o2 g4 & g16 & g80 r8 r20 o2 c2 & c8 & c20 r4 r16 r80
+@{ptBassHeld} v10.182 q8 o3 c4 & c16 & c80 r8 r20 o2 g4 & g16 & g80 r8 r20 o2 c2 & c8 & c20 r4 r16 r80
 #ch ドラム
 #role perc
 // 16分刻み。楽器ごとの強弱と発音長は定義にまとめる。
 #bundle ptKickQ2 = @{ptKick} @e{ptDecay} @o-3 @d553 q2 @s0
-#drum K = @{ptKickQ2} v14 キック（v14・q2）
+#drum K = @{ptKickQ2} v13 キック（v14・q2）
 #bundle ptKickQ1 = @{ptKick} @e{ptDecay} @o-3 @d553 q1 @s0
-#drum k = @{ptKickQ1} v12 キック（v12・q1）
-#drum B = @{ptKickQ2} v15 キック（v15・q2）
-#drum b = @{ptKickQ2} v13 キック（v13・q2）
+#drum k = @{ptKickQ1} v11 キック（v12・q1）
+#drum B = @{ptKickQ2} v14 キック（v15・q2）
+#drum b = @{ptKickQ2} v12 キック（v13・q2）
 #bundle ptSnareQ4 = @{noise(white)} @e{ptDecay} @d900 q4 @s0
-#drum S = @{ptSnareQ4} v12 スネア（v12・q4）
-#drum s = @{ptSnareQ4} v13 スネア（v13・q4）
+#drum S = @{ptSnareQ4} v11 スネア（v12・q4）
+#drum s = @{ptSnareQ4} v12 スネア（v13・q4）
 #bundle ptSnareQ2 = @{noise(white)} @e{ptDecay} @d900 q2 @s0
-#drum N = @{ptSnareQ2} v7 スネア（v7・q2）
-#drum n = @{ptSnareQ2} v9 スネア（v9・q2）
-#drum T = @{ptSnareQ2} v10 スネア（v10・q2）
-#drum t = @{ptSnareQ2} v13 スネア（v13・q2）
+#drum N = @{ptSnareQ2} v6 スネア（v7・q2）
+#drum n = @{ptSnareQ2} v8 スネア（v9・q2）
+#drum T = @{ptSnareQ2} v9 スネア（v10・q2）
+#drum t = @{ptSnareQ2} v12 スネア（v13・q2）
 #bundle ptHatQ2 = @{noise(white)} @e{ptDecay} @o+2 @d900 q2 @s0
-#drum H = @{ptHatQ2} v7 ハイハット（v7・q2）
-#drum h = @{ptHatQ2} v10 ハイハット（v10・q2）
+#drum H = @{ptHatQ2} v6 ハイハット（v7・q2）
+#drum h = @{ptHatQ2} v9 ハイハット（v10・q2）
 #drum I = @{ptHatQ2} v6 ハイハット（v6・q2）
-#drum i = @{ptHatQ2} v9 ハイハット（v9・q2）
+#drum i = @{ptHatQ2} v8 ハイハット（v9・q2）
 #bundle ptHatQ1 = @{noise(white)} @e{ptDecay} @o+2 @d900 q1 @s0
 #drum J = @{ptHatQ1} v6 ハイハット（v6・q1）
-#drum j = @{ptHatQ1} v7 ハイハット（v7・q1）
+#drum j = @{ptHatQ1} v6 ハイハット（v7・q1）
 #bundle ptKickQ8 = @{ptKick} @e{ptDecay} @o-3 @d553 q8 @s0
-#drum E = @{ptKickQ8} v12 キック（v12・q8）
+#drum E = @{ptKickQ8} v11 キック（v12・q8）
 t120 v15 @m0 @d0 @o0 @s0
 // イントロ
 r1
@@ -179,32 +177,32 @@ r1
 t120 q8 r1
 // 本編
 [
-t120 o4 l4 q8 @{ptBaseVoice} @d0 @m0 @s0 @o0 @p{0,0,0} @{ptChordHeld} v7 @d0 @s0 q8 o3 f4 & f16 &
-f64 & f640 & f3200 r10 r160 r800 v6 o3 f10 r16 r40 o3 f4 & f50 r5 r40 r200 v7 o3 g5 & g50 r8 r40
-r200 v6 o3 g4 & g16 & g40 & g400 r16 r32 r320 r1600 o3 g25 & g200 r64 r640 r3200 v7 o3 c4 & c5 &
-c100 r8 r25 v6 o3 c10 r16 r40 o3 c8 & c80 & c400 r25 r160 r800 v7 o3 c5 & c80 & c400 r8 r32 r320
-r1600 v6 o3 c10 & c200 r8 r50 o3 c4 & c20 & c100 r16 r400 v7 o3 f4 & f16 & f64 & f640 & f3200 r10
-r160 r800 v6 o3 f10 r16 r40 o3 f4 & f50 r5 r40 r200 v7 o3 d5 & d50 r8 r40 r200 v6 o3 d4 & d16 & d40
-& d400 r16 r32 r320 r1600 o3 d25 & d200 r64 r640 r3200 v7 o3 g4 & g5 & g100 r8 r25 v6 o3 g10 r16 r40
-o3 g8 & g80 & g400 r25 r160 r800 v7 o3 c5 & c80 & c400 r8 r32 r320 r1600 v6 o3 c10 & c200 r8 r50 o3
-c4 & c20 & c100 r16 r400 v7 o3 a4 & a16 & a64 & a640 & a3200 r10 r160 r800 v6 o3 a10 r16 r40 o3 a4 &
-a50 r5 r40 r200 v7 o3 e5 & e50 r8 r40 r200 v6 o3 e4 & e16 & e40 & e400 r16 r32 r320 r1600 o3 e25 &
-e200 r64 r640 r3200 v7 o3 f4 & f5 & f100 r8 r25 v6 o3 f10 r16 r40 o3 f8 & f80 & f400 r25 r160 r800
-v7 o3 g5 & g80 & g400 r8 r32 r320 r1600 v6 o3 g10 & g200 r8 r50 o3 g4 & g20 & g100 r16 r400 v7 o3 d4
-& d16 & d64 & d640 & d3200 r10 r160 r800 v6 o3 d10 r16 r40 o3 d4 & d50 r5 r40 r200 v7 o3 a5 & a50 r8
-r40 r200 v6 o3 a4 & a16 & a40 & a400 r16 r32 r320 r1600 o3 a25 & a200 r64 r640 r3200 v7 o3 f4 & f5 &
-f100 r8 r25 v6 o3 f10 r16 r40 o3 f8 & f80 & f400 r25 r160 r800 v7 o3 g5 & g80 & g400 r8 r32 r320
-r1600 v6 o3 g10 & g200 r8 r50 o3 g4 & g20 & g100 r16 r400 v7 o3 f4 & f16 & f64 & f640 & f3200 r10
-r160 r800 v6 o3 f10 r16 r40 o3 f4 & f50 r5 r40 r200 v7 o3 g5 & g50 r8 r40 r200 v6 o3 g4 & g16 & g40
-& g400 r16 r32 r320 r1600 o3 g25 & g200 r64 r640 r3200 v7 o3 e4 & e5 & e100 r8 r25 v6 o3 e10 r16 r40
-o3 e8 & e80 & e400 r25 r160 r800 v7 o3 a5 & a80 & a400 r8 r32 r320 r1600 v6 o3 a10 & a200 r8 r50 o3
-a4 & a20 & a100 r16 r400 v7 o3 d4 & d16 & d64 & d640 & d3200 r10 r160 r800 v6 o3 d10 r16 r40 o3 d4 &
-d50 r5 r40 r200 v7 o3 g5 & g50 r8 r40 r200 v6 o3 g4 & g16 & g40 & g400 r16 r32 r320 r1600 o3 g25 &
-g200 r64 r640 r3200 v7 o3 c4 & c5 & c100 r8 r25 v6 o3 c10 r16 r40 o3 c8 & c80 & c400 r25 r160 r800
-v7 o3 c5 & c80 & c400 r8 r32 r320 r1600 v6 o3 c10 & c200 r8 r50 o3 c4 & c20 & c100 r16 r400
+t120 o4 l4 q8 @{ptBaseVoice} @d0 @m0 @s0 @o0 @p{0,0,0} @{ptChordHeld} v6.479 @d0 @s0 q8 o3 f4 & f16 &
+f64 & f640 & f3200 r10 r160 r800 v5.554 o3 f10 r16 r40 o3 f4 & f50 r5 r40 r200 v6.479 o3 g5 & g50 r8 r40
+r200 v5.554 o3 g4 & g16 & g40 & g400 r16 r32 r320 r1600 o3 g25 & g200 r64 r640 r3200 v6.479 o3 c4 & c5 &
+c100 r8 r25 v5.554 o3 c10 r16 r40 o3 c8 & c80 & c400 r25 r160 r800 v6.479 o3 c5 & c80 & c400 r8 r32 r320
+r1600 v5.554 o3 c10 & c200 r8 r50 o3 c4 & c20 & c100 r16 r400 v6.479 o3 f4 & f16 & f64 & f640 & f3200 r10
+r160 r800 v5.554 o3 f10 r16 r40 o3 f4 & f50 r5 r40 r200 v6.479 o3 d5 & d50 r8 r40 r200 v5.554 o3 d4 & d16 & d40
+& d400 r16 r32 r320 r1600 o3 d25 & d200 r64 r640 r3200 v6.479 o3 g4 & g5 & g100 r8 r25 v5.554 o3 g10 r16 r40
+o3 g8 & g80 & g400 r25 r160 r800 v6.479 o3 c5 & c80 & c400 r8 r32 r320 r1600 v5.554 o3 c10 & c200 r8 r50 o3
+c4 & c20 & c100 r16 r400 v6.479 o3 a4 & a16 & a64 & a640 & a3200 r10 r160 r800 v5.554 o3 a10 r16 r40 o3 a4 &
+a50 r5 r40 r200 v6.479 o3 e5 & e50 r8 r40 r200 v5.554 o3 e4 & e16 & e40 & e400 r16 r32 r320 r1600 o3 e25 &
+e200 r64 r640 r3200 v6.479 o3 f4 & f5 & f100 r8 r25 v5.554 o3 f10 r16 r40 o3 f8 & f80 & f400 r25 r160 r800
+v6.479 o3 g5 & g80 & g400 r8 r32 r320 r1600 v5.554 o3 g10 & g200 r8 r50 o3 g4 & g20 & g100 r16 r400 v6.479 o3 d4
+& d16 & d64 & d640 & d3200 r10 r160 r800 v5.554 o3 d10 r16 r40 o3 d4 & d50 r5 r40 r200 v6.479 o3 a5 & a50 r8
+r40 r200 v5.554 o3 a4 & a16 & a40 & a400 r16 r32 r320 r1600 o3 a25 & a200 r64 r640 r3200 v6.479 o3 f4 & f5 &
+f100 r8 r25 v5.554 o3 f10 r16 r40 o3 f8 & f80 & f400 r25 r160 r800 v6.479 o3 g5 & g80 & g400 r8 r32 r320
+r1600 v5.554 o3 g10 & g200 r8 r50 o3 g4 & g20 & g100 r16 r400 v6.479 o3 f4 & f16 & f64 & f640 & f3200 r10
+r160 r800 v5.554 o3 f10 r16 r40 o3 f4 & f50 r5 r40 r200 v6.479 o3 g5 & g50 r8 r40 r200 v5.554 o3 g4 & g16 & g40
+& g400 r16 r32 r320 r1600 o3 g25 & g200 r64 r640 r3200 v6.479 o3 e4 & e5 & e100 r8 r25 v5.554 o3 e10 r16 r40
+o3 e8 & e80 & e400 r25 r160 r800 v6.479 o3 a5 & a80 & a400 r8 r32 r320 r1600 v5.554 o3 a10 & a200 r8 r50 o3
+a4 & a20 & a100 r16 r400 v6.479 o3 d4 & d16 & d64 & d640 & d3200 r10 r160 r800 v5.554 o3 d10 r16 r40 o3 d4 &
+d50 r5 r40 r200 v6.479 o3 g5 & g50 r8 r40 r200 v5.554 o3 g4 & g16 & g40 & g400 r16 r32 r320 r1600 o3 g25 &
+g200 r64 r640 r3200 v6.479 o3 c4 & c5 & c100 r8 r25 v5.554 o3 c10 r16 r40 o3 c8 & c80 & c400 r25 r160 r800
+v6.479 o3 c5 & c80 & c400 r8 r32 r320 r1600 v5.554 o3 c10 & c200 r8 r50 o3 c4 & c20 & c100 r16 r400
 ]$LOOP_END
 // エンディング
-v7 o4 c4 & c16 & c80 r8 r20 o3 b4 & b16 & b80 r8 r20 o4 c2 & c8 & c20 r4 r16 r80
+v6.479 o4 c4 & c16 & c80 r8 r20 o3 b4 & b16 & b80 r8 r20 o4 c2 & c8 & c20 r4 r16 r80
 #ch 和音 1 上声
 #role chord
 // パート 7 — 和音 1（同時発音の追加声部 1）。
@@ -212,10 +210,10 @@ v7 o4 c4 & c16 & c80 r8 r20 o3 b4 & b16 & b80 r8 r20 o4 c2 & c8 & c20 r4 r16 r80
 t120 q8 r1
 // 本編
 [
-t120 o4 l4 q8 @{ptBaseVoice} v14 @d0 @m0 @s0 @o0 @p{0,0,0} [ r1 r1 r1 r1 ]6
+t120 o4 l4 q8 @{ptBaseVoice} v12.959 @d0 @m0 @s0 @o0 @p{0,0,0} [ r1 r1 r1 r1 ]6
 ]$LOOP_END
 // エンディング
-@{ptChordHeld} v7 @d0 @s0 q8 o4 e4 & e16 & e80 r8 r20 o4 d4 & d16 & d80 r8 r20 o4 e2 & e8 & e20 r4
+@{ptChordHeld} v6.479 @d0 @s0 q8 o4 e4 & e16 & e80 r8 r20 o4 d4 & d16 & d80 r8 r20 o4 e2 & e8 & e20 r4
 r16 r80
 #ch 和音 1 最高声
 #role chord
@@ -224,10 +222,10 @@ r16 r80
 t120 q8 r1
 // 本編
 [
-t120 o4 l4 q8 @{ptBaseVoice} v14 @d0 @m0 @s0 @o0 @p{0,0,0} [ r1 r1 r1 r1 ]6
+t120 o4 l4 q8 @{ptBaseVoice} v12.959 @d0 @m0 @s0 @o0 @p{0,0,0} [ r1 r1 r1 r1 ]6
 ]$LOOP_END
 // エンディング
-@{ptChordHeld} v7 @d0 @s0 q8 o4 g4 & g16 & g80 r8 r20 o4 f4 & f16 & f80 r8 r20 o4 g2 & g8 & g20 r4
+@{ptChordHeld} v6.479 @d0 @s0 q8 o4 g4 & g16 & g80 r8 r20 o4 f4 & f16 & f80 r8 r20 o4 g2 & g8 & g20 r4
 r16 r80
 #ch 和音 2
 #role chord
@@ -236,29 +234,29 @@ r16 r80
 t120 q8 r1
 // 本編
 [
-t120 o4 l4 q8 @{ptBaseVoice} @d0 @m0 @s0 @o0 @p{0,0,0} @{ptChordHeld} v7 @d0 @s0 q8 o3 a4 & a16 &
-a64 & a640 & a3200 r10 r160 r800 v6 o3 a10 r16 r40 o3 a4 & a50 r5 r40 r200 v7 o3 b5 & b50 r8 r40
-r200 v6 o3 b4 & b16 & b40 & b400 r16 r32 r320 r1600 o3 b25 & b200 r64 r640 r3200 v7 o3 f4 & f5 &
-f100 r8 r25 v6 o3 f10 r16 r40 o3 f8 & f80 & f400 r25 r160 r800 v7 o3 e5 & e80 & e400 r8 r32 r320
-r1600 v6 o3 e10 & e200 r8 r50 o3 e4 & e20 & e100 r16 r400 v7 o3 a4 & a16 & a64 & a640 & a3200 r10
-r160 r800 v6 o3 a10 r16 r40 o3 a4 & a50 r5 r40 r200 v7 o3 f5 & f50 r8 r40 r200 v6 o3 f4 & f16 & f40
-& f400 r16 r32 r320 r1600 o3 f25 & f200 r64 r640 r3200 v7 o3 b4 & b5 & b100 r8 r25 v6 o3 b10 r16 r40
-o3 b8 & b80 & b400 r25 r160 r800 v7 o3 e5 & e80 & e400 r8 r32 r320 r1600 v6 o3 e10 & e200 r8 r50 o3
-e4 & e20 & e100 r16 r400 v7 o4 c4 & c16 & c64 & c640 & c3200 r10 r160 r800 v6 o4 c10 r16 r40 o4 c4 &
-c50 r5 r40 r200 v7 o3 g5 & g50 r8 r40 r200 v6 o3 g4 & g16 & g40 & g400 r16 r32 r320 r1600 o3 g25 &
-g200 r64 r640 r3200 v7 o3 a4 & a5 & a100 r8 r25 v6 o3 a10 r16 r40 o3 a8 & a80 & a400 r25 r160 r800
-v7 o3 b5 & b80 & b400 r8 r32 r320 r1600 v6 o3 b10 & b200 r8 r50 o3 b4 & b20 & b100 r16 r400 v7 o3 f4
-& f16 & f64 & f640 & f3200 r10 r160 r800 v6 o3 f10 r16 r40 o3 f4 & f50 r5 r40 r200 v7 o4 c5 & c50 r8
-r40 r200 v6 o4 c4 & c16 & c40 & c400 r16 r32 r320 r1600 o4 c25 & c200 r64 r640 r3200 v7 o3 a4 & a5 &
-a100 r8 r25 v6 o3 a10 r16 r40 o3 a8 & a80 & a400 r25 r160 r800 v7 o3 b5 & b80 & b400 r8 r32 r320
-r1600 v6 o3 b10 & b200 r8 r50 o3 b4 & b20 & b100 r16 r400 v7 o3 a4 & a16 & a64 & a640 & a3200 r10
-r160 r800 v6 o3 a10 r16 r40 o3 a4 & a50 r5 r40 r200 v7 o3 b5 & b50 r8 r40 r200 v6 o3 b4 & b16 & b40
-& b400 r16 r32 r320 r1600 o3 b25 & b200 r64 r640 r3200 v7 o3 g4 & g5 & g100 r8 r25 v6 o3 g10 r16 r40
-o3 g8 & g80 & g400 r25 r160 r800 v7 o4 c5 & c80 & c400 r8 r32 r320 r1600 v6 o4 c10 & c200 r8 r50 o4
-c4 & c20 & c100 r16 r400 v7 o3 f4 & f16 & f64 & f640 & f3200 r10 r160 r800 v6 o3 f10 r16 r40 o3 f4 &
-f50 r5 r40 r200 v7 o3 b5 & b50 r8 r40 r200 v6 o3 b4 & b16 & b40 & b400 r16 r32 r320 r1600 o3 b25 &
-b200 r64 r640 r3200 v7 o3 f4 & f5 & f100 r8 r25 v6 o3 f10 r16 r40 o3 f8 & f80 & f400 r25 r160 r800
-v7 o3 e5 & e80 & e400 r8 r32 r320 r1600 v6 o3 e10 & e200 r8 r50 o3 e4 & e20 & e100 r16 r400
+t120 o4 l4 q8 @{ptBaseVoice} @d0 @m0 @s0 @o0 @p{0,0,0} @{ptChordHeld} v6.479 @d0 @s0 q8 o3 a4 & a16 &
+a64 & a640 & a3200 r10 r160 r800 v5.554 o3 a10 r16 r40 o3 a4 & a50 r5 r40 r200 v6.479 o3 b5 & b50 r8 r40
+r200 v5.554 o3 b4 & b16 & b40 & b400 r16 r32 r320 r1600 o3 b25 & b200 r64 r640 r3200 v6.479 o3 f4 & f5 &
+f100 r8 r25 v5.554 o3 f10 r16 r40 o3 f8 & f80 & f400 r25 r160 r800 v6.479 o3 e5 & e80 & e400 r8 r32 r320
+r1600 v5.554 o3 e10 & e200 r8 r50 o3 e4 & e20 & e100 r16 r400 v6.479 o3 a4 & a16 & a64 & a640 & a3200 r10
+r160 r800 v5.554 o3 a10 r16 r40 o3 a4 & a50 r5 r40 r200 v6.479 o3 f5 & f50 r8 r40 r200 v5.554 o3 f4 & f16 & f40
+& f400 r16 r32 r320 r1600 o3 f25 & f200 r64 r640 r3200 v6.479 o3 b4 & b5 & b100 r8 r25 v5.554 o3 b10 r16 r40
+o3 b8 & b80 & b400 r25 r160 r800 v6.479 o3 e5 & e80 & e400 r8 r32 r320 r1600 v5.554 o3 e10 & e200 r8 r50 o3
+e4 & e20 & e100 r16 r400 v6.479 o4 c4 & c16 & c64 & c640 & c3200 r10 r160 r800 v5.554 o4 c10 r16 r40 o4 c4 &
+c50 r5 r40 r200 v6.479 o3 g5 & g50 r8 r40 r200 v5.554 o3 g4 & g16 & g40 & g400 r16 r32 r320 r1600 o3 g25 &
+g200 r64 r640 r3200 v6.479 o3 a4 & a5 & a100 r8 r25 v5.554 o3 a10 r16 r40 o3 a8 & a80 & a400 r25 r160 r800
+v6.479 o3 b5 & b80 & b400 r8 r32 r320 r1600 v5.554 o3 b10 & b200 r8 r50 o3 b4 & b20 & b100 r16 r400 v6.479 o3 f4
+& f16 & f64 & f640 & f3200 r10 r160 r800 v5.554 o3 f10 r16 r40 o3 f4 & f50 r5 r40 r200 v6.479 o4 c5 & c50 r8
+r40 r200 v5.554 o4 c4 & c16 & c40 & c400 r16 r32 r320 r1600 o4 c25 & c200 r64 r640 r3200 v6.479 o3 a4 & a5 &
+a100 r8 r25 v5.554 o3 a10 r16 r40 o3 a8 & a80 & a400 r25 r160 r800 v6.479 o3 b5 & b80 & b400 r8 r32 r320
+r1600 v5.554 o3 b10 & b200 r8 r50 o3 b4 & b20 & b100 r16 r400 v6.479 o3 a4 & a16 & a64 & a640 & a3200 r10
+r160 r800 v5.554 o3 a10 r16 r40 o3 a4 & a50 r5 r40 r200 v6.479 o3 b5 & b50 r8 r40 r200 v5.554 o3 b4 & b16 & b40
+& b400 r16 r32 r320 r1600 o3 b25 & b200 r64 r640 r3200 v6.479 o3 g4 & g5 & g100 r8 r25 v5.554 o3 g10 r16 r40
+o3 g8 & g80 & g400 r25 r160 r800 v6.479 o4 c5 & c80 & c400 r8 r32 r320 r1600 v5.554 o4 c10 & c200 r8 r50 o4
+c4 & c20 & c100 r16 r400 v6.479 o3 f4 & f16 & f64 & f640 & f3200 r10 r160 r800 v5.554 o3 f10 r16 r40 o3 f4 &
+f50 r5 r40 r200 v6.479 o3 b5 & b50 r8 r40 r200 v5.554 o3 b4 & b16 & b40 & b400 r16 r32 r320 r1600 o3 b25 &
+b200 r64 r640 r3200 v6.479 o3 f4 & f5 & f100 r8 r25 v5.554 o3 f10 r16 r40 o3 f8 & f80 & f400 r25 r160 r800
+v6.479 o3 e5 & e80 & e400 r8 r32 r320 r1600 v5.554 o3 e10 & e200 r8 r50 o3 e4 & e20 & e100 r16 r400
 ]$LOOP_END
 // エンディング
 r2 r4 r8 r20 r100 r1 r16 r400
@@ -269,29 +267,29 @@ r2 r4 r8 r20 r100 r1 r16 r400
 t120 q8 r1
 // 本編
 [
-t120 o4 l4 q8 @{ptBaseVoice} @d0 @m0 @s0 @o0 @p{0,0,0} @{ptChordHeld} v7 @d0 @s0 q8 o4 c4 & c16 &
-c64 & c640 & c3200 r10 r160 r800 v6 o4 c10 r16 r40 o4 c4 & c50 r5 r40 r200 v7 o4 d5 & d50 r8 r40
-r200 v6 o4 d4 & d16 & d40 & d400 r16 r32 r320 r1600 o4 d25 & d200 r64 r640 r3200 v7 o3 g4 & g5 &
-g100 r8 r25 v6 o3 g10 r16 r40 o3 g8 & g80 & g400 r25 r160 r800 v7 o3 g5 & g80 & g400 r8 r32 r320
-r1600 v6 o3 g10 & g200 r8 r50 o3 g4 & g20 & g100 r16 r400 v7 o4 c4 & c16 & c64 & c640 & c3200 r10
-r160 r800 v6 o4 c10 r16 r40 o4 c4 & c50 r5 r40 r200 v7 o3 a5 & a50 r8 r40 r200 v6 o3 a4 & a16 & a40
-& a400 r16 r32 r320 r1600 o3 a25 & a200 r64 r640 r3200 v7 o4 d4 & d5 & d100 r8 r25 v6 o4 d10 r16 r40
-o4 d8 & d80 & d400 r25 r160 r800 v7 o3 g5 & g80 & g400 r8 r32 r320 r1600 v6 o3 g10 & g200 r8 r50 o3
-g4 & g20 & g100 r16 r400 v7 o4 e4 & e16 & e64 & e640 & e3200 r10 r160 r800 v6 o4 e10 r16 r40 o4 e4 &
-e50 r5 r40 r200 v7 o3 b5 & b50 r8 r40 r200 v6 o3 b4 & b16 & b40 & b400 r16 r32 r320 r1600 o3 b25 &
-b200 r64 r640 r3200 v7 o4 c4 & c5 & c100 r8 r25 v6 o4 c10 r16 r40 o4 c8 & c80 & c400 r25 r160 r800
-v7 o4 d5 & d80 & d400 r8 r32 r320 r1600 v6 o4 d10 & d200 r8 r50 o4 d4 & d20 & d100 r16 r400 v7 o3 a4
-& a16 & a64 & a640 & a3200 r10 r160 r800 v6 o3 a10 r16 r40 o3 a4 & a50 r5 r40 r200 v7 o4 e5 & e50 r8
-r40 r200 v6 o4 e4 & e16 & e40 & e400 r16 r32 r320 r1600 o4 e25 & e200 r64 r640 r3200 v7 o4 c4 & c5 &
-c100 r8 r25 v6 o4 c10 r16 r40 o4 c8 & c80 & c400 r25 r160 r800 v7 o4 d5 & d80 & d400 r8 r32 r320
-r1600 v6 o4 d10 & d200 r8 r50 o4 d4 & d20 & d100 r16 r400 v7 o4 c4 & c16 & c64 & c640 & c3200 r10
-r160 r800 v6 o4 c10 r16 r40 o4 c4 & c50 r5 r40 r200 v7 o4 d5 & d50 r8 r40 r200 v6 o4 d4 & d16 & d40
-& d400 r16 r32 r320 r1600 o4 d25 & d200 r64 r640 r3200 v7 o3 b4 & b5 & b100 r8 r25 v6 o3 b10 r16 r40
-o3 b8 & b80 & b400 r25 r160 r800 v7 o4 e5 & e80 & e400 r8 r32 r320 r1600 v6 o4 e10 & e200 r8 r50 o4
-e4 & e20 & e100 r16 r400 v7 o3 a4 & a16 & a64 & a640 & a3200 r10 r160 r800 v6 o3 a10 r16 r40 o3 a4 &
-a50 r5 r40 r200 v7 o4 d5 & d50 r8 r40 r200 v6 o4 d4 & d16 & d40 & d400 r16 r32 r320 r1600 o4 d25 &
-d200 r64 r640 r3200 v7 o3 g4 & g5 & g100 r8 r25 v6 o3 g10 r16 r40 o3 g8 & g80 & g400 r25 r160 r800
-v7 o3 g5 & g80 & g400 r8 r32 r320 r1600 v6 o3 g10 & g200 r8 r50 o3 g4 & g20 & g100 r16 r400
+t120 o4 l4 q8 @{ptBaseVoice} @d0 @m0 @s0 @o0 @p{0,0,0} @{ptChordHeld} v6.479 @d0 @s0 q8 o4 c4 & c16 &
+c64 & c640 & c3200 r10 r160 r800 v5.554 o4 c10 r16 r40 o4 c4 & c50 r5 r40 r200 v6.479 o4 d5 & d50 r8 r40
+r200 v5.554 o4 d4 & d16 & d40 & d400 r16 r32 r320 r1600 o4 d25 & d200 r64 r640 r3200 v6.479 o3 g4 & g5 &
+g100 r8 r25 v5.554 o3 g10 r16 r40 o3 g8 & g80 & g400 r25 r160 r800 v6.479 o3 g5 & g80 & g400 r8 r32 r320
+r1600 v5.554 o3 g10 & g200 r8 r50 o3 g4 & g20 & g100 r16 r400 v6.479 o4 c4 & c16 & c64 & c640 & c3200 r10
+r160 r800 v5.554 o4 c10 r16 r40 o4 c4 & c50 r5 r40 r200 v6.479 o3 a5 & a50 r8 r40 r200 v5.554 o3 a4 & a16 & a40
+& a400 r16 r32 r320 r1600 o3 a25 & a200 r64 r640 r3200 v6.479 o4 d4 & d5 & d100 r8 r25 v5.554 o4 d10 r16 r40
+o4 d8 & d80 & d400 r25 r160 r800 v6.479 o3 g5 & g80 & g400 r8 r32 r320 r1600 v5.554 o3 g10 & g200 r8 r50 o3
+g4 & g20 & g100 r16 r400 v6.479 o4 e4 & e16 & e64 & e640 & e3200 r10 r160 r800 v5.554 o4 e10 r16 r40 o4 e4 &
+e50 r5 r40 r200 v6.479 o3 b5 & b50 r8 r40 r200 v5.554 o3 b4 & b16 & b40 & b400 r16 r32 r320 r1600 o3 b25 &
+b200 r64 r640 r3200 v6.479 o4 c4 & c5 & c100 r8 r25 v5.554 o4 c10 r16 r40 o4 c8 & c80 & c400 r25 r160 r800
+v6.479 o4 d5 & d80 & d400 r8 r32 r320 r1600 v5.554 o4 d10 & d200 r8 r50 o4 d4 & d20 & d100 r16 r400 v6.479 o3 a4
+& a16 & a64 & a640 & a3200 r10 r160 r800 v5.554 o3 a10 r16 r40 o3 a4 & a50 r5 r40 r200 v6.479 o4 e5 & e50 r8
+r40 r200 v5.554 o4 e4 & e16 & e40 & e400 r16 r32 r320 r1600 o4 e25 & e200 r64 r640 r3200 v6.479 o4 c4 & c5 &
+c100 r8 r25 v5.554 o4 c10 r16 r40 o4 c8 & c80 & c400 r25 r160 r800 v6.479 o4 d5 & d80 & d400 r8 r32 r320
+r1600 v5.554 o4 d10 & d200 r8 r50 o4 d4 & d20 & d100 r16 r400 v6.479 o4 c4 & c16 & c64 & c640 & c3200 r10
+r160 r800 v5.554 o4 c10 r16 r40 o4 c4 & c50 r5 r40 r200 v6.479 o4 d5 & d50 r8 r40 r200 v5.554 o4 d4 & d16 & d40
+& d400 r16 r32 r320 r1600 o4 d25 & d200 r64 r640 r3200 v6.479 o3 b4 & b5 & b100 r8 r25 v5.554 o3 b10 r16 r40
+o3 b8 & b80 & b400 r25 r160 r800 v6.479 o4 e5 & e80 & e400 r8 r32 r320 r1600 v5.554 o4 e10 & e200 r8 r50 o4
+e4 & e20 & e100 r16 r400 v6.479 o3 a4 & a16 & a64 & a640 & a3200 r10 r160 r800 v5.554 o3 a10 r16 r40 o3 a4 &
+a50 r5 r40 r200 v6.479 o4 d5 & d50 r8 r40 r200 v5.554 o4 d4 & d16 & d40 & d400 r16 r32 r320 r1600 o4 d25 &
+d200 r64 r640 r3200 v6.479 o3 g4 & g5 & g100 r8 r25 v5.554 o3 g10 r16 r40 o3 g8 & g80 & g400 r25 r160 r800
+v6.479 o3 g5 & g80 & g400 r8 r32 r320 r1600 v5.554 o3 g10 & g200 r8 r50 o3 g4 & g20 & g100 r16 r400
 ]$LOOP_END
 // エンディング
 r2 r4 r8 r20 r100 r1 r16 r400
@@ -302,8 +300,8 @@ r2 r4 r8 r20 r100 r1 r16 r400
 t120 q8 r1
 // 本編
 [
-t120 o4 l4 q8 @{ptBaseVoice} v14 @d0 @m0 @s0 @o0 @p{0,0,0} r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
-@{ptHarmonyHeld} v8 @d0 @s0 q6 o5 f16 o5 a16 q3 o6 c8 q6 o5 a16 o6 c16 o6 f8 o6 e16 o6 c16 o5 b8 o5
+t120 o4 l4 q8 @{ptBaseVoice} v12.959 @d0 @m0 @s0 @o0 @p{0,0,0} r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+@{ptHarmonyHeld} v7.405 @d0 @s0 q6 o5 f16 o5 a16 q3 o6 c8 q6 o5 a16 o6 c16 o6 f8 o6 e16 o6 c16 o5 b8 o5
 a8 o5 g8 o5 g16 o6 c16 q3 o6 e8 q6 o6 c16 o6 e16 o6 g8 o6 f16 o6 e16 o6 d8 q3 o6 c4 q6 o5 a16 o6 c16
 q3 o6 e8 q6 o6 c16 o6 e16 o6 a8 o6 g16 o6 f16 o6 e8 o6 c8 o5 b8 o5 b16 o6 d16 q3 o6 f8 q6 o6 a16 o6
 f16 o6 e8 q3 o6 d2 q6 o5 a16 o6 c16 q3 o6 e8 q6 o6 c16 o6 e16 o6 a8 o6 g16 o6 f16 o6 e8 o6 c8 o5 b8
@@ -316,3 +314,4 @@ r4
 ]$LOOP_END
 // エンディング
 r2 r4 r1 r4
+
