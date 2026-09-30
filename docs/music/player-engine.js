@@ -1,4 +1,4 @@
-// MMS/XX player and audio engine, source commit 6c495496df2e5bf8fdc6ddaa1e41dc05913078ac
+// MMS/XX player and audio engine, source commit ffb65d12e7fa4ccb30180dce49c2164ff19a9517
 (() => {
   var __defProp = Object.defineProperty;
   var __export = (target, all) => {
@@ -6,7 +6,7 @@
       __defProp(target, name, { get: all[name], enumerable: true });
   };
 
-  // ../../../tmp/panther-update/sound/audio.js
+  // engine-source/sound/audio.js
   var audio_exports = {};
   __export(audio_exports, {
     ChipTuneSound: () => ChipTuneSound,
@@ -16,7 +16,7 @@
     psgDiv: () => psgDiv
   });
 
-  // ../../../tmp/panther-update/sound/mml.js
+  // engine-source/sound/mml.js
   var mml_exports = {};
   __export(mml_exports, {
     DEFAULT_ENV: () => DEFAULT_ENV,
@@ -67,11 +67,13 @@
     validateMML: () => validateMML,
     voiceName: () => voiceName,
     voiceNameProblem: () => voiceNameProblem,
+    volFromGain: () => volFromGain,
+    volGainOf: () => volGainOf,
     waveMeta: () => waveMeta,
     waveRole: () => waveRole
   });
 
-  // ../../../tmp/panther-update/sound/gm.js
+  // engine-source/sound/gm.js
   var GM_NAMES = [
     "Acoustic Grand Piano",
     "Bright Acoustic Piano",
@@ -217,7 +219,7 @@
     return GM_NAMES.filter((n) => key(n).startsWith(head)).slice(0, limit);
   }
 
-  // ../../../tmp/panther-update/sound/opllvoice.js
+  // engine-source/sound/opllvoice.js
   var OP_FIELDS = {
     mul: {
       at: "ml",
@@ -371,7 +373,7 @@
     return toBytes(m, c);
   }
 
-  // ../../../tmp/panther-update/sound/tones.js
+  // engine-source/sound/tones.js
   var tones_exports = {};
   __export(tones_exports, {
     TONE_FRAME: () => TONE_FRAME,
@@ -945,7 +947,7 @@
     }
   }
 
-  // ../../../tmp/panther-update/sound/mml.js
+  // engine-source/sound/mml.js
   var SEMI = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 };
   var LETTER = { c: 0, d: 1, e: 2, f: 3, g: 4, a: 5, b: 6 };
   var LETTER_OF_SEMI = { 0: 0, 2: 1, 4: 2, 5: 3, 7: 4, 9: 5, 11: 6 };
@@ -1934,6 +1936,39 @@
       throw new Error(`[ChpTnSnd] \u97F3\u8272 "${name}" \u306F\u3082\u3046\u767B\u9332\u3055\u308C\u3066\u3044\u307E\u3059(\u5DEE\u3057\u66FF\u3048\u308B\u306A\u3089 overwrite: true \u3092\u6E21\u3057\u3066\u304F\u3060\u3055\u3044)`);
     }
     return at;
+  }
+  function volGainOf(v, curve, steps) {
+    if (!(v > 0)) return 0;
+    const n = steps > 0 ? steps : 15;
+    const down = Math.max(0, n - v / 15 * n);
+    switch (curve) {
+      case "3db":
+        return Math.pow(10, -3 * down / 20);
+      case "0.75db":
+        return Math.pow(10, -0.75 * down / 20);
+      case "linear":
+        return v / 15;
+      default:
+        return Math.pow(v / 15, 1.8);
+    }
+  }
+  function volFromGain(g, curve, steps) {
+    if (!(g > 0)) return 0;
+    const n = steps > 0 ? steps : 15;
+    const back = (perStep) => {
+      const down = -20 * Math.log10(g) / perStep;
+      return clamp(15 * (n - down) / n, 0, 15);
+    };
+    switch (curve) {
+      case "3db":
+        return back(3);
+      case "0.75db":
+        return back(0.75);
+      case "linear":
+        return clamp(g * 15, 0, 15);
+      default:
+        return clamp(15 * Math.pow(g, 1 / 1.8), 0, 15);
+    }
   }
   function registerFM(name, params = {}, opts = {}) {
     const at = requireFreeName(name, opts.overwrite);
@@ -3108,7 +3143,9 @@ ${val}`;
     let detune = 0, octShift = 0;
     let echo = null;
     let fade = null;
-    if (again && again.head) fade = { t0: 0, t1: 0, from: again.level, to: again.level };
+    if (again && again.head) {
+      fade = { t0: 0, t1: 0, from: again.level, to: again.level, raw: !!again.raw };
+    }
     const volLog = [];
     const volLogAt = /* @__PURE__ */ new Map();
     let saidFixed = false;
@@ -3122,6 +3159,13 @@ ${val}`;
       pts.push([age, fadeVolOf(e, age)]);
       if (then) pts.push(then);
       e.fade = pts;
+    };
+    const fadeScaler = (at, m, raw) => {
+      if (raw) return (b, r) => b * r;
+      const w = WAVEFORMS[at] || {};
+      const steps = (m && m.vsteps !== null ? m.vsteps : w.vsteps) || 0;
+      const curve = (m && m.vcurve !== null ? m.vcurve : w.vcurve) || "curve";
+      return (b, r) => volFromGain(volGainOf(b, curve, steps) * r, curve, steps);
     };
     const fadeVolOf = (e, age) => {
       const pts = e.fade;
@@ -3184,8 +3228,17 @@ ${val}`;
       let v = base;
       let fd = null;
       if (fade) {
-        v = base * fadeAt(fade, time) / 15;
-        if (time < fade.t1 - 1e-9) fd = [[0, v], [fade.t1 - time, base * fade.to / 15]];
+        const scale = fadeScaler(m ? m.wave : wave, m, fade.raw);
+        v = scale(base, fadeAt(fade, time) / 15);
+        if (time < fade.t1 - 1e-9) {
+          const span = fade.t1 - time;
+          const n = fade.raw ? 1 : Math.max(1, Math.min(24, Math.ceil(span / 0.1)));
+          fd = [];
+          for (let i = 0; i <= n; i++) {
+            const at = span * i / n;
+            fd.push([at, scale(base, fadeAt(fade, time + at) / 15)]);
+          }
+        }
       }
       const ev = m && m.env !== null ? m.env : env;
       const hold = inDrums ? envRunLen(ev, dur * g / 8) : dur * g / 8;
@@ -3506,16 +3559,19 @@ ${val}`;
       let body = "";
       while (pos < src.length && src[pos] !== "}") body += src[pos++];
       pos++;
-      const [a, b] = body.split(",").map((x) => Number(x.trim()));
-      if (body.split(",").length !== 2 || !Number.isFinite(a) || !Number.isFinite(b) || b < 0) {
-        bad('[ChpTnSnd] MML: "@fade" \u306B\u306F\u884C\u304D\u5148\u306E\u97F3\u91CF\u3068\u62CD\u6570\u3092\u66F8\u304D\u307E\u3059(`@fade{0,8}`)');
+      const parts = body.split(",").map((x) => x.trim());
+      const [a, b] = parts.map(Number);
+      const how = (parts[2] || "").toLowerCase();
+      if (parts.length < 2 || parts.length > 3 || !Number.isFinite(a) || !Number.isFinite(b) || b < 0 || parts.length === 3 && how !== "raw" && how !== "amp") {
+        bad('[ChpTnSnd] MML: "@fade" \u306B\u306F\u884C\u304D\u5148\u306E\u97F3\u91CF\u3068\u62CD\u6570\u3092\u66F8\u304D\u307E\u3059(`@fade{0,8}`)\u30023 \u3064\u3081\u306F\u66F8\u304B\u306A\u304F\u3066\u3088\u304F\u3001\u66F8\u304F\u306A\u3089 amp(\u65E2\u5B9A\u3002\u97F3\u8272\u304C\u9055\u3063\u3066\u3082\u540C\u3058\u4E0B\u304C\u308A\u65B9)\u304B raw(v \u3078\u76F4\u306B\u639B\u3051\u308B)\u3067\u3059');
       }
       const from = fade ? fadeAt(fade, time) : 15;
       const to = clamp(a, 0, 15);
-      fade = { t0: time, t1: time + b * 60 / tempo, from, to };
+      fade = { t0: time, t1: time + b * 60 / tempo, from, to, raw: how === "raw" };
       volLog.push({ t: time, fade });
       for (const e of lastSounding()) {
-        bendAt(e, time - e.t, [fade.t1 - e.t, written.get(e) * to / 15]);
+        const scale = fadeScaler(e.wave, null, fade.raw);
+        bendAt(e, time - e.t, [fade.t1 - e.t, scale(written.get(e), to / 15)]);
       }
     };
     const readKey = () => {
@@ -3923,7 +3979,13 @@ ${val}`;
             marks.push({ name, t: time });
             volLogAt.set(name, volLog.length);
             if (again && isLoopMark(name.trim().toLowerCase())) {
-              fade = { t0: time, t1: time, from: again.level, to: again.level };
+              fade = {
+                t0: time,
+                t1: time,
+                from: again.level,
+                to: again.level,
+                raw: !!again.raw
+              };
             }
           }
         } else if (ch === CUE_AT) {
@@ -4254,7 +4316,10 @@ ${val}`;
         REPORT = { mode: "loose", problems: [] };
         let two;
         try {
-          two = compileOne(mml, { level: fadeAt(end.fade, loop.to), head: !back }).events;
+          two = compileOne(
+            mml,
+            { level: fadeAt(end.fade, loop.to), head: !back, raw: end.fade.raw }
+          ).events;
         } finally {
           REPORT = keepReport;
         }
@@ -4603,7 +4668,7 @@ ${val}`;
     return { ok: errors.length === 0, errors, warnings, channels, total };
   }
 
-  // ../../../tmp/panther-update/sound/chipset.js
+  // engine-source/sound/chipset.js
   var ROLE_RANK = {
     lead: 6,
     // 旋律。いちばん前に出るもの
@@ -4624,7 +4689,7 @@ ${val}`;
   };
   var ROLES_COVERED = ROLES.every((r) => ROLE_RANK[r] !== void 0);
 
-  // ../../../tmp/panther-update/sound/mask.js
+  // engine-source/sound/mask.js
   function groupsOf(tracks) {
     const out = [];
     for (const t of tracks ?? []) {
@@ -4660,7 +4725,7 @@ ${val}`;
     return { group: now ? now.name : null, sets, silent, machine };
   }
 
-  // ../../../tmp/panther-update/sound/wavetables.js
+  // engine-source/sound/wavetables.js
   var N = 32;
   var build = (f) => Array.from({ length: N }, (_, i) => f(i / N, i));
   var norm = (w) => {
@@ -4829,7 +4894,7 @@ ${val}`;
     );
   }
 
-  // ../../../tmp/panther-update/sound/fmpresets.js
+  // engine-source/sound/fmpresets.js
   var FM_PRESETS = {
     // 1 バイオリン。弓のこすれを出すため、比を少しずらして倍音を残す
     // 2 ギター。はじいた瞬間だけ硬く、あとは丸くなる
@@ -4912,7 +4977,7 @@ ${val}`;
     }
   }
 
-  // ../../../tmp/panther-update/sound/beeppresets.js
+  // engine-source/sound/beeppresets.js
   var BEEP_PRESETS = {
     // ---- 搬送波を刻む型。**音程を変える回路が無い機械** ----
     // 2.4kHz が鳴りっぱなしで、ソフトはそれを On/Off するだけ。
@@ -5104,7 +5169,7 @@ ${val}`;
     }
   }
 
-  // ../../../tmp/panther-update/sound/fdspresets.js
+  // engine-source/sound/fdspresets.js
   var FDS_LEN = 64;
   var FDS_BITS = 6;
   var build2 = (fn) => Array.from({ length: FDS_LEN }, (_, i) => fn(i / FDS_LEN));
@@ -5221,7 +5286,7 @@ ${val}`;
     }
   }
 
-  // ../../../tmp/panther-update/sound/ym2151.js
+  // engine-source/sound/ym2151.js
   var OPM_CLOCK = 3579545;
   var OPM_RATE = OPM_CLOCK / 64;
   var OPM_CODE = `
@@ -6594,7 +6659,7 @@ registerProcessor('mmsxx-opm', OpmBank);
     };
   }
 
-  // ../../../tmp/panther-update/sound/fm4presets.js
+  // engine-source/sound/fm4presets.js
   var FM4_PRESETS = {
     "fm4Brass": {
       noteJa: "4 \u30AA\u30DA\u306E\u91D1\u7BA1\u3002\u30AA\u30DA\u30EC\u30FC\u30BF\u304C\u5897\u3048\u305F\u3076\u3093\u3001\u4F38\u3070\u3057\u3066\u3044\u308B\u3042\u3044\u3060\u306B\u500D\u97F3\u304C\u80B2\u3064\u3002\u672C\u7269\u306E\u91D1\u7BA1\u3068\u540C\u3058\u52D5\u304D\u3067\u30012 \u30AA\u30DA\u306B\u306F\u3067\u304D\u306A\u3044",
@@ -6719,7 +6784,7 @@ registerProcessor('mmsxx-opm', OpmBank);
     });
   }
 
-  // ../../../tmp/panther-update/sound/extrawaves.js
+  // engine-source/sound/extrawaves.js
   var EXTRA_LEN = 32;
   var build3 = (fn) => Array.from({ length: EXTRA_LEN }, (_, i) => fn(i / EXTRA_LEN));
   var pulse = (n) => build3((p) => p < n / 16 ? 1 : -1);
@@ -7068,7 +7133,7 @@ registerProcessor('mmsxx-opm', OpmBank);
     }
   }
 
-  // ../../../tmp/panther-update/sound/pcmbake.js
+  // engine-source/sound/pcmbake.js
   var MIN_LOOP = 1024;
   function periodMultiple(ratios, maxM = 8) {
     for (let m = 1; m <= maxM; m++) {
@@ -7150,7 +7215,7 @@ registerProcessor('mmsxx-opm', OpmBank);
     };
   }
 
-  // ../../../tmp/panther-update/sound/opll.js
+  // engine-source/sound/opll.js
   var OPLL_INST = [
     0,
     0,
@@ -8396,7 +8461,7 @@ class OpllBank extends AudioWorkletProcessor {
 registerProcessor('mmsxx-opll', OpllBank);
 `;
 
-  // ../../../tmp/panther-update/sound/opllpresets.js
+  // engine-source/sound/opllpresets.js
   var OPLL_PRESETS = [
     [
       1,
@@ -8574,6 +8639,122 @@ registerProcessor('mmsxx-opll', OpllBank);
       "Cymbal, sharing its phase with the hi-hat."
     ]
   ];
+  var OPLL_USER_DRUMS = [
+    ["opllUserKick", {
+      mod: {
+        ratio: 1,
+        depth: 22,
+        feedback: 4,
+        attack: 15,
+        decay: 15,
+        sustain: 12,
+        release: 15
+      },
+      car: { ratio: 0, attack: 15, decay: 7, sustain: 0, release: 7 }
+    }, "Bass drum. The carrier runs an octave below what you write, so the body lands low while the modulator only clicks at the front. The click is kept small on purpose: with noise layered over it, this voice is the body. Play it at o2."],
+    ["opllUserSnare", {
+      mod: {
+        ratio: 4,
+        depth: 18,
+        feedback: 6,
+        attack: 15,
+        decay: 13,
+        sustain: 2,
+        release: 10,
+        half: true
+      },
+      car: { ratio: 1, attack: 15, decay: 10, sustain: 0, release: 8 }
+    }, "Snare. The shell, not the wires: body around 250Hz and a woody crack above it. Lay PSG noise over the top for the snares. Play it at o3."],
+    ["opllUserHatClosed", {
+      mod: {
+        ratio: 15,
+        depth: 6,
+        feedback: 7,
+        attack: 15,
+        decay: 10,
+        sustain: 0,
+        release: 6,
+        half: true
+      },
+      car: { ratio: 13, attack: 15, decay: 15, sustain: 0, release: 15, half: true }
+    }, "Closed hi-hat. Ratios of 15 against 13 give the metal its beating, and the carrier is cut off at once. Play it at o5."],
+    ["opllUserHatOpen", {
+      mod: {
+        ratio: 15,
+        depth: 6,
+        feedback: 7,
+        attack: 15,
+        decay: 10,
+        sustain: 0,
+        release: 6,
+        half: true
+      },
+      car: { ratio: 13, attack: 15, decay: 8, sustain: 0, release: 5, half: true }
+    }, "Open hi-hat. The same metal as the closed one, held on instead of cut. Striking the closed hat chokes it, the way a foot on the pedal does. Play it at o5."],
+    ["opllUserTom", {
+      mod: {
+        ratio: 2,
+        depth: 22,
+        feedback: 5,
+        attack: 15,
+        decay: 14,
+        sustain: 8,
+        release: 12,
+        half: true
+      },
+      car: { ratio: 1, attack: 15, decay: 8, sustain: 0, release: 7 }
+    }, "Tom. Pitched, so the note is the drum \u2014 write o3 for a floor tom and o4 for a rack tom."],
+    ["opllUserKickHat", {
+      mod: {
+        ratio: 15,
+        depth: 4,
+        feedback: 7,
+        attack: 15,
+        decay: 15,
+        sustain: 10,
+        release: 12,
+        half: true,
+        scaleRate: 1
+      },
+      car: { ratio: 1, attack: 15, decay: 9, sustain: 0, release: 8, scaleRate: 1 }
+    }, "Kick and hi-hat in one voice, for when they fall on the same beat. Write o2 for the kick and o8 for the hat."],
+    ["opllUserKickSnare", {
+      mod: {
+        ratio: 3,
+        depth: 16,
+        feedback: 7,
+        attack: 15,
+        decay: 14,
+        sustain: 4,
+        release: 11,
+        half: true,
+        scaleRate: 1
+      },
+      car: { ratio: 1, attack: 15, decay: 9, sustain: 0, release: 8, scaleRate: 1 }
+    }, "Kick and snare in one voice. Write o2 for the kick and o4 for the snare."],
+    ["opllUserSnareHat", {
+      mod: {
+        ratio: 11,
+        depth: 10,
+        feedback: 7,
+        attack: 15,
+        decay: 13,
+        sustain: 0,
+        release: 9,
+        half: true,
+        scaleRate: 1
+      },
+      car: {
+        ratio: 3,
+        attack: 15,
+        decay: 10,
+        sustain: 0,
+        release: 8,
+        half: true,
+        scaleRate: 1
+      }
+    }, "Snare and hi-hat in one voice. Write o4 for the snare and o6 for the hat."]
+  ];
   function registerOPLLPresets() {
     for (const [inst, name, role, noteJa, note] of OPLL_PRESETS) {
       try {
@@ -8605,9 +8786,15 @@ registerProcessor('mmsxx-opll', OpllBank);
       } catch (e) {
       }
     }
+    for (const [name, spec, note] of OPLL_USER_DRUMS) {
+      try {
+        registerOPLLVoice(name, spec, { role: "perc", note });
+      } catch (e) {
+      }
+    }
   }
 
-  // ../../../tmp/panther-update/sound/duty.js
+  // engine-source/sound/duty.js
   var DUTY_CODE = `
 const FRAME = ${TONE_FRAME};
 
@@ -8742,7 +8929,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     return Math.min(0.98, Math.max(0.02, x));
   };
 
-  // ../../../tmp/panther-update/sound/demotunes.js
+  // engine-source/sound/demotunes.js
   var SE_SYS_PAUSE = "sys.pause";
   var SYSTEM_SE = {
     [SE_SYS_PAUSE]: [
@@ -8830,7 +9017,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     BEAT_TOM_FILL
   ]);
 
-  // ../../../tmp/panther-update/sound/se.js
+  // engine-source/sound/se.js
   var SE_FRAME = 1 / 60;
   var SE_WHOLE = 64;
   var SE_TEMPO = Math.round(240 / (SE_WHOLE * SE_FRAME));
@@ -8979,7 +9166,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     }
   };
 
-  // ../../../tmp/panther-update/sound/layerpresets.js
+  // engine-source/sound/layerpresets.js
   var DETUNE_STEPS = [
     { key: "", value: "none", c: 0, en: "no detune" },
     {
@@ -9140,10 +9327,10 @@ registerProcessor('mmsxx-duty', DutyBank);
     }
   }
 
-  // ../../../tmp/panther-update/sound/version.js
+  // engine-source/sound/version.js
   var SOUND_VERSION = "0.22.0";
 
-  // ../../../tmp/panther-update/sound/audio.js
+  // engine-source/sound/audio.js
   registerDefaultWaves();
   registerDefaultFM();
   registerDefaultBeeps();
@@ -9263,21 +9450,6 @@ registerProcessor('mmsxx-duty', DutyBank);
     if (!(steps > 0) || !(v > 0)) return v;
     const step = 15 / steps;
     return Math.min(15, Math.max(step, Math.round(v / step) * step));
-  }
-  function volGainOf(v, curve, steps) {
-    if (!(v > 0)) return 0;
-    const n = steps > 0 ? steps : 15;
-    const down = Math.max(0, n - v / 15 * n);
-    switch (curve) {
-      case "3db":
-        return Math.pow(10, -3 * down / 20);
-      case "0.75db":
-        return Math.pow(10, -0.75 * down / 20);
-      case "linear":
-        return v / 15;
-      default:
-        return Math.pow(v / 15, 1.8);
-    }
   }
   function levelAt(ev, age) {
     const e = envOf(ev);
@@ -13119,10 +13291,10 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out;
   }
 
-  // ../../../tmp/panther-update/tool/ui/version.js
+  // engine-source/tool/ui/version.js
   var PLAYER_VERSION = "1.0.0";
 
-  // ../../../tmp/panther-update/tool/core/tomml.js
+  // engine-source/tool/core/tomml.js
   var NAMES = ["c", "c+", "d", "d+", "e", "f", "f+", "g", "g+", "a", "a+", "b"];
   var LENS = [
     [16, "1"],
@@ -13202,7 +13374,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out.join("\n\n");
   }
 
-  // ../../../tmp/panther-update/tool/core/wav.js
+  // engine-source/tool/core/wav.js
   function writeWAV(samples, rate = 44100) {
     const n = samples.length;
     const out = new Uint8Array(44 + n * 2);
@@ -13230,7 +13402,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out;
   }
 
-  // ../../../tmp/panther-update/tool/ui/player.js
+  // engine-source/tool/ui/player.js
   var COPYRIGHT = "2026 harayoki";
   var PLAYER_CSS = `
 .mmsxx-player{ font-family:var(--mono); font-size:13px; line-height:1.55; color:var(--ink); }
@@ -14844,7 +15016,7 @@ ChipTuneSound ${SOUND_VERSION}
     };
   }
 
-  // ../../../tmp/panther-update/samples-entry.js
+  // engine-source/samples-entry.js
   var sound = { ...audio_exports, ...mml_exports, ...tones_exports, mountPlayer, PLAYER_CSS, PLAYER_VERSION, player: { mount: mountPlayer, CSS: PLAYER_CSS, version: PLAYER_VERSION } };
   window.MMSXX = window.MMSXX || {};
   window.MMSXX.sound = sound;
