@@ -3,7 +3,7 @@
 #about 2オペのFM音源をかっこよくするテスト曲。80年代の雰囲気で。コード進行記述MMLとドラム専用MMLも活用してソースを短くしました。
 #label 開始
 
-#bundle beatBass1  = @{wtRamp} @e{piano} @s{8,2}
+#bundle beatBass1  = @{waveRamp} @e{piano} @s{8,2}
 #bundle beatBass2  = @{triangle} @e{flat}
 #bundle beatKick   = @{opllKick} @e{percussive} @o-2,   @{noise} v11 @e{snap} @o-2
 #bundle beatSnare  = @{opllSnare} @e{percussive},  @{noise} v10 @e{tap}
@@ -40,3 +40,4 @@ t152 q8 @{drums 16}{ v13 [$a | $a | $a | $b | $a | $a | $a | $c |]2
 #ch ブラス
 t152 q8 v10 l16 @{brass} [r1 r2 r4 r8 'o4a o4f o4d'16 'o4a o4f o4d'16 r1 r2 r4 'o4g o4e o4c'4 r1 r2 r4 r8 'o4a
   o4f o4d'16 'o4a o4f o4d'16 r2 'o5d o4b- o4g'4 'o5d o4b- o4g'4 'o5e o5c+ o4a'4 r4 r2]2
+

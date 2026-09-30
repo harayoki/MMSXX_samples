@@ -1,4 +1,4 @@
-// MMS/XX player and audio engine, source commit ffb65d12e7fa4ccb30180dce49c2164ff19a9517
+// MMS/XX player and audio engine, source commit 8a78397c351d4bbe12b665b4a30c7bf86a568642
 (() => {
   var __defProp = Object.defineProperty;
   var __export = (target, all) => {
@@ -6,7 +6,7 @@
       __defProp(target, name, { get: all[name], enumerable: true });
   };
 
-  // engine-source/sound/audio.js
+  // engine-v23/sound/audio.js
   var audio_exports = {};
   __export(audio_exports, {
     ChipTuneSound: () => ChipTuneSound,
@@ -16,7 +16,7 @@
     psgDiv: () => psgDiv
   });
 
-  // engine-source/sound/mml.js
+  // engine-v23/sound/mml.js
   var mml_exports = {};
   __export(mml_exports, {
     DEFAULT_ENV: () => DEFAULT_ENV,
@@ -73,7 +73,7 @@
     waveRole: () => waveRole
   });
 
-  // engine-source/sound/gm.js
+  // engine-v23/sound/gm.js
   var GM_NAMES = [
     "Acoustic Grand Piano",
     "Bright Acoustic Piano",
@@ -219,7 +219,7 @@
     return GM_NAMES.filter((n) => key(n).startsWith(head)).slice(0, limit);
   }
 
-  // engine-source/sound/opllvoice.js
+  // engine-v23/sound/opllvoice.js
   var OP_FIELDS = {
     mul: {
       at: "ml",
@@ -373,7 +373,7 @@
     return toBytes(m, c);
   }
 
-  // engine-source/sound/tones.js
+  // engine-v23/sound/tones.js
   var tones_exports = {};
   __export(tones_exports, {
     TONE_FRAME: () => TONE_FRAME,
@@ -453,7 +453,7 @@
   var TONE_PRESETS = {
     // 分散和音。長三和音を 1 フレームずつ回して、和音に聞かせる。
     // 矩形波が 2 本しか無い機械で和音を出す手
-    "tnArp(major)": {
+    "toneArp(major)": {
       noteJa: "\u9577\u4E09\u548C\u97F3\u3092 1 \u30D5\u30EC\u30FC\u30E0\u305A\u3064\u56DE\u3059\u3002\u77E9\u5F62\u6CE2\u304C 2 \u672C\u3057\u304B\u7121\u3044\u6A5F\u68B0\u3067\u548C\u97F3\u3092\u51FA\u3059\u624B",
       dev: ["done"],
       role: "arp",
@@ -463,11 +463,11 @@
       arp: [0, 4, 7],
       loop: { arp: 0 }
     },
-    "tnArp(minor)": {
-      noteJa: "\u77ED\u4E09\u548C\u97F3\u3067\u540C\u3058\u3053\u3068\u3092\u3059\u308B\u3002tnArp(major) \u3068\u7D44\u306B\u3059\u308B\u3068\u9032\u884C\u304C\u56DE\u305B\u308B",
+    "toneArp(minor)": {
+      noteJa: "\u77ED\u4E09\u548C\u97F3\u3067\u540C\u3058\u3053\u3068\u3092\u3059\u308B\u3002toneArp(major) \u3068\u7D44\u306B\u3059\u308B\u3068\u9032\u884C\u304C\u56DE\u305B\u308B",
       dev: ["done"],
       role: "arp",
-      note: "Minor triad, same spin. Pairs with tnArp(major) for a whole progression.",
+      note: "Minor triad, same spin. Pairs with toneArp(major) for a whole progression.",
       wave: "pulse(25)",
       env: "flat",
       arp: [0, 3, 7],
@@ -478,7 +478,7 @@
     // 1 段が長いほど 1 つ 1 つが聞き取れる。
     //
     // 上の 2 つは「和音に聞かせる」寄り。ここから下は「震えて聞かせる」寄り
-    "tnArp(hard)": {
+    "toneArp(hard)": {
       noteJa: "\u540C\u3058\u9577\u4E09\u548C\u97F3\u3092\u7D30\u3044\u77E9\u5F62\u6CE2\u3067\u3002\u9F3B\u306B\u304B\u304B\u3063\u3066\u524D\u3078\u51FA\u308B\u306E\u3067\u3001\u548C\u97F3\u3068\u3044\u3046\u3088\u308A\u5538\u3063\u3066\u805E\u3053\u3048\u308B",
       dev: ["done"],
       role: "arp",
@@ -489,7 +489,7 @@
       loop: { arp: 0 }
     },
     // オクターブまで跳ぶ。幅が広いほど荒れる。あの手の曲でいちばん多い形
-    "tnArp(wide)": {
+    "toneArp(wide)": {
       noteJa: "\u4E3B\u97F3\u30FB5 \u5EA6\u30FB\u30AA\u30AF\u30BF\u30FC\u30D6\u3002\u8DF3\u3076\u5E45\u304C\u5E83\u3044\u306E\u3067\u3001\u548C\u97F3\u3067\u306F\u306A\u304F\u9707\u3048\u306B\u805E\u3053\u3048\u308B\u3002\u30D5\u30A1\u30DF\u30B3\u30F3\u306E\u30EA\u30FC\u30C9\u3067\u3044\u3061\u3070\u3093\u591A\u3044\u5F62",
       dev: ["done"],
       role: "arp",
@@ -499,22 +499,22 @@
       arp: [0, 7, 12],
       loop: { arp: 0 }
     },
-    "tnArp(wideM)": {
-      noteJa: "tnArp(wide) \u306E\u77ED\u8ABF\u7248",
+    "toneArp(wideM)": {
+      noteJa: "toneArp(wide) \u306E\u77ED\u8ABF\u7248",
       dev: ["done"],
       role: "arp",
-      note: "Minor version of tnArp(wide).",
+      note: "Minor version of toneArp(wide).",
       wave: "pulse(12)",
       env: "flat",
       arp: [0, 3, 12],
       loop: { arp: 0 }
     },
-    // 1 段を 2 フレーム持つ組。tnArp と同じ和音の作り分けを、遅い側にも置く。
+    // 1 段を 2 フレーム持つ組。toneArp と同じ和音の作り分けを、遅い側にも置く。
     //
     // 速さは和音の種類と同じくらい効く。速い側は和音に、遅い側は
     // 1 つ 1 つの音に聞こえるので、同じ [0,4,7] でも別の音として使う。
     // 別のまとまりにしてあるのは、選ぶときにまず速さで選ぶから
-    "tnArpSlow(major)": {
+    "toneArpSlow(major)": {
       noteJa: "\u9577\u4E09\u548C\u97F3\u3092\u30011 \u6BB5 2 \u30D5\u30EC\u30FC\u30E0\u3067\u56DE\u3059\u3002\u9045\u3044\u3076\u3093\u548C\u97F3\u306E 1 \u3064 1 \u3064\u304C\u805E\u3053\u3048\u3066\u3001\u7C92\u304C\u7ACB\u3064",
       dev: ["done"],
       role: "arp",
@@ -524,7 +524,7 @@
       arp: [0, 0, 4, 4, 7, 7],
       loop: { arp: 0 }
     },
-    "tnArpSlow(minor)": {
+    "toneArpSlow(minor)": {
       noteJa: "\u77ED\u4E09\u548C\u97F3\u3092\u30011 \u6BB5 2 \u30D5\u30EC\u30FC\u30E0\u3067\u56DE\u3059",
       dev: ["done"],
       role: "arp",
@@ -534,17 +534,17 @@
       arp: [0, 0, 3, 3, 7, 7],
       loop: { arp: 0 }
     },
-    "tnArpSlow(hard)": {
+    "toneArpSlow(hard)": {
       noteJa: "\u540C\u3058\u9577\u4E09\u548C\u97F3\u3092\u3001\u3044\u3061\u3070\u3093\u7D30\u3044\u77E9\u5F62\u6CE2\u3067\u3002\u9045\u3044\u306E\u3067\u5538\u308A\u306B\u306F\u306A\u3089\u305A\u3001\u7C92\u304C\u786C\u304F\u306A\u308B",
       dev: ["done"],
       role: "arp",
       note: "The same major triad on the narrowest pulse. Too slow to buzz, so it reads as hard-edged grain instead.",
-      wave: "wtPulse(6)",
+      wave: "wavePulse(6)",
       env: "flat",
       arp: [0, 0, 4, 4, 7, 7],
       loop: { arp: 0 }
     },
-    "tnArpSlow(wide)": {
+    "toneArpSlow(wide)": {
       noteJa: "\u4E3B\u97F3\u30FB5 \u5EA6\u30FB\u30AA\u30AF\u30BF\u30FC\u30D6\u3092\u30011 \u6BB5 2 \u30D5\u30EC\u30FC\u30E0\u3067\u56DE\u3059\u3002\u8DF3\u3076\u5E45\u304C\u5E83\u3044\u306E\u3067\u3001\u65CB\u5F8B\u304C 3 \u672C\u8D70\u3063\u3066\u3044\u308B\u3088\u3046\u306B\u805E\u3053\u3048\u308B",
       dev: ["done"],
       role: "arp",
@@ -554,11 +554,11 @@
       arp: [0, 0, 7, 7, 12, 12],
       loop: { arp: 0 }
     },
-    "tnArpSlow(wideM)": {
-      noteJa: "tnArpSlow(wide) \u306E\u77ED\u8ABF\u7248",
+    "toneArpSlow(wideM)": {
+      noteJa: "toneArpSlow(wide) \u306E\u77ED\u8ABF\u7248",
       dev: ["done"],
       role: "arp",
-      note: "Minor version of tnArpSlow(wide).",
+      note: "Minor version of toneArpSlow(wide).",
       wave: "pulse(12)",
       env: "flat",
       arp: [0, 0, 3, 3, 12, 12],
@@ -575,7 +575,7 @@
     },
     // 遅れて出るビブラート。押した瞬間は真っ直ぐで、伸ばすと揺れ出す。
     // チップチューンのリードの顔
-    tnLead: {
+    toneLead: {
       noteJa: "\u62BC\u3057\u3066\u304B\u3089 18 \u30D5\u30EC\u30FC\u30E0\u5F85\u3063\u3066\u63FA\u308C\u51FA\u3059\u30D3\u30D6\u30E9\u30FC\u30C8\u3002\u771F\u3063\u76F4\u3050\u5165\u3063\u3066\u9014\u4E2D\u304B\u3089\u63FA\u308C\u308B\u306E\u304C\u3001\u30C1\u30C3\u30D7\u30C1\u30E5\u30FC\u30F3\u306E\u30EA\u30FC\u30C9\u306E\u9854",
       role: "lead",
       note: "Vibrato that only starts after you hold the note (18 frames). The straight attack followed by a wobble is the signature chiptune lead.",
@@ -584,7 +584,7 @@
       vib: { depth: 5, speed: 6, delay: 18 }
     },
     // 刻んで減る音量。割合ではなく表なので、短い音では途中までしか鳴らない
-    tnPluck: {
+    tonePluck: {
       noteJa: "\u97F3\u91CF\u3092 1 \u30D5\u30EC\u30FC\u30E0\u305A\u3064\u843D\u3068\u3059\u3002\u5272\u5408\u3067\u306F\u306A\u304F\u8868\u306A\u306E\u3067\u3001\u77ED\u3044\u97F3\u3067\u306F\u9014\u4E2D\u307E\u3067\u3057\u304B\u9CF4\u3089\u306A\u3044 \u2014 \u305D\u3053\u304C\u72D9\u3044",
       role: "chord",
       note: "Volume steps down a frame at a time. Because it is a table and not a ratio, short notes only get part of it \u2014 that is the point.",
@@ -597,7 +597,7 @@
     //
     // 幅は 0〜1。0.5 が矩形波で、そこから離れるほど細く尖る。
     // 0.25 と 0.75 は同じ音(上下が逆なだけ)なので、下半分だけ使えば足りる
-    tnDutyOpen: {
+    toneDutyOpen: {
       noteJa: "\u5E45\u304C\u7D30\u3044\u3068\u3053\u308D\u304B\u3089\u59CB\u307E\u3063\u3066\u30019 \u30D5\u30EC\u30FC\u30E0\u3067\u77E9\u5F62\u6CE2\u307E\u3067\u5E83\u304C\u3063\u3066\u6B62\u307E\u308B\u3002\u9AD8\u3055\u3082\u97F3\u91CF\u3082\u52D5\u304B\u3055\u305A\u306B\u3001\u982D\u3060\u3051\u53E3\u3092\u958B\u3051\u305F\u3088\u3046\u306B\u805E\u3053\u3048\u308B",
       role: "lead",
       note: "The pulse starts thin and widens to a square over nine frames, then stays. Gives the attack a vowel-like opening without touching pitch or volume.",
@@ -606,7 +606,7 @@
       duty: [0.06, 0.09, 0.125, 0.18, 0.25, 0.31, 0.375, 0.44, 0.5]
     },
     // 行って戻る。ゆっくり回すと、声が 2 本あるように聞こえる(実機の PWM)
-    tnDutyPWM: {
+    toneDutyPWM: {
       noteJa: "\u5E45\u304C 24 \u30D5\u30EC\u30FC\u30E0(\u7D04 2.5 Hz)\u304B\u3051\u3066\u884C\u3063\u3066\u623B\u308B\u3002\u9045\u3044\u306E\u3067\u97F3\u8272\u306E\u5909\u5316\u3068\u3044\u3046\u3088\u308A\u3001\u58F0\u304C 2 \u672C\u3042\u3063\u3066\u5538\u3063\u3066\u3044\u308B\u3088\u3046\u306B\u805E\u3053\u3048\u308B\u3002\u5B9F\u6A5F\u306E PWM \u306E\u97F3",
       role: "chord",
       note: "The width sweeps out and back over 24 frames (about 2.5 Hz). Slow enough to hear as two voices beating rather than as a timbre \u2014 the pulse-width modulation sound.",
@@ -641,7 +641,7 @@
       loop: { duty: 0 }
     },
     // 1 フレームで 1 段。速すぎて幅の変化としては聞こえず、荒れた音になる
-    tnDutyBuzz: {
+    toneDutyBuzz: {
       noteJa: "\u5E45\u3092 1 \u30D5\u30EC\u30FC\u30E0\u306B 1 \u6BB5\u305A\u3064 3 \u901A\u308A\u56DE\u3059(20 Hz)\u3002\u901F\u3059\u304E\u3066\u5E45\u306E\u5909\u5316\u3068\u3057\u3066\u306F\u805E\u3053\u3048\u305A\u3001\u97F3\u306E\u7E01\u304C\u8352\u308C\u3066\u805E\u3053\u3048\u308B",
       role: "lead",
       note: "Three widths spun one frame per step (20 Hz). Too fast to hear as a sweep \u2014 it reads as a rough, reedy edge on the note instead.",
@@ -651,8 +651,8 @@
       loop: { duty: 0 }
     },
     // ゆっくり 2 つの幅を行き来する。実機の手癖はこちらで、
-    // `tnDutyBuzz` の 20 Hz は速すぎた。8 フレームずつなら幅の変化として聞こえる
-    tnDutyNes: {
+    // `toneDutyBuzz` の 20 Hz は速すぎた。8 フレームずつなら幅の変化として聞こえる
+    toneDutyNes: {
       noteJa: "\u5E45\u3092 2 \u3064\u3060\u3051\u30018 \u30D5\u30EC\u30FC\u30E0\u305A\u3064\u884C\u304D\u6765\u3059\u308B\u3002\u30D5\u30A1\u30DF\u30B3\u30F3\u306E\u99C6\u52D5\u7CFB\u304C\u3088\u304F\u4F7F\u3063\u305F\u624B\u3067\u3001\u901F\u304F\u56DE\u3059\u3088\u308A\u5E45\u304C\u52D5\u3044\u3066\u3044\u308B\u306E\u304C\u5206\u304B\u308B",
       role: "lead",
       note: "Two widths, eight frames each. What NES drivers actually did \u2014 slow enough that you hear the width move, unlike a fast spin.",
@@ -683,7 +683,7 @@
     // 表を回すのとはまったく別の使い方で、こちらはエンベロープと同じ仕事を
     // 音量ではなく幅でやっている。音量を動かさずに「叩いた感じ」が出せるので、
     // 三角波に音量つまみが無い機械でも効く、というのが本来の値打ち
-    tnDutyAtk: {
+    toneDutyAtk: {
       noteJa: "\u982D\u306E 2 \u30D5\u30EC\u30FC\u30E0\u3060\u3051\u5E45 50%\u3001\u305D\u306E\u3042\u3068\u306F 25%\u3002\u97F3\u91CF\u306F\u307E\u3063\u305F\u304F\u52D5\u304B\u3055\u305A\u306B\u3001\u982D\u304C\u786C\u304F\u306A\u308B\u3002\u901F\u3044\u8B5C\u9762\u307B\u3069\u52B9\u304F",
       role: "lead",
       note: "Fifty per cent for the first two frames, then twenty-five. The volume never moves, yet every note arrives with a hard edge. The faster the line, the more it does.",
@@ -691,7 +691,7 @@
       env: "flat",
       duty: [0.5, 0.5, 0.25]
     },
-    tnDutyAtkAlt: {
+    toneDutyAtkAlt: {
       noteJa: "\u982D\u3067 2 \u30D5\u30EC\u30FC\u30E0\u305A\u3064 50% \u3068 25% \u3092 2 \u5F80\u5FA9\u3057\u3066\u304B\u3089 25% \u306B\u843D\u3061\u7740\u304F\u3002\u786C\u3044\u3060\u3051\u3067\u306A\u304F\u300C\u30B8\u30E3\u30C3\u300D\u3068\u3044\u3046\u7C92\u304C\u4ED8\u304F",
       role: "lead",
       note: "Two frames of fifty, two of twenty-five, twice over, then it settles. Harder than a plain attack and grainier with it.",
@@ -701,7 +701,7 @@
     },
     // 滑り込む入り。下から定位置へ 4 フレームで上がる。
     // 音符ごとに掛かるので、速い譜面ほど効く
-    tnSlideIn: {
+    toneSlideIn: {
       noteJa: "2 \u534A\u97F3\u4E0B\u304B\u3089 4 \u30D5\u30EC\u30FC\u30E0\u3067\u5B9A\u4F4D\u7F6E\u3078\u4E0A\u304C\u308B\u3002\u62BC\u3057\u305F\u97F3\u304C\u4E00\u6BB5\u4E0B\u304B\u3089\u6ED1\u308A\u8FBC\u3093\u3067\u304F\u308B\u306E\u3067\u3001\u901F\u3044\u8B5C\u9762\u307B\u3069\u751F\u304D\u308B",
       role: "lead",
       note: "Every note slides up into place from two semitones below over four frames. The faster the line, the more it does.",
@@ -711,7 +711,7 @@
     },
     // 3 つ重ね。滑り込んで、幅が開いて、遅れて揺れる。
     // どれも 1 つずつは地味だが、順に起きると 1 本の音として聞こえる
-    tnPsgLead: {
+    tonePsgLead: {
       noteJa: "\u6ED1\u308A\u8FBC\u307F\u3068\u5E45\u958B\u304D\u3068\u9045\u308C\u305F\u30D3\u30D6\u30E9\u30FC\u30C8\u3092\u91CD\u306D\u305F\u3082\u306E\u3002\u62BC\u3057\u305F\u77AC\u9593\u306F\u7D30\u304F\u3066\u4F4E\u304F\u3001\u4F38\u3070\u3059\u3046\u3061\u306B\u592A\u304F\u771F\u3063\u76F4\u3050\u306B\u306A\u308A\u3001\u6700\u5F8C\u306B\u63FA\u308C\u51FA\u3059\u3002PSG \u306E\u30EA\u30FC\u30C9\u3067\u3044\u3061\u3070\u3093\u6C17\u6301\u3061\u306E\u3088\u3044\u5F62",
       role: "lead",
       note: "A slide-in, a widening pulse and a delayed vibrato stacked. It arrives thin and flat, fills out as you hold it, then starts to wobble \u2014 the most satisfying shape a PSG lead takes.",
@@ -722,7 +722,7 @@
       vib: { depth: 4, speed: 6, delay: 20 }
     },
     // 息づく和音。幅がゆっくり往復するので、伸ばすほど中で動く
-    tnBreathPad: {
+    toneBreathPad: {
       noteJa: "\u5E45\u304C 18 \u30D5\u30EC\u30FC\u30E0\u304B\u3051\u3066\u958B\u3044\u3066\u9589\u3058\u308B\u3002\u4F38\u3070\u3057\u305F\u548C\u97F3\u306E\u4E2D\u3067\u3086\u3063\u304F\u308A\u52D5\u304F\u306E\u3067\u3001\u540C\u3058\u97F3\u3092\u9577\u304F\u7F6E\u3044\u3066\u3082\u98FD\u304D\u306A\u3044",
       role: "chord",
       note: "The width opens and closes over eighteen frames. A held chord keeps moving inside itself, so it does not go stale.",
@@ -752,7 +752,7 @@
       vib: { depth: 3, speed: 4, delay: 30 }
     },
     // タム。`seFall` の落ち幅を小さくして、落ちながら消す
-    tnTom: {
+    toneTom: {
       noteJa: "\u9AD8\u3055\u304C\u5C11\u3057\u3060\u3051\u843D\u3061\u306A\u304C\u3089\u6D88\u3048\u308B\u3002\u843D\u3061\u5E45\u304C\u5C0F\u3055\u3044\u306E\u304C\u304D\u3082\u3067\u30011 \u30AA\u30AF\u30BF\u30FC\u30D6\u843D\u3068\u3059\u3068\u592A\u9F13\u3067\u306F\u306A\u304F\u52B9\u679C\u97F3\u306B\u306A\u308B",
       role: "perc",
       note: "The pitch drops a little and fades. The small drop is the whole point \u2014 take it down an octave and it stops being a drum.",
@@ -762,7 +762,7 @@
       vol: [15, 13, 10, 7, 4, 2, 1]
     },
     // 金属。1 フレームで大きく跳ぶので、音程として聞こえなくなる
-    tnClang: {
+    toneClang: {
       noteJa: "\u9AD8\u3055\u304C 1 \u30D5\u30EC\u30FC\u30E0\u3054\u3068\u306B\u5927\u304D\u304F\u8DF3\u3076\u3002\u8DF3\u3076\u5E45\u304C\u548C\u97F3\u3092\u8D8A\u3048\u3066\u3044\u308B\u306E\u3067\u3001\u97F3\u7A0B\u3067\u306F\u306A\u304F\u91D1\u5C5E\u3092\u53E9\u3044\u305F\u97F3\u306B\u805E\u3053\u3048\u308B",
       role: "perc",
       note: "The pitch leaps by more than a chord every frame, so the ear stops hearing a note and starts hearing struck metal.",
@@ -797,7 +797,7 @@
     //
     // 全音符くらい置く前提なら、ゆっくり入ってよい。
     // 短い音符で使うと立ち上がりきる前に終わるが、それは使いどころが違うだけ。
-    tnPadSwell: {
+    tonePadSwell: {
       noteJa: "24 \u30D5\u30EC\u30FC\u30E0(0.4 \u79D2)\u304B\u3051\u3066\u97F3\u91CF\u304C\u4E0A\u304C\u308A\u304D\u308B\u3002\u8868\u3067\u4E0A\u3052\u3066\u3044\u308B\u306E\u3067\u3001@e \u3092\u66F8\u3044\u3066\u3082\u5F62\u306F\u5909\u308F\u3089\u306A\u3044 \u2014 \u548C\u97F3\u3068\u3057\u3066\u7F6E\u3044\u305F\u3068\u304D\u306B\u3001\u65CB\u5F8B\u3088\u308A\u9045\u308C\u3066\u5165\u3063\u3066\u304F\u308B\u306E\u304C\u5024\u6253\u3061",
       role: "chord",
       note: "The volume climbs over twenty-four frames (0.4s). It is the table doing it, so writing @e does not change the shape \u2014 the point is that it arrives behind the melody when you lay it under one.",
@@ -806,7 +806,7 @@
       vol: [0, 1, 1, 2, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 12, 13, 13, 14, 14, 15, 15, 15, 15],
       loop: { vol: 23 }
     },
-    tnPadStrings: {
+    tonePadStrings: {
       noteJa: "30 \u30D5\u30EC\u30FC\u30E0\u5F85\u3063\u3066\u304B\u3089\u3001\u6D45\u304F\u9577\u304F\u63FA\u308C\u306F\u3058\u3081\u308B\u3002\u5F26\u3092\u4F55\u672C\u3082\u91CD\u306D\u305F\u3068\u304D\u306E\u3046\u306D\u308A\u306B\u5BC4\u305B\u305F\u3082\u306E\u3067\u3001\u4F38\u3070\u3059\u307B\u3069\u52B9\u304F",
       role: "chord",
       note: "Waits thirty frames, then a shallow slow waver \u2014 the beating of several string players not quite together. The longer you hold it the more it does.",
@@ -912,7 +912,7 @@
       duty: [0.5, 0.5, 0.5, 0.4, 0.3, 0.25, 0.25]
     },
     // 唸る低音。細かく上下させて、うねりを出す
-    tnGrowlBass: {
+    toneGrowlBass: {
       noteJa: "\u4E09\u89D2\u6CE2\u306B\u7D30\u304B\u3044\u9AD8\u3055\u306E\u8868\u3092\u56DE\u3057\u3066\u3001\u4F4E\u3044\u3068\u3053\u308D\u3067\u5538\u3089\u305B\u308B",
       role: "bass",
       note: "Triangle with a small pitch table looping, so the low end beats against itself.",
@@ -924,22 +924,22 @@
   };
   function registerDefaultTones() {
     const chords = (head) => Object.entries(TONE_PRESETS).filter(([name]) => name.startsWith(head + "(")).map(([name, p]) => ({ value: name.slice(head.length + 1, -1), note: p.note }));
-    registerFamily("tnArp", {
+    registerFamily("toneArp", {
       note: "A chord spun one step per frame, the way a machine with few channels fakes harmony.",
       params: [{
         name: "chord",
         default: "major",
         note: "Which chord shape to spin, and on how narrow a pulse.",
-        values: chords("tnArp")
+        values: chords("toneArp")
       }]
     });
-    registerFamily("tnArpSlow", {
-      note: "The same chord spins as tnArp at two frames per step, so each note is heard as grain.",
+    registerFamily("toneArpSlow", {
+      note: "The same chord spins as toneArp at two frames per step, so each note is heard as grain.",
       params: [{
         name: "chord",
         default: "major",
         note: "Which chord shape to spin, and on how narrow a pulse.",
-        values: chords("tnArpSlow")
+        values: chords("toneArpSlow")
       }]
     });
     for (const [name, spec] of Object.entries(TONE_PRESETS)) {
@@ -947,7 +947,7 @@
     }
   }
 
-  // engine-source/sound/mml.js
+  // engine-v23/sound/mml.js
   var SEMI = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 };
   var LETTER = { c: 0, d: 1, e: 2, f: 3, g: 4, a: 5, b: 6 };
   var LETTER_OF_SEMI = { 0: 0, 2: 1, 4: 2, 5: 3, 7: 4, 9: 5, 11: 6 };
@@ -3144,7 +3144,14 @@ ${val}`;
     let echo = null;
     let fade = null;
     if (again && again.head) {
-      fade = { t0: 0, t1: 0, from: again.level, to: again.level, raw: !!again.raw };
+      fade = {
+        t0: 0,
+        t1: 0,
+        from: again.level,
+        to: again.level,
+        raw: !!again.raw,
+        gamma: 1
+      };
     }
     const volLog = [];
     const volLogAt = /* @__PURE__ */ new Map();
@@ -3152,7 +3159,8 @@ ${val}`;
     const fadeAt = (f, t) => {
       if (t >= f.t1) return f.to;
       if (t <= f.t0) return f.from;
-      return f.from + (f.to - f.from) * (t - f.t0) / (f.t1 - f.t0);
+      const u = (t - f.t0) / (f.t1 - f.t0);
+      return f.from + (f.to - f.from) * (f.gamma === 1 ? u : Math.pow(u, f.gamma));
     };
     const bendAt = (e, age, then) => {
       const pts = (e.fade || []).filter((p) => p[0] < age - 1e-9);
@@ -3561,17 +3569,47 @@ ${val}`;
       pos++;
       const parts = body.split(",").map((x) => x.trim());
       const [a, b] = parts.map(Number);
-      const how = (parts[2] || "").toLowerCase();
-      if (parts.length < 2 || parts.length > 3 || !Number.isFinite(a) || !Number.isFinite(b) || b < 0 || parts.length === 3 && how !== "raw" && how !== "amp") {
-        bad('[ChpTnSnd] MML: "@fade" \u306B\u306F\u884C\u304D\u5148\u306E\u97F3\u91CF\u3068\u62CD\u6570\u3092\u66F8\u304D\u307E\u3059(`@fade{0,8}`)\u30023 \u3064\u3081\u306F\u66F8\u304B\u306A\u304F\u3066\u3088\u304F\u3001\u66F8\u304F\u306A\u3089 amp(\u65E2\u5B9A\u3002\u97F3\u8272\u304C\u9055\u3063\u3066\u3082\u540C\u3058\u4E0B\u304C\u308A\u65B9)\u304B raw(v \u3078\u76F4\u306B\u639B\u3051\u308B)\u3067\u3059');
+      let raw = false;
+      let gamma = 1;
+      let sayBad = parts.length < 2 || !Number.isFinite(a) || !Number.isFinite(b) || b < 0;
+      for (const w of parts.slice(2)) {
+        const t = w.toLowerCase();
+        if (t === "amp") {
+          raw = false;
+          continue;
+        }
+        if (t === "raw") {
+          raw = true;
+          continue;
+        }
+        if (t.startsWith("g")) {
+          const n = Number(t.slice(1));
+          if (Number.isFinite(n) && n > 0) {
+            gamma = n;
+            continue;
+          }
+        }
+        sayBad = true;
+      }
+      if (sayBad) {
+        bad('[ChpTnSnd] MML: "@fade" \u306B\u306F\u884C\u304D\u5148\u306E\u97F3\u91CF\u3068\u62CD\u6570\u3092\u66F8\u304D\u307E\u3059(`@fade{0,8}`)\u30023 \u3064\u3081\u304B\u3089\u5148\u306F\u66F8\u304B\u306A\u304F\u3066\u3088\u304F\u3001\u66F8\u304F\u306A\u3089 amp(\u65E2\u5B9A\u3002\u97F3\u8272\u304C\u9055\u3063\u3066\u3082\u540C\u3058\u4E0B\u304C\u308A\u65B9)\u30FBraw(v \u3078\u76F4\u306B\u639B\u3051\u308B)\u30FBg<\u6570>(\u6642\u9593\u306E\u66F2\u304C\u308A\u5177\u5408\u30021 \u3067\u771F\u3063\u76F4\u3050\u30012\u301C3 \u3067\u7ACB\u3061\u4E0A\u304C\u308A\u3092\u6291\u3048\u308B)\u3067\u3059\u3002\u9806\u756A\u306F\u554F\u3044\u307E\u305B\u3093');
       }
       const from = fade ? fadeAt(fade, time) : 15;
       const to = clamp(a, 0, 15);
-      fade = { t0: time, t1: time + b * 60 / tempo, from, to, raw: how === "raw" };
+      fade = { t0: time, t1: time + b * 60 / tempo, from, to, raw, gamma };
       volLog.push({ t: time, fade });
       for (const e of lastSounding()) {
         const scale = fadeScaler(e.wave, null, fade.raw);
-        bendAt(e, time - e.t, [fade.t1 - e.t, scale(written.get(e), to / 15)]);
+        const span = fade.t1 - time;
+        const n = fade.raw && fade.gamma === 1 ? 1 : Math.max(1, Math.min(24, Math.ceil(span / 0.1)));
+        for (let i = 1; i <= n; i++) {
+          const at = span * i / n;
+          bendAt(
+            e,
+            time - e.t + (i > 1 ? at - span / n : 0),
+            [time - e.t + at, scale(written.get(e), fadeAt(fade, time + at) / 15)]
+          );
+        }
       }
     };
     const readKey = () => {
@@ -3984,7 +4022,8 @@ ${val}`;
                 t1: time,
                 from: again.level,
                 to: again.level,
-                raw: !!again.raw
+                raw: !!again.raw,
+                gamma: 1
               };
             }
           }
@@ -4668,7 +4707,7 @@ ${val}`;
     return { ok: errors.length === 0, errors, warnings, channels, total };
   }
 
-  // engine-source/sound/chipset.js
+  // engine-v23/sound/chipset.js
   var ROLE_RANK = {
     lead: 6,
     // 旋律。いちばん前に出るもの
@@ -4689,7 +4728,7 @@ ${val}`;
   };
   var ROLES_COVERED = ROLES.every((r) => ROLE_RANK[r] !== void 0);
 
-  // engine-source/sound/mask.js
+  // engine-v23/sound/mask.js
   function groupsOf(tracks) {
     const out = [];
     for (const t of tracks ?? []) {
@@ -4725,7 +4764,7 @@ ${val}`;
     return { group: now ? now.name : null, sets, silent, machine };
   }
 
-  // engine-source/sound/wavetables.js
+  // engine-v23/sound/wavetables.js
   var N = 32;
   var build = (f) => Array.from({ length: N }, (_, i) => f(i / N, i));
   var norm = (w) => {
@@ -4755,7 +4794,7 @@ ${val}`;
     return s * Math.min(1, d);
   });
   function registerDefaultWaves() {
-    registerFamily("wtSine", {
+    registerFamily("waveSine", {
       note: "A sine held in wavetable memory. The only thing that changes is the bit depth, so it is the clearest way to hear what depth does.",
       params: [{
         name: "bits",
@@ -4769,7 +4808,7 @@ ${val}`;
       }]
     });
     registerWave(
-      "wtSine(8)",
+      "waveSine(8)",
       WT_SINE,
       8,
       {
@@ -4779,7 +4818,7 @@ ${val}`;
       }
     );
     registerWave(
-      "wtSine(5)",
+      "waveSine(5)",
       WT_SINE,
       5,
       {
@@ -4789,7 +4828,7 @@ ${val}`;
       }
     );
     registerWave(
-      "wtSine(3)",
+      "waveSine(3)",
       WT_SINE,
       3,
       {
@@ -4799,7 +4838,7 @@ ${val}`;
       }
     );
     registerWave(
-      "wtBell",
+      "waveBell",
       WT_BELL,
       8,
       {
@@ -4808,7 +4847,7 @@ ${val}`;
         note: "Wavetable with strong upper partials. Metallic attack, good for bells and chimes."
       }
     );
-    registerFamily("wtOrgan", {
+    registerFamily("waveOrgan", {
       note: "Stacked octaves in one wavetable cycle, like pulling an organ stop. Two bit depths to compare.",
       params: [{
         name: "bits",
@@ -4821,7 +4860,7 @@ ${val}`;
       }]
     });
     registerWave(
-      "wtOrgan(8)",
+      "waveOrgan(8)",
       WT_ORGAN,
       8,
       {
@@ -4831,7 +4870,7 @@ ${val}`;
       }
     );
     registerWave(
-      "wtOrgan(5)",
+      "waveOrgan(5)",
       WT_ORGAN,
       5,
       {
@@ -4841,7 +4880,7 @@ ${val}`;
       }
     );
     registerWave(
-      "wtRamp",
+      "waveRamp",
       WT_RAMP,
       5,
       {
@@ -4851,7 +4890,7 @@ ${val}`;
       }
     );
     registerWave(
-      "wtVoice",
+      "waveVoice",
       WT_VOICE,
       5,
       {
@@ -4861,7 +4900,7 @@ ${val}`;
       }
     );
     registerWave(
-      "wtPadWarm",
+      "wavePadWarm",
       WT_PAD_WARM,
       8,
       {
@@ -4872,7 +4911,7 @@ ${val}`;
       }
     );
     registerWave(
-      "wtPadAiry",
+      "wavePadAiry",
       WT_PAD_AIRY,
       8,
       {
@@ -4883,7 +4922,7 @@ ${val}`;
       }
     );
     registerWave(
-      "wtSquareSoft",
+      "waveSquareSoft",
       WT_SQUARE_SOFT,
       8,
       {
@@ -4894,7 +4933,7 @@ ${val}`;
     );
   }
 
-  // engine-source/sound/fmpresets.js
+  // engine-v23/sound/fmpresets.js
   var FM_PRESETS = {
     // 1 バイオリン。弓のこすれを出すため、比を少しずらして倍音を残す
     // 2 ギター。はじいた瞬間だけ硬く、あとは丸くなる
@@ -4977,7 +5016,7 @@ ${val}`;
     }
   }
 
-  // engine-source/sound/beeppresets.js
+  // engine-v23/sound/beeppresets.js
   var BEEP_PRESETS = {
     // ---- 搬送波を刻む型。**音程を変える回路が無い機械** ----
     // 2.4kHz が鳴りっぱなしで、ソフトはそれを On/Off するだけ。
@@ -5169,7 +5208,7 @@ ${val}`;
     }
   }
 
-  // engine-source/sound/fdspresets.js
+  // engine-v23/sound/fdspresets.js
   var FDS_LEN = 64;
   var FDS_BITS = 6;
   var build2 = (fn) => Array.from({ length: FDS_LEN }, (_, i) => fn(i / FDS_LEN));
@@ -5286,7 +5325,7 @@ ${val}`;
     }
   }
 
-  // engine-source/sound/ym2151.js
+  // engine-v23/sound/ym2151.js
   var OPM_CLOCK = 3579545;
   var OPM_RATE = OPM_CLOCK / 64;
   var OPM_CODE = `
@@ -6659,7 +6698,7 @@ registerProcessor('mmsxx-opm', OpmBank);
     };
   }
 
-  // engine-source/sound/fm4presets.js
+  // engine-v23/sound/fm4presets.js
   var FM4_PRESETS = {
     "fm4Brass": {
       noteJa: "4 \u30AA\u30DA\u306E\u91D1\u7BA1\u3002\u30AA\u30DA\u30EC\u30FC\u30BF\u304C\u5897\u3048\u305F\u3076\u3093\u3001\u4F38\u3070\u3057\u3066\u3044\u308B\u3042\u3044\u3060\u306B\u500D\u97F3\u304C\u80B2\u3064\u3002\u672C\u7269\u306E\u91D1\u7BA1\u3068\u540C\u3058\u52D5\u304D\u3067\u30012 \u30AA\u30DA\u306B\u306F\u3067\u304D\u306A\u3044",
@@ -6774,7 +6813,7 @@ registerProcessor('mmsxx-opm', OpmBank);
     for (const [name, p] of Object.entries(FM4_PRESETS)) {
       registerOPM(name, p.patch, { note: p.note, noteJa: p.noteJa, role: p.role });
     }
-    registerBaked("bkBrass", {
+    registerBaked("bakedBrass", {
       from: "fm4Brass",
       octaves: [3, 4, 5],
       step: 3,
@@ -6784,7 +6823,7 @@ registerProcessor('mmsxx-opm', OpmBank);
     });
   }
 
-  // engine-source/sound/extrawaves.js
+  // engine-v23/sound/extrawaves.js
   var EXTRA_LEN = 32;
   var build3 = (fn) => Array.from({ length: EXTRA_LEN }, (_, i) => fn(i / EXTRA_LEN));
   var pulse = (n) => build3((p) => p < n / 16 ? 1 : -1);
@@ -6895,35 +6934,35 @@ registerProcessor('mmsxx-opm', OpmBank);
     return step / 15 * 2 - 1;
   });
   var EXTRA_PRESETS = {
-    "wtPulse(6)": {
+    "wavePulse(6)": {
       noteJa: "\u5E45 6.25%(16 \u5206\u306E 1)\u3002\u7D30\u304F\u3066\u9F3B\u306B\u304B\u304B\u308B\u3002\u6DF7\u3093\u3060\u3068\u3053\u308D\u3067\u3082\u4ED6\u3068\u3076\u3064\u304B\u3089\u305A\u306B\u4E0A\u3078\u4E57\u308B",
       role: "lead",
       wave: pulse(1),
       bits: 1,
       note: "1/16 duty (6.25%). Thin and reedy; sits above a busier mix without fighting it."
     },
-    "wtPulse(18)": {
+    "wavePulse(18)": {
       noteJa: "\u5E45 18.75%(16 \u5206\u306E 3)\u3002\u30D7\u30EA\u30BB\u30C3\u30C8\u306E 12.5% \u3068 25% \u306E\u3042\u3044\u3060",
       role: "lead",
       wave: pulse(3),
       bits: 1,
       note: "3/16 duty (18.75%). Between the built-in 12.5% and 25%."
     },
-    "wtPulse(31)": {
+    "wavePulse(31)": {
       noteJa: "\u5E45 31.25%(16 \u5206\u306E 5)",
       role: "lead",
       wave: pulse(5),
       bits: 1,
       note: "5/16 duty (31.25%)."
     },
-    "wtPulse(37)": {
+    "wavePulse(37)": {
       noteJa: "\u5E45 37.5%(16 \u5206\u306E 6)",
       role: "lead",
       wave: pulse(6),
       bits: 1,
       note: "6/16 duty (37.5%)."
     },
-    "wtPulse(43)": {
+    "wavePulse(43)": {
       noteJa: "\u5E45 43.75%(16 \u5206\u306E 7)\u3002\u307B\u3068\u3093\u3069\u77E9\u5F62\u6CE2\u3068\u540C\u3058\u592A\u3055",
       role: "lead",
       wave: pulse(7),
@@ -6934,7 +6973,7 @@ registerProcessor('mmsxx-opm', OpmBank);
     // (あれは音量が効くようにあえてそうしてある。実機に寄せて殺すと、
     // いま使っている曲が全部変わる)。**寄せたものが要るなら別の名前で足す。**
     //
-    // **`wt` の一族ではない。**あちらは実機の波形メモリらしさを集めたところで、
+    // **`wave` の一族ではない。**あちらは実機の波形メモリらしさを集めたところで、
     // 書き換えられることが売りになっている。ファミコンの三角波は形が固定で、
     // 書き換えられない。中で `registerWave` を通っているだけ(2026-09-25)。
     //
@@ -6967,7 +7006,7 @@ registerProcessor('mmsxx-opm', OpmBank);
     },
     // **音律を確かめるためのもの。**楽器ではない。
     //
-    // **`wt` の一族ではない。**あちらは実機の波形メモリらしさを集めたところで、
+    // **`wave` の一族ではない。**あちらは実機の波形メモリらしさを集めたところで、
     // 段が粗いことが売りになっている。これは 8 ビットで、倍音から作っていて、
     // 分周の丸めからも外してある。性格が合わないので `tool` で始める。
     // 素の `tuner` を取らないのは、短い語を 1 つ押さえてしまうため(2026-09-23)。
@@ -7066,7 +7105,7 @@ registerProcessor('mmsxx-opm', OpmBank);
       dcBias: 0.371,
       note: "The triangle in sixteen steps, coarse for the same reason. A triangle carries few partials to begin with, so the grit of the stair shows up more clearly on it."
     },
-    wtSawStep: {
+    waveSawStep: {
       noteJa: "\u6BB5\u306E\u3042\u308B\u306E\u3053\u304E\u308A\u30027 \u6BB5\u306E\u307C\u3063\u3066 1 \u6BB5\u843D\u3061\u308B\u3002\u8DB3\u3057\u7B97\u5668\u3067\u4F5C\u308B\u30C1\u30C3\u30D7\u306F\u3053\u306E\u5F62\u306B\u306A\u308B\u3002\u7D20\u306E\u306A\u3060\u3089\u304B\u306A\u5742\u3088\u308A\u3056\u3089\u3064\u304F\u3002VRC6 \u306E\u306E\u3053\u304E\u308A\u306B\u305D\u306E\u307E\u307E\u5F53\u3066\u306F\u307E\u308B",
       role: "lead",
       wave: SAW_STEP,
@@ -7075,7 +7114,7 @@ registerProcessor('mmsxx-opm', OpmBank);
     }
   };
   function registerExtraFamilies() {
-    registerFamily("wtPulse", {
+    registerFamily("wavePulse", {
       note: "One-bit wavetable pulses in sixteenths, for widths the built-in pulse does not have.",
       params: [{
         name: "width",
@@ -7133,7 +7172,7 @@ registerProcessor('mmsxx-opm', OpmBank);
     }
   }
 
-  // engine-source/sound/pcmbake.js
+  // engine-v23/sound/pcmbake.js
   var MIN_LOOP = 1024;
   function periodMultiple(ratios, maxM = 8) {
     for (let m = 1; m <= maxM; m++) {
@@ -7215,7 +7254,7 @@ registerProcessor('mmsxx-opm', OpmBank);
     };
   }
 
-  // engine-source/sound/opll.js
+  // engine-v23/sound/opll.js
   var OPLL_INST = [
     0,
     0,
@@ -8461,7 +8500,7 @@ class OpllBank extends AudioWorkletProcessor {
 registerProcessor('mmsxx-opll', OpllBank);
 `;
 
-  // engine-source/sound/opllpresets.js
+  // engine-v23/sound/opllpresets.js
   var OPLL_PRESETS = [
     [
       1,
@@ -8794,7 +8833,7 @@ registerProcessor('mmsxx-opll', OpllBank);
     }
   }
 
-  // engine-source/sound/duty.js
+  // engine-v23/sound/duty.js
   var DUTY_CODE = `
 const FRAME = ${TONE_FRAME};
 
@@ -8929,7 +8968,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     return Math.min(0.98, Math.max(0.02, x));
   };
 
-  // engine-source/sound/demotunes.js
+  // engine-v23/sound/demotunes.js
   var SE_SYS_PAUSE = "sys.pause";
   var SYSTEM_SE = {
     [SE_SYS_PAUSE]: [
@@ -8944,7 +8983,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     return out.join("\n");
   };
   var BEAT_BUNDLES = [
-    "#bundle beatBass1  = @{wtRamp} @e{piano} @s{8,2}",
+    "#bundle beatBass1  = @{waveRamp} @e{piano} @s{8,2}",
     "#bundle beatBass2  = @{triangle} @e{flat}",
     "#bundle beatKick   = @{opllKick} @e{percussive},   @{noise} v11 @e{snap}",
     "#bundle beatSnare  = @{opllSnare} @e{percussive},  @{noise} v8 @o+1 @e{snap}",
@@ -9017,7 +9056,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     BEAT_TOM_FILL
   ]);
 
-  // engine-source/sound/se.js
+  // engine-v23/sound/se.js
   var SE_FRAME = 1 / 60;
   var SE_WHOLE = 64;
   var SE_TEMPO = Math.round(240 / (SE_WHOLE * SE_FRAME));
@@ -9166,7 +9205,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     }
   };
 
-  // engine-source/sound/layerpresets.js
+  // engine-v23/sound/layerpresets.js
   var DETUNE_STEPS = [
     { key: "", value: "none", c: 0, en: "no detune" },
     {
@@ -9220,7 +9259,7 @@ registerProcessor('mmsxx-duty', DutyBank);
       for (const d of [...DETUNE_STEPS].reverse()) {
         for (const e of [...ECHO_STEPS].reverse()) {
           if (!d.c && !e.f) continue;
-          const name = `lyPair(${w.key}, ${d.c ? d.value : "detune: none"}, ${e.f ? e.value : "echo: none"})`;
+          const name = `layerPair(${w.key}, ${d.c ? d.value : "detune: none"}, ${e.f ? e.value : "echo: none"})`;
           const both = d.c && e.f;
           const what = both ? "@d \u3068 @s" : d.c ? "@d" : "@s";
           out[name] = {
@@ -9238,7 +9277,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     }
     return out;
   }
-  function lyPairFamily() {
+  function layerPairFamily() {
     return {
       note: "Two pulses of the same width, the second detuned and/or delayed. The same thing @d and @s do, but as a voice that costs two channels.",
       params: [
@@ -9276,7 +9315,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     // **`@e{snap}` で早く消す。**打楽器に添えるものは伸ばす意味が無いうえ、
     // **鳴り終われば枠を返せる**。声が足りないところでは、
     // 添え物が席を握ったままでいるのがいちばん困る
-    lyKickAir: {
+    layerKickAir: {
       layers: [
         { wave: "opllKick" },
         { wave: "noise", gain: 0.34, semi: 24, follow: false, env: "snap" }
@@ -9306,7 +9345,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     // **SCC が挿さっている MSX でしか鳴らなくなる**。50% なら
     // MSX + MSX-MUSIC で鳴る — FM は拡張、PSG は本体にあるので、
     // **足すぶんに元手が要らない**という、実機でよくやっていた形になる
-    lyBrassBite: {
+    layerBrassBite: {
       layers: [
         { wave: "opllTrumpet" },
         { wave: "pulse(50)", gain: 0.6, semi: 12, follow: false, env: "tap" }
@@ -9318,7 +9357,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     }
   };
   function registerDefaultLayers() {
-    registerFamily("lyPair", lyPairFamily());
+    registerFamily("layerPair", layerPairFamily());
     const has = (n) => findWave(n) >= 0;
     const all = { ...LAYER_PRESETS, ...detuneEchoPresets() };
     for (const [name, spec] of Object.entries(all)) {
@@ -9327,10 +9366,10 @@ registerProcessor('mmsxx-duty', DutyBank);
     }
   }
 
-  // engine-source/sound/version.js
-  var SOUND_VERSION = "0.22.0";
+  // engine-v23/sound/version.js
+  var SOUND_VERSION = "0.23.0";
 
-  // engine-source/sound/audio.js
+  // engine-v23/sound/audio.js
   registerDefaultWaves();
   registerDefaultFM();
   registerDefaultBeeps();
@@ -11347,7 +11386,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
      * 作り分けを持つ音色なら軸と値と既定を、名前に作り分けを書けば選ばれた値も返す。
      * AI が名前から見当をつけずに済むように置いてある
      *
-     * @param {string} name `lyPair` `pulse(25)` など
+     * @param {string} name `layerPair` `pulse(25)` など
      */
     describeVoice(name) {
       return describeVoice(name);
@@ -13291,10 +13330,10 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out;
   }
 
-  // engine-source/tool/ui/version.js
+  // engine-v23/tool/ui/version.js
   var PLAYER_VERSION = "1.0.0";
 
-  // engine-source/tool/core/tomml.js
+  // engine-v23/tool/core/tomml.js
   var NAMES = ["c", "c+", "d", "d+", "e", "f", "f+", "g", "g+", "a", "a+", "b"];
   var LENS = [
     [16, "1"],
@@ -13374,7 +13413,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out.join("\n\n");
   }
 
-  // engine-source/tool/core/wav.js
+  // engine-v23/tool/core/wav.js
   function writeWAV(samples, rate = 44100) {
     const n = samples.length;
     const out = new Uint8Array(44 + n * 2);
@@ -13402,7 +13441,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out;
   }
 
-  // engine-source/tool/ui/player.js
+  // engine-v23/tool/ui/player.js
   var COPYRIGHT = "2026 harayoki";
   var PLAYER_CSS = `
 .mmsxx-player{ font-family:var(--mono); font-size:13px; line-height:1.55; color:var(--ink); }
@@ -15016,7 +15055,7 @@ ChipTuneSound ${SOUND_VERSION}
     };
   }
 
-  // engine-source/samples-entry.js
+  // engine-v23/samples-entry.js
   var sound = { ...audio_exports, ...mml_exports, ...tones_exports, mountPlayer, PLAYER_CSS, PLAYER_VERSION, player: { mount: mountPlayer, CSS: PLAYER_CSS, version: PLAYER_VERSION } };
   window.MMSXX = window.MMSXX || {};
   window.MMSXX.sound = sound;
