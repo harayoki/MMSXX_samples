@@ -1,25 +1,23 @@
 /*
-このMMLはJS側の音色・エンベロープ設定が必要です。
+このMMLにはJS側に残る設定があります。
 設定JS: https://harayoki.github.io/MMSXX_samples/music/03_Windward-Crossing/player.js
-
-音色:
-- wcFieldLead
-- wcBattleLead
-- wcCounterLead
-- wcFieldCounter
-- wcBattleBass
-- wcBass
-- wcArp
-- wcKick
-エンベロープ:
-- wcLeadEnv
-- wcPluckEnv
-- wcDrumEnv
-- wcBattleBassEnv
+残る定義: wcKick
 */
 
+#voice wcLeadEnv = @adsr{0.004, 0.09, 0.68, 0.012}
+#voice wcPluckEnv = @adsr{0.003, 0.08, 0.18, 0.008}
+#voice wcDrumEnv = @adsr{0.001, 0.045, 0, 0.004}
+#voice wcBattleBassEnv = @adsr{0.003, 0.055, 0.65, 0.01}
+#voice wcFieldLead = @{nesTriangle} @e{wcLeadEnv}
+#voice wcBattleLead = @{pulse(25)} @e{wcLeadEnv}
+#voice wcCounterLead = @{pulse(12)} @e{wcLeadEnv}
+#voice wcFieldCounter = @{pulse(50)} @e{wcLeadEnv}
+#voice wcBattleBass = @{pulse(50)} @e{wcBattleBassEnv}
+#voice wcBass = @{nesTriangle} @e{wcPluckEnv}
+#voice wcArp = @{pulse(50)} @e{wcPluckEnv}
+
 #title 風渡りの境界 (RPG組曲)
-#version 1.9
+#version 1.10
 #about 王道RPGを意識した組曲。フィールド、エンカウント、戦闘（A/B/C）、勝利、敗北を連続再生。
 #arrangement RPG Suite — 風渡りの境界
 #copyright 2026 harayoki

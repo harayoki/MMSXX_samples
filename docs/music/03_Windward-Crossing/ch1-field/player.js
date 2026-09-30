@@ -1,15 +1,8 @@
 // Windward Crossing CH1フィールド専用プレイヤー。
 (() => {
   const E = MMSXX.sound;
-  E.registerEnvelope('wcLeadEnv', {
-    a: .004, d: .09, s: .68, r: .012,
-    note: 'Windward Crossing lead envelope.',
-    noteJa: 'Windward Crossingのリード用エンベロープ。',
-  });
-  E.registerTone('wcFieldLead', {
-    wave: 'nesTriangle', env: 'wcLeadEnv',
-    note: 'Field lead.', noteJa: 'フィールド用リード。',
-  });
+  // 音色・エンベロープはMMLの #voice で定義する。
+
 
   const editor = document.getElementById('wc-ch1-field-src');
   const status = document.querySelector('[data-music-status]');

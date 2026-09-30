@@ -1,16 +1,9 @@
-/*
-このMMLはJS側のエンベロープ設定が必要です。
-設定JS: https://harayoki.github.io/MMSXX_samples/music/08_STARFABLE-Boss/player.js
-音色:
-- なし
-エンベロープ:
-- sfFlat
-- sfSoft
-- sfPerc
-*/
+#voice sfFlat = @adsr{0.5%, 0%, 1, 1%}
+#voice sfSoft = @adsr{8%, 10%, 0.8, 15%}
+#voice sfPerc = @adsr{0.2%, 25%, 0, 5%}
 
 #title STARFABLE — BOSS
-#version 1.8
+#version 1.9
 #copyright 2026 harayoki
 #license CC BY 4.0 (music and MML source)
 #about MSX1風のSTG "STAR FABLE" のBGMをファミコン縛りの音構成で再現しました。

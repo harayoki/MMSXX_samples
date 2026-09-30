@@ -1,9 +1,6 @@
 // STARFABLE ボス曲。フェードはMMLで指定する。
 (() => {
   const E = MMSXX.sound;
-  E.registerEnvelope('sfFlat', { a: '0.5%', d: '0%', s: 1, r: '1%' });
-  E.registerEnvelope('sfSoft', { a: '8%', d: '10%', s: 0.8, r: '15%' });
-  E.registerEnvelope('sfPerc', { a: '0.2%', d: '25%', s: 0, r: '5%' });
 
   const editor = document.getElementById('starfable-boss-src');
   const status = document.querySelector('[data-music-status]');

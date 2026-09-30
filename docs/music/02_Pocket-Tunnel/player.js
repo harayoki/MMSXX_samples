@@ -1,17 +1,7 @@
 // Pocket Tunnel 3アレンジ共通プレイヤー。
 (() => {
   const E = MMSXX.sound;
-  E.registerEnvelope('ptHeld', {
-    a: .003, d: 0, s: 1, r: .004,
-    note: 'Pocket Tunnel held envelope.',
-    noteJa: 'Pocket Tunnelの保持音用エンベロープ。',
-  });
-  E.registerEnvelope('ptDecay', {
-    a: .003, d: '70%', s: .32, r: '30%',
-    note: 'Pocket Tunnel short decay.',
-    noteJa: 'Pocket Tunnelの短い減衰音。',
-  });
-  E.registerEnvelope('ptPercussive', { a: .002, d: '25%', s: 0, r: .05 });
+  // MMLで未対応の設定だけをJSに残す。
   E.registerFM('ptKick', {
     ratio: 1, depth: 0, attack: .003, decay: .12, sustain: 0,
     drop: 125 / 45 - 1, dropTime: .12,
@@ -20,26 +10,6 @@
     note: 'Pocket Tunnel kick.',
     noteJa: 'Pocket Tunnelのキック。',
   });
-
-  const tones = {
-    ptLead: { wave: 'pulse(50)' },
-    ptJazzLead: { wave: 'pulse(50)' },
-    ptArp: { wave: 'saw' },
-    ptBass: { wave: 'pulse(50)' },
-    ptJazzBass: { wave: 'triangle' },
-    ptChord: { wave: 'pulse(50)' },
-    ptJazzChord: { wave: 'triangle' },
-    ptJazzAnswer: { wave: 'triangle' },
-    ptHarmony: { wave: 'pulse(50)' },
-    ptChipPulse: { wave: 'pulse(50)' },
-  };
-  for (const [name, spec] of Object.entries(tones)) {
-    E.registerTone(name, {
-      wave: spec.wave, env: 'ptHeld',
-      note: 'Pocket Tunnel custom tone.',
-      noteJa: 'Pocket Tunnel専用音色。',
-    });
-  }
 
   // タブ切替時のマスター音量とチューニング設定。音符の強弱はMMLのvで指定。
   const songs = [

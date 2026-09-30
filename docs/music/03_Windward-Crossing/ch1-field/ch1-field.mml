@@ -1,5 +1,8 @@
+#voice wcLeadEnv = @adsr{0.004, 0.09, 0.68, 0.012}
+#voice wcFieldLead = @{nesTriangle} @e{wcLeadEnv}
+
 #title Windward Crossing — CH1 Field
-#version 1.0
+#version 1.1
 #about Windward CrossingのCH1（主旋律）のフィールド部分だけを再生。
 #arrangement RPG Suite — 風渡りの境界
 #copyright 2026 harayoki
