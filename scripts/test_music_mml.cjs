@@ -7,7 +7,7 @@ global.window = global;
 require('../docs/music/player-engine.js');
 
 const E = MMSXX.sound;
-assert.equal(E.SOUND_VERSION, '0.26.2', 'bundled sound engine version');
+assert.equal(E.SOUND_VERSION, '0.27.0', 'bundled sound engine version');
 assert(E.compileMML('@{tape(worn)}{ o2 a1 f1 c1 g1 }').events.every(event => event.tape?.data),
   'tape sections must accept note names as data bursts');
 assert(E.findWave('waveRamp') >= 0, 'renamed waveRamp must exist');

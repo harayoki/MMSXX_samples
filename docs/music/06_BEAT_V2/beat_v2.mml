@@ -1,5 +1,5 @@
 #title BEAT_V2
-#version 2.6
+#version 2.7
 #about 2オペのFM音源をかっこよくするテスト曲。80年代の雰囲気で。コード進行記述MMLとドラム専用MMLも活用してソースを短くしました。
 #label 開始
 
@@ -38,6 +38,7 @@ t152 q8 @{drums 16}{ v13 [$a | $a | $a | $b | $a | $a | $a | $c |]2
 }
 
 #ch ブラス
-t152 q8 v10 l16 @{brass} [r1 r2 r4 r8 'o4a o4f o4d'16 'o4a o4f o4d'16 r1 r2 r4 'o4g o4e o4c'4 r1 r2 r4 r8 'o4a
+t152 q8 v11 l16 @{brass} [r1 r2 r4 r8 'o4a o4f o4d'16 'o4a o4f o4d'16 r1 r2 r4 'o4g o4e o4c'4 r1 r2 r4 r8 'o4a
   o4f o4d'16 'o4a o4f o4d'16 r2 'o5d o4b- o4g'4 'o5d o4b- o4g'4 'o5e o5c+ o4a'4 r4 r2]2
+
 
