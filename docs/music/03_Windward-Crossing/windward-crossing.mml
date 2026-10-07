@@ -15,7 +15,7 @@
 #voice wcArp = @{pulse(50)} @e{wcPluckEnv}
 
 #title 風渡りの境界 (RPG組曲)
-#version 1.12
+#version 1.13
 // 全体音量はMMLのvで指定（上限15）。JSによる曲別増幅は使わない。
 #about 王道RPGを意識した組曲。フィールド、エンカウント、戦闘（A/B/C）、勝利、敗北を連続再生。
 #arrangement RPG Suite — 風渡りの境界
@@ -37,7 +37,6 @@
 
 // 曲内で使う音色セット。音色にエコーやエンベロープを着せ、宣言をここへ集約。
 // 複数セットを同時に重ねる場合は、#bundle の右辺へカンマ区切りで並べる。
-#bundle fieldLeadEcho = @{wcFieldLead} @s{8,8}
 #bundle fieldLeadDry  = @{wcFieldLead} @s0
 #bundle battleLead    = @{wcBattleLead} @s0
 #bundle counterLead   = @{wcCounterLead} @s0 @o+1
@@ -98,7 +97,7 @@ $RESET = { o4 l4 t120 v15 q7 p3 @{pulse(50)} @e{flat} @d0 @m0 @s0 @o0 }
 #ch 主旋律
 #role lead
 // 音色・テンポ・音量の共通設定。音符は下のフレーズ／各曲に記述。
-$sound1 = { @m0 t112 @{fieldLeadEcho} @m1 v15 q5 o5 }
+$sound1 = { @m0 t112 @{fieldLeadDry} @m1 v15 q5 o5 }
 $sound2 = { @m0 t152 @{battleLead} @m1 v10.984 q6 o4 }
 $sound3 = { @m0 t152 @{battleLead} @m1 v10.984 q6 o5 }
 $sound4 = { @m0 t152 @{battleLead} @m1 v14.122 q6 o5 }
@@ -337,4 +336,5 @@ $lose = { $RESET [$loseDrums]3 $endingKick96 }
 $fieldShort = { $RESET [$fieldDrums]4 }
 // 演奏順は冒頭の $ORDER と回数で指定します。
 $ORDER
+
 

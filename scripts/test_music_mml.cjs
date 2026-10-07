@@ -7,7 +7,7 @@ global.window = global;
 require('../docs/music/player-engine.js');
 
 const E = MMSXX.sound;
-assert.equal(E.SOUND_VERSION, '0.27.0', 'bundled sound engine version');
+assert.equal(E.SOUND_VERSION, '0.30.1', 'bundled sound engine version');
 assert(E.compileMML('@{tape(worn)}{ o2 a1 f1 c1 g1 }').events.every(event => event.tape?.data),
   'tape sections must accept note names as data bursts');
 assert(E.findWave('waveRamp') >= 0, 'renamed waveRamp must exist');
@@ -193,7 +193,7 @@ for (const { file, channels, marks, source } of sources) {
   if (marks) assert(info.marks.every((mark, index) =>
     index === 0 || mark.t > info.marks[index - 1].t), file + ': jump label order');
   if (file === '03_Windward-Crossing/windward-crossing.mml') {
-    assert.equal(info.meta.version, '1.12', file + ': song version');
+    assert.equal(info.meta.version, '1.13', file + ': song version');
     assert(!info.meta.about.includes('CH3とCH4は発音が重ならないため統合可能。'),
       file + ': echoed counter melody is no longer mergeable with drums');
     assert(!info.meta.about.includes('ファミコン準拠'),
@@ -206,9 +206,8 @@ for (const { file, channels, marks, source } of sources) {
     const counter = compiled[2].events;
     const fieldStart = info.marks.find(mark => mark.name === 'フィールド').t;
     const fieldEnd = info.marks.find(mark => mark.name === 'エンカウント').t;
-    assert(compiled[0].events.some(event =>
-      event.t >= fieldStart && event.t < fieldEnd && event.echo !== null),
-    file + ': channel 1 field lead self echo');
+    assert(compiled[0].events.every(event => !event.echo && !event.tail),
+    file + ': NES triangle lead must not have echo');
     assert(counter.some(event => event.t >= fieldStart && event.t < fieldEnd),
       file + ': channel 3 must complement the field melody');
     assert(counter.some(event => event.echo !== null),
@@ -220,8 +219,8 @@ for (const { file, channels, marks, source } of sources) {
     assert.equal(info.tracks[0].voices, 1,
       file + ': field lead self echo must stay within one voice');
     const compiled = audio.bgmDefs.get('test');
-    assert(compiled[0].events.some(event => event.echo !== null),
-      file + ': field lead self echo');
+    assert(compiled[0].events.every(event => !event.echo && !event.tail),
+      file + ': NES triangle field lead must not have echo');
     const suiteSource = sources.find(song =>
       song.file === '03_Windward-Crossing/windward-crossing.mml').source;
     const suiteAudio = new E.ChipTuneSound();
@@ -317,3 +316,4 @@ for (const relative of ['02_Pocket-Tunnel/player.js', '03_Windward-Crossing/play
   const code = fs.readFileSync(path.join(__dirname, "../docs/music", relative), "utf8");
   assert(!/\baudio\.volume\s*=/.test(code), relative + ": use MML volume");
 }
+

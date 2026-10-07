@@ -12,7 +12,7 @@
 #voice fieldHit0x11800 = @{pulse(12)} @e{flat} @pitch{21.540003004618065}
 
 #title 草原のトリニティ
-#version 2.2
+#version 2.3
 #about アクションRPGの草原BGMをイメージ。ファミコン4音に限定。
 #ch メロディ
 #role lead
@@ -73,9 +73,9 @@ $p17 $p15 r16 $p1 @{pulse(12)} @e{flat} v8 o4 g+8&g+32&g+256&g+1024&g+8192 r16 $
 @e{fieldBody} v8 o5 d32&d64 r64 @{pulse(25)} @e{fieldBody} v8 o5 f16&f32 r32 @{pulse(25)}
 @e{fieldBody} v8 o5 d16&d32 r32 @{pulse(12)} @e{flat} v8 o4 f4 r4
 
-$p1={ @{fieldHit0x29000} @e{flat} v11 o4 d256&d512&d1024&d8192&d32768&d65536 r1024 r2048 r4096 r32768
-  @{fieldHit0x18000} @e{flat} v9 o3 f+256&f+512&f+1024&f+8192&f+32768&f+65536 r1024 r2048 r4096 r32768 r65536
-  @{fieldHit0x11800} @e{flat} v7 o2 b-256&b-512&b-1024&b-8192&b-32768&b-65536 r1024 r2048 r4096 r32768 }
+$p1={ @{fieldHit0x29000} @e{flat} v9 o4 d256&d512&d1024&d8192&d32768&d65536 r1024 r2048 r4096 r32768
+  @{fieldHit0x18000} @e{flat} v7 o3 f+256&f+512&f+1024&f+8192&f+32768&f+65536 r1024 r2048 r4096 r32768 r65536
+  @{fieldHit0x11800} @e{flat} v5 o2 b-256&b-512&b-1024&b-8192&b-32768&b-65536 r1024 r2048 r4096 r32768 }
 $p2={ @{fieldHit2x14500} @e{flat} v13 o3 d256&d512&d1024&d8192&d32768&d65536 r1024 r2048 r4096 r32768
   @{fieldHit2x8200} @e{flat} v11 o2 e256&e512&e1024&e8192&e32768&e65536 r1024 r2048 r4096 r32768 r65536
   @{fieldHit2x5200} @e{flat} v9 o1 g+256&g+512&g+1024&g+8192&g+32768&g+65536 r1024 r2048 r4096 r32768 }

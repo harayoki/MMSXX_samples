@@ -14,7 +14,7 @@ function run(loops, repeat, structured = true) {
     _chLevel: new Map(),
     ignoreSongLoop: !repeat, playOutro: true,
     _scheduleTrack(track, base, gain, nodes, from, to) { spans.push({ base, from, to }); },
-    _scheduleCues() {}, _wkFlushAll() {}, stopBGM() { alive = false; },
+    _scheduleCues() {}, _scheduleTexts() {}, _wkFlushAll() {}, stopBGM() { alive = false; },
   };
   global.setTimeout = (fn, ms) => { pending.push({ fn, at: time + ms / 1000 }); return pending.length; };
   try {

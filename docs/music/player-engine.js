@@ -1,4 +1,4 @@
-// MMS/XX player and audio engine, source commit b47b72e0a357e2b644b1cf5d7f5818f52794d94c
+// MMS/XX player and audio engine, source commit df32dbb160cf08cd34ee53d5fbad4b885120c1a6
 (() => {
   var __defProp = Object.defineProperty;
   var __export = (target, all) => {
@@ -6,24 +6,29 @@
       __defProp(target, name, { get: all[name], enumerable: true });
   };
 
-  // mmsxx-mml-studio/sound/audio.js
+  // engine/sound/audio.js
   var audio_exports = {};
   __export(audio_exports, {
     ChipTuneSound: () => ChipTuneSound,
     SE_SYS_PAUSE: () => SE_SYS_PAUSE,
     SOUND_VERSION: () => SOUND_VERSION,
     encodeWAV: () => encodeWAV,
-    psgDiv: () => psgDiv
+    psgDiv: () => psgDiv,
+    snapVol: () => snapVol
   });
 
-  // mmsxx-mml-studio/sound/mml.js
+  // engine/sound/mml.js
   var mml_exports = {};
   __export(mml_exports, {
+    AY_ENV_SHAPES: () => AY_ENV_SHAPES,
+    AY_MODES: () => AY_MODES,
     DEFAULT_ENV: () => DEFAULT_ENV,
     DEFAULT_WAVE: () => DEFAULT_WAVE,
     DEV_MARKS: () => DEV_MARKS,
+    DRUM_FREQ: () => DRUM_FREQ,
     ENVELOPES: () => ENVELOPES,
     HEAD_MARK: () => HEAD_MARK,
+    NES_MODES: () => NES_MODES,
     NOISE_VARIANTS: () => NOISE_VARIANTS,
     ROLES: () => ROLES,
     SPECIALS: () => SPECIALS,
@@ -49,17 +54,25 @@
     readDrums: () => readDrums,
     readVoices: () => readVoices,
     readWaves: () => readWaves,
+    registerAY: () => registerAY,
     registerBaked: () => registerBaked,
     registerBeep: () => registerBeep,
+    registerBrass: () => registerBrass,
     registerCoreFamilies: () => registerCoreFamilies,
     registerEnvelope: () => registerEnvelope,
+    registerFDS: () => registerFDS,
     registerFM: () => registerFM,
     registerFamily: () => registerFamily,
     registerLayer: () => registerLayer,
+    registerModal: () => registerModal,
+    registerNES: () => registerNES,
     registerNoiseVariants: () => registerNoiseVariants,
     registerOPLL: () => registerOPLL,
     registerOPLLVoice: () => registerOPLLVoice,
     registerOPM: () => registerOPM,
+    registerOPNARhythm: () => registerOPNARhythm,
+    registerPCE: () => registerPCE,
+    registerSCC: () => registerSCC,
     registerWave: () => registerWave,
     roleOf: () => roleOf,
     sealPresets: () => sealPresets,
@@ -78,7 +91,7 @@
     waveSteal: () => waveSteal
   });
 
-  // mmsxx-mml-studio/sound/gm.js
+  // engine/sound/gm.js
   var GM_NAMES = [
     "Acoustic Grand Piano",
     "Bright Acoustic Piano",
@@ -224,7 +237,7 @@
     return GM_NAMES.filter((n) => key(n).startsWith(head)).slice(0, limit);
   }
 
-  // mmsxx-mml-studio/sound/opllvoice.js
+  // engine/sound/opllvoice.js
   var OP_FIELDS = {
     mul: {
       at: "ml",
@@ -387,7 +400,7 @@
     return hold && opllAttackMs(ar) < STEAL_ATTACK_MS ? "ok" : "avoid";
   }
 
-  // mmsxx-mml-studio/sound/opll.js
+  // engine/sound/opll.js
   var OPLL_INST = [
     0,
     0,
@@ -910,8 +923,17 @@
   var OPLL_SETS = [OPLL_INST, OPLL_INST_VRC7, OPLL_INST_YMF281];
   var OPLL_CLOCK = 3579545;
   var OPLL_RATE = OPLL_CLOCK / 72;
+  var OPLL_DRUM_TABLE = {
+    bd: { bit: 16, reg: 54, hi: 0, ch: 6, fnum: 288, blk: 2 },
+    sd: { bit: 8, reg: 55, hi: 0, ch: 7, fnum: 336, blk: 2 },
+    hh: { bit: 1, reg: 55, hi: 1, ch: 7, fnum: 336, blk: 2 },
+    tom: { bit: 4, reg: 56, hi: 1, ch: 8, fnum: 448, blk: 0 },
+    cym: { bit: 2, reg: 56, hi: 0, ch: 8, fnum: 448, blk: 0 }
+  };
   var OPLL_CODE = `
 const SETS = ${JSON.stringify([OPLL_INST, OPLL_INST_VRC7, OPLL_INST_YMF281])};
+// \u30EA\u30BA\u30E0\u306E 5 \u3064\u3002\u8868\u306F\u5916(OPLL_DRUM_TABLE)\u3067\u3001\u8B66\u544A\u3092\u51FA\u3059\u5074\u3082\u540C\u3058\u3082\u306E\u3092\u898B\u308B
+const DRUM = ${JSON.stringify(OPLL_DRUM_TABLE)};
 const CLK = ${OPLL_CLOCK};
 const RATE = CLK / 72;
 
@@ -1377,21 +1399,6 @@ function pitchOf(freq) {
   return { blk: 7, fnum: 511 };
 }
 
-/**
- * \u30EA\u30BA\u30E0\u306E 5 \u3064\u3002R14 \u306E\u3069\u306E\u30D3\u30C3\u30C8\u3067\u53E9\u304F\u304B\u3001\u97F3\u91CF\u3092\u3069\u3053\u3078\u66F8\u304F\u304B\u3002
- *
- * **\u9AD8\u3055\u306F\u6C7A\u3081\u6253\u3061\u3002**\u5B9F\u6A5F\u306E\u30C9\u30E9\u30A4\u30D0\u3082\u3053\u306E\u5024\u3067\u4F7F\u3063\u3066\u3044\u305F\u3002\u30B9\u30CD\u30A2\u3068\u30CF\u30A4\u30CF\u30C3\u30C8\u304C
- * \u540C\u3058\u30C1\u30E3\u30F3\u30CD\u30EB\u3001\u30BF\u30E0\u3068\u30B7\u30F3\u30D0\u30EB\u3082\u540C\u3058\u30C1\u30E3\u30F3\u30CD\u30EB\u306A\u306E\u3067\u3001\u97F3\u7B26\u3054\u3068\u306B\u9AD8\u3055\u3092
- * \u5909\u3048\u308B\u3068\u7247\u65B9\u304C\u3082\u3046\u7247\u65B9\u3092\u62BC\u3057\u306E\u3051\u308B
- */
-const DRUM = {
-  bd:  { bit: 0x10, reg: 0x36, hi: 0 },
-  sd:  { bit: 0x08, reg: 0x37, hi: 0 },
-  hh:  { bit: 0x01, reg: 0x37, hi: 1 },
-  tom: { bit: 0x04, reg: 0x38, hi: 1 },
-  cym: { bit: 0x02, reg: 0x38, hi: 0 },
-};
-
 class OpllBank extends AudioWorkletProcessor {
   constructor(o) {
     super();
@@ -1492,9 +1499,44 @@ class OpllBank extends AudioWorkletProcessor {
     if (this.rhythmOn) return;
     this.rhythmOn = true;
     this.chip.writeReg(0x0e, 0x20);
-    this.chip.writeReg(0x16, 0x20); this.chip.writeReg(0x26, 0x05);
-    this.chip.writeReg(0x17, 0x50); this.chip.writeReg(0x27, 0x05);
-    this.chip.writeReg(0x18, 0xc0); this.chip.writeReg(0x28, 0x01);
+    for (const k of ['bd', 'sd', 'tom']) this.drumPitch(DRUM[k], DRUM[k]);
+  }
+
+  /**
+   * \u6253\u697D\u5668\u306E\u9AD8\u3055\u3092\u66F8\u304F\u3002
+   *
+   * **\u30AD\u30FC\u30AA\u30F3\u306E\u30D3\u30C3\u30C8\u306F\u7ACB\u3066\u306A\u3044\u3002**\u30EA\u30BA\u30E0\u97F3\u6E90\u306E\u53E9\u304D\u306F\u3058\u3081\u306F R14 \u304C\u6301\u3064\u306E\u3067\u3001
+   * 0x20 \u53F0\u306E bit4 \u306F 0 \u306E\u307E\u307E\u7F6E\u304F\u3002
+   *
+   * **\u540C\u3058\u5024\u306A\u3089\u66F8\u304B\u306A\u3044\u3002**\u53E9\u304F\u305F\u3073\u306B\u547C\u3070\u308C\u308B\u306E\u3067\u3001\u9AD8\u3055\u3092\u52D5\u304B\u3057\u3066\u3044\u306A\u3044\u66F2\u3067
+   * \u66F8\u304D\u8FBC\u307F\u304C\u5897\u3048\u306A\u3044\u3088\u3046\u306B\u3057\u3066\u304A\u304F\u3002
+   *
+   * @param {object} d DRUM \u306E 1 \u3064
+   * @param {{fnum:number, blk:number}} at \u66F8\u304F\u9AD8\u3055
+   */
+  drumPitch(d, at) {
+    const lo = at.fnum & 0xff;
+    const hi = (at.blk << 1) | ((at.fnum >> 8) & 1);
+    if (this.chip.reg[0x10 + d.ch] !== lo) this.chip.writeReg(0x10 + d.ch, lo);
+    if (this.chip.reg[0x20 + d.ch] !== hi) this.chip.writeReg(0x20 + d.ch, hi);
+  }
+
+  /**
+   * \u66F8\u3044\u305F\u9AD8\u3055\u306E\u6BD4\u304B\u3089\u3001\u305D\u306E\u6253\u697D\u5668\u306E fnum \u3068 blk \u3092\u51FA\u3059\u3002
+   *
+   * \u5B9F\u6A5F\u306E\u30C9\u30E9\u30A4\u30D0\u306E\u5024\u3092\u7269\u5DEE\u3057\u306B\u3057\u3066\u3001\u6BD4\u3067\u52D5\u304B\u3059\u3002**\u6BD4\u304C 1 \u306A\u3089\u547C\u3070\u308C\u306A\u3044**
+   * (\u97F3\u7B26\u304C o4c \u306E\u307E\u307E\u306A\u3089\u3001startRhythm() \u304C\u66F8\u3044\u305F\u5024\u304C\u305D\u306E\u307E\u307E\u6B8B\u308B)\u306E\u3067\u3001
+   * \u524D\u304B\u3089\u3042\u308B\u66F2\u306E\u97F3\u306F\u5909\u308F\u3089\u306A\u3044\u3002
+   *
+   * @param {object} d DRUM \u306E 1 \u3064
+   * @param {number} ratio \u66F8\u3044\u305F\u9AD8\u3055 \xF7 o4c
+   * @returns {{fnum:number, blk:number}}
+   */
+  drumBend(d, ratio) {
+    let fnum = d.fnum * ratio, blk = d.blk;
+    while (fnum > 511 && blk < 7) { fnum /= 2; blk++; }
+    while (fnum < 256 && blk > 0) { fnum *= 2; blk--; }
+    return { fnum: Math.max(1, Math.min(511, Math.round(fnum))), blk };
   }
 
   /** \u305D\u306E\u58F0\u306B\u3001\u97F3\u7A0B\u306E\u66F8\u304D\u76F4\u3057\u3092\u6301\u305F\u305B\u308B\u3002\u524D\u306E\u97F3\u306E\u3076\u3093\u306F\u6368\u3066\u308B */
@@ -1622,6 +1664,11 @@ class OpllBank extends AudioWorkletProcessor {
         if (ev.drum) {
           const d = DRUM[ev.drum];
           this.startRhythm();
+          // **\u53E9\u304F\u305F\u3073\u306B\u3001\u305D\u306E\u6253\u697D\u5668\u306E\u9AD8\u3055\u3092\u66F8\u304D\u76F4\u3059\u3002**\u30B9\u30CD\u30A2\u3068\u30CF\u30A4\u30CF\u30C3\u30C8\u306F
+          // \u30C1\u30E3\u30F3\u30CD\u30EB 7 \u3092\u3001\u30BF\u30E0\u3068\u30B7\u30F3\u30D0\u30EB\u306F 8 \u3092\u5206\u3051\u5408\u3046\u306E\u3067\u3001\u66F8\u304D\u76F4\u3055\u306A\u3044\u3068
+          // \u7247\u65B9\u304C\u7F6E\u3044\u3066\u3044\u3063\u305F\u9AD8\u3055\u3067\u9CF4\u308B\u3002\u5B9F\u6A5F\u306E\u30C9\u30E9\u30A4\u30D0\u3082\u53E9\u304F\u305F\u3073\u306B\u66F8\u3044\u3066\u3044\u305F\u3002
+          // \u5024\u304C\u540C\u3058\u306A\u3089\u66F8\u304B\u306A\u3044\u306E\u3067\u3001\u9AD8\u3055\u3092\u52D5\u304B\u3057\u3066\u3044\u306A\u3044\u66F2\u3067\u306F\u66F8\u304D\u8FBC\u307F\u304C\u5897\u3048\u306A\u3044
+          this.drumPitch(d, ev.rp ? this.drumBend(d, ev.rp) : d);
           const att = Math.max(0, Math.min(15, 15 - Math.round(ev.v)));
           const cur = this.chip.reg[d.reg];
           this.chip.writeReg(d.reg, d.hi ? ((att << 4) | (cur & 15)) : ((cur & 0xf0) | att));
@@ -1717,7 +1764,7 @@ class OpllBank extends AudioWorkletProcessor {
 registerProcessor('mmsxx-opll', OpllBank);
 `;
 
-  // mmsxx-mml-studio/sound/ym2151.js
+  // engine/sound/ym2151.js
   var OPM_CLOCK = 3579545;
   var OPM_RATE = OPM_CLOCK / 64;
   var OPM_CODE = `
@@ -2134,8 +2181,11 @@ class OPM {
 /**
  * \u5E38\u99D0\u3057\u3066\u5168\u90E8\u306E\u58F0\u3092\u56DE\u3059\u3002
  *
- * \u58F0\u306E\u53D6\u308A\u5408\u3044\u306F**\u30C1\u30E3\u30F3\u30CD\u30EB 8 \u672C**\u3067\u3084\u308B\u3002\u5B9F\u6A5F\u304C\u305D\u3046\u306A\u306E\u3067\u3001
- * 9 \u672C\u76EE\u304C\u6765\u305F\u3089\u3044\u3061\u3070\u3093\u53E4\u3044\u3082\u306E\u3092\u8B72\u308B\u3002
+ * \u4E2D\u306B\u30C1\u30C3\u30D7\u3092\u4F55\u500B\u3067\u3082\u6301\u3064(sound/ay.js \u3068\u540C\u3058\u8003\u3048\u65B9)\u3002\u524D\u306F 1 \u500B\u306E 8 \u58F0\u3092\u53D6\u308A\u5408\u3044\u3001
+ * 9 \u97F3\u76EE\u3067\u3044\u3061\u3070\u3093\u53E4\u3044\u97F3\u3092\u6B62\u3081\u3066\u3044\u305F\u304C\u3001\u307B\u304B\u306E\u30C1\u30C3\u30D7\u3068\u540C\u3058\u304F\u6570\u306F\u7E1B\u3089\u306A\u3044(2026-10-05)\u3002
+ *
+ * LFO \u306F\u30C1\u30C3\u30D7\u306B 1 \u3064\u3067\u30018 \u58F0\u304C\u5206\u3051\u5408\u3046\u3002\u97F3\u8272\u3054\u3068\u306B\u8A2D\u5B9A\u304C\u9055\u3048\u3070\u3001\u5225\u306E\u30C1\u30C3\u30D7\u306B\u8F09\u305B\u308B\u3002
+ * \u30CE\u30A4\u30BA\u306F\u30C1\u30E3\u30F3\u30CD\u30EB 8 \u3060\u3051\u304C\u51FA\u305B\u308B\u3002\u5B9F\u6A5F\u306E\u5236\u7D04\u306F\u3001\u66F8\u304D\u51FA\u3059\u3068\u304D\u306B\u898B\u308B\u3002
  */
 class OpmBank extends AudioWorkletProcessor {
   constructor(o) {
@@ -2143,23 +2193,11 @@ class OpmBank extends AudioWorkletProcessor {
     const q = o.processorOptions || {};
     this.events = (q.events || []).slice().sort((a, b) => a.t - b.t);
     this.at = 0;
-    this.chip = new OPM();
-    this.chip.write(0x0f, 0);
-    this.busy = [];                 // [{ ch, off }] \u9CF4\u3063\u3066\u3044\u308B\u3082\u306E
-    // \u30D5\u30A7\u30FC\u30C9\u306E\u9014\u4E2D\u306E\u97F3\u3002[{ ch, list, at, patch }]\u3002\u9CF4\u3063\u3066\u3044\u308B\u3042\u3044\u3060\u3068\u4F59\u97FB\u306E\u3042\u3044\u3060\u3001
-    // \u51FA\u53E3\u5074\u306E\u30AA\u30DA\u30EC\u30FC\u30BF\u306E TL \u3092\u66F8\u304D\u76F4\u3059\u3002\u58F0\u3092\u8B72\u3063\u305F\u3089\u6368\u3066\u308B
-    this.fading = [];
-    // \u30DD\u30EB\u30BF\u30E1\u30F3\u30C8\u306E\u9014\u4E2D\u306E\u97F3\u3002[{ ch, list, at }]\u3002\u9CF4\u3063\u3066\u3044\u308B\u3042\u3044\u3060\u306B
-    // \u97F3\u7A0B\u30EC\u30B8\u30B9\u30BF(KC \u3068 KF)\u3092\u66F8\u304D\u76F4\u3059\u3002\u5B9F\u6A5F\u306E\u30C9\u30E9\u30A4\u30D0\u3082\u540C\u3058\u3053\u3068\u3092\u3057\u3066\u3044\u305F
-    this.gliding = [];
+    this.pool = [];
     // \u30EC\u30B8\u30B9\u30BF\u306E\u8A18\u9332(log)\u3002OPLL \u3068\u540C\u3058\u3067\u3001\u66F8\u3044\u305F\u6642\u523B\u3068\u4E2D\u8EAB\u3092\u5916\u3078\u6D41\u3059\u3002
     // \u540C\u3058\u66F8\u304D\u8FBC\u307F\u3092\u30A8\u30DF\u30E5\u30EC\u30FC\u30BF\u3078\u6E21\u3057\u3066\u3001\u3053\u3061\u3089\u306E\u7FFB\u8A33\u3092\u8033\u3067\u78BA\u304B\u3081\u308B\u305F\u3081
-    if (q.log) {
-      const raw = this.chip.write.bind(this.chip);
-      this.logNow = 0;
-      this.logBuf = [];
-      this.chip.write = (r, d) => { this.logBuf.push(this.logNow, r & 0xff, d & 0xff); raw(r, d); };
-    }
+    this.log = !!q.log;
+    this.logNow = 0;
     this.acc = 0;
     this.base = currentTime;
     // \u6B62\u3081\u3066\u3044\u308B\u6700\u4E2D\u3002\u51FA\u53E3\u3092\u843D\u3068\u3057\u3066\u3044\u308B\u3042\u3044\u3060\u306E\u30B5\u30F3\u30D7\u30EB\u6570\u3002-1 \u306A\u3089\u6B62\u3081\u3066\u3044\u306A\u3044
@@ -2177,6 +2215,39 @@ class OpmBank extends AudioWorkletProcessor {
     };
   }
 
+  /** LFO \u306E\u8A2D\u5B9A\u3092\u6587\u5B57\u306B\u3059\u308B\u3002\u540C\u3058\u306A\u3089\u540C\u3058\u30C1\u30C3\u30D7\u306B\u8F09\u305B\u3089\u308C\u308B */
+  lfoKey(p) {
+    const l = p.lfo;
+    return l ? (l.rate | 0) + '.' + (l.amd | 0) + '.' + (l.pmd | 0) + '.' + (l.wf | 0) : '';
+  }
+
+  grow() {
+    const c = new OPM();
+    // busy: \u9CF4\u3063\u3066\u3044\u308B\u3082\u306E [{ ch, off }]\u3002
+    // fading: \u30D5\u30A7\u30FC\u30C9\u306E\u9014\u4E2D\u306E\u97F3 [{ ch, list, at, patch }]\u3002\u51FA\u53E3\u5074\u306E\u30AA\u30DA\u306E TL \u3092\u66F8\u304D\u76F4\u3059\u3002
+    // gliding: \u30DD\u30EB\u30BF\u30E1\u30F3\u30C8\u306E\u9014\u4E2D\u306E\u97F3 [{ ch, list, at }]\u3002\u97F3\u7A0B\u30EC\u30B8\u30B9\u30BF\u3092\u66F8\u304D\u76F4\u3059
+    const chip = { c, key: null, busy: [], fading: [], gliding: [], log: null, quiet: true, noise: false };
+    if (this.log) {
+      const raw = c.write.bind(c);
+      chip.log = [];
+      c.write = (r, d) => { chip.log.push(this.logNow, r & 0xff, d & 0xff); raw(r, d); };
+    }
+    c.write(0x0f, 0);
+    this.pool.push(chip);
+    return chip;
+  }
+
+  /** LFO \u3092\u66F8\u304F(\u901F\u3055\u30FB\u97F3\u91CF\u306E\u6DF1\u3055\u30FB\u97F3\u7A0B\u306E\u6DF1\u3055\u30FB\u6CE2\u5F62) */
+  setLfo(chip, key, p) {
+    const l = p.lfo || { rate: 0, amd: 0, pmd: 0, wf: 0 };
+    const c = chip.c;
+    c.write(0x18, l.rate & 0xff);
+    c.write(0x19, l.amd & 0x7f);
+    c.write(0x19, 0x80 | (l.pmd & 0x7f));
+    c.write(0x1b, l.wf & 3);
+    chip.key = key;
+  }
+
   /**
    * \u6B62\u3081\u308B\u3002\u6E9C\u3081\u305F\u30A4\u30D9\u30F3\u30C8\u3092\u6368\u3066\u3066\u3001\u9CF4\u3063\u3066\u3044\u308B\u58F0\u3092\u9ED9\u3089\u305B\u308B\u3002
    *
@@ -2187,34 +2258,73 @@ class OpmBank extends AudioWorkletProcessor {
   cut() {
     this.events.length = 0;
     this.at = 0;
-    // \u9CF4\u3063\u3066\u3044\u308B\u58F0\u3092\u5168\u90E8\u30AD\u30FC\u30AA\u30D5(0x08 \u306E\u4E0B 3 \u30D3\u30C3\u30C8\u304C\u30C1\u30E3\u30F3\u30CD\u30EB)
-    for (const b of this.busy) this.chip.write(0x08, b.ch);
-    this.busy.length = 0;
-    this.fading.length = 0;
-    this.gliding.length = 0;
+    for (const chip of this.pool) {
+      // \u9CF4\u3063\u3066\u3044\u308B\u58F0\u3092\u5168\u90E8\u30AD\u30FC\u30AA\u30D5(0x08 \u306E\u4E0B 3 \u30D3\u30C3\u30C8\u304C\u30C1\u30E3\u30F3\u30CD\u30EB)
+      for (const b of chip.busy) chip.c.write(0x08, b.ch);
+      chip.busy.length = 0;
+      chip.fading.length = 0;
+      chip.gliding.length = 0;
+    }
     if (this.cutAt < 0) this.cutAt = 0;
   }
 
-  /** \u7A7A\u3044\u3066\u3044\u308B\u30C1\u30E3\u30F3\u30CD\u30EB\u3092\u53D6\u308B\u3002\u7121\u3051\u308C\u3070\u3044\u3061\u3070\u3093\u53E4\u3044\u3082\u306E\u3092\u8B72\u3063\u3066\u3082\u3089\u3046 */
-  take(t) {
-    for (let ch = 0; ch < 8; ch++) {
-      if (!this.busy.some((b) => b.ch === ch)) return ch;
+  /**
+   * \u9CF4\u308A\u304D\u3063\u305F\u304B\u3002\u30AD\u30FC\u30AA\u30D5\u306E\u3042\u3068\u306E\u4F59\u97FB\u3082\u542B\u3081\u3066\u3001\u5168\u90E8\u306E\u30AA\u30DA\u304C\u9ED9\u3063\u3066\u3044\u308C\u3070 true\u3002
+   * TL \u3092\u8DB3\u3057\u305F\u6E1B\u8870\u3067\u898B\u308B(TL 127 \u306E\u30AA\u30DA\u306F\u3001\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u304C\u6B8B\u3063\u3066\u3044\u3066\u3082\u805E\u3053\u3048\u306A\u3044)
+   */
+  silent(chip) {
+    if (chip.busy.length) return false;
+    const { att, cTL } = chip.c;
+    for (let i = 0; i < 32; i++) if (att[i] + cTL[i] < 0x3f0) return false;
+    return true;
+  }
+
+  /** \u305D\u306E\u30C1\u30C3\u30D7\u306E\u7A7A\u3044\u3066\u3044\u308B\u30C1\u30E3\u30F3\u30CD\u30EB\u3002\u30CE\u30A4\u30BA\u306F 8 \u672C\u76EE\u3060\u3051\u3002\u307B\u304B\u306F 8 \u672C\u76EE\u3092\u5F8C\u56DE\u3057\u306B\u3059\u308B */
+  freeCh(chip, noise) {
+    const used = (ch) => chip.busy.some((b) => b.ch === ch);
+    if (noise) return used(7) ? -1 : 7;
+    for (let ch = 0; ch < 8; ch++) if (!used(ch)) return ch;
+    return -1;
+  }
+
+  /**
+   * \u8F09\u305B\u308B\u30C1\u30C3\u30D7\u3068\u30C1\u30E3\u30F3\u30CD\u30EB\u3092\u9078\u3076\u3002LFO \u306E\u8A2D\u5B9A\u304C\u540C\u3058\u30C1\u30C3\u30D7\u3092\u5148\u306B\u898B\u308B\u3002
+   * \u9ED9\u3063\u3066\u3044\u308B\u30C1\u30C3\u30D7\u306F\u3001LFO \u3092\u66F8\u304D\u76F4\u3057\u3066\u4F7F\u3044\u56DE\u3059\u3002\u3069\u308C\u3082\u99C4\u76EE\u306A\u3089\u30C1\u30C3\u30D7\u3092\u8DB3\u3059
+   */
+  pick(p) {
+    const key = this.lfoKey(p);
+    const noise = p.noise != null;
+    for (const chip of this.pool) {
+      if (chip.key !== key) continue;
+      const ch = this.freeCh(chip, noise);
+      if (ch >= 0) return { chip, ch };
     }
-    const old = this.busy.shift();
-    this.chip.write(0x08, old.ch);
-    // \u8B72\u3063\u305F\u58F0\u306E\u66F8\u304D\u76F4\u3057\u306F\u6368\u3066\u308B\u3002\u524D\u306E\u97F3\u306E\u9AD8\u3055\u3092\u3001\u6B21\u306E\u97F3\u3078\u66F8\u304D\u7D9A\u3051\u3066\u3057\u307E\u3046
-    this.gliding = this.gliding.filter((f) => f.ch !== old.ch);
-    return old.ch;
+    for (const chip of this.pool) {
+      if (!this.silent(chip)) continue;
+      this.setLfo(chip, key, p);
+      return { chip, ch: this.freeCh(chip, noise) };
+    }
+    const chip = this.grow();
+    this.setLfo(chip, key, p);
+    return { chip, ch: this.freeCh(chip, noise) };
   }
 
   start(ev) {
-    const ch = this.take(ev.t);
     const p = ev.patch;
-    this.fading = this.fading.filter((f) => f.ch !== ch);
-    if (ev.vs && ev.vs.length) this.fading.push({ ch, list: ev.vs, at: 0, patch: p });
-    this.gliding = this.gliding.filter((f) => f.ch !== ch);
-    if (ev.ps && ev.ps.length) this.gliding.push({ ch, list: ev.ps, at: 0 });
-    const c = this.chip;
+    const { chip, ch } = this.pick(p);
+    chip.quiet = false;
+    chip.fading = chip.fading.filter((f) => f.ch !== ch);
+    if (ev.vs && ev.vs.length) chip.fading.push({ ch, list: ev.vs, at: 0, patch: p });
+    chip.gliding = chip.gliding.filter((f) => f.ch !== ch);
+    if (ev.ps && ev.ps.length) chip.gliding.push({ ch, list: ev.ps, at: 0 });
+    const c = chip.c;
+    // \u30CE\u30A4\u30BA\u3002\u30C1\u30E3\u30F3\u30CD\u30EB 8 \u306E\u30AA\u30DA 4 \u304C\u30CE\u30A4\u30BA\u306B\u306A\u308B\u3002\u30CE\u30A4\u30BA\u3067\u306A\u3044\u97F3\u304C 8 \u672C\u76EE\u306B\u6765\u305F\u3089\u623B\u3059
+    if (ch === 7) {
+      const want = p.noise != null;
+      if (want) c.write(0x0f, 0x80 | (p.noise & 31));
+      else if (chip.noise) c.write(0x0f, 0);
+      chip.noise = want;
+    }
     c.write(0x20 + ch, 0xc0 | ((p.fb & 7) << 3) | (p.alg & 7));
     c.write(0x38 + ch, ((p.pms & 7) << 4) | (p.ams & 3));
     const car = CARRIER[p.alg & 7];
@@ -2233,51 +2343,64 @@ class OpmBank extends AudioWorkletProcessor {
     c.write(0x28 + ch, ev.kc & 0x7f);
     c.write(0x30 + ch, (ev.kf & 0x3f) << 2);
     c.write(0x08, ch | 0x78);
-    this.busy.push({ ch, off: ev.t + ev.dur });
+    chip.busy.push({ ch, off: ev.t + ev.dur });
+  }
+
+  /** 1 \u30C1\u30C3\u30D7\u3076\u3093\u3001\u6642\u523B t \u307E\u3067\u306B\u6765\u305F\u66F8\u304D\u76F4\u3057\u3068\u30AD\u30FC\u30AA\u30D5\u3092\u7247\u4ED8\u3051\u308B */
+  step(chip, t) {
+    for (let k = chip.fading.length - 1; k >= 0; k--) {
+      const f = chip.fading[k];
+      while (f.at < f.list.length && f.list[f.at][0] <= t) {
+        const att = f.list[f.at++][1];
+        const car = CARRIER[f.patch.alg & 7];
+        for (const n of car) {
+          chip.c.write(0x60 + f.ch + OPOF[n], Math.min(127, (f.patch.ops[n].tl & 0x7f) + att));
+        }
+      }
+      if (f.at >= f.list.length) chip.fading.splice(k, 1);
+    }
+    // \u97F3\u7A0B\u306E\u66F8\u304D\u76F4\u3057\u3002\u9CF4\u3089\u3057\u59CB\u3081\u306E\u30D3\u30C3\u30C8\u306F\u5225\u306E\u30EC\u30B8\u30B9\u30BF(0x08)\u306B\u3042\u308B\u306E\u3067\u3001
+    // \u3053\u3053\u306F\u97F3\u7A0B\u3060\u3051\u3092\u66F8\u3051\u308B
+    for (let k = chip.gliding.length - 1; k >= 0; k--) {
+      const f = chip.gliding[k];
+      while (f.at < f.list.length && f.list[f.at][0] <= t) {
+        const [, kc, kf] = f.list[f.at++];
+        chip.c.write(0x28 + f.ch, kc & 0x7f);
+        chip.c.write(0x30 + f.ch, (kf & 0x3f) << 2);
+      }
+      if (f.at >= f.list.length) chip.gliding.splice(k, 1);
+    }
+    for (let k = chip.busy.length - 1; k >= 0; k--) {
+      if (chip.busy[k].off <= t) {
+        chip.c.write(0x08, chip.busy[k].ch);
+        chip.busy.splice(k, 1);
+      }
+    }
   }
 
   process(inputs, outputs) {
     const out = outputs[0][0];
     const sr = sampleRate;
     const steps = ${OPM_RATE} / sr;
+    // \u9CF4\u308A\u304D\u3063\u305F\u30C1\u30C3\u30D7\u306F\u8A08\u7B97\u3057\u306A\u3044\u3002\u4F59\u97FB\u304C\u3042\u308B\u306E\u3067\u3001128 \u30B5\u30F3\u30D7\u30EB\u3054\u3068\u306B\u898B\u76F4\u3059
+    for (const chip of this.pool) if (!chip.quiet && this.silent(chip)) chip.quiet = true;
     for (let i = 0; i < out.length; i++) {
       const t = this.base + i / sr;
-      if (this.logBuf) this.logNow = t;
+      if (this.log) this.logNow = t;
       while (this.at < this.events.length && this.events[this.at].t <= t) {
         this.start(this.events[this.at++]);
       }
-      for (let k = this.fading.length - 1; k >= 0; k--) {
-        const f = this.fading[k];
-        while (f.at < f.list.length && f.list[f.at][0] <= t) {
-          const att = f.list[f.at++][1];
-          const car = CARRIER[f.patch.alg & 7];
-          for (const n of car) {
-            this.chip.write(0x60 + f.ch + OPOF[n], Math.min(127, (f.patch.ops[n].tl & 0x7f) + att));
-          }
-        }
-        if (f.at >= f.list.length) this.fading.splice(k, 1);
-      }
-      // \u97F3\u7A0B\u306E\u66F8\u304D\u76F4\u3057\u3002\u9CF4\u3089\u3057\u59CB\u3081\u306E\u30D3\u30C3\u30C8\u306F\u5225\u306E\u30EC\u30B8\u30B9\u30BF(0x08)\u306B\u3042\u308B\u306E\u3067\u3001
-      // \u3053\u3053\u306F\u97F3\u7A0B\u3060\u3051\u3092\u66F8\u3051\u308B
-      for (let k = this.gliding.length - 1; k >= 0; k--) {
-        const f = this.gliding[k];
-        while (f.at < f.list.length && f.list[f.at][0] <= t) {
-          const [, kc, kf] = f.list[f.at++];
-          this.chip.write(0x28 + f.ch, kc & 0x7f);
-          this.chip.write(0x30 + f.ch, (kf & 0x3f) << 2);
-        }
-        if (f.at >= f.list.length) this.gliding.splice(k, 1);
-      }
-      for (let k = this.busy.length - 1; k >= 0; k--) {
-        if (this.busy[k].off <= t) {
-          this.chip.write(0x08, this.busy[k].ch);
-          this.busy.splice(k, 1);
-        }
-      }
+      for (const chip of this.pool) if (!chip.quiet) this.step(chip, t);
       // \u5B9F\u6A5F\u306E\u523B\u307F\u3068\u51FA\u3059\u523B\u307F\u306F\u9055\u3046\u3002\u8DB3\u308A\u308B\u307E\u3067\u56DE\u3059
       this.acc += steps;
-      while (this.acc >= 1) { this.chip.tick(); this.acc -= 1; }
-      let v = this.chip.out();
+      let n = 0;
+      while (this.acc >= 1) { n++; this.acc -= 1; }
+      let v = 0;
+      for (const chip of this.pool) {
+        if (chip.quiet) continue;
+        for (let k = 0; k < n; k++) chip.c.tick();
+        v += chip.c.out();
+      }
       // \u6B62\u3081\u3066\u3044\u308B\u6700\u4E2D\u306A\u3089\u3001\u3077\u3064\u3063\u3068\u9CF4\u3089\u306A\u3044\u3088\u3046 10 \u30DF\u30EA\u79D2\u3067\u843D\u3068\u3059
       if (this.cutAt >= 0) {
         const len = Math.max(1, Math.round(sampleRate * 0.01));
@@ -2288,9 +2411,13 @@ class OpmBank extends AudioWorkletProcessor {
       out[i] = v;
     }
     this.base += out.length / sr;
-    if (this.logBuf && this.logBuf.length) {
-      this.port.postMessage({ regs: this.logBuf });
-      this.logBuf = [];
+    if (this.log) {
+      for (let k = 0; k < this.pool.length; k++) {
+        const chip = this.pool[k];
+        if (!chip.log.length) continue;
+        this.port.postMessage({ regs: chip.log, chip: k, type: 0 });
+        chip.log = [];
+      }
     }
     return true;
   }
@@ -3114,12 +3241,20 @@ registerProcessor('mmsxx-opm', OpmBank);
       dt2: o.dt2 ?? 0,
       ame: o.ame ?? 0
     });
+    const l = p.lfo;
     return {
       alg: p.alg ?? 0,
       fb: p.fb ?? 0,
       pms: p.pms ?? 0,
       ams: p.ams ?? 0,
-      ops: [op(p.ops?.[0]), op(p.ops?.[1]), op(p.ops?.[2]), op(p.ops?.[3])]
+      ops: [op(p.ops?.[0]), op(p.ops?.[1]), op(p.ops?.[2]), op(p.ops?.[3])],
+      ...l ? { lfo: {
+        rate: (l.rate ?? 0) & 255,
+        amd: (l.amd ?? 0) & 127,
+        pmd: (l.pmd ?? 0) & 127,
+        wf: (l.wf ?? 0) & 3
+      } } : {},
+      ...p.noise != null ? { noise: p.noise & 31 } : {}
     };
   }
   var OUT_OPS = [[3], [3], [3], [3], [1, 3], [1, 2, 3], [1, 2, 3], [0, 1, 2, 3]];
@@ -3134,7 +3269,7 @@ registerProcessor('mmsxx-opm', OpmBank);
     return hold && ms < attackMs ? "ok" : "avoid";
   }
 
-  // mmsxx-mml-studio/sound/tones.js
+  // engine/sound/tones.js
   var tones_exports = {};
   __export(tones_exports, {
     TONE_FRAME: () => TONE_FRAME,
@@ -3705,7 +3840,7 @@ registerProcessor('mmsxx-opm', OpmBank);
     }
   }
 
-  // mmsxx-mml-studio/sound/mml.js
+  // engine/sound/mml.js
   var SEMI = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 };
   var LETTER = { c: 0, d: 1, e: 2, f: 3, g: 4, a: 5, b: 6 };
   var LETTER_OF_SEMI = { 0: 0, 2: 1, 4: 2, 5: 3, 7: 4, 9: 5, 11: 6 };
@@ -4201,7 +4336,7 @@ registerProcessor('mmsxx-opm', OpmBank);
       noteJa: "\u843D\u3061\u3066\u306F\u5C11\u3057\u623B\u308B\u3001\u3092\u7E70\u308A\u8FD4\u3057\u3066\u5C0F\u3055\u304F\u306A\u308A\u3001\u305D\u306E\u3042\u3068\u306F\u5C0F\u3055\u3044\u307E\u307E\u8DF3\u306D\u3064\u3065\u3051\u308B\u3002\u623B\u308B\u5148\u304C\u9014\u4E2D\u306A\u306E\u3067\u3001\u5927\u304D\u304F\u8DF3\u306D\u308B\u306E\u306F\u982D\u306E\u4F55\u56DE\u304B\u3060\u3051",
       note: "Falls, springs back a little, falls further \u2014 and once it is quiet it keeps bouncing at that size. The loop point sits partway in, so the big bounces only happen at the top."
     },
-    // **ADSR 型だが、番号は後ろに付ける。**曲も部品も名前で持っている
+    // ADSR 型だが、番号は後ろに付ける。曲も部品も名前で持っている
     //(`@e{名前}`、`samples/songs/*.json` の `"env": "piano"`)ので、どこへ
     // 入れても鳴り方は変わらない。それでも後ろに付けるのは、一覧に並ぶ順が
     // 動かないほうが、前に見たものを探しやすいため(2026-09-24)。
@@ -4296,11 +4431,6 @@ registerProcessor('mmsxx-opm', OpmBank);
     if (opts.gain > 0) entry.gain = Math.max(0.1, Math.min(4, Number(opts.gain)));
     const tone = toneOf(opts, "wave", name);
     if (tone) entry.tone = tone;
-    if (opts.modRatio > 0 && opts.modDepth > 0) {
-      entry.modRatio = opts.modRatio;
-      entry.modDepth = opts.modDepth;
-      entry.modTable = Float32Array.from(opts.modTable ?? Array.from({ length: 32 }, (_, i) => 1 - 4 * Math.abs(i / 32 - 0.5)));
-    }
     if (at >= 0) WAVEFORMS[at] = entry;
     else WAVEFORMS.push(entry);
     return entry.id;
@@ -4666,7 +4796,7 @@ registerProcessor('mmsxx-opm', OpmBank);
       // 書き出せる先。言葉の一覧は道具の側が持つ(tool/core/targets.js)。
       // 書かなくてよい — 空なら、道具が音色の作りから割り出す
       targets: words(opts.targets),
-      // **声の取り合いの目安。**チャンネルが足りないときに、この音色を
+      // 声の取り合いの目安。チャンネルが足りないときに、この音色を
       // 割り込んでよいか。書かなければ null(決めていない)。
       // 禁止ではなく目安で、読む側(圧縮)はまだ無い
       steal: stealOf(opts.steal, opts.name),
@@ -4680,7 +4810,7 @@ registerProcessor('mmsxx-opm', OpmBank);
       // 番号でも名前でもよい(`56` でも `'Trumpet'` でも同じ)。
       // 書き間違いはここで言う — 黙って捨てると、書き出すまで気づけない
       gm: gmOf(opts.gm),
-      // **音量の段数と曲線。**どちらも必ず持つ(書かなければ既定)ので、
+      // 音量の段数と曲線。どちらも必ず持つ(書かなければ既定)ので、
       // 読む側に「無かったら」の分岐が要らない。
       //
       // 実機は音量の目盛りが機種ごとに違う。AY は 16 段で 1 段 3dB、
@@ -4691,16 +4821,11 @@ registerProcessor('mmsxx-opm', OpmBank);
       // `registerTone` で着せ替えた音色を 2 つ登録する(2026-09-25)
       vsteps: vstepsOf(opts.vsteps),
       vcurve: vcurveOf(opts.vcurve),
-      // **実機の高さの刻み。**書かなければ音色の作りから決める(`psgDiv`)。
+      // 実機の高さの刻み。書かなければ音色の作りから決める(`psgDiv`)。
       // 書くのは、ふつうの音程レジスタとは別の道で高さを作る音色だけ ——
       // AY のブザー音がそれで、エンベロープの周期で高さが決まるため
       // 刻みが 16 倍粗い(2026-09-26)
       ...opts.snapDiv > 0 ? { snapDiv: Math.floor(opts.snapDiv) } : {},
-      // **直流ぶんの比。**波形は上下対称に均してあるが、実機の DAC は 0 から上
-      // しか出さない音色がある。同じチャンネルの矩形波で刻むとき、この差が
-      // そのまま「矩形波そのものが聞こえるかどうか」になる。均す前の平均を
-      // 山の高さで割った値を持っておいて、鳴らす側が足し戻す(2026-09-26)
-      ...opts.dcBias > 0 ? { dcBias: Number(opts.dcBias) } : {},
       // 別名。同じ音を 2 通りの名前で呼べる(findWave)
       alias: Array.isArray(opts.alias) ? opts.alias.map(String) : [],
       // 説明は 2 か国語ぶん持てる。どちらか片方でよい(マニュアルの側で
@@ -4722,15 +4847,15 @@ registerProcessor('mmsxx-opm', OpmBank);
   }
   function volGainOf(v, curve, steps) {
     if (!(v > 0)) return 0;
-    const n = steps > 0 ? steps : 15;
-    const down = Math.max(0, n - v / 15 * n);
+    const n = steps > 0 ? steps : 16;
+    const down = Math.max(0, (n - 1) * (1 - v / 15));
     switch (curve) {
       case "3db":
         return Math.pow(10, -3 * down / 20);
-      // SN76489(セガ)。16 段で 1 段 2dB。**こちらでは測っていない**
+      // SN76489(セガ)。16 段で 1 段 2dB。こちらでは測っていない
       case "2db":
         return Math.pow(10, -2 * down / 20);
-      // PCE(HuC6280)。5 ビット(32 段)で 1 段 1.5dB。**こちらでは測っていない**
+      // PCE(HuC6280)。5 ビット(32 段)で 1 段 1.5dB。こちらでは測っていない
       case "1.5db":
         return Math.pow(10, -1.5 * down / 20);
       case "0.75db":
@@ -4843,6 +4968,9 @@ registerProcessor('mmsxx-opm', OpmBank);
       ...opts.set > 0 ? { set: Math.floor(opts.set) } : {},
       // 自分で作った音色なら、レジスタ 0x00〜0x07 に書く 8 バイト
       ...opts.voice ? { voice: opts.voice } : {},
+      // 書いた高さからずらす半音。作り分けで高さ違いを並べるために持つ
+      // (`opllKick(low)` など)。曲の側で `#bundle` に `@o` を書くのと同じこと
+      ...opts.semi ? { semi: Math.round(opts.semi) } : {},
       role: roleOf(opts.role, name),
       ...meta,
       special: [...new Set(meta.special.concat("worklet"))]
@@ -4854,6 +4982,175 @@ registerProcessor('mmsxx-opm', OpmBank);
         if (bytes && bytes.length === 8) entry.steal = opllSteal(bytes);
       }
     }
+    if (at >= 0) WAVEFORMS[at] = entry;
+    else WAVEFORMS.push(entry);
+    return entry.id;
+  }
+  var AY_MODES = ["tone", "noise", "env"];
+  var AY_ENV_SHAPES = {
+    saw: { r13: 8, div: 256 },
+    tri: { r13: 10, div: 512 }
+  };
+  function registerAY(name, params = {}, opts = {}) {
+    const at = requireFreeName(name, opts.overwrite);
+    const mode = AY_MODES.includes(params.mode) ? params.mode : "tone";
+    if (params.mode !== void 0 && params.mode !== mode) {
+      warn(`[ChpTnSnd] AY \u306E mode "${params.mode}" \u306F\u77E5\u3089\u306A\u3044\u540D\u524D\u3067\u3059(\u4F7F\u3048\u308B\u306E\u306F ${AY_MODES.join(" / ")})`);
+    }
+    const env = mode === "env";
+    const shape = AY_ENV_SHAPES[params.shape] ? params.shape : "saw";
+    if (env && params.shape !== void 0 && params.shape !== shape) {
+      warn(`[ChpTnSnd] AY \u306E shape "${params.shape}" \u306F\u77E5\u3089\u306A\u3044\u540D\u524D\u3067\u3059(\u4F7F\u3048\u308B\u306E\u306F ${Object.keys(AY_ENV_SHAPES).join(" / ")})`);
+    }
+    const meta = metaOf(env ? { vsteps: 1, vcurve: "3db", snapDiv: AY_ENV_SHAPES[shape].div, ...opts } : { vsteps: 16, vcurve: "3db", ...opts });
+    const entry = {
+      id: at >= 0 ? at : WAVEFORMS.length,
+      name,
+      kind: "ay",
+      mode,
+      ...env ? { shape } : {},
+      ...params.ay ? { ay: true } : {},
+      role: roleOf(opts.role, name),
+      ...meta,
+      special: [...new Set(meta.special.concat(env ? ["buzz", "worklet"] : ["worklet"]))]
+    };
+    if (at >= 0) WAVEFORMS[at] = entry;
+    else WAVEFORMS.push(entry);
+    return entry.id;
+  }
+  var NES_MODES = ["pulse", "triangle", "noise"];
+  function registerNES(name, params = {}, opts = {}) {
+    const at = requireFreeName(name, opts.overwrite);
+    const mode = NES_MODES.includes(params.mode) ? params.mode : "pulse";
+    if (params.mode !== void 0 && params.mode !== mode) {
+      warn(`[ChpTnSnd] NES \u306E mode "${params.mode}" \u306F\u77E5\u3089\u306A\u3044\u540D\u524D\u3067\u3059(\u4F7F\u3048\u308B\u306E\u306F ${NES_MODES.join(" / ")})`);
+    }
+    const tri = mode === "triangle";
+    const meta = metaOf({ vsteps: tri ? 1 : 16, vcurve: "linear", ...opts });
+    const entry = {
+      id: at >= 0 ? at : WAVEFORMS.length,
+      name,
+      kind: "nes",
+      mode,
+      ...mode === "pulse" ? { duty: [0.125, 0.25, 0.5, 0.75].includes(params.duty) ? params.duty : 0.5 } : {},
+      ...mode === "noise" && params.short ? { short: true } : {},
+      role: roleOf(opts.role, name),
+      ...meta,
+      special: [...new Set(meta.special.concat("worklet"))]
+    };
+    if (at >= 0) WAVEFORMS[at] = entry;
+    else WAVEFORMS.push(entry);
+    return entry.id;
+  }
+  function registerFDS(name, params = {}, opts = {}) {
+    const at = requireFreeName(name, opts.overwrite);
+    const src = Array.isArray(params.wave) ? params.wave : [];
+    if (src.length !== 64) warn(`[ChpTnSnd] FDS \u306E\u6CE2\u5F62\u306F 64 \u500B\u3067\u3059(${name} \u306F ${src.length} \u500B)`);
+    const wave = Array.from({ length: 64 }, (_, i) => Math.max(0, Math.min(63, Math.round(src[i] ?? 32))));
+    const m = params.mod;
+    const meta = metaOf({ vsteps: 32, vcurve: "linear", ...opts });
+    const entry = {
+      id: at >= 0 ? at : WAVEFORMS.length,
+      name,
+      kind: "fds",
+      wave,
+      ...m && m.ratio > 0 && m.depth > 0 ? { mod: { ratio: Number(m.ratio), depth: Number(m.depth), table: m.table === "step" ? "step" : "tri" } } : {},
+      role: roleOf(opts.role, name),
+      ...meta,
+      special: [...new Set(meta.special.concat("worklet"))]
+    };
+    if (at >= 0) WAVEFORMS[at] = entry;
+    else WAVEFORMS.push(entry);
+    return entry.id;
+  }
+  function registerSCC(name, params = {}, opts = {}) {
+    const at = requireFreeName(name, opts.overwrite);
+    const src = Array.isArray(params.wave) ? params.wave : [];
+    if (src.length !== 32) warn(`[ChpTnSnd] SCC \u306E\u6CE2\u5F62\u306F 32 \u500B\u3067\u3059(${name} \u306F ${src.length} \u500B)`);
+    const wave = Array.from({ length: 32 }, (_, i) => Math.max(-128, Math.min(127, Math.round(src[i] ?? 0))));
+    const meta = metaOf({ vsteps: 16, vcurve: "linear", ...opts });
+    const entry = {
+      id: at >= 0 ? at : WAVEFORMS.length,
+      name,
+      kind: "scc",
+      wave,
+      role: roleOf(opts.role, name),
+      ...meta,
+      special: [...new Set(meta.special.concat("worklet"))]
+    };
+    if (opts.env !== void 0) entry.defaultEnv = envIndex(opts.env);
+    if (at >= 0) WAVEFORMS[at] = entry;
+    else WAVEFORMS.push(entry);
+    return entry.id;
+  }
+  function registerModal(name, params = {}, opts = {}) {
+    const at = requireFreeName(name, opts.overwrite);
+    const meta = metaOf(opts);
+    const entry = {
+      id: at >= 0 ? at : WAVEFORMS.length,
+      name,
+      kind: "modal",
+      patch: String(params.patch || ""),
+      role: roleOf(opts.role, name),
+      ...meta,
+      special: [...new Set(meta.special.concat("worklet"))]
+    };
+    if (at >= 0) WAVEFORMS[at] = entry;
+    else WAVEFORMS.push(entry);
+    return entry.id;
+  }
+  function registerBrass(name, params = {}, opts = {}) {
+    const at = requireFreeName(name, opts.overwrite);
+    const meta = metaOf(opts);
+    const entry = {
+      id: at >= 0 ? at : WAVEFORMS.length,
+      name,
+      kind: "brass",
+      patch: String(params.patch || ""),
+      role: roleOf(opts.role, name),
+      ...meta,
+      special: [...new Set(meta.special.concat("worklet"))]
+    };
+    if (at >= 0) WAVEFORMS[at] = entry;
+    else WAVEFORMS.push(entry);
+    return entry.id;
+  }
+  function registerOPNARhythm(name, params = {}, opts = {}) {
+    const at = requireFreeName(name, opts.overwrite);
+    const keys = ["bd", "sd", "top", "hh", "tom", "rim"];
+    const key2 = keys.includes(params.key) ? params.key : "bd";
+    if (!keys.includes(params.key)) warn(`[ChpTnSnd] OPNA \u306E\u30EA\u30BA\u30E0\u306F ${keys.join(" / ")} \u306E\u3069\u308C\u304B\u3067\u3059(${name} \u306F ${params.key})`);
+    const meta = metaOf({ vsteps: 32, vcurve: "0.75db", ...opts });
+    const entry = {
+      id: at >= 0 ? at : WAVEFORMS.length,
+      name,
+      kind: "opnaRhythm",
+      key: key2,
+      role: roleOf(opts.role, name),
+      ...meta,
+      special: [...new Set(meta.special.concat("worklet"))]
+    };
+    if (opts.env !== void 0) entry.defaultEnv = envIndex(opts.env);
+    if (at >= 0) WAVEFORMS[at] = entry;
+    else WAVEFORMS.push(entry);
+    return entry.id;
+  }
+  function registerPCE(name, params = {}, opts = {}) {
+    const at = requireFreeName(name, opts.overwrite);
+    const noise = !!params.noise;
+    const src = Array.isArray(params.wave) ? params.wave : [];
+    if (!noise && src.length !== 32) warn(`[ChpTnSnd] PC \u30A8\u30F3\u30B8\u30F3\u306E\u6CE2\u5F62\u306F 32 \u500B\u3067\u3059(${name} \u306F ${src.length} \u500B)`);
+    const meta = metaOf({ vsteps: 32, vcurve: "1.5db", ...opts });
+    const entry = {
+      id: at >= 0 ? at : WAVEFORMS.length,
+      name,
+      kind: "pce",
+      ...noise ? { noise: true } : { wave: Array.from({ length: 32 }, (_, i) => Math.max(0, Math.min(31, Math.round(src[i] ?? 16)))) },
+      role: roleOf(opts.role, name),
+      ...meta,
+      special: [...new Set(meta.special.concat("worklet"))]
+    };
+    if (opts.env !== void 0) entry.defaultEnv = envIndex(opts.env);
     if (at >= 0) WAVEFORMS[at] = entry;
     else WAVEFORMS.push(entry);
     return entry.id;
@@ -4941,7 +5238,7 @@ registerProcessor('mmsxx-opm', OpmBank);
         display: { min: 0.01, max: 0.99 }
       }
     },
-    // AY のブザー音。音色が開く(`@{ayBuzzSaw}{ ... }`)。
+    // AY のブザー音。音色が開く(`@{ayEnvSaw}{ ... }`)。
     //
     // 中の音符はブザーの高さ。`@g{+12}` を置くと、そこから先の音符に
     // 同じチャンネルの矩形波が重なる(数は半音)。実機はこの 2 つを掛け算する
@@ -5120,6 +5417,7 @@ registerProcessor('mmsxx-opm', OpmBank);
   }
   var MARK_AT = "";
   var CUE_AT = "";
+  var TEXT_AT = "";
   var LOOP_LABEL = "loop";
   function isLoopMark(low) {
     return low === LOOP_LABEL;
@@ -5331,6 +5629,7 @@ ${val}`;
     "@role\\{(?<role>[^}]*)\\}",
     "@adsr\\{(?<adsr>[^}]*)\\}",
     "@opll\\{(?<opll>(?:[^{}]|\\{[^{}]*\\})*)\\}",
+    "@opm\\{(?<opm>(?:[^{}]|\\{[^{}]*\\})*)\\}",
     "@arp\\{(?<arp>[^}]*)\\}",
     "@pitch\\{(?<pitch>[^}]*)\\}",
     "@vol\\{(?<vol>[^}]*)\\}",
@@ -5372,6 +5671,71 @@ ${val}`;
       s: level,
       r: time(words2[3], "\u96E2\u3057")
     };
+  }
+  function readOpmSpec(text, name) {
+    const spec = { ops: [{}, {}, {}, {}] };
+    const said = /* @__PURE__ */ new Set();
+    for (const one of splitParts(text)) {
+      const m = /^([A-Za-z]+[1-4]?)\s*(?:\{([^}]*)\})?\s*(-?\d+)?$/.exec(one.trim());
+      if (!m || m[2] === void 0 && m[3] === void 0) {
+        bad(`[ChpTnSnd] MML: \u97F3\u8272 "${name}" \u306E @opm \u306E "${one.trim()}" \u306F\u8AAD\u3081\u307E\u305B\u3093(op1{\u2026} lfo{\u2026} \u304B\u3001alg 4 \u306E\u3088\u3046\u306B\u66F8\u304D\u307E\u3059)`);
+      }
+      const key2 = m[1].toLowerCase();
+      said.add(key2);
+      const op = /^op([1-4])$/.exec(key2);
+      if (op) {
+        if (m[2] === void 0) bad(`[ChpTnSnd] MML: \u97F3\u8272 "${name}" \u306E @opm \u306E ${key2} \u306F ${key2}{\u2026} \u3067\u66F8\u304D\u307E\u3059`);
+        spec.ops[Number(op[1]) - 1] = opmFields(m[2], name, key2, OPM_OP_NAMES);
+      } else if (key2 === "lfo") {
+        if (m[2] === void 0) bad(`[ChpTnSnd] MML: \u97F3\u8272 "${name}" \u306E @opm \u306E lfo \u306F lfo{\u2026} \u3067\u66F8\u304D\u307E\u3059`);
+        spec.lfo = opmFields(m[2], name, key2, OPM_LFO_NAMES);
+      } else if (["alg", "fb", "pms", "ams", "noise"].includes(key2)) {
+        if (m[3] === void 0) bad(`[ChpTnSnd] MML: \u97F3\u8272 "${name}" \u306E @opm \u306E ${key2} \u306F\u6570\u3067\u66F8\u304D\u307E\u3059`);
+        spec[key2] = Number(m[3]);
+      } else {
+        bad(`[ChpTnSnd] MML: \u97F3\u8272 "${name}" \u306E @opm \u306B "${m[1]}" \u306F\u66F8\u3051\u307E\u305B\u3093(\u66F8\u3051\u308B\u306E\u306F alg fb pms ams noise op1\u301Cop4 lfo \u3067\u3059)`);
+      }
+    }
+    if (![1, 2, 3, 4].some((n) => said.has("op" + n))) {
+      bad(`[ChpTnSnd] MML: \u97F3\u8272 "${name}" \u306E @opm \u306B\u30AA\u30DA\u304C\u3042\u308A\u307E\u305B\u3093(op1{\u2026}\u301Cop4{\u2026} \u3092\u66F8\u3044\u3066\u304F\u3060\u3055\u3044)`);
+    }
+    return opmPatch(spec);
+  }
+  var OPM_OP_NAMES = {
+    ar: "ar",
+    d1r: "d1r",
+    dr: "d1r",
+    d2r: "d2r",
+    sr: "d2r",
+    rr: "rr",
+    d1l: "d1l",
+    sl: "d1l",
+    tl: "tl",
+    ks: "ks",
+    mul: "mul",
+    ml: "mul",
+    dt1: "dt1",
+    dt: "dt1",
+    dt2: "dt2",
+    ame: "ame",
+    am: "ame"
+  };
+  var OPM_LFO_NAMES = { rate: "rate", amd: "amd", pmd: "pmd", wf: "wf" };
+  function opmFields(text, name, where, names) {
+    const out = {};
+    for (const one of String(text).split(",")) {
+      const w = one.trim().split(/\s+/).filter(Boolean);
+      if (!w.length) continue;
+      if (w.length !== 2 || !Number.isFinite(Number(w[1]))) {
+        bad(`[ChpTnSnd] MML: \u97F3\u8272 "${name}" \u306E @opm \u306E ${where}{${text}} \u306F\u300C\u540D\u524D \u6570\u300D\u3092 \`,\` \u3067\u533A\u5207\u3063\u3066\u66F8\u304D\u307E\u3059`);
+      }
+      const k = names[w[0].toLowerCase()];
+      if (!k) {
+        bad(`[ChpTnSnd] MML: \u97F3\u8272 "${name}" \u306E @opm \u306E ${where} \u306B "${w[0]}" \u306F\u66F8\u3051\u307E\u305B\u3093(\u66F8\u3051\u308B\u306E\u306F ${Object.keys(names).join(" ")} \u3067\u3059)`);
+      }
+      out[k] = Number(w[1]);
+    }
+    return out;
   }
   function readOpllSpec(text, name) {
     const spec = {};
@@ -5431,14 +5795,15 @@ ${val}`;
       octave: 0,
       detune: 0,
       role: null,
-      opll: null
+      opll: null,
+      opm: null
     };
     let at = 0;
     while (at < text.length) {
       VOICE_PART.lastIndex = at;
       const m = VOICE_PART.exec(text);
       if (!m) {
-        bad(`[ChpTnSnd] MML: \u97F3\u8272 "${name}" \u306E "${text.slice(at)}" \u306F\u8AAD\u3081\u307E\u305B\u3093(\u66F8\u3051\u308B\u306E\u306F @{\u97F3\u8272} @e{\u5F62} @role @adsr @opll @arp @pitch @vol @duty @loop @delay @gain @o @d \u3060\u3051\u3067\u3059)`);
+        bad(`[ChpTnSnd] MML: \u97F3\u8272 "${name}" \u306E "${text.slice(at)}" \u306F\u8AAD\u3081\u307E\u305B\u3093(\u66F8\u3051\u308B\u306E\u306F @{\u97F3\u8272} @e{\u5F62} @role @adsr @opll @opm @arp @pitch @vol @duty @loop @delay @gain @o @d \u3060\u3051\u3067\u3059)`);
       }
       at = VOICE_PART.lastIndex;
       const g = m.groups;
@@ -5460,6 +5825,10 @@ ${val}`;
       }
       if (g.opll !== void 0) {
         part.opll = readOpllSpec(g.opll, name);
+        continue;
+      }
+      if (g.opm !== void 0) {
+        part.opm = readOpmSpec(g.opm, name);
         continue;
       }
       if (g.arp !== void 0) {
@@ -5525,6 +5894,32 @@ ${val}`;
   function makeVoice(name, parts) {
     if (parts.length === 1) {
       const p = parts[0];
+      if (p.opm) {
+        if (p.wave !== null) {
+          bad(`[ChpTnSnd] MML: \u97F3\u8272 "${name}" \u306B @{${p.wave}} \u306F\u66F8\u3051\u307E\u305B\u3093(@opm \u304C\u97F3\u8272\u305D\u306E\u3082\u306E\u3067\u3059)`);
+        }
+        refuse(
+          name,
+          p,
+          [
+            "env",
+            "adsr",
+            "arp",
+            "pitch",
+            "vol",
+            "duty",
+            "loop",
+            "delay",
+            "gain",
+            "octave",
+            "detune"
+          ],
+          "@opm \u306F\u97F3\u8272\u305D\u306E\u3082\u306E\u3067\u3059\u3002\u8868\u3092\u7740\u305B\u308B\u3068\u304D\u306F\u5225\u306E #voice \u3067\u3053\u306E\u540D\u524D\u3092\u547C\u3093\u3067\u304F\u3060\u3055\u3044"
+        );
+        tellIfTaken(name, findWave(name) >= 0, "\u97F3\u8272");
+        registerOPM(name, p.opm, { ...p.role === null ? {} : { role: p.role }, overwrite: true });
+        return "opm";
+      }
       if (p.opll) {
         if (p.wave !== null) {
           bad(`[ChpTnSnd] MML: \u97F3\u8272 "${name}" \u306B @{${p.wave}} \u306F\u66F8\u3051\u307E\u305B\u3093(@opll \u304C\u97F3\u8272\u305D\u306E\u3082\u306E\u3067\u3059)`);
@@ -5685,6 +6080,7 @@ ${val}`;
   var DRUM_LINE = /^[ \t*]*#[ \t]*drum[ \t]+([A-Za-z][A-Za-z0-9]*)[ \t]*=[ \t]*(.*)$/i;
   var DRUM_OPEN = /@\{[ \t]*drums\b([^}]*)\}[ \t]*\{/i;
   var DRUM_MIDI = 60;
+  var DRUM_FREQ = 440 * Math.pow(2, (DRUM_MIDI - 69) / 12);
   function envRunLen(env, fallback) {
     const e = ENVELOPES[env];
     if (!e) return fallback;
@@ -5694,6 +6090,30 @@ ${val}`;
     if (!(e.s === 0)) return fallback;
     const sec = (v) => envSec(v, fallback);
     return Math.max(fallback, sec(e.a) + sec(e.d) + sec(e.r));
+  }
+  function tellIfDrumPitchClash(names, table, said) {
+    if (names.length < 2) return;
+    const at = /* @__PURE__ */ new Map();
+    for (const { nm } of names) {
+      for (const part of (table.get(nm) || {}).parts || []) {
+        const w = WAVEFORMS[part.wave];
+        if (!w || w.kind !== "opll" || !w.drum) continue;
+        const slot = OPLL_DRUM_TABLE[w.drum];
+        if (!slot || slot.ch === 6) continue;
+        const semi = (part.octave || 0) * 12 + (part.detune || 0) / 100;
+        const got = at.get(slot.ch) || /* @__PURE__ */ new Map();
+        if (!got.has(semi)) got.set(semi, `${nm}(${w.name})`);
+        at.set(slot.ch, got);
+      }
+    }
+    for (const [ch, got] of at) {
+      if (got.size < 2) continue;
+      const who = [...got.values()];
+      const key2 = `${ch}:${who.join(",")}`;
+      if (said.has(key2)) continue;
+      said.add(key2);
+      warn(`[ChpTnSnd] MML: \u540C\u3058\u62CD\u306B\u9AD8\u3055\u9055\u3044\u306E\u6253\u697D\u5668\u304C\u91CD\u306A\u3063\u3066\u3044\u307E\u3059(${who.join(" / ")})\u3002OPLL \u306E\u30EA\u30BA\u30E0\u97F3\u6E90\u306F\u30C1\u30E3\u30F3\u30CD\u30EB ${ch} \u306E\u9AD8\u3055\u3092 1 \u7D44\u3057\u304B\u6301\u305F\u306A\u3044\u306E\u3067\u3001\u3042\u3068\u306B\u66F8\u3044\u305F\u307B\u3046\u306E\u9AD8\u3055\u3067\u4E21\u65B9\u304C\u9CF4\u308A\u307E\u3059\u3002\u9806\u306B\u9CF4\u3089\u3059\u3076\u3093\u306F\u66F8\u3044\u305F\u3068\u304A\u308A\u3067\u3059`);
+    }
   }
   function readDrums(raw, bundles = readBundles(raw)) {
     const mml = normalizeDirectives(raw);
@@ -6028,7 +6448,7 @@ ${val}`;
     }
     return out;
   }
-  function stripComments(raw, names = [], cues = []) {
+  function stripComments(raw, names = [], cues = [], texts = []) {
     const src = normalizeDirectives(raw);
     const LABEL = /^\s*#\s*label\b[ \t]*(.*)$/i;
     const CUE = /^\s*#\s*cue\b[ \t]*(.*)$/i;
@@ -6060,6 +6480,21 @@ ${val}`;
         const stop = end < 0 ? src.length : end + 2;
         for (let k = i; k < stop; k++) if (src[k] === "\n") out += "\n";
         i = stop - 1;
+      } else if (src[i] === '"') {
+        const triple = src[i + 1] === '"' && src[i + 2] === '"';
+        const close = triple ? '"""' : '"';
+        let j = i + close.length, body = "";
+        while (j < src.length && src[j] !== "\n" && !src.startsWith(close, j)) {
+          body += src[j++];
+        }
+        const shut = src.startsWith(close, j);
+        if (!shut) {
+          warn(`[ChpTnSnd] MML: \u5B57 "${body}" \u306E\u9589\u3058\u308B ${close} \u304C\u3042\u308A\u307E\u305B\u3093(\u5B57\u306F 1 \u884C\u306E\u4E2D\u3067\u9589\u3058\u307E\u3059)`);
+        }
+        texts.push(body);
+        out += `${TEXT_AT}${texts.length - 1}${TEXT_AT}`;
+        i = (shut ? j + close.length : j) - 1;
+        headOfLine = false;
       } else {
         if (src[i] === "\n") headOfLine = true;
         else if (!" 	\r".includes(src[i])) headOfLine = false;
@@ -6117,8 +6552,9 @@ ${val}`;
     const drums = readDrums(mml, bundles);
     const markNames = [];
     const cueNames = [];
+    const textList = [];
     const expanded = expandLoops(expandMacros(spaceDrumRepeats(
-      lowerOutsideDrums(stripComments(String(mml), markNames, cueNames))
+      lowerOutsideDrums(stripComments(String(mml), markNames, cueNames, textList))
     )));
     const { body: src, table: cueTable } = readCueNames(expanded);
     let pos = 0;
@@ -6194,6 +6630,7 @@ ${val}`;
     const marks = [];
     const bars = [];
     const cues = [];
+    const texts = [];
     const pushNote = (dur, freq, extra) => {
       if (!bundle) {
         const ev = oneNote(dur, freq, null, extra);
@@ -6344,12 +6781,14 @@ ${val}`;
       const len = parseInt(String(head[1]).trim(), 10);
       const step = 240 / tempo / (Number.isFinite(len) && len > 0 ? len : defLen);
       const table = new Map([...drums.outer, ...drums.scopes[drumSeq++] || /* @__PURE__ */ new Map()]);
+      const saidClash = /* @__PURE__ */ new Set();
       const keep2 = { wave, bundle, chordSet, vol, env, octave, lane };
       inDrums = true;
       let base = vol;
       let names = [];
       const hit = () => {
         if (!names.length) return;
+        tellIfDrumPitchClash(names, table, saidClash);
         const id = names.length > 1 ? chordSeq++ : null;
         for (const { nm, bang } of names) {
           const d = table.get(nm);
@@ -7037,6 +7476,12 @@ ${val}`;
             const num = Number(rest[0]);
             cues.push({ name: word, arg: Number.isFinite(num) ? num : 0, t: time });
           }
+        } else if (ch === TEXT_AT) {
+          let n = "";
+          while (pos < src.length && src[pos] !== TEXT_AT) n += src[pos++];
+          pos++;
+          const said = textList[Number(n)];
+          if (said !== void 0) texts.push({ text: said, t: time });
         } else if (ch === "!") {
           let word = "";
           while (pos < src.length && isNameChar(src[pos])) word += src[pos++];
@@ -7437,6 +7882,7 @@ ${val}`;
       marks,
       bars,
       cues,
+      texts,
       // 層の呼び名。`lane` は控えめな字なので、画面に出すものは別に持つ
       laneLabels
     };
@@ -7515,6 +7961,7 @@ ${val}`;
       events: all.events.slice(head.events.length).map((e) => ({ ...e, t: e.t - head.total })),
       marks: all.marks.slice(head.marks.length).map((m) => ({ ...m, t: m.t - head.total })),
       bars: all.bars.slice(head.bars.length).map((b) => b - head.total),
+      texts: all.texts.slice(head.texts.length),
       cues: all.cues.slice(head.cues.length).map((c) => ({ ...c, t: c.t - head.total })),
       total: all.total - head.total
     };
@@ -7537,6 +7984,7 @@ ${val}`;
           takes: [],
           bars: [],
           cues: [],
+          texts: [],
           problems: REPORT.problems
         };
       }
@@ -7551,7 +7999,7 @@ ${val}`;
     if (!segs.some((x) => x.kind === "takes")) {
       return { ...compileOne(mml), takes: [], problems: here() };
     }
-    const events = [], marks = [], takes = [], bars = [], cues = [];
+    const events = [], marks = [], takes = [], bars = [], cues = [], texts = [];
     const laneLabels = /* @__PURE__ */ new Map();
     let prefix = "";
     let at = 0;
@@ -7565,6 +8013,7 @@ ${val}`;
         }
         for (const b of p.bars) bars.push(b + at);
         for (const c of p.cues) cues.push({ ...c, t: c.t + at });
+        for (const x of p.texts || []) texts.push({ ...x, t: x.t + at });
         for (const [k, v] of p.laneLabels ?? []) laneLabels.set(k, v);
         at += p.total;
         prefix += s.text;
@@ -7583,6 +8032,7 @@ ${val}`;
       }
       for (const b of opts[0].bars) bars.push(b + at);
       for (const c of opts[0].cues) cues.push({ ...c, t: c.t + at });
+      for (const x of opts[0].texts || []) texts.push({ ...x, t: x.t + at });
       for (const o of opts) for (const [k, v] of o.laneLabels ?? []) laneLabels.set(k, v);
       takes.push({
         group: s.group,
@@ -7594,6 +8044,7 @@ ${val}`;
           name: o.name,
           events: o.events,
           cues: o.cues,
+          texts: o.texts,
           bars: o.bars,
           total: o.total
         }))
@@ -7617,6 +8068,7 @@ ${val}`;
       takes,
       bars,
       cues,
+      texts,
       laneLabels,
       problems: here()
     };
@@ -7745,7 +8197,7 @@ ${val}`;
     return { ok: errors.length === 0, errors, warnings, channels, total };
   }
 
-  // mmsxx-mml-studio/sound/chipset.js
+  // engine/sound/chipset.js
   var ROLE_RANK = {
     lead: 6,
     // 旋律。いちばん前に出るもの
@@ -7758,7 +8210,7 @@ ${val}`;
     arp: 2,
     // 分散和音。和音の代わりなので、和音と同じあたり
     chord: 2,
-    // 和音・パッド。**まず譲る側**
+    // 和音・パッド。まず譲る側
     noise: 1,
     // 楽器としてのノイズ
     se: 0
@@ -7766,7 +8218,7 @@ ${val}`;
   };
   var ROLES_COVERED = ROLES.every((r) => ROLE_RANK[r] !== void 0);
 
-  // mmsxx-mml-studio/sound/mask.js
+  // engine/sound/mask.js
   function groupsOf(tracks) {
     const out = [];
     for (const t of tracks ?? []) {
@@ -7802,7 +8254,7 @@ ${val}`;
     return { group: now ? now.name : null, sets, silent, machine };
   }
 
-  // mmsxx-mml-studio/sound/wavetables.js
+  // engine/sound/wavetables.js
   var N = 32;
   var build = (f) => Array.from({ length: N }, (_, i) => f(i / N, i));
   var norm = (w) => {
@@ -7971,7 +8423,7 @@ ${val}`;
     );
   }
 
-  // mmsxx-mml-studio/sound/fmpresets.js
+  // engine/sound/fmpresets.js
   var FM_PRESETS = {
     // 1 バイオリン。弓のこすれを出すため、比を少しずらして倍音を残す
     // 2 ギター。はじいた瞬間だけ硬く、あとは丸くなる
@@ -8054,7 +8506,7 @@ ${val}`;
     }
   }
 
-  // mmsxx-mml-studio/sound/beeppresets.js
+  // engine/sound/beeppresets.js
   var BEEP_PRESETS = {
     // ---- 搬送波を刻む型。**音程を変える回路が無い機械** ----
     // 2.4kHz が鳴りっぱなしで、ソフトはそれを On/Off するだけ。
@@ -8246,126 +8698,9 @@ ${val}`;
     }
   }
 
-  // mmsxx-mml-studio/sound/fdspresets.js
-  var FDS_LEN = 64;
-  var FDS_BITS = 6;
-  var build2 = (fn) => Array.from({ length: FDS_LEN }, (_, i) => fn(i / FDS_LEN));
-  var FDS_STEP = build2((p) => {
-    const n = 8;
-    return Math.round(Math.sin(2 * Math.PI * p) * n) / n;
-  });
-  var FDS_SPIKE = build2((p) => p < 0.12 ? Math.sin(Math.PI * p / 0.12) : -0.18);
-  var FDS_HALF = build2((p) => {
-    const v = Math.sin(2 * Math.PI * p);
-    return (v > 0 ? v : 0) * 2 - 0.6;
-  });
-  var FDS_RAMP = build2((p) => Math.round((1 - 2 * p) * 6) / 6);
-  var FDS_ODD = build2((p) => p < 0.35 ? Math.sin(Math.PI * p / 0.35) : -0.7 * Math.sin(Math.PI * (p - 0.35) / 0.65));
-  var FDS_TWIN = build2((p) => Math.sin(2 * Math.PI * p) * 0.5 + Math.sin(4 * Math.PI * p) * 0.5);
-  var FDS_LIKE_ZLD = build2((p) => {
-    const h = Math.sin(2 * Math.PI * p) + 0.12 * Math.sin(4 * Math.PI * p) + 0.28 * Math.sin(6 * Math.PI * p) + 0.16 * Math.sin(10 * Math.PI * p) + 0.09 * Math.sin(14 * Math.PI * p);
-    return h / 1.65;
-  });
-  var MOD_TRI = Array.from({ length: 32 }, (_, i) => 1 - 4 * Math.abs(i / 32 - 0.5));
-  var MOD_STEP = Array.from({ length: 32 }, (_, i) => [1, 1, 0.5, 0.5, 0, 0, -0.5, -1][i >> 2]);
-  var FDS_PRESETS = {
-    fdsStep: {
-      noteJa: "\u6BB5\u306E\u3042\u308B\u6CE2\u5F62\u30E1\u30E2\u30EA\u3002\u300C\u6CE2\u5F62\u30E1\u30E2\u30EA\u306E\u97F3\u300D\u3068\u3044\u3061\u3070\u3093\u5206\u304B\u308A\u3084\u3059\u304F\u805E\u3053\u3048\u308B\u5F62",
-      role: "lead",
-      wave: FDS_STEP,
-      note: 'Stepped wavetable \u2014 the shape that reads as "wavetable chip" more than any other.'
-    },
-    fdsSpike: {
-      noteJa: "\u6CE2\u5F62\u30E1\u30E2\u30EA\u306B\u7D30\u3044\u5C71\u3092\u7ACB\u3066\u305F\u3082\u306E\u3002\u660E\u308B\u304F\u3066\u7D30\u3044",
-      role: "lead",
-      note: "Narrow spike in the wavetable: bright and thin.",
-      wave: FDS_SPIKE
-    },
-    fdsHalf: {
-      noteJa: "\u534A\u5206\u3060\u3051\u6B8B\u3057\u305F\u6CE2\u3002\u592A\u304F\u3066\u4E38\u3044",
-      role: "bass",
-      wave: FDS_HALF,
-      note: "Half-wave rectified: fat and round."
-    },
-    fdsRamp: {
-      noteJa: "\u6CE2\u5F62\u30E1\u30E2\u30EA\u306B\u5742\u3092\u5165\u308C\u305F\u3082\u306E\u3002\u3056\u3089\u3064\u3044\u3066\u3044\u3066\u3001\u306E\u3053\u304E\u308A\u306B\u8FD1\u3044",
-      role: "lead",
-      wave: FDS_RAMP,
-      note: "Ramp in the wavetable. Buzzy, close to a saw."
-    },
-    fdsOdd: {
-      noteJa: "\u5947\u6570\u306E\u500D\u97F3\u3060\u3051\u306E\u5F62\u3002\u6728\u7BA1\u306E\u3088\u3046\u306B\u9F3B\u306B\u304B\u304B\u3063\u3066\u805E\u3053\u3048\u308B",
-      role: "lead",
-      wave: FDS_ODD,
-      note: "Odd-harmonic shape. Reads as reedy."
-    },
-    fdsTwin: {
-      noteJa: "1 \u5468\u671F\u306B\u5C71\u304C 2 \u3064\u3002\u5B9F\u969B\u306E\u9AD8\u3055\u3088\u308A 1 \u30AA\u30AF\u30BF\u30FC\u30D6\u660E\u308B\u304F\u805E\u3053\u3048\u308B",
-      role: "lead",
-      wave: FDS_TWIN,
-      note: "Two humps per cycle, so it sounds an octave brighter than it is."
-    },
-    // ---- 変調ユニット入り。**ここからが FDS らしさ** ----
-    fdsVibe: {
-      role: "lead",
-      note: "Slow modulation used as vibrato rather than as timbre.",
-      wave: FDS_HALF,
-      mod: { ratio: 0.035, depth: 0.03, table: MOD_TRI },
-      noteJa: "\u3086\u3063\u304F\u308A\u63FA\u308C\u308B\u3002\u30D3\u30D6\u30E9\u30FC\u30C8"
-    },
-    fdsBell: {
-      role: "counter",
-      note: "Fast modulation at a musical ratio, which grows sidebands \u2014 much the same thing FM does.",
-      wave: FDS_STEP,
-      mod: { ratio: 1, depth: 0.6, table: MOD_TRI },
-      noteJa: "**\u540C\u3058\u9AD8\u3055\u3067\u6DF1\u304F\u63FA\u3089\u3059**\u3002\u91D1\u5C5E\u8CEA"
-    },
-    fdsMetal: {
-      role: "perc",
-      note: "Modulation deep enough that the result stops being a pitch and becomes a clang.",
-      wave: FDS_TWIN,
-      mod: { ratio: 2.51, depth: 0.9, table: MOD_STEP },
-      noteJa: "\u534A\u7AEF\u306A\u6BD4 + \u6BB5\u306E\u3042\u308B\u8868\u3002\u6FC1\u3063\u305F\u91D1\u5C5E"
-    },
-    fdsWobble: {
-      role: "counter",
-      note: "Modulation slow and deep: the pitch audibly swings.",
-      wave: FDS_ODD,
-      mod: { ratio: 0.25, depth: 0.35, table: MOD_STEP },
-      noteJa: "\u97F3\u306E 1/4 \u306E\u901F\u3055\u3067\u6DF1\u304F\u3002\u5927\u304D\u304F\u3046\u306D\u308B"
-    },
-    fdsGrowl: {
-      role: "bass",
-      note: "Low, with modulation fast enough to roughen the tone.",
-      wave: FDS_RAMP,
-      mod: { ratio: 0.5, depth: 0.7, table: MOD_STEP },
-      noteJa: "\u534A\u5206\u306E\u901F\u3055\u3067\u6DF1\u304F\u3002\u5538\u308B"
-    },
-    // **旋律を張るための 1 つ。**上の 5 つはビブラートを音色として使っているが、
-    // これは**ビブラートをビブラートとして**使う — 浅くゆっくり掛けて、
-    // 形のほうで通りをよくする
-    // **前置きのすぐ後ろの `Like`。**あの音を目指した、という印
-    // (docs/MML.md の「音色の名前」)。**実機のデータではない**ことを
-    // 名前のほうでも言っておく
-    fdsLikeZld: {
-      role: "lead",
-      tags: ["homage"],
-      note: "A hollow, slightly asymmetric wavetable with a shallow vibrato \u2014 the overworld-lead sound of the disk system, drawn rather than lifted.",
-      wave: FDS_LIKE_ZLD,
-      mod: { ratio: 0.015, depth: 0.025, table: MOD_TRI },
-      noteJa: "\u4E2D\u304C\u7A7A\u3044\u305F\u5F62\u306B\u3001\u6D45\u3044\u63FA\u308C\u3092\u3086\u3063\u304F\u308A\u639B\u3051\u305F\u3082\u306E\u3002\u65CB\u5F8B\u3092\u5F35\u308B\u305F\u3081\u306E\u97F3\u3067\u3001\u548C\u97F3\u306E\u4E0A\u306B\u4E57\u305B\u3066\u3082\u57CB\u3082\u308C\u306A\u3044"
-    }
-  };
-  function registerDefaultFDS() {
-    for (const [name, p] of Object.entries(FDS_PRESETS)) {
-      const meta = { note: p.note, noteJa: p.noteJa, role: p.role, tags: p.tags, alias: p.alias };
-      registerWave(name, p.wave, FDS_BITS, p.mod ? { ...meta, modRatio: p.mod.ratio, modDepth: p.mod.depth, modTable: p.mod.table } : meta);
-    }
-  }
-
-  // mmsxx-mml-studio/sound/fm4presets.js
-  var FM4_PRESETS = {
-    "fm4Brass": {
+  // engine/sound/opmpresets.js
+  var OPM_PRESETS = {
+    "opnBrass": {
       noteJa: "4 \u30AA\u30DA\u306E\u91D1\u7BA1\u3002\u30AA\u30DA\u30EC\u30FC\u30BF\u304C\u5897\u3048\u305F\u3076\u3093\u3001\u4F38\u3070\u3057\u3066\u3044\u308B\u3042\u3044\u3060\u306B\u500D\u97F3\u304C\u80B2\u3064\u3002\u672C\u7269\u306E\u91D1\u7BA1\u3068\u540C\u3058\u52D5\u304D\u3067\u30012 \u30AA\u30DA\u306B\u306F\u3067\u304D\u306A\u3044",
       role: "lead",
       note: "Four-operator brass. The extra operators let the harmonics build over the note the way a real horn does \u2014 the thing two operators cannot do.",
@@ -8377,7 +8712,7 @@ ${val}`;
         { ar: 17, d1r: 6, d2r: 0, rr: 9, d1l: 1, tl: 0, ks: 0, mul: 1, dt1: 5, dt2: 0 }
       ] })
     },
-    "fm4Lead": {
+    "opnLead": {
       noteJa: "4 \u30AA\u30DA\u306E\u30EA\u30FC\u30C9\u3002\u660E\u308B\u304F\u524D\u3078\u51FA\u308B\u3002\u539A\u3044\u7DE8\u6210\u306E\u4E0A\u306B\u4E57\u305B\u308B\u305F\u3081\u306E\u97F3",
       role: "lead",
       note: "Four-operator lead. Bright and cutting, meant to sit above a full arrangement.",
@@ -8389,7 +8724,7 @@ ${val}`;
         { ar: 23, d1r: 6, d2r: 0, rr: 9, d1l: 2, tl: 4, ks: 0, mul: 1, dt1: 5, dt2: 0 }
       ] })
     },
-    "fm4Bass": {
+    "opnBass": {
       noteJa: "4 \u30AA\u30DA\u306E\u4F4E\u97F3\u3002\u82AF\u304C\u3057\u3063\u304B\u308A\u3057\u3066\u3044\u3066\u4E0A\u306E\u500D\u97F3\u3082\u3042\u308B\u306E\u3067\u3001\u5C0F\u3055\u3044\u30B9\u30D4\u30FC\u30AB\u30FC\u3067\u3082\u805E\u3053\u3048\u308B",
       role: "bass",
       note: "Four-operator bass. Solid fundamental with enough upper harmonics to be heard on small speakers.",
@@ -8401,7 +8736,7 @@ ${val}`;
         { ar: 27, d1r: 11, d2r: 0, rr: 10, d1l: 3, tl: 0, ks: 0, mul: 1, dt1: 5, dt2: 0 }
       ] })
     },
-    "fm4EP": {
+    "opnEP": {
       noteJa: "\u30A8\u30EC\u30AF\u30C8\u30EA\u30C3\u30AF\u30D4\u30A2\u30CE\u30024 \u30AA\u30DA\u306E FM \u304C\u3044\u3061\u3070\u3093\u6709\u540D\u306B\u306A\u3063\u305F\u97F3",
       role: "chord",
       note: "Electric piano. The sound four-operator FM is most famous for.",
@@ -8413,7 +8748,7 @@ ${val}`;
         { ar: 24, d1r: 7, d2r: 0, rr: 8, d1l: 4, tl: 3, ks: 0, mul: 2, dt1: 5, dt2: 0 }
       ] })
     },
-    "fm4Bell": {
+    "opmBell": {
       noteJa: "\u9418\u3002\u305D\u308D\u308F\u306A\u3044\u500D\u97F3\u3067\u3001\u9577\u304F\u6E1B\u308B",
       role: "counter",
       note: "Bell. Inharmonic partials, long decay.",
@@ -8425,7 +8760,7 @@ ${val}`;
         { ar: 27, d1r: 12, d2r: 0, rr: 4, d1l: 15, tl: 4, ks: 0, mul: 2, dt1: 5, dt2: 0 }
       ] })
     },
-    "fm4Klang": {
+    "opnKlang": {
       noteJa: "\u91D1\u5C5E\u3092\u53E9\u3044\u305F\u97F3\u3002\u308F\u3056\u3068\u500D\u97F3\u3092\u305D\u308D\u3048\u3066\u3044\u306A\u3044\u306E\u3067\u3001\u97F3\u3068\u3044\u3046\u3088\u308A\u30CE\u30A4\u30BA\u306B\u8FD1\u3044",
       role: "perc",
       note: "Metallic hit. Deliberately inharmonic \u2014 closer to noise than to a note.",
@@ -8437,7 +8772,7 @@ ${val}`;
         { ar: 25, d1r: 9, d2r: 0, rr: 9, d1l: 2, tl: 0, ks: 0, mul: 1, dt1: 5, dt2: 0 }
       ] })
     },
-    "fm4Glass": {
+    "opmGlass": {
       noteJa: "\u30AC\u30E9\u30B9\u306E\u3088\u3046\u306B\u7D30\u304F\u6F84\u3093\u3060\u97F3\u3002\u982D\u306F\u786C\u3044",
       role: "counter",
       note: "Glassy and thin, with a hard attack.",
@@ -8449,7 +8784,7 @@ ${val}`;
         { ar: 27, d1r: 13, d2r: 0, rr: 4, d1l: 15, tl: 3, ks: 0, mul: 2, dt1: 6, dt2: 0 }
       ] })
     },
-    "fm4Slap": {
+    "opnSlap": {
       noteJa: "\u30B9\u30E9\u30C3\u30D7\u306E\u30D9\u30FC\u30B9\u3002\u982D\u3067\u307B\u3068\u3093\u3069\u6C7A\u307E\u308B",
       role: "bass",
       note: "Slapped bass. The attack carries most of the character.",
@@ -8461,7 +8796,7 @@ ${val}`;
         { ar: 27, d1r: 11, d2r: 0, rr: 10, d1l: 3, tl: 0, ks: 0, mul: 1, dt1: 5, dt2: 0 }
       ] })
     },
-    "fm4Tom": {
+    "opmTom": {
       noteJa: "\u97F3\u7A0B\u306E\u843D\u3061\u308B\u30BF\u30E0",
       role: "perc",
       note: "Tom with a pitch drop.",
@@ -8474,24 +8809,24 @@ ${val}`;
       ] })
     }
   };
-  function registerDefaultFM4() {
-    for (const [name, p] of Object.entries(FM4_PRESETS)) {
+  function registerOPMPresets() {
+    for (const [name, p] of Object.entries(OPM_PRESETS)) {
       registerOPM(name, p.patch, { note: p.note, noteJa: p.noteJa, role: p.role });
     }
     registerBaked("bakedBrass", {
-      from: "fm4Brass",
+      from: "opnBrass",
       octaves: [3, 4, 5],
       step: 3,
       role: "lead",
-      noteJa: "fm4Brass \u3092 3 \u30AA\u30AF\u30BF\u30FC\u30D6\u3076\u3093\u713C\u3044\u3066\u6CE2\u5F62\u306B\u3057\u305F\u3082\u306E\u3002\u5834\u6240\u306F\u98DF\u3046\u304C\u8A08\u7B97\u306F\u8981\u3089\u306A\u3044 \u2014 \u5B9F\u6A5F\u304C\u3084\u3063\u3066\u3044\u305F\u53D6\u308A\u5F15\u304D\u3068\u540C\u3058",
+      noteJa: "opnBrass \u3092 3 \u30AA\u30AF\u30BF\u30FC\u30D6\u3076\u3093\u713C\u3044\u3066\u6CE2\u5F62\u306B\u3057\u305F\u3082\u306E\u3002\u5834\u6240\u306F\u98DF\u3046\u304C\u8A08\u7B97\u306F\u8981\u3089\u306A\u3044 \u2014 \u5B9F\u6A5F\u304C\u3084\u3063\u3066\u3044\u305F\u53D6\u308A\u5F15\u304D\u3068\u540C\u3058",
       note: "The four-operator brass rendered to samples across three octaves. Baking it costs memory but no CPU \u2014 the trade real hardware made."
     });
   }
 
-  // mmsxx-mml-studio/sound/extrawaves.js
+  // engine/sound/extrawaves.js
   var EXTRA_LEN = 32;
-  var build3 = (fn) => Array.from({ length: EXTRA_LEN }, (_, i) => fn(i / EXTRA_LEN));
-  var pulse = (n) => build3((p) => p < n / 16 ? 1 : -1);
+  var build2 = (fn) => Array.from({ length: EXTRA_LEN }, (_, i) => fn(i / EXTRA_LEN));
+  var pulse = (n) => build2((p) => p < n / 16 ? 1 : -1);
   var TUNER = (() => {
     const h = [0.5, 0.35, 0.4, 0.95, 1, 0.25];
     const power = h.reduce((s, a) => s + a * a, 0);
@@ -8500,103 +8835,16 @@ ${val}`;
       for (let j = 0; j <= k; j++) acc += (k + 1 - j) * h[j] * h[j] / power;
       return -Math.PI * acc;
     });
-    const raw = build3((p) => h.reduce(
+    const raw = build2((p) => h.reduce(
       (sum, a, i) => sum + a * Math.sin(2 * Math.PI * (i + 1) * p + phase[i]),
       0
     ));
     const top = Math.max(...raw.map(Math.abs));
     return raw.map((v) => v / top);
   })();
-  var SAW_STEP = build3((p) => {
+  var SAW_STEP = build2((p) => {
     const step = Math.floor(p * 8);
     return step >= 7 ? -1 : step / 6 * 2 - 1;
-  });
-  var AY_VOL_YM = [
-    0,
-    1,
-    1,
-    2,
-    2,
-    3,
-    3,
-    4,
-    5,
-    6,
-    7,
-    9,
-    11,
-    13,
-    15,
-    18,
-    22,
-    26,
-    31,
-    37,
-    45,
-    53,
-    63,
-    76,
-    90,
-    106,
-    127,
-    151,
-    180,
-    214,
-    255,
-    255
-  ];
-  var AY_VOL_AY = [
-    0,
-    0,
-    3,
-    3,
-    4,
-    4,
-    6,
-    6,
-    9,
-    9,
-    13,
-    13,
-    18,
-    18,
-    29,
-    29,
-    34,
-    34,
-    55,
-    55,
-    77,
-    77,
-    98,
-    98,
-    130,
-    130,
-    166,
-    166,
-    208,
-    208,
-    255,
-    255
-  ];
-  var AY_SHAPE = (list) => {
-    const mid = list.reduce((s, v) => s + v, 0) / list.length;
-    const out = list.map((v) => v - mid);
-    const peak = Math.max(...out.map(Math.abs));
-    return out.map((v) => v / peak);
-  };
-  var SAW_OF = (t) => AY_SHAPE(Array.from({ length: 32 }, (_, i) => t[31 - i] / 255));
-  var TRI_OF = (t) => AY_SHAPE([
-    ...Array.from({ length: 32 }, (_, i) => t[31 - i] / 255),
-    ...Array.from({ length: 32 }, (_, i) => t[i] / 255)
-  ]);
-  var BUZZ_SAW = SAW_OF(AY_VOL_YM);
-  var BUZZ_TRI = TRI_OF(AY_VOL_YM);
-  var BUZZ_SAW_4 = SAW_OF(AY_VOL_AY);
-  var BUZZ_TRI_4 = TRI_OF(AY_VOL_AY);
-  var NES_TRI = Array.from({ length: 32 }, (_, i) => {
-    const step = i < 16 ? 15 - i : i - 16;
-    return step / 15 * 2 - 1;
   });
   var EXTRA_PRESETS = {
     "wavePulse(6)": {
@@ -8634,44 +8882,9 @@ ${val}`;
       bits: 1,
       note: "7/16 duty (43.75%). Nearly as full as a square wave."
     },
-    // **ファミコンの三角波に寄せたもの。**いまの `triangle` は触らない
-    // (あれは音量が効くようにあえてそうしてある。実機に寄せて殺すと、
-    // いま使っている曲が全部変わる)。**寄せたものが要るなら別の名前で足す。**
+    // 音律を確かめるためのもの。楽器ではない。
     //
-    // **`wave` の一族ではない。**あちらは実機の波形メモリらしさを集めたところで、
-    // 書き換えられることが売りになっている。ファミコンの三角波は形が固定で、
-    // 書き換えられない。中で `registerWave` を通っているだけ(2026-09-25)。
-    //
-    // **`vsteps: 1` を持つ。**実機ではこの声にだけ音量つまみが無かったので、
-    // 段が 1 つしかない —— 鳴るときは必ず最大で、`v0` だけが消音になる。
-    // 音量の目盛りそのものは 0〜15 のままで、**この音色が段を 1 つしか
-    // 持たない**だけ。前は `special: ['fixedVolume']` で書いていた。
-    //
-    // `vcurve: 'linear'` も実機どおり。ファミコンの矩形波と三角波は、
-    // 4 ビットの値がそのまま振幅になる(対数の AY とはここが違う)。
-    //
-    // **音量の下駄 1.65 倍は実機の比。**あちらは声を足すところが直線ではなくて、
-    // 三角のチャンネルだけ重みが違う。
-    //
-    //   パルス 1 本 最大 = 95.88 / (8128/15 + 100)  = 0.149
-    //   三角      最大 = 159.79 / (8227/15 + 100) = 0.246
-    //
-    // ピークで 1.65 倍。三角の形そのものは実効値が振幅の 1/√3(−4.8dB)なので、
-    // 掛けてようやくパルス 1 本と並ぶ。下駄を入れないと 4.4dB 小さく、
-    // 実機の記憶より引っ込んで聞こえる(2026-09-23)。
-    nesTriangle: {
-      noteJa: "\u30D5\u30A1\u30DF\u30B3\u30F3\u306E\u4E09\u89D2\u6CE2\u3002\u306A\u3081\u3089\u304B\u3067\u306F\u306A\u304F 32 \u6BB5\u306E\u968E\u6BB5\u3067\u3001\u305D\u3053\u304B\u3089 31 \u500D\u97F3\u3068 33 \u500D\u97F3\u304C\u51FA\u308B\u3002\u3042\u306E\u300C\u30B8\u30FC\u300D\u3068\u3044\u3046\u8CEA\u611F\u306F\u3053\u308C\u3002\u5B9F\u6A5F\u3068\u540C\u3058\u304F\u97F3\u91CF\u3064\u307E\u307F\u304C\u52B9\u304B\u306A\u3044(v0 \u3067\u6D88\u97F3\u3001\u305D\u308C\u4EE5\u5916\u306F\u6700\u5927)\u3002\u5B9F\u6A5F\u306F\u4E09\u89D2\u306E\u30C1\u30E3\u30F3\u30CD\u30EB\u3060\u3051\u8DB3\u3059\u3068\u304D\u306E\u91CD\u307F\u304C\u9055\u3046\u306E\u3067\u3001\u305D\u306E\u6BD4\u306E 1.65 \u500D\u3092\u4E0B\u99C4\u306B\u3057\u3066\u3042\u308B\u3002\u3053\u308C\u3067\u30D1\u30EB\u30B9 1 \u672C\u3068\u540C\u3058\u304F\u3089\u3044\u306E\u5927\u304D\u3055\u306B\u306A\u308B",
-      role: "bass",
-      wave: NES_TRI,
-      bits: 4,
-      vsteps: 1,
-      vcurve: "linear",
-      gain: 1.65,
-      note: "The NES triangle. A thirty-two step staircase rather than a smooth ramp, which puts the 31st and 33rd harmonics into it \u2014 that is where the buzz comes from. As on the real chip, volume does nothing: v0 silences it, anything else plays full. The real mixer weights the triangle channel more heavily than a pulse, so it carries that ratio as a 1.65x boost \u2014 without it the triangle sits 4.4dB below a pulse at full volume."
-    },
-    // **音律を確かめるためのもの。**楽器ではない。
-    //
-    // **`wave` の一族ではない。**あちらは実機の波形メモリらしさを集めたところで、
+    // `wave` の一族ではない。あちらは実機の波形メモリらしさを集めたところで、
     // 段が粗いことが売りになっている。これは 8 ビットで、倍音から作っていて、
     // 分周の丸めからも外してある。性格が合わないので `tool` で始める。
     // 素の `tuner` を取らないのは、短い語を 1 つ押さえてしまうため(2026-09-23)。
@@ -8681,7 +8894,7 @@ ${val}`;
     // 矩形波には偶数倍音が無いので、4 倍音も 2 倍音も出ない。ぶつかる相手が
     // いないので、どの音律で鳴らしても同じに聞こえる(2026-09-23)。
     //
-    // そこで 2〜5 倍音を持たせて、**4 倍音と 5 倍音を basic より大きくした。**
+    // そこで 2〜5 倍音を持たせて、4 倍音と 5 倍音を basic より大きくした。
     // 3 度も 5 度も、ずれていればはっきりうなる。
     toolTuner: {
       noteJa: "\u97F3\u5F8B\u3092\u78BA\u304B\u3081\u308B\u305F\u3081\u306E\u3082\u306E\u3002\u697D\u5668\u3067\u306F\u306A\u3044\u30024 \u500D\u97F3\u3068 5 \u500D\u97F3\u3092\u5F37\u304F\u3057\u3066\u3042\u308B\u306E\u3067\u30013 \u5EA6\u3068 5 \u5EA6\u306E\u305A\u308C\u304C\u3046\u306A\u308A\u306B\u306A\u3063\u3066\u51FA\u308B\u3002\u97F3\u5F8B\u3092\u66FF\u3048\u3066\u9577\u304F\u306E\u3070\u3059\u3068\u3001\u3046\u306A\u308A\u306E\u901F\u3055\u304C\u5909\u308F\u308B\u306E\u304C\u5206\u304B\u308B\u3002\u77E9\u5F62\u6CE2\u3067\u306F\u5076\u6570\u500D\u97F3\u304C\u7121\u3044\u306E\u3067\u3001\u305D\u3082\u305D\u3082\u3046\u306A\u308A\u304C\u51FA\u306A\u3044\u3002\u5B9F\u6A5F\u306E\u5206\u5468\u306B\u306F\u4E57\u305B\u306A\u3044\u3002\u4E38\u3081\u308B\u3068\u7D14\u6B63\u306E 3 \u5EA6\u304C 1.5Hz \u3046\u306A\u3063\u3066\u3001\u5E73\u5747\u5F8B\u306E\u901F\u3044\u3046\u306A\u308A\u3088\u308A\u63FA\u308C\u3066\u805E\u3053\u3048\u3066\u3057\u307E\u3046\u3002\u5C71\u3092 1 \u306B\u5747\u3059\u3076\u3093\u5B9F\u52B9\u5024\u304C\u4E0B\u304C\u308B\u306E\u3067\u3001\u97F3\u91CF\u306E\u4E0B\u99C4\u3092 1.9 \u500D\u306F\u304B\u305B\u3066\u3001\u77E9\u5F62\u6CE2\u3068\u540C\u3058 v \u3067\u540C\u3058\u304F\u3089\u3044\u306E\u5927\u304D\u3055\u306B\u306A\u308B\u3088\u3046\u306B\u3057\u3066\u3042\u308B",
@@ -8691,84 +8904,6 @@ ${val}`;
       special: ["exact"],
       gain: 1.9,
       note: "A ruler, not an instrument. The fourth and fifth harmonics are pushed up, so a third or a fifth that is out of tune beats audibly. Hold a dyad and switch tunings: the beat rate is the difference. A square wave has no even harmonics, so nothing beats there at all. This one is never rounded onto the real chip dividers: rounding leaves a pure third beating at 1.5Hz, which reads as more wobble than the fast one."
-    },
-    // ---- AY のエンベロープを発振器として使ったときの音(ブザー音) ----
-    //
-    // MSX の PSG は、チャンネルの音量をエンベロープに任せられる。周期を
-    // 音の速さまで上げると、音量の上下そのものが波形になる。矩形波しか
-    // 出せないはずの PSG から、のこぎりと三角が出るのはこれ。
-    //
-    // **段は 32。DAC は対数で 1 段 1.5dB。**だから下りが直線ではなく、
-    // 指数で落ちる形になる。そこがブザー音の質感(2026-09-26)。
-    //
-    // **音量つまみは効かない。**音量レジスタをエンベロープに明け渡すので、
-    // `v` を書いても変わらない。`vsteps: 1` がそれを言う。
-    //
-    // **大きさは実機に合わせる。**実機の DAC では、ブザーの山は v15 の矩形波と
-    // 同じ高さで、波が下まで降りるぶん実効値が低い(YM で 4.6dB、AY で 4.3dB)。
-    // こちらの波形は山を 1 に均してあるので、そのままだとさらに下がる。
-    //
-    // **`gain` は表から計算した値ではなく、鳴らして測った値。**波形を帯域制限して
-    // 山で正規化するところで目減りするぶんが、形によって違う。のこぎりは段差が
-    // 大きいぶん行き過ぎが出て、そこで 1.5dB 削られていた(2026-09-26)。
-    //
-    // 下駄を付けないままにしていた(2026-09-26 の午前)。均したあとの値を実機の値だと
-    // 思い込んでいた。均す前と後で矩形波との比が変わるのを見落としていた。
-    //
-    // **高さはエンベロープの周期で決まる。**クロックを 8 で割ったものを数え、
-    // `EP` ごとに 1 段進む。のこぎりは 32 段で 1 周(`snapDiv: 256`)、三角は
-    // 端で向きが反転して 64 段で 1 周(`snapDiv: 512`)。
-    //
-    // だから刻みがふつうの音程レジスタの 16 分の 1(三角は 32 分の 1)しかない。
-    // 低いところは合うが高いところはずれる。ベースに使われたのはそのため。
-    // 三角を 256 で寄せていたときは、実機より音痴が小さかった(2026-09-26)。
-    "ayBuzzSaw(5bit)": {
-      noteJa: "MSX \u306E PSG \u3067\u3001\u97F3\u91CF\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u3092\u767A\u632F\u5668\u306B\u3057\u305F\u3068\u304D\u306E\u97F3\u3002\u4E0B\u308B\u306E\u3053\u304E\u308A\u3002\u6BB5\u306F 32 \u3067\u3001\u5B9F\u6A5F\u306E DAC \u304C\u5BFE\u6570\u306A\u306E\u3067\u76F4\u7DDA\u3067\u306F\u306A\u304F\u6307\u6570\u3067\u843D\u3061\u308B\u3002\u97F3\u91CF\u3064\u307E\u307F\u306F\u52B9\u304B\u306A\u3044(v0 \u3067\u6D88\u97F3\u3001\u305D\u308C\u4EE5\u5916\u306F\u6700\u5927)\u3002\u5927\u304D\u3055\u306F v13 \u306E\u77E9\u5F62\u6CE2\u3068\u540C\u3058\u304F\u3089\u3044\u3002\u5C71\u306F v15 \u3068\u540C\u3058\u9AD8\u3055\u3060\u304C\u3001\u6CE2\u304C\u4E0B\u307E\u3067\u964D\u308A\u308B\u306E\u3067\u5B9F\u52B9\u5024\u304C 4.6dB \u4F4E\u3044\u3002\u5B9F\u6A5F\u3067\u306F\u9AD8\u3055\u306E\u523B\u307F\u304C\u7C97\u304F\u3001\u9AD8\u3044\u97F3\u307B\u3069\u305A\u308C\u308B\u306E\u3067\u30D9\u30FC\u30B9\u306B\u4F7F\u3046",
-      role: "bass",
-      wave: BUZZ_SAW,
-      bits: 5,
-      vsteps: 1,
-      snapDiv: 256,
-      gain: 1.841,
-      special: ["buzz"],
-      dcBias: 0.289,
-      note: "What an MSX PSG sounds like when its volume envelope is driven at audio rate: a falling sawtooth. Thirty-two steps, and because the real DAC is logarithmic it falls in an exponential curve rather than a straight line. Volume does nothing here. On the real chip the pitch steps are coarse, so it went on the bass where that does not show. It lands about as loud as a square wave at v13."
-    },
-    "ayBuzzTri(5bit)": {
-      noteJa: "MSX \u306E PSG \u3067\u3001\u97F3\u91CF\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u3092\u4E09\u89D2\u306E\u5F62\u3067\u56DE\u3057\u305F\u3068\u304D\u306E\u97F3\u3002\u77E9\u5F62\u6CE2\u3092\u8DB3\u3057\u3066\u306F\u4F5C\u308C\u306A\u3044\u4E09\u89D2\u304C\u3001\u3053\u3061\u3089\u304B\u3089\u306F\u51FA\u308B\u3002\u6BB5\u306F 32 \u3067\u3001\u5B9F\u6A5F\u306E DAC \u304C\u5BFE\u6570\u306A\u306E\u3067\u5742\u304C\u3075\u304F\u3089\u3080\u3002\u97F3\u91CF\u3064\u307E\u307F\u306F\u52B9\u304B\u306A\u3044\u3002\u306E\u3053\u304E\u308A\u3068\u540C\u3058\u304F\u3001v13 \u306E\u77E9\u5F62\u6CE2\u3068\u540C\u3058\u304F\u3089\u3044\u306E\u5927\u304D\u3055\u3002\u5B9F\u6A5F\u3067\u306F\u540C\u3058\u5468\u671F\u306E\u306E\u3053\u304E\u308A\u3088\u308A 1 \u30AA\u30AF\u30BF\u30FC\u30D6\u4F4E\u304F\u9CF4\u308B",
-      role: "bass",
-      wave: BUZZ_TRI,
-      bits: 5,
-      vsteps: 1,
-      snapDiv: 512,
-      gain: 1.581,
-      special: ["buzz"],
-      dcBias: 0.289,
-      note: "The same envelope trick with the alternating shape: a triangle, the one thing you cannot reach by stacking squares. Thirty-two steps each way, bowed by the logarithmic DAC. Volume does nothing, and it lands about as loud as a square at v13. On the real chip it sounds an octave below the sawtooth for the same envelope period."
-    },
-    "ayBuzzSaw(4bit)": {
-      noteJa: "\u4E0B\u308B\u306E\u3053\u304E\u308A\u306E 16 \u6BB5\u3002AY-3-8910 \u306F DAC \u304C 4 \u30D3\u30C3\u30C8\u3057\u304B\u306A\u3044\u306E\u3067\u3001\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u306E 32 \u6BB5\u304C 16 \u6BB5\u306B\u6F70\u308C\u308B\u30021 \u6BB5\u304C 1.8\u301C4.2dB \u3068\u3070\u3089\u3064\u304D\u3001\u968E\u6BB5\u304C\u7C97\u3044\u3002\u4E26\u3073\u65B9\u3082\u5225\u3082\u306E\u306A\u306E\u3067\u3001\u5B9F\u52B9\u5024\u306F 32 \u6BB5\u3088\u308A 0.3dB \u5927\u304D\u3044\u3002MSX1 \u3068 ZX Spectrum \u306F\u3053\u3061\u3089\u3002MSX2 \u4EE5\u964D\u306E YM2149 \u306F 32 \u6BB5\u306E\u307E\u307E",
-      role: "bass",
-      wave: BUZZ_SAW_4,
-      bits: 4,
-      vsteps: 1,
-      snapDiv: 256,
-      gain: 1.828,
-      special: ["buzz"],
-      dcBias: 0.371,
-      note: "The falling ramp in sixteen steps. An AY-3-8910 has only a four-bit DAC, so the envelope's thirty-two steps collapse to sixteen, spaced anywhere from 1.8 to 4.2dB: a coarser stair, laid out differently, and 0.3dB louder overall. This is the MSX1 and the ZX Spectrum; a YM2149 keeps all thirty-two."
-    },
-    "ayBuzzTri(4bit)": {
-      noteJa: "\u4E09\u89D2\u306E 16 \u6BB5\u3002\u306E\u3053\u304E\u308A\u3068\u540C\u3058\u7406\u7531\u3067\u968E\u6BB5\u304C\u7C97\u3044\u3002\u4E09\u89D2\u306F\u3082\u3068\u3082\u3068\u500D\u97F3\u304C\u5C11\u306A\u3044\u306E\u3067\u3001\u6BB5\u306E\u3056\u3089\u3064\u304D\u304C\u305D\u306E\u3076\u3093\u76EE\u7ACB\u3064",
-      role: "bass",
-      wave: BUZZ_TRI_4,
-      bits: 4,
-      vsteps: 1,
-      snapDiv: 512,
-      gain: 1.611,
-      special: ["buzz"],
-      dcBias: 0.371,
-      note: "The triangle in sixteen steps, coarse for the same reason. A triangle carries few partials to begin with, so the grit of the stair shows up more clearly on it."
     },
     waveSawStep: {
       noteJa: "\u6BB5\u306E\u3042\u308B\u306E\u3053\u304E\u308A\u30027 \u6BB5\u306E\u307C\u3063\u3066 1 \u6BB5\u843D\u3061\u308B\u3002\u8DB3\u3057\u7B97\u5668\u3067\u4F5C\u308B\u30C1\u30C3\u30D7\u306F\u3053\u306E\u5F62\u306B\u306A\u308B\u3002\u7D20\u306E\u306A\u3060\u3089\u304B\u306A\u5742\u3088\u308A\u3056\u3089\u3064\u304F\u3002VRC6 \u306E\u306E\u3053\u304E\u308A\u306B\u305D\u306E\u307E\u307E\u5F53\u3066\u306F\u307E\u308B",
@@ -8794,23 +8929,6 @@ ${val}`;
         ]
       }]
     });
-    const buzzBits = {
-      name: "bits",
-      default: "5bit",
-      note: "Resolution of the PSG volume DAC the envelope runs through.",
-      values: [
-        { value: "5bit", note: "Thirty-two steps, as on a YM2149 (MSX2 and later)." },
-        { value: "4bit", note: "Sixteen uneven steps, as on an AY-3-8910 (MSX1, ZX Spectrum). Coarser." }
-      ]
-    };
-    registerFamily("ayBuzzSaw", {
-      note: "MSX PSG volume envelope run at audio rate as a falling sawtooth. Volume does nothing.",
-      params: [buzzBits]
-    });
-    registerFamily("ayBuzzTri", {
-      note: "MSX PSG volume envelope run at audio rate as a triangle. Volume does nothing.",
-      params: [buzzBits]
-    });
   }
   function registerExtraWaves() {
     registerExtraFamilies();
@@ -8830,14 +8948,14 @@ ${val}`;
             vsteps: p.vsteps,
             vcurve: p.vcurve,
             snapDiv: p.snapDiv,
-            dcBias: p.dcBias
+            dev: p.dev
           }
         );
       }
     }
   }
 
-  // mmsxx-mml-studio/sound/pcmbake.js
+  // engine/sound/pcmbake.js
   var MIN_LOOP = 1024;
   function periodMultiple(ratios, maxM = 8) {
     for (let m = 1; m <= maxM; m++) {
@@ -8919,7 +9037,7 @@ ${val}`;
     };
   }
 
-  // mmsxx-mml-studio/sound/opllpresets.js
+  // engine/sound/opllpresets.js
   var OPLL_PRESETS = [
     [
       1,
@@ -9225,6 +9343,11 @@ ${val}`;
       }
     }, "Snare and hi-hat in one voice. Write o4 for the snare and o6 for the hat."]
   ];
+  var OPLL_KICK_VARIANTS = [
+    ["low", -12, "An octave down, 54.6Hz. Heavy and slack; it sits under everything."],
+    ["mid", 0, "The pitch the real driver used, 109.2Hz. Tight and light."],
+    ["high", 12, "An octave up, 218.5Hz. Hard and small. Lay noise over it and it reads as a snare."]
+  ];
   function registerOPLLPresets() {
     for (const [inst, name, role, noteJa, note] of OPLL_PRESETS) {
       try {
@@ -9247,6 +9370,33 @@ ${val}`;
       }
     }
     for (const [drum, name, noteJa, note] of OPLL_DRUMS) {
+      if (drum === "bd") {
+        try {
+          registerFamily(name, {
+            note: "The OPLL rhythm bass drum, at three pitches. The chip holds one pitch per channel, but the bass drum has channel 6 to itself, so moving it leaves the other drums alone.",
+            params: [{
+              name: "pitch",
+              default: "mid",
+              note: "How far from the pitch the real driver used.",
+              values: OPLL_KICK_VARIANTS.map(([value, , vn]) => ({ value, note: vn }))
+            }]
+          });
+        } catch (e) {
+        }
+        for (const [value, semi, vn] of OPLL_KICK_VARIANTS) {
+          try {
+            registerOPLL(`${name}(${value})`, 16, {
+              role: "perc",
+              drum,
+              semi,
+              noteJa: `${noteJa}\u3002\u4F7F\u3046\u3068\u97F3\u306E\u30C1\u30E3\u30F3\u30CD\u30EB\u304C 9 \u672C\u304B\u3089 6 \u672C\u306B\u6E1B\u308B`,
+              note: `${note} ${vn}`
+            });
+          } catch (e) {
+          }
+        }
+        continue;
+      }
       try {
         registerOPLL(name, 16, {
           role: "perc",
@@ -9265,7 +9415,2214 @@ ${val}`;
     }
   }
 
-  // mmsxx-mml-studio/sound/duty.js
+  // engine/sound/ay.js
+  var AY_CLOCK = 1789772;
+  var AY_VOLTBL = [
+    [
+      0,
+      1,
+      1,
+      2,
+      2,
+      3,
+      3,
+      4,
+      5,
+      6,
+      7,
+      9,
+      11,
+      13,
+      15,
+      18,
+      22,
+      26,
+      31,
+      37,
+      45,
+      53,
+      63,
+      76,
+      90,
+      106,
+      127,
+      151,
+      180,
+      214,
+      255,
+      255
+    ],
+    [
+      0,
+      0,
+      3,
+      3,
+      4,
+      4,
+      6,
+      6,
+      9,
+      9,
+      13,
+      13,
+      18,
+      18,
+      29,
+      29,
+      34,
+      34,
+      55,
+      55,
+      77,
+      77,
+      98,
+      98,
+      130,
+      130,
+      166,
+      166,
+      208,
+      208,
+      255,
+      255
+    ]
+  ];
+  var AY_OUT_DIV = 14568;
+  function ayTonePeriod(freq) {
+    if (!(freq > 0)) return 4095;
+    return Math.max(1, Math.min(4095, Math.round(AY_CLOCK / (16 * freq))));
+  }
+  function ayNoisePeriod(freq) {
+    if (!(freq > 0)) return 31;
+    return Math.max(1, Math.min(31, Math.round(AY_CLOCK / (256 * freq))));
+  }
+  function ayEnvPeriod(freq, div) {
+    if (!(freq > 0)) return 65535;
+    return Math.max(1, Math.min(65535, Math.round(AY_CLOCK / (div * freq))));
+  }
+  var AY_PRESETS = [
+    [
+      "ayTone",
+      { mode: "tone" },
+      "lead",
+      "Square wave from the AY-3-8910 / YM2149 itself: the register-level MSX PSG rather than an oscillator imitating it. Volume follows the chip table, 16 steps of about 3dB."
+    ],
+    [
+      "ayNoise",
+      { mode: "noise" },
+      "noise",
+      "Noise from the AY-3-8910 / YM2149 itself: the 17-bit shift register of the real chip. The note picks the noise period (R6); o4a lands mid-range, lower notes are coarser. The chip has one noise generator, so two noise notes in the same part share its period."
+    ],
+    [
+      "ayEnvSaw(5bit)",
+      { mode: "env", shape: "saw" },
+      "bass",
+      "The volume envelope of the YM2149 itself, cycled at audio rate as a falling sawtooth. Volume does nothing; the note sets the envelope period, whose steps are 16 times coarser than a tone, so high notes drift. One envelope serves all three channels of the chip."
+    ],
+    [
+      "ayEnvSaw(4bit)",
+      { mode: "env", shape: "saw", ay: true },
+      "bass",
+      "The same falling sawtooth through the AY-3-8910 volume table: sixteen uneven steps instead of thirty-two. The MSX1 and the ZX Spectrum sound."
+    ],
+    [
+      "ayEnvTri(5bit)",
+      { mode: "env", shape: "tri" },
+      "bass",
+      "The volume envelope of the YM2149 itself, alternating, so it comes out as a triangle an octave below the sawtooth for the same period. Volume does nothing."
+    ],
+    [
+      "ayEnvTri(4bit)",
+      { mode: "env", shape: "tri", ay: true },
+      "bass",
+      "The alternating envelope through the AY-3-8910 volume table: a coarser triangle."
+    ]
+  ];
+  var ENV_BITS = {
+    name: "bits",
+    default: "5bit",
+    note: "Which volume table the envelope runs through.",
+    values: [
+      { value: "5bit", note: "Thirty-two steps, as on a YM2149 (MSX2 and later)." },
+      { value: "4bit", note: "Sixteen uneven steps, as on an AY-3-8910 (MSX1, ZX Spectrum). Coarser." }
+    ]
+  };
+  function registerAYPresets() {
+    try {
+      registerFamily("ayEnvSaw", {
+        note: "The AY / YM2149 volume envelope cycled at audio rate as a falling sawtooth, from the chip itself.",
+        params: [ENV_BITS]
+      });
+      registerFamily("ayEnvTri", {
+        note: "The AY / YM2149 volume envelope cycled at audio rate as a triangle, from the chip itself.",
+        params: [ENV_BITS]
+      });
+    } catch (e) {
+    }
+    for (const [name, params, role, note] of AY_PRESETS) {
+      try {
+        registerAY(name, params, { role, note });
+      } catch (e) {
+      }
+    }
+  }
+  var AY_CODE = `
+const CLK = ${AY_CLOCK};
+const VOLTBL = ${JSON.stringify(AY_VOLTBL)};
+const OUT_DIV = ${AY_OUT_DIV};
+const REGMSK = [0xff, 0x0f, 0xff, 0x0f, 0xff, 0x0f, 0x1f, 0x3f,
+  0x1f, 0x1f, 0x1f, 0xff, 0xff, 0x0f, 0xff, 0xff];
+
+/**
+ * \u30C1\u30C3\u30D7 1 \u500B\u3002emu2149 \u306E\u9AD8\u54C1\u8CEA\u306E\u9053(\u5185\u90E8\u3092 CLK / 8 \u3067\u56DE\u3057\u3066\u3001\u51FA\u53E3\u3067\u5E73\u5747\u3059\u308B)\u3002
+ *
+ * \u51FA\u53E3\u306F 0 \u304B\u3089\u4E0A\u3060\u3051(\u5B9F\u6A5F\u306E DAC \u3068\u540C\u3058)\u3002\u76F4\u6D41\u306F\u5916\u3067\u629C\u304F\u3002
+ */
+class PSG {
+  constructor(rate, type = 0) {
+    this.voltbl = VOLTBL[type] || VOLTBL[0];
+    this.realstep = CLK;
+    this.psgstep = rate * 8;
+    this.psgtime = 0;
+    // \u30CA\u30A4\u30AD\u30B9\u30C8\u3088\u308A\u9AD8\u3044\u30C8\u30FC\u30F3\u306F\u9ED9\u3089\u305B\u308B(emu2149 \u3068\u540C\u3058\u3002\u5B9F\u6A5F\u306F\u5F8C\u308D\u306E\u56DE\u8DEF\u304C\u843D\u3068\u3059)
+    this.freqLimit = Math.floor(CLK / 16 / (rate / 2));
+    this.reg = new Uint8Array(16);
+    this.count = new Uint16Array(3);
+    this.freq = new Uint16Array(3);
+    this.edge = new Uint8Array(3);
+    this.volume = new Uint8Array(3);
+    this.tmask = new Uint8Array(3);
+    this.nmask = new Uint8Array(3);
+    this.chOut = new Int32Array(3);
+    this.noiseSeed = 0xffff;
+    this.noiseScaler = 0;
+    this.noiseCount = 0;
+    this.noiseFreq = 0;
+    this.envPtr = 0;
+    this.envFace = 0;
+    this.envContinue = 0;
+    this.envAttack = 0;
+    this.envAlternate = 0;
+    this.envHold = 0;
+    this.envPause = 1;
+    this.envFreq = 0;
+    this.envCount = 0;
+    this.out = 0;
+  }
+
+  writeReg(reg, val) {
+    if (reg > 15) return;
+    val &= REGMSK[reg];
+    this.reg[reg] = val;
+    switch (reg) {
+      case 0: case 1: case 2: case 3: case 4: case 5: {
+        const c = reg >> 1;
+        this.freq[c] = ((this.reg[c * 2 + 1] & 15) << 8) + this.reg[c * 2];
+        break;
+      }
+      case 6:
+        this.noiseFreq = val & 31;
+        break;
+      case 7:
+        this.tmask[0] = val & 1; this.tmask[1] = val & 2; this.tmask[2] = val & 4;
+        this.nmask[0] = val & 8; this.nmask[1] = val & 16; this.nmask[2] = val & 32;
+        break;
+      case 8: case 9: case 10:
+        this.volume[reg - 8] = val << 1;
+        break;
+      case 11: case 12:
+        this.envFreq = (this.reg[12] << 8) + this.reg[11];
+        break;
+      case 13:
+        this.envContinue = (val >> 3) & 1;
+        this.envAttack = (val >> 2) & 1;
+        this.envAlternate = (val >> 1) & 1;
+        this.envHold = val & 1;
+        this.envFace = this.envAttack;
+        this.envPause = 0;
+        this.envPtr = this.envFace ? 0 : 0x1f;
+        break;
+    }
+  }
+
+  /** \u5185\u90E8\u306E 1 \u523B\u307F(CLK / 8 \u306B 1 \u56DE) */
+  update() {
+    // \u30A8\u30F3\u30D9\u30ED\u30FC\u30D7
+    this.envCount++;
+    if (this.envCount >= this.envFreq) {
+      if (!this.envPause) {
+        this.envPtr = this.envFace ? (this.envPtr + 1) & 0x3f : (this.envPtr + 0x3f) & 0x3f;
+      }
+      if (this.envPtr & 0x20) {
+        if (this.envContinue) {
+          if (this.envAlternate ^ this.envHold) this.envFace ^= 1;
+          if (this.envHold) this.envPause = 1;
+          this.envPtr = this.envFace ? 0 : 0x1f;
+        } else {
+          this.envPause = 1;
+          this.envPtr = 0;
+        }
+      }
+      if (this.envFreq >= 1) this.envCount -= this.envFreq;
+      else this.envCount = 0;
+    }
+    // \u30CE\u30A4\u30BA\u300217 \u30D3\u30C3\u30C8\u306E\u4E26\u3073\u3092\u30012 \u56DE\u306B 1 \u56DE\u9032\u3081\u308B
+    this.noiseCount++;
+    if (this.noiseCount >= this.noiseFreq) {
+      this.noiseScaler ^= 1;
+      if (this.noiseScaler) {
+        if (this.noiseSeed & 1) this.noiseSeed ^= 0x24000;
+        this.noiseSeed >>= 1;
+      }
+      if (this.noiseFreq >= 1) this.noiseCount -= this.noiseFreq;
+      else this.noiseCount = 0;
+    }
+    const noise = this.noiseSeed & 1;
+    // \u30C8\u30FC\u30F3
+    for (let i = 0; i < 3; i++) {
+      this.count[i]++;
+      if (this.count[i] >= this.freq[i]) {
+        this.edge[i] ^= 1;
+        if (this.freq[i] >= 1) this.count[i] -= this.freq[i];
+        else this.count[i] = 0;
+      }
+      // \u30CA\u30A4\u30AD\u30B9\u30C8\u3088\u308A\u9AD8\u3044\u30C8\u30FC\u30F3\u3092\u9ED9\u3089\u305B\u308B\u306E\u306F\u3001\u30C8\u30FC\u30F3\u3092\u958B\u3051\u3066\u3044\u308B\u3068\u304D\u3060\u3051\u3002
+      // emu2149 \u306F\u9589\u3058\u3066\u3044\u3066\u3082\u898B\u308B\u306E\u3067\u3001\u5468\u671F\u3092\u66F8\u304B\u305A\u306B\u9CF4\u3089\u3059\u30D6\u30B6\u30FC(R7 \u3067
+      // \u30C8\u30FC\u30F3\u3092\u9589\u3058\u3066\u3001\u97F3\u91CF\u3092\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u306B\u4EFB\u305B\u308B)\u304C\u9ED9\u3063\u3066\u3044\u305F
+      if (this.freqLimit > 0 && !this.tmask[i] && this.freq[i] <= this.freqLimit && this.nmask[i]) continue;
+      if ((this.tmask[i] || this.edge[i]) && (this.nmask[i] || noise)) {
+        const v = this.volume[i];
+        this.chOut[i] = (v & 32 ? this.voltbl[this.envPtr] : this.voltbl[v & 31]) << 4;
+      } else {
+        this.chOut[i] = 0;
+      }
+    }
+  }
+
+  /** \u51FA\u53E3\u306E 1 \u30B5\u30F3\u30D7\u30EB */
+  calc() {
+    while (this.realstep > this.psgtime) {
+      this.psgtime += this.psgstep;
+      this.update();
+      this.out = (this.out + this.chOut[0] + this.chOut[1] + this.chOut[2]) >> 1;
+    }
+    this.psgtime -= this.realstep;
+    return this.out;
+  }
+}
+
+/**
+ * \u884C\u304D\u5148 1 \u3064\u3076\u3093\u306E\u51E6\u7406\u5668\u3002\u4E2D\u306B\u30C1\u30C3\u30D7\u3092\u4F55\u500B\u3067\u3082\u6301\u3064\u3002
+ *
+ * \u5B9F\u6A5F\u306E 1 \u500B\u306E\u30C1\u30C3\u30D7\u306F\u30013 \u58F0\u3067\u30CE\u30A4\u30BA 1 \u3064\u3068\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7 1 \u3064\u3092\u5206\u3051\u5408\u3046\u3002
+ * \u3053\u3061\u3089\u306F\u6B62\u3081\u306A\u3044\u3002\u30D6\u30B6\u30FC\u3084\u30CE\u30A4\u30BA\u3092\u540C\u6642\u306B\u9CF4\u3089\u3057\u305F\u3044\u3068\u304D\u306F\u3001\u7A7A\u3044\u3066\u3044\u308B
+ * \u30C1\u30C3\u30D7\u304C\u7121\u3051\u308C\u3070 1 \u500B\u8DB3\u3059\u3002\u5B9F\u6A5F\u3067\u4E00\u7DD2\u306B\u4F7F\u3048\u308B\u304B\u306F\u3001\u66F8\u304D\u51FA\u3057\u306E\u3068\u304D\u306B\u898B\u308B
+ * (\u9CF4\u3089\u3059\u5074\u306F\u7E1B\u3089\u306A\u3044)\u3002
+ *
+ * \u9ED9\u3063\u3066\u3044\u308B\u30C1\u30C3\u30D7\u306F\u56DE\u3055\u306A\u3044\u306E\u3067\u3001\u91CD\u3055\u306F\u9CF4\u3063\u3066\u3044\u308B\u97F3\u306E\u6570\u306B\u6BD4\u4F8B\u3059\u308B\u3002
+ */
+class AyBank extends AudioWorkletProcessor {
+  constructor(o) {
+    super();
+    const q = o.processorOptions || {};
+    this.events = (q.events || []).slice().sort((a, b) => a.t - b.t);
+    this.at = 0;
+    // \u30C1\u30C3\u30D7\u306E\u4E26\u3073\u30021 \u3064\u304C { c: PSG, type, v: [3 \u58F0] }
+    this.pool = [];
+    this.log = !!q.log;
+    this.logNow = 0;
+    // \u76F4\u6D41\u3092\u629C\u304F(\u5B9F\u6A5F\u306E\u51FA\u53E3\u306E\u30B3\u30F3\u30C7\u30F3\u30B5\u306B\u3042\u305F\u308B)\u3002\u524D\u306E\u5165\u529B\u3068\u524D\u306E\u51FA\u529B
+    this.dcX = 0;
+    this.dcY = 0;
+    this.dcR = 1 - 2 * Math.PI * 20 / sampleRate;   // 20Hz
+    this.cutAt = -1;
+    this.cutLen = Math.max(1, Math.round(sampleRate * 0.01));
+    this.port.onmessage = (e) => {
+      if (e.data && e.data.cut) { this.cut(); return; }
+      const add = e.data && e.data.add;
+      if (!add || !add.length) return;
+      this.cutAt = -1;
+      for (let i = 0; i < add.length; i++) this.events.push(add[i]);
+    };
+  }
+
+  /** \u30C1\u30C3\u30D7\u3092 1 \u500B\u8DB3\u3059\u3002type \u306F\u97F3\u91CF\u306E\u8868(0 = YM2149\u30011 = AY-3-8910) */
+  grow(type) {
+    const c = new PSG(sampleRate, type);
+    const chip = { c, type, log: null, v: [0, 1, 2].map(() => ({ end: 0, vs: null, ps: null, gs: null })) };
+    // \u8A18\u9332\u3059\u308B\u3068\u304D\u306F\u3001\u66F8\u3044\u305F\u6642\u523B\u3068\u4E2D\u8EAB\u3092\u30C1\u30C3\u30D7\u3054\u3068\u306B\u6E9C\u3081\u3066\u5916\u3078\u6D41\u3059\u3002
+    // \u30C1\u30C3\u30D7\u304C\u4F55\u500B\u3042\u3063\u3066\u3082\u3001\u3069\u308C\u3078\u306E\u66F8\u304D\u8FBC\u307F\u304B\u304C\u5206\u304B\u308B\u3088\u3046\u306B\u5206\u3051\u3066\u304A\u304F
+    // (VGM \u3078\u51FA\u3059\u3068\u304D\u306F\u3001\u30C1\u30C3\u30D7\u3054\u3068\u306B 1 \u500B\u306E\u30C1\u30C3\u30D7\u3068\u3057\u3066\u66F8\u304F)
+    if (this.log) {
+      const raw = c.writeReg.bind(c);
+      chip.log = [];
+      c.writeReg = (r, d) => { chip.log.push(this.logNow, r & 0xff, d & 0xff); raw(r, d); };
+    }
+    // \u30CE\u30A4\u30BA\u3082\u30C8\u30FC\u30F3\u3082\u5207\u3063\u3066\u304A\u304F(R7 \u306F 1 \u3067\u6B62\u307E\u308B)
+    c.writeReg(7, 0x3f);
+    this.pool.push(chip);
+    return chip;
+  }
+
+  /** \u6B62\u3081\u308B\u3002\u6E9C\u3081\u305F\u30A4\u30D9\u30F3\u30C8\u3092\u6368\u3066\u3066\u3001\u9CF4\u3063\u3066\u3044\u308B\u58F0\u3092\u9ED9\u3089\u305B\u308B */
+  cut() {
+    this.events.length = 0;
+    this.at = 0;
+    for (const chip of this.pool) for (let ch = 0; ch < 3; ch++) this.silence(chip, ch);
+    if (this.cutAt < 0) this.cutAt = 0;
+  }
+
+  /** \u305D\u306E\u58F0\u3092\u9ED9\u3089\u305B\u308B\u3002\u97F3\u91CF\u3092 0 \u306B\u3057\u3066\u3001\u30C8\u30FC\u30F3\u3082\u30CE\u30A4\u30BA\u3082\u5916\u3059 */
+  silence(chip, ch) {
+    const c = chip.c;
+    const v = chip.v[ch];
+    v.end = 0; v.vs = null; v.ps = null; v.gs = null;
+    v.noise = false; v.env = false;
+    if (c.reg[8 + ch] !== 0) c.writeReg(8 + ch, 0);
+    const mix = c.reg[7] | (9 << ch);
+    if (c.reg[7] !== mix) c.writeReg(7, mix);
+  }
+
+  /**
+   * \u97F3\u7B26\u3092\u7F6E\u304F\u5834\u6240\u3092\u9078\u3076\u3002\u7A7A\u3044\u305F\u58F0\u304C\u3042\u308A\u3001\u30CE\u30A4\u30BA\u3084\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u3092\u4F7F\u3046\u97F3\u7B26\u306A\u3089
+   * \u305D\u308C\u3092\u4F7F\u3063\u3066\u3044\u308B\u58F0\u304C\u307B\u304B\u306B\u7121\u3044\u30C1\u30C3\u30D7\u3002\u7121\u3051\u308C\u3070\u30C1\u30C3\u30D7\u3092\u8DB3\u3059\u3002
+   */
+  pick(ev, now) {
+    const type = ev.ay ? 1 : 0;
+    for (const chip of this.pool) {
+      if (chip.type !== type) continue;
+      let free = -1, busyNoise = false, busyEnv = false;
+      for (let ch = 0; ch < 3; ch++) {
+        const v = chip.v[ch];
+        if (v.end <= now) { if (free < 0) free = ch; continue; }
+        if (v.noise) busyNoise = true;
+        if (v.env) busyEnv = true;
+      }
+      if (free < 0) continue;
+      if (ev.noise && busyNoise) continue;
+      if (ev.env && busyEnv) continue;
+      return { chip, ch: free };
+    }
+    return { chip: this.grow(type), ch: 0 };
+  }
+
+  /** \u30C8\u30FC\u30F3\u306E\u5468\u671F\u3092\u66F8\u3044\u3066\u3001\u305D\u306E\u30C1\u30E3\u30F3\u30CD\u30EB\u306E\u30C8\u30FC\u30F3\u3092\u958B\u3051\u308B(0 \u306A\u3089\u9589\u3058\u308B) */
+  gate(c, ch, tp) {
+    if (tp > 0) {
+      if (c.reg[ch * 2] !== (tp & 0xff)) c.writeReg(ch * 2, tp & 0xff);
+      if (c.reg[ch * 2 + 1] !== ((tp >> 8) & 15)) c.writeReg(ch * 2 + 1, (tp >> 8) & 15);
+    }
+    const mix = tp > 0 ? c.reg[7] & ~(1 << ch) : c.reg[7] | (1 << ch);
+    if (c.reg[7] !== mix) c.writeReg(7, mix);
+  }
+
+  /** \u97F3\u7B26\u3092 1 \u3064\u4E57\u305B\u308B */
+  start(ev, now) {
+    const { chip, ch } = this.pick(ev, now);
+    const c = chip.c;
+    // \u524D\u306E\u97F3\u304C\u6B8B\u3063\u3066\u3044\u308C\u3070\u5148\u306B\u9ED9\u3089\u305B\u308B(\u66F8\u304D\u76F4\u3057\u306E\u4E26\u3073\u3092\u6368\u3066\u308B)
+    if (chip.v[ch].end > 0) this.silence(chip, ch);
+    const noise = !!ev.noise;
+    const env = ev.env || null;
+    // R7 \u306F 1 \u3067\u6B62\u307E\u308B\u3002\u307E\u305A\u30C8\u30FC\u30F3\u3082\u30CE\u30A4\u30BA\u3082\u9589\u3058\u3066\u304B\u3089\u3001\u8981\u308B\u307B\u3046\u3092\u958B\u3051\u308B
+    let mix = c.reg[7] | (9 << ch);
+    if (noise) {
+      if (c.reg[6] !== ev.np) c.writeReg(6, ev.np);
+      mix &= ~(8 << ch);
+    } else if (!env) {
+      c.writeReg(ch * 2, ev.tp & 0xff);
+      c.writeReg(ch * 2 + 1, (ev.tp >> 8) & 15);
+      mix &= ~(1 << ch);
+    }
+    if (c.reg[7] !== mix) c.writeReg(7, mix);
+    if (env) {
+      // \u30D6\u30B6\u30FC\u3002\u5468\u671F\u3092\u66F8\u3044\u3066\u304B\u3089 R13 \u3092\u66F8\u304F\u3002R13 \u3092\u66F8\u304F\u3068\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u304C\u982D\u304B\u3089\u56DE\u308B\u3002
+      // \u30C8\u30FC\u30F3\u306F\u533A\u5207\u308A(gs)\u306E\u6700\u521D\u306E\u5024\u3067\u958B\u3051\u9589\u3081\u3059\u308B(@g \u3067\u639B\u3051\u308B\u77E9\u5F62\u6CE2)
+      c.writeReg(11, env.ep & 0xff);
+      c.writeReg(12, (env.ep >> 8) & 0xff);
+      c.writeReg(13, env.shape);
+      this.gate(c, ch, ev.g0 || 0);
+    }
+    // \u97F3\u91CF\u306F 0\u301C15\u300216 \u3092\u8DB3\u3059\u3068\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u306B\u5F93\u3046(\u30D6\u30B6\u30FC)
+    c.writeReg(8 + ch, ev.v & 31);
+    const v = chip.v[ch];
+    v.end = ev.t + ev.dur;
+    v.noise = noise;
+    v.env = !!env;
+    v.vs = ev.vs && ev.vs.length ? { list: ev.vs, at: 0 } : null;
+    v.ps = ev.ps && ev.ps.length ? { list: ev.ps, at: 0 } : null;
+    v.gs = ev.gs && ev.gs.length ? { list: ev.gs, at: 0 } : null;
+  }
+
+  /** \u6642\u523B\u304C\u6765\u305F\u66F8\u304D\u76F4\u3057\u3092\u66F8\u304F\u3002\u7D42\u308F\u3063\u305F\u58F0\u3092\u9ED9\u3089\u305B\u308B */
+  step(now) {
+    for (const chip of this.pool) {
+      const c = chip.c;
+      for (let ch = 0; ch < 3; ch++) {
+        const v = chip.v[ch];
+        if (v.end <= 0) continue;
+        if (v.end <= now) { this.silence(chip, ch); continue; }
+        if (v.vs) {
+          const f = v.vs;
+          while (f.at < f.list.length && f.list[f.at][0] <= now) {
+            const val = f.list[f.at++][1] & 31;
+            if (c.reg[8 + ch] !== val) c.writeReg(8 + ch, val);
+          }
+          if (f.at >= f.list.length) v.vs = null;
+        }
+        if (v.ps) {
+          const f = v.ps;
+          while (f.at < f.list.length && f.list[f.at][0] <= now) {
+            const p = f.list[f.at++][1];
+            if (v.noise) {
+              if (c.reg[6] !== p) c.writeReg(6, p);
+            } else if (v.env) {
+              // \u30D6\u30B6\u30FC\u306E\u9AD8\u3055\u306F\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u306E\u5468\u671F\u3002R13 \u306F\u66F8\u304B\u306A\u3044(\u66F8\u304F\u3068\u982D\u304B\u3089\u56DE\u308A\u76F4\u3059)
+              if (c.reg[11] !== (p & 0xff)) c.writeReg(11, p & 0xff);
+              if (c.reg[12] !== ((p >> 8) & 0xff)) c.writeReg(12, (p >> 8) & 0xff);
+            } else {
+              if (c.reg[ch * 2] !== (p & 0xff)) c.writeReg(ch * 2, p & 0xff);
+              if (c.reg[ch * 2 + 1] !== ((p >> 8) & 15)) c.writeReg(ch * 2 + 1, (p >> 8) & 15);
+            }
+          }
+          if (f.at >= f.list.length) v.ps = null;
+        }
+        if (v.gs) {
+          const f = v.gs;
+          while (f.at < f.list.length && f.list[f.at][0] <= now) this.gate(c, ch, f.list[f.at++][1]);
+          if (f.at >= f.list.length) v.gs = null;
+        }
+      }
+    }
+  }
+
+  /** \u305D\u306E\u30C1\u30C3\u30D7\u306B\u9CF4\u3063\u3066\u3044\u308B\u58F0\u304C\u3042\u308B\u304B */
+  live(chip) {
+    return chip.v[0].end > 0 || chip.v[1].end > 0 || chip.v[2].end > 0;
+  }
+
+  process(inputs, outputs) {
+    const out = outputs[0][0];
+    const n = out.length;
+    const base = currentTime;
+    // \u4F55\u3082\u9CF4\u3063\u3066\u304A\u3089\u305A\u3001\u6B21\u306E\u97F3\u7B26\u3082\u3053\u306E\u7BC4\u56F2\u306B\u6765\u306A\u3044\u306A\u3089\u3001\u8A08\u7B97\u3092\u98DB\u3070\u3059\u3002
+    // \u76F4\u6D41\u3092\u629C\u3044\u305F\u3042\u3068\u306E\u5C3E\u304C\u6B8B\u3063\u3066\u3044\u308B\u3042\u3044\u3060\u306F\u56DE\u3059
+    const next = this.at < this.events.length ? this.events[this.at].t : Infinity;
+    if (!this.pool.some((c) => this.live(c)) && next >= base + n / sampleRate
+      && Math.abs(this.dcY) < 1e-6) {
+      out.fill(0);
+      this.dcX = 0; this.dcY = 0;
+      return true;
+    }
+    for (let i = 0; i < n; i++) {
+      const now = base + i / sampleRate;
+      if (this.log) this.logNow = now;
+      // \u7D42\u308F\u308B\u97F3\u7B26\u3092\u3001\u59CB\u307E\u308B\u97F3\u7B26\u3088\u308A\u5148\u306B(sound/opll.js \u3068\u540C\u3058\u7406\u7531)
+      this.step(now);
+      while (this.at < this.events.length && this.events[this.at].t <= now) {
+        this.start(this.events[this.at++], now);
+      }
+      // \u9ED9\u3063\u3066\u3044\u308B\u30C1\u30C3\u30D7\u306F\u56DE\u3055\u306A\u3044\u3002\u51FA\u53E3\u306F 0 \u306E\u307E\u307E
+      let raw = 0;
+      for (const chip of this.pool) {
+        if (this.live(chip)) raw += chip.c.calc();
+        else chip.c.out = 0;
+      }
+      const x = raw / OUT_DIV;
+      const y = x - this.dcX + this.dcR * this.dcY;
+      this.dcX = x;
+      this.dcY = y;
+      let v = y;
+      if (this.cutAt >= 0) {
+        v *= Math.max(0, 1 - this.cutAt / this.cutLen);
+        this.cutAt++;
+        if (this.cutAt > this.cutLen) { this.cutAt = this.cutLen; v = 0; }
+      }
+      out[i] = v;
+    }
+    if (this.log) {
+      for (let k = 0; k < this.pool.length; k++) {
+        const chip = this.pool[k];
+        if (!chip.log.length) continue;
+        // type \u306F\u97F3\u91CF\u306E\u8868(0 = YM2149\u30011 = AY-3-8910)\u3002VGM \u306E\u982D\u306B\u66F8\u304F\u306E\u306B\u8981\u308B
+        this.port.postMessage({ regs: chip.log, chip: k, type: chip.type });
+        chip.log = [];
+      }
+    }
+    return true;
+  }
+}
+registerProcessor('mmsxx-ay', AyBank);
+`;
+
+  // engine/sound/nes.js
+  var NES_CLOCK = 1789773;
+  var NES_NOISE_PERIODS = [4, 8, 16, 32, 64, 96, 128, 160, 202, 254, 380, 508, 762, 1016, 2034, 4068];
+  var NES_DUTIES = [0.125, 0.25, 0.5, 0.75];
+  var NES_OUT_GAIN = 1.876;
+  function nesPulseTimer(freq) {
+    if (!(freq > 0)) return 2047;
+    return Math.max(8, Math.min(2047, Math.round(NES_CLOCK / (16 * freq) - 1)));
+  }
+  function nesTriangleTimer(freq) {
+    if (!(freq > 0)) return 2047;
+    return Math.max(2, Math.min(2047, Math.round(NES_CLOCK / (32 * freq) - 1)));
+  }
+  function nesNoisePeriod(freq, short) {
+    if (!(freq > 0)) return 15;
+    const want = short ? NES_CLOCK / (93 * freq) : NES_CLOCK / (16 * freq);
+    let best = 0;
+    for (let i = 1; i < 16; i++) {
+      if (Math.abs(Math.log(NES_NOISE_PERIODS[i] / want)) < Math.abs(Math.log(NES_NOISE_PERIODS[best] / want))) best = i;
+    }
+    return best;
+  }
+  function nesDutyIndex(duty) {
+    let best = 0;
+    for (let i = 1; i < 4; i++) if (Math.abs(NES_DUTIES[i] - duty) < Math.abs(NES_DUTIES[best] - duty)) best = i;
+    return best;
+  }
+  var NES_PRESETS = [
+    [
+      "nesPulse(12)",
+      { mode: "pulse", duty: 0.125 },
+      "lead",
+      "NES APU pulse at 12.5% duty, from the chip itself. Thin and nasal. Volume is the 4-bit value as amplitude, and the two pulses share one nonlinear mixer."
+    ],
+    [
+      "nesPulse(25)",
+      { mode: "pulse", duty: 0.25 },
+      "lead",
+      "NES APU pulse at 25% duty, from the chip itself. The classic NES lead."
+    ],
+    [
+      "nesPulse(50)",
+      { mode: "pulse", duty: 0.5 },
+      "lead",
+      "NES APU pulse at 50% duty, from the chip itself. A plain square."
+    ],
+    [
+      "nesTriangle",
+      { mode: "triangle" },
+      "bass",
+      "NES APU triangle, from the chip itself: a 32-step staircase, an octave below a pulse with the same timer. It has no volume control; v0 silences it and anything else plays full."
+    ],
+    [
+      "nesNoise(long)",
+      { mode: "noise" },
+      "noise",
+      "NES APU noise in its long mode: the 15-bit shift register, heard as white noise. The note picks one of the sixteen periods; o4a lands mid-range, lower notes are coarser."
+    ],
+    [
+      "nesNoise(short)",
+      { mode: "noise", short: true },
+      "noise",
+      "NES APU noise in its short mode: the register loops every 93 steps, so it comes out as a metallic buzz with a pitch. The note picks the nearest of the sixteen periods."
+    ]
+  ];
+  function registerNESPresets() {
+    try {
+      registerFamily("nesPulse", {
+        note: "The NES APU pulse channel, from the chip itself.",
+        params: [{
+          name: "duty",
+          default: "50",
+          note: "Share of each cycle spent high, in percent (rounded down).",
+          values: [
+            { value: "12", note: "12.5%. Thin and nasal." },
+            { value: "25", note: "25%. The classic NES lead." },
+            { value: "50", note: "50%. A plain square." }
+          ]
+        }]
+      });
+      registerFamily("nesNoise", {
+        note: "The NES APU noise channel, from the chip itself.",
+        params: [{
+          name: "mode",
+          default: "long",
+          note: "Which loop the shift register runs.",
+          values: [
+            { value: "long", note: "The full 32767-step loop: white noise. Drums and effects." },
+            { value: "short", note: "A 93-step loop, heard as a metallic buzz with a pitch." }
+          ]
+        }]
+      });
+    } catch (e) {
+    }
+    for (const [name, params, role, note] of NES_PRESETS) {
+      try {
+        registerNES(name, params, { role, note });
+      } catch (e) {
+      }
+    }
+  }
+  var NES_CODE = `
+const CLK = ${NES_CLOCK};
+const NOISE = ${JSON.stringify(NES_NOISE_PERIODS)};
+const OUT_GAIN = ${NES_OUT_GAIN};
+const DUTY = [
+  [0, 1, 0, 0, 0, 0, 0, 0],
+  [0, 1, 1, 0, 0, 0, 0, 0],
+  [0, 1, 1, 1, 1, 0, 0, 0],
+  [1, 0, 0, 1, 1, 1, 1, 1],
+];
+const TRI = [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0,
+  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+const LENGTH = [10, 254, 20, 2, 40, 4, 80, 6, 160, 8, 60, 10, 14, 12, 26, 14,
+  12, 16, 24, 18, 48, 20, 96, 22, 192, 24, 72, 26, 16, 28, 32, 30];
+/** \u30D5\u30EC\u30FC\u30E0\u30AB\u30A6\u30F3\u30BF\u306E 1/4 \u30D5\u30EC\u30FC\u30E0(4 \u6BB5\u306E\u30E2\u30FC\u30C9)\u3002CPU \u306E\u30AF\u30ED\u30C3\u30AF\u3067\u6570\u3048\u308B */
+const QUARTER = CLK / 240;
+
+/** \u97F3\u91CF\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7(\u77E9\u5F62\u6CE2\u3068\u30CE\u30A4\u30BA)\u3002\u4E00\u5B9A\u306E\u97F3\u91CF\u306B\u3057\u3066\u3044\u308C\u3070\u5024\u3092\u305D\u306E\u307E\u307E\u51FA\u3059 */
+function newEnv() {
+  return { start: false, div: 0, decay: 0, loop: false, constant: true, vol: 0 };
+}
+function clockEnv(e) {
+  if (e.start) { e.start = false; e.decay = 15; e.div = e.vol; return; }
+  if (e.div > 0) { e.div--; return; }
+  e.div = e.vol;
+  if (e.decay > 0) e.decay--;
+  else if (e.loop) e.decay = 15;
+}
+const envOut = (e) => (e.constant ? e.vol : e.decay);
+
+/**
+ * \u30C1\u30C3\u30D7 1 \u500B\u3002\u77E9\u5F62\u6CE2 2 \u672C\u30FB\u4E09\u89D2\u6CE2\u30FB\u30CE\u30A4\u30BA\u3002
+ *
+ * \u51FA\u53E3\u306E\u30B5\u30F3\u30D7\u30EB\u3054\u3068\u306B CPU \u306E\u30AF\u30ED\u30C3\u30AF\u3092\u6570\u3048\u3066\u9032\u3081\u3001\u305D\u306E\u3042\u3044\u3060\u306E\u5404\u58F0\u306E\u5024\u3092
+ * \u6642\u9593\u3067\u5E73\u5747\u3057\u3066\u304B\u3089\u6DF7\u305C\u308B(\u70B9\u3067\u62FE\u3046\u3068\u9AD8\u3044\u97F3\u3067\u6298\u308A\u8FD4\u3057\u304C\u51FA\u308B\u305F\u3081)\u3002
+ * \u6DF7\u305C\u65B9\u306F NESdev \u306E\u5F0F(\u58F0\u3092\u8DB3\u3059\u3068\u3053\u308D\u304C\u76F4\u7DDA\u3067\u306A\u3044)\u3002
+ */
+class APU {
+  constructor(rate) {
+    this.step = CLK / rate;    // \u51FA\u53E3 1 \u30B5\u30F3\u30D7\u30EB\u3042\u305F\u308A\u306E CPU \u306E\u30AF\u30ED\u30C3\u30AF
+    this.frac = 0;
+    this.quarter = 0;
+    this.half = false;
+    this.reg = new Uint8Array(0x18);
+    this.pulse = [0, 1].map(() => ({ duty: 0, seq: 0, timer: 0, count: 2, len: 0, halt: false,
+      env: newEnv(), sweepNeg: false, sweepShift: 0, on: false }));
+    this.tri = { seq: 0, timer: 0, count: 1, len: 0, halt: false, lin: 0, linLoad: 0, linReload: false, on: false };
+    this.noise = { shift: 1, short: false, period: 4, count: 4, len: 0, halt: false, env: newEnv(), on: false };
+  }
+
+  writeReg(r, v) {
+    if (r > 0x17) return;
+    this.reg[r] = v;
+    if (r < 8) {
+      const p = this.pulse[r >> 2];
+      switch (r & 3) {
+        case 0:
+          p.duty = v >> 6; p.halt = !!(v & 0x20); p.env.loop = p.halt;
+          p.env.constant = !!(v & 0x10); p.env.vol = v & 15;
+          break;
+        case 1:
+          p.sweepNeg = !!(v & 8); p.sweepShift = v & 7;
+          break;
+        case 2:
+          p.timer = (p.timer & 0x700) | v;
+          break;
+        case 3:
+          p.timer = (p.timer & 0xff) | ((v & 7) << 8);
+          if (p.on) p.len = LENGTH[v >> 3];
+          // \u4E0A\u306E\u6841\u3092\u66F8\u304F\u3068\u3001\u6CE2\u306E\u982D\u304B\u3089\u3084\u308A\u76F4\u3059(\u5B9F\u6A5F\u3068\u540C\u3058\u3002\u3060\u304B\u3089\u9AD8\u3055\u3092\u6ED1\u3089\u305B\u308B
+          // \u3068\u304D\u306F\u3001\u5909\u308F\u3089\u306A\u3051\u308C\u3070\u66F8\u304B\u306A\u3044)
+          p.seq = 0; p.env.start = true;
+          break;
+      }
+      return;
+    }
+    const t = this.tri, n = this.noise;
+    switch (r) {
+      case 0x08: t.halt = !!(v & 0x80); t.linLoad = v & 0x7f; break;
+      case 0x0a: t.timer = (t.timer & 0x700) | v; break;
+      case 0x0b:
+        t.timer = (t.timer & 0xff) | ((v & 7) << 8);
+        if (t.on) t.len = LENGTH[v >> 3];
+        t.linReload = true;
+        break;
+      case 0x0c:
+        n.halt = !!(v & 0x20); n.env.loop = n.halt; n.env.constant = !!(v & 0x10); n.env.vol = v & 15;
+        break;
+      case 0x0e: n.short = !!(v & 0x80); n.period = NOISE[v & 15]; break;
+      case 0x0f: if (n.on) n.len = LENGTH[v >> 3]; n.env.start = true; break;
+      case 0x15:
+        this.pulse[0].on = !!(v & 1); this.pulse[1].on = !!(v & 2);
+        t.on = !!(v & 4); n.on = !!(v & 8);
+        if (!this.pulse[0].on) this.pulse[0].len = 0;
+        if (!this.pulse[1].on) this.pulse[1].len = 0;
+        if (!t.on) t.len = 0;
+        if (!n.on) n.len = 0;
+        break;
+    }
+  }
+
+  /** 1/4 \u30D5\u30EC\u30FC\u30E0\u3002\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u3068\u4E09\u89D2\u6CE2\u306E\u7DDA\u5F62\u30AB\u30A6\u30F3\u30BF\u3002\u534A\u5206\u3054\u3068\u306B\u9577\u3055\u30AB\u30A6\u30F3\u30BF */
+  clockQuarter() {
+    clockEnv(this.pulse[0].env); clockEnv(this.pulse[1].env); clockEnv(this.noise.env);
+    const t = this.tri;
+    if (t.linReload) t.lin = t.linLoad;
+    else if (t.lin > 0) t.lin--;
+    if (!t.halt) t.linReload = false;
+    this.half = !this.half;
+    if (this.half) {
+      for (const p of this.pulse) if (!p.halt && p.len > 0) p.len--;
+      if (!t.halt && t.len > 0) t.len--;
+      if (!this.noise.halt && this.noise.len > 0) this.noise.len--;
+    }
+  }
+
+  /** \u77E9\u5F62\u6CE2\u3092 n \u30AF\u30ED\u30C3\u30AF\u9032\u3081\u3066\u3001\u305D\u306E\u3042\u3044\u3060\u306E\u5024\u306E\u5408\u8A08\u3092\u8FD4\u3059 */
+  runPulse(p, n) {
+    // \u9ED9\u3089\u305B\u308B\u6761\u4EF6(\u5B9F\u6A5F\u3068\u540C\u3058)\u30028 \u3088\u308A\u5C0F\u3055\u3044\u30BF\u30A4\u30DE\u30FC\u3068\u3001\u30B9\u30A4\u30FC\u30D7\u306E\u5148\u304C\u6841\u3042\u3075\u308C\u3059\u308B\u3068\u304D
+    const target = p.sweepNeg ? 0 : p.timer + (p.timer >> p.sweepShift);
+    const muted = p.timer < 8 || target > 0x7ff || p.len === 0;
+    const vol = muted ? 0 : envOut(p.env);
+    const per = 2 * (p.timer + 1);
+    let sum = 0;
+    while (n >= p.count) {
+      sum += (DUTY[p.duty][p.seq] ? vol : 0) * p.count;
+      n -= p.count;
+      p.seq = (p.seq + 1) & 7;
+      p.count = per;
+    }
+    sum += (DUTY[p.duty][p.seq] ? vol : 0) * n;
+    p.count -= n;
+    return sum;
+  }
+
+  /** \u4E09\u89D2\u6CE2\u3002\u30AB\u30A6\u30F3\u30BF\u304C 0 \u306A\u3089\u6BB5\u306F\u9032\u307E\u305A\u3001\u3044\u307E\u306E\u5024\u3092\u51FA\u3057\u3064\u3065\u3051\u308B(\u5B9F\u6A5F\u3068\u540C\u3058) */
+  runTri(n) {
+    const t = this.tri;
+    const go = t.lin > 0 && t.len > 0;
+    const per = t.timer + 1;
+    let sum = 0;
+    if (!go) return TRI[t.seq] * n;
+    while (n >= t.count) {
+      sum += TRI[t.seq] * t.count;
+      n -= t.count;
+      t.seq = (t.seq + 1) & 31;
+      t.count = per;
+    }
+    sum += TRI[t.seq] * n;
+    t.count -= n;
+    return sum;
+  }
+
+  /** \u30CE\u30A4\u30BA\u300215 \u30D3\u30C3\u30C8\u306E\u4E26\u3073\u3002\u77ED\u3044\u4E26\u3073\u306F 6 \u756A\u76EE\u306E\u30D3\u30C3\u30C8\u3067\u5E30\u3059 */
+  runNoise(n) {
+    const z = this.noise;
+    const vol = z.len === 0 ? 0 : envOut(z.env);
+    let sum = 0;
+    while (n >= z.count) {
+      sum += (z.shift & 1 ? 0 : vol) * z.count;
+      n -= z.count;
+      const fb = (z.shift & 1) ^ ((z.shift >> (z.short ? 6 : 1)) & 1);
+      z.shift = (z.shift >> 1) | (fb << 14);
+      z.count = z.period;
+    }
+    sum += (z.shift & 1 ? 0 : vol) * n;
+    z.count -= n;
+    return sum;
+  }
+
+  /** \u51FA\u53E3\u306E 1 \u30B5\u30F3\u30D7\u30EB\u30020 \u304B\u3089\u4E0A(\u5B9F\u6A5F\u306E DAC \u3068\u540C\u3058)\u3002\u76F4\u6D41\u306F\u5916\u3067\u629C\u304F */
+  calc() {
+    this.frac += this.step;
+    const n = Math.floor(this.frac);
+    this.frac -= n;
+    this.quarter += n;
+    if (this.quarter >= QUARTER) { this.quarter -= QUARTER; this.clockQuarter(); }
+    if (n <= 0) return this.out || 0;
+    const p1 = this.runPulse(this.pulse[0], n) / n;
+    const p2 = this.runPulse(this.pulse[1], n) / n;
+    const tr = this.runTri(n) / n;
+    const no = this.runNoise(n) / n;
+    // NESdev \u306E\u6DF7\u305C\u65B9\u30020 \u3067\u5272\u3089\u306A\u3044\u3088\u3046\u306B\u5206\u3051\u3066\u66F8\u304F
+    const ps = p1 + p2;
+    const pulseOut = ps > 0 ? 95.88 / (8128 / ps + 100) : 0;
+    const tnd = tr / 8227 + no / 12241;
+    const tndOut = tnd > 0 ? 159.79 / (1 / tnd + 100) : 0;
+    this.out = pulseOut + tndOut;
+    return this.out;
+  }
+}
+
+/** \u58F0\u306E\u7A2E\u985E\u3068\u3001\u30C1\u30C3\u30D7\u306E\u4E2D\u306E\u756A\u53F7\u3002\u77E9\u5F62\u6CE2 2 \u672C\u30FB\u4E09\u89D2\u6CE2 1 \u672C\u30FB\u30CE\u30A4\u30BA 1 \u672C */
+const SLOTS = { pulse: [0, 1], triangle: [2], noise: [3] };
+
+/**
+ * \u884C\u304D\u5148 1 \u3064\u3076\u3093\u306E\u51E6\u7406\u5668\u3002\u4E2D\u306B\u30C1\u30C3\u30D7\u3092\u4F55\u500B\u3067\u3082\u6301\u3064(sound/ay.js \u3068\u540C\u3058\u8003\u3048\u65B9)\u3002
+ * \u58F0\u304C\u8DB3\u308A\u306A\u3051\u308C\u3070\u30C1\u30C3\u30D7\u3092\u8DB3\u3059\u3002\u5B9F\u6A5F\u3067\u4F55\u53F0\u8981\u308B\u304B\u306F\u3001\u66F8\u304D\u51FA\u3057\u306E\u3068\u304D\u306B\u898B\u308B\u3002
+ */
+class NesBank extends AudioWorkletProcessor {
+  constructor(o) {
+    super();
+    const q = o.processorOptions || {};
+    this.events = (q.events || []).slice().sort((a, b) => a.t - b.t);
+    this.at = 0;
+    this.pool = [];
+    this.log = !!q.log;
+    this.logNow = 0;
+    this.dcX = 0;
+    this.dcY = 0;
+    this.dcR = 1 - 2 * Math.PI * 20 / sampleRate;   // 20Hz
+    this.cutAt = -1;
+    this.cutLen = Math.max(1, Math.round(sampleRate * 0.01));
+    this.port.onmessage = (e) => {
+      if (e.data && e.data.cut) { this.cut(); return; }
+      const add = e.data && e.data.add;
+      if (!add || !add.length) return;
+      this.cutAt = -1;
+      for (let i = 0; i < add.length; i++) this.events.push(add[i]);
+    };
+  }
+
+  grow() {
+    const c = new APU(sampleRate);
+    const chip = { c, log: null, v: [0, 1, 2, 3].map(() => ({ end: 0, vs: null, ps: null, ds: null })) };
+    // \u8A18\u9332\u306F\u30C1\u30C3\u30D7\u3054\u3068\u306B\u5206\u3051\u308B(sound/ay.js \u3068\u540C\u3058)\u3002\u756A\u53F7\u306F $4000 \u304B\u3089\u306E\u5DEE
+    if (this.log) {
+      const raw = c.writeReg.bind(c);
+      chip.log = [];
+      c.writeReg = (r, d) => { chip.log.push(this.logNow, r & 0xff, d & 0xff); raw(r, d); };
+    }
+    // 4 \u58F0\u3068\u3082\u4F7F\u3048\u308B\u3088\u3046\u306B\u3057\u3066\u3001\u30B9\u30A4\u30FC\u30D7\u306F\u6B62\u3081\u3066\u304A\u304F(\u8CA0\u306E\u5411\u304D\u306B\u3059\u308B\u3068\u6841\u3042\u3075\u308C\u3067\u9ED9\u3089\u306A\u3044)
+    c.writeReg(0x15, 0x0f);
+    c.writeReg(0x01, 0x08);
+    c.writeReg(0x05, 0x08);
+    c.writeReg(0x00, 0x30);
+    c.writeReg(0x04, 0x30);
+    c.writeReg(0x08, 0x80);
+    c.writeReg(0x0c, 0x30);
+    this.pool.push(chip);
+    return chip;
+  }
+
+  cut() {
+    this.events.length = 0;
+    this.at = 0;
+    for (const chip of this.pool) for (let s = 0; s < 4; s++) this.silence(chip, s);
+    if (this.cutAt < 0) this.cutAt = 0;
+  }
+
+  /** \u305D\u306E\u58F0\u3092\u9ED9\u3089\u305B\u308B */
+  silence(chip, s) {
+    const c = chip.c;
+    const v = chip.v[s];
+    v.end = 0; v.vs = null; v.ps = null; v.ds = null;
+    if (s < 2) c.writeReg(s * 4, (c.reg[s * 4] & 0xc0) | 0x30);
+    else if (s === 2) { c.writeReg(0x08, 0x80); c.writeReg(0x0b, c.reg[0x0b]); }
+    else c.writeReg(0x0c, 0x30);
+  }
+
+  pick(kind, now) {
+    const want = SLOTS[kind];
+    for (const chip of this.pool) {
+      for (const s of want) if (chip.v[s].end <= now) return { chip, s };
+    }
+    return { chip: this.grow(), s: want[0] };
+  }
+
+  /** \u77E9\u5F62\u6CE2\u306E\u30BF\u30A4\u30DE\u30FC\u3092\u66F8\u304F\u3002\u4E0A\u306E\u6841\u306F\u5909\u308F\u3063\u305F\u3068\u304D\u3060\u3051(\u66F8\u304F\u3068\u6CE2\u306E\u982D\u306B\u623B\u308B\u305F\u3081) */
+  pulseTimer(c, s, t, force) {
+    const lo = t & 0xff, hi = (t >> 8) & 7;
+    if (force || c.reg[s * 4 + 2] !== lo) c.writeReg(s * 4 + 2, lo);
+    if (force || (c.reg[s * 4 + 3] & 7) !== hi) c.writeReg(s * 4 + 3, 0xf8 | hi);
+  }
+
+  /** \u4E09\u89D2\u6CE2\u306E\u30BF\u30A4\u30DE\u30FC\u3092\u66F8\u304F */
+  triTimer(c, t) {
+    const lo = t & 0xff, hi = (t >> 8) & 7;
+    if (c.reg[0x0a] !== lo) c.writeReg(0x0a, lo);
+    if ((c.reg[0x0b] & 7) !== hi) c.writeReg(0x0b, 0xf8 | hi);
+  }
+
+  /** \u97F3\u91CF(\u3068\u5E45)\u3092\u66F8\u304F\u3002\u4E09\u89D2\u6CE2\u306F\u9CF4\u3089\u3059\u304B\u6B62\u3081\u308B\u304B\u3060\u3051 */
+  level(c, s, vol, duty) {
+    if (s < 2) {
+      const val = ((duty & 3) << 6) | 0x30 | (vol & 15);
+      if (c.reg[s * 4] !== val) c.writeReg(s * 4, val);
+    } else if (s === 2) {
+      // \u7DDA\u5F62\u30AB\u30A6\u30F3\u30BF\u3067\u6B62\u3081\u308B\u30020 \u3092\u8AAD\u307F\u8FBC\u307E\u305B\u308B\u3068\u3001\u6B21\u306E 1/4 \u30D5\u30EC\u30FC\u30E0\u3067\u6BB5\u304C\u6B62\u307E\u308B
+      const val = vol > 0 ? 0xff : 0x80;
+      if (c.reg[0x08] !== val) { c.writeReg(0x08, val); c.writeReg(0x0b, c.reg[0x0b]); }
+    } else {
+      const val = 0x30 | (vol & 15);
+      if (c.reg[0x0c] !== val) c.writeReg(0x0c, val);
+    }
+  }
+
+  start(ev, now) {
+    const { chip, s } = this.pick(ev.ch, now);
+    const c = chip.c;
+    if (chip.v[s].end > 0) this.silence(chip, s);
+    const v = chip.v[s];
+    if (s < 2) {
+      this.level(c, s, ev.v, ev.duty);
+      c.writeReg(s * 4 + 1, 0x08);
+      this.pulseTimer(c, s, ev.p, true);
+    } else if (s === 2) {
+      c.writeReg(0x0a, ev.p & 0xff);
+      c.writeReg(0x08, ev.v > 0 ? 0xff : 0x80);
+      c.writeReg(0x0b, 0xf8 | ((ev.p >> 8) & 7));
+    } else {
+      this.level(c, s, ev.v, 0);
+      c.writeReg(0x0e, (ev.short ? 0x80 : 0) | (ev.p & 15));
+      c.writeReg(0x0f, 0xf8);
+    }
+    v.end = ev.t + ev.dur;
+    v.duty = ev.duty | 0;
+    v.short = !!ev.short;
+    v.vs = ev.vs && ev.vs.length ? { list: ev.vs, at: 0 } : null;
+    v.ps = ev.ps && ev.ps.length ? { list: ev.ps, at: 0 } : null;
+    v.ds = ev.ds && ev.ds.length ? { list: ev.ds, at: 0 } : null;
+    v.vol = ev.v;
+  }
+
+  step(now) {
+    for (const chip of this.pool) {
+      const c = chip.c;
+      for (let s = 0; s < 4; s++) {
+        const v = chip.v[s];
+        if (v.end <= 0) continue;
+        if (v.end <= now) { this.silence(chip, s); continue; }
+        let lv = false;
+        if (v.ds) {
+          const f = v.ds;
+          while (f.at < f.list.length && f.list[f.at][0] <= now) { v.duty = f.list[f.at++][1]; lv = true; }
+          if (f.at >= f.list.length) v.ds = null;
+        }
+        if (v.vs) {
+          const f = v.vs;
+          while (f.at < f.list.length && f.list[f.at][0] <= now) { v.vol = f.list[f.at++][1]; lv = true; }
+          if (f.at >= f.list.length) v.vs = null;
+        }
+        if (lv) this.level(c, s, v.vol, v.duty);
+        if (v.ps) {
+          const f = v.ps;
+          while (f.at < f.list.length && f.list[f.at][0] <= now) {
+            const p = f.list[f.at++][1];
+            if (s < 2) this.pulseTimer(c, s, p, false);
+            else if (s === 2) this.triTimer(c, p);
+            else c.writeReg(0x0e, (v.short ? 0x80 : 0) | (p & 15));
+          }
+          if (f.at >= f.list.length) v.ps = null;
+        }
+      }
+    }
+  }
+
+  live(chip) {
+    return chip.v[0].end > 0 || chip.v[1].end > 0 || chip.v[2].end > 0 || chip.v[3].end > 0;
+  }
+
+  process(inputs, outputs) {
+    const out = outputs[0][0];
+    const n = out.length;
+    const base = currentTime;
+    const next = this.at < this.events.length ? this.events[this.at].t : Infinity;
+    if (!this.pool.some((c) => this.live(c)) && next >= base + n / sampleRate
+      && Math.abs(this.dcY) < 1e-6) {
+      out.fill(0);
+      // dcX \u306F\u6B8B\u3059\u3002\u6B62\u3081\u305F\u4E09\u89D2\u6CE2\u304C\u4FDD\u3063\u3066\u3044\u308B\u5024\u3067\u3001\u9CF4\u3089\u3057\u76F4\u3057\u305F\u3068\u304D\u306E\u51FA\u767A\u70B9\u306B\u306A\u308B
+      this.dcY = 0;
+      return true;
+    }
+    for (let i = 0; i < n; i++) {
+      const now = base + i / sampleRate;
+      if (this.log) this.logNow = now;
+      this.step(now);
+      while (this.at < this.events.length && this.events[this.at].t <= now) {
+        this.start(this.events[this.at++], now);
+      }
+      // \u9ED9\u3063\u3066\u3044\u308B\u30C1\u30C3\u30D7\u3082\u56DE\u3059\u3002\u4E09\u89D2\u6CE2\u306F\u6B62\u3081\u305F\u4F4D\u7F6E\u306E\u5024\u3092\u51FA\u3057\u3064\u3065\u3051\u308B(\u5B9F\u6A5F\u3068\u540C\u3058)\u3002
+      // \u56DE\u3055\u305A\u306B 0 \u306B\u3059\u308B\u3068\u3001\u6B62\u3081\u305F\u77AC\u9593\u3068\u9CF4\u3089\u3057\u76F4\u3057\u305F\u77AC\u9593\u306B\u51FA\u53E3\u304C\u8DF3\u3093\u3067\u30D7\u30C1\u30C3\u3068\u9CF4\u308B\u3002
+      // \u524D\u306F\u305D\u3046\u3057\u3066\u3044\u3066\u3001q7 \u3067\u523B\u3080\u4E09\u89D2\u6CE2\u306E\u30D9\u30FC\u30B9\u304C\u62CD\u3054\u3068\u306B\u9CF4\u3063\u3066\u3044\u305F(2026-10-07)\u3002
+      // \u91CD\u3055\u306F\u3001\u4E0A\u306E\u300C\u4F55\u3082\u9CF4\u3063\u3066\u3044\u306A\u3044\u533A\u5207\u308A\u306F\u56DE\u3055\u306A\u3044\u300D\u3067\u6291\u3048\u3066\u3044\u308B
+      let raw = 0;
+      for (const chip of this.pool) raw += chip.c.calc();
+      const x = raw * OUT_GAIN;
+      const y = x - this.dcX + this.dcR * this.dcY;
+      this.dcX = x;
+      this.dcY = y;
+      let v = y;
+      if (this.cutAt >= 0) {
+        v *= Math.max(0, 1 - this.cutAt / this.cutLen);
+        this.cutAt++;
+        if (this.cutAt > this.cutLen) { this.cutAt = this.cutLen; v = 0; }
+      }
+      out[i] = v;
+    }
+    if (this.log) {
+      for (let k = 0; k < this.pool.length; k++) {
+        const chip = this.pool[k];
+        if (!chip.log.length) continue;
+        this.port.postMessage({ regs: chip.log, chip: k, type: 0 });
+        chip.log = [];
+      }
+    }
+    return true;
+  }
+}
+registerProcessor('mmsxx-nes', NesBank);
+`;
+
+  // engine/sound/fds.js
+  var FDS_CLOCK = 1789773;
+  var FDS_LEN = 64;
+  var FDS_OUT_PEAK = 2.4 * (95.88 / (8128 / 15 + 100)) * 1.876;
+  function fdsPitch(freq) {
+    if (!(freq > 0)) return 0;
+    return Math.max(1, Math.min(4095, Math.round(freq * 16 * 64 * 4096 / FDS_CLOCK)));
+  }
+  var fdsWave = (list) => Array.from(list, (v) => Math.round((Math.max(-1, Math.min(1, v)) + 1) / 2 * 63));
+  var build3 = (fn) => fdsWave(Array.from({ length: FDS_LEN }, (_, i) => fn(i / FDS_LEN)));
+  var FDS_MOD_TABLES = {
+    // 0 から上がって +16、下がって −16、戻って 0
+    tri: [...Array(8).fill(2), ...Array(16).fill(6), ...Array(8).fill(2)],
+    // +16 と −16 を行き来する段
+    step: [4, 3, 3, 3, 3, ...Array(11).fill(0), 4, 5, 5, 5, 5, ...Array(11).fill(0)]
+  };
+  var MOD_PEAK = 16;
+  var fdsModGain = (depth) => Math.max(0, Math.min(63, Math.round(depth * 1024 / MOD_PEAK)));
+  var STEP = build3((p) => Math.round(Math.sin(2 * Math.PI * p) * 8) / 8);
+  var SPIKE = build3((p) => p < 0.12 ? Math.sin(Math.PI * p / 0.12) : -0.18);
+  var HALF = build3((p) => {
+    const v = Math.sin(2 * Math.PI * p);
+    return (v > 0 ? v : 0) * 2 - 0.6;
+  });
+  var RAMP = build3((p) => Math.round((1 - 2 * p) * 6) / 6);
+  var ODD = build3((p) => p < 0.35 ? Math.sin(Math.PI * p / 0.35) : -0.7 * Math.sin(Math.PI * (p - 0.35) / 0.65));
+  var TWIN = build3((p) => Math.sin(2 * Math.PI * p) * 0.5 + Math.sin(4 * Math.PI * p) * 0.5);
+  var LIKE_ZLD = build3((p) => (Math.sin(2 * Math.PI * p) + 0.12 * Math.sin(4 * Math.PI * p) + 0.28 * Math.sin(6 * Math.PI * p) + 0.16 * Math.sin(10 * Math.PI * p) + 0.09 * Math.sin(14 * Math.PI * p)) / 1.65);
+  var FDS_PRESETS = [
+    ["fdsStep", { wave: STEP }, "lead", 'Stepped wavetable on the disk system chip: the shape that reads as "wavetable chip" more than any other.'],
+    ["fdsSpike", { wave: SPIKE }, "lead", "Narrow spike in the disk system wavetable: bright and thin."],
+    ["fdsHalf", { wave: HALF }, "bass", "Half-wave rectified shape on the disk system chip: fat and round."],
+    ["fdsRamp", { wave: RAMP }, "lead", "Stepped ramp on the disk system chip. Buzzy, close to a saw."],
+    ["fdsOdd", { wave: ODD }, "lead", "Lopsided shape on the disk system chip. Reads as reedy."],
+    ["fdsTwin", { wave: TWIN }, "lead", "Two humps per cycle on the disk system chip, so it sounds an octave brighter than it is."],
+    [
+      "fdsVibe",
+      { wave: HALF, mod: { ratio: 0.035, depth: 0.03, table: "tri" } },
+      "lead",
+      "The disk system modulator run slowly, used as vibrato rather than as timbre."
+    ],
+    [
+      "fdsBell",
+      { wave: STEP, mod: { ratio: 1, depth: 0.6, table: "tri" } },
+      "counter",
+      "The disk system modulator at the note\u2019s own rate and deep: sidebands grow and it turns metallic."
+    ],
+    [
+      "fdsMetal",
+      { wave: TWIN, mod: { ratio: 2.51, depth: 0.9, table: "step" } },
+      "perc",
+      "An awkward modulator ratio with a stepped table, deep enough that the pitch turns into a clang."
+    ],
+    [
+      "fdsWobble",
+      { wave: ODD, mod: { ratio: 0.25, depth: 0.35, table: "step" } },
+      "counter",
+      "The modulator at a quarter of the note\u2019s rate, deep: the pitch audibly swings."
+    ],
+    [
+      "fdsGrowl",
+      { wave: RAMP, mod: { ratio: 0.5, depth: 0.7, table: "step" } },
+      "bass",
+      "The modulator at half the note\u2019s rate, deep enough to roughen the tone into a growl."
+    ],
+    [
+      "fdsLikeZld",
+      { wave: LIKE_ZLD, mod: { ratio: 0.015, depth: 0.025, table: "tri" } },
+      "lead",
+      "A hollow, slightly asymmetric wavetable with a shallow vibrato: the overworld-lead sound of the disk system, drawn rather than lifted.",
+      ["homage"]
+    ]
+  ];
+  function registerFDSPresets() {
+    for (const [name, params, role, note, tags] of FDS_PRESETS) {
+      try {
+        registerFDS(name, params, { role, note, tags });
+      } catch (e) {
+      }
+    }
+  }
+  var FDS_CODE = `
+const CLK = ${FDS_CLOCK};
+const OUT_PEAK = ${FDS_OUT_PEAK};
+const MOD_STEP = [0, 1, 2, 4, 0, -4, -2, -1];
+
+/**
+ * \u30C1\u30C3\u30D7 1 \u500B\u300216 \u30AF\u30ED\u30C3\u30AF\u3054\u3068\u306B\u6CE2\u5F62\u3068\u5909\u8ABF\u306E\u8F2A\u3092\u9032\u3081\u308B\u3002
+ * \u51FA\u53E3\u306E\u30B5\u30F3\u30D7\u30EB\u306E\u3042\u3044\u3060\u306B\u6765\u305F\u523B\u307F\u306E\u5024\u3092\u5E73\u5747\u3057\u30012kHz \u306E\u4F4E\u57DF\u901A\u904E\u3092\u901A\u3059
+ * (\u30A2\u30C0\u30D7\u30BF\u306E\u51FA\u53E3\u306B\u3042\u308B\u3002\u8CC7\u6599\u306E\u300C\u304A\u3088\u305D 1 \u6B21\u306E 2kHz\u300D)\u3002
+ */
+class FDS {
+  constructor(rate) {
+    this.step = CLK / 16 / rate;   // \u51FA\u53E3 1 \u30B5\u30F3\u30D7\u30EB\u3042\u305F\u308A\u306E\u523B\u307F\u306E\u6570
+    this.frac = 0;
+    this.reg = new Uint8Array(0x80);
+    this.wave = new Uint8Array(64);
+    this.mod = new Int8Array(32);
+    this.waveAcc = 0;        // 24 \u30D3\u30C3\u30C8\u3002\u4E0A\u306E 6 \u30D3\u30C3\u30C8\u304C\u6CE2\u5F62\u306E\u4F4D\u7F6E
+    this.modAcc = 0;         // 12 \u30D3\u30C3\u30C8\u3002\u6841\u304C\u3042\u3075\u308C\u305F\u3089\u8868\u3092 1 \u3064\u9032\u3081\u308B
+    this.modPos = 0;         // 64 \u306E\u4F4D\u7F6E(\u8868\u306F 2 \u3064\u305A\u3064\u540C\u3058\u5024\u3092\u4F7F\u3046)
+    this.counter = 0;        // 7 \u30D3\u30C3\u30C8\u306E\u7B26\u53F7\u3064\u304D
+    this.pitch = 0;
+    this.modFreq = 0;
+    this.gain = 0;           // \u3044\u307E\u51FA\u3057\u3066\u3044\u308B\u97F3\u91CF(0\u301C32 \u3067\u982D\u6253\u3061)
+    this.pend = -1;          // \u6CE2\u5F62\u306E\u4F4D\u7F6E\u304C 0 \u306B\u623B\u3063\u305F\u3068\u304D\u306B\u5165\u308C\u308B\u97F3\u91CF
+    this.modGain = 0;
+    this.halt = true;        // $4083 bit7\u3002\u6CE2\u5F62\u3092\u6B62\u3081\u3066\u982D\u306B\u623B\u3059
+    this.modHalt = true;     // $4087 bit7\u3002\u5909\u8ABF\u3092\u6B62\u3081\u3066\u3001\u8868\u3092\u66F8\u3051\u308B\u3088\u3046\u306B\u3059\u308B
+    this.write = false;      // $4089 bit7\u3002\u6CE2\u5F62\u30E1\u30E2\u30EA\u3092\u66F8\u3051\u308B(\u51FA\u53E3\u306F\u6B62\u307E\u308B)
+    this.master = 1;
+    this.held = 0;
+    const cut = 2000;
+    this.lpA = 1 - Math.exp(-2 * Math.PI * cut / rate);
+    this.lp = 0;
+  }
+
+  writeReg(r, v) {
+    if (r >= 0x40) {
+      if (this.write) this.wave[r - 0x40] = v & 63;
+      return;
+    }
+    this.reg[r] = v;
+    switch (r) {
+      case 0x20: {   // $4080 \u97F3\u91CF\u3002\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u3092\u5207\u3063\u3066\u3001\u5024\u3092\u305D\u306E\u307E\u307E\u4F7F\u3046
+        const g = v & 63;
+        if (g === 0) { this.gain = 0; this.pend = -1; } else this.pend = g;
+        break;
+      }
+      case 0x22: this.pitch = (this.pitch & 0xf00) | v; break;
+      case 0x23:
+        this.pitch = (this.pitch & 0xff) | ((v & 15) << 8);
+        this.halt = !!(v & 0x80);
+        if (this.halt) this.waveAcc = 0;
+        break;
+      case 0x24: this.modGain = v & 63; break;
+      case 0x25: this.counter = ((v & 0x7f) ^ 0x40) - 0x40; break;
+      case 0x26: this.modFreq = (this.modFreq & 0xf00) | v; break;
+      case 0x27:
+        this.modFreq = (this.modFreq & 0xff) | ((v & 15) << 8);
+        this.modHalt = !!(v & 0x80);
+        if (this.modHalt) this.modAcc = 0;
+        break;
+      case 0x28:
+        // \u6B62\u3081\u3066\u3044\u308B\u3042\u3044\u3060\u3060\u3051\u66F8\u3051\u308B\u3002\u3044\u307E\u306E\u4F4D\u7F6E\u306B\u5165\u308C\u3066\u3001\u6B21\u3078\u9032\u3081\u308B
+        if (this.modHalt) {
+          this.mod[(this.modPos >> 1) & 31] = v & 7;
+          this.modPos = (this.modPos + 2) & 63;
+        }
+        break;
+      case 0x29:
+        this.write = !!(v & 0x80);
+        if (this.write) this.held = this.wave[(this.waveAcc >>> 18) & 63];
+        this.master = [1, 2 / 3, 2 / 4, 2 / 5][v & 3];
+        break;
+    }
+  }
+
+  /** 16 \u30AF\u30ED\u30C3\u30AF\u3076\u3093\u9032\u3081\u308B\u3002\u305D\u306E\u3068\u304D\u306E\u51FA\u53E3\u306E\u5024(0\u301C1)\u3092\u8FD4\u3059 */
+  tick() {
+    // \u5909\u8ABF\u3002\u6841\u304C\u3042\u3075\u308C\u305F\u3089\u3001\u8868\u306E\u5024\u3067\u30AB\u30A6\u30F3\u30BF\u3092\u52D5\u304B\u3059
+    if (!this.modHalt && this.modFreq > 0) {
+      this.modAcc += this.modFreq;
+      while (this.modAcc >= 4096) {
+        this.modAcc -= 4096;
+        const m = this.mod[(this.modPos >> 1) & 31];
+        if (m === 4) this.counter = 0;
+        else this.counter = (((this.counter + MOD_STEP[m]) & 0x7f) ^ 0x40) - 0x40;
+        this.modPos = (this.modPos + 1) & 63;
+      }
+    }
+    if (!this.halt && !this.write && this.pitch > 0) {
+      // \u8CC7\u6599\u306E\u5F0F\u305D\u306E\u307E\u307E\u3002\u6B63\u306E\u5074\u3060\u3051 6 \u30D3\u30C3\u30C8\u3078\u5207\u308A\u4E0A\u3052\u308B
+      let temp = this.counter * this.modGain;
+      if ((temp & 0x0f) && !(temp & 0x800)) temp += 0x20;
+      temp += 0x400;
+      temp = (temp >> 4) & 0xff;
+      const wp = (this.pitch * temp) & 0xfffff;
+      const before = this.waveAcc >>> 18;
+      this.waveAcc = (this.waveAcc + wp) % 0x1000000;
+      // \u97F3\u91CF\u306E\u66F8\u304D\u63DB\u3048\u306F\u3001\u6CE2\u5F62\u306E\u4F4D\u7F6E\u304C 0 \u306B\u623B\u3063\u305F\u3068\u3053\u308D\u3067\u52B9\u304F
+      if (this.pend >= 0 && (this.waveAcc >>> 18) < before) { this.gain = this.pend; this.pend = -1; }
+    } else if (this.pend >= 0) {
+      this.gain = this.pend; this.pend = -1;
+    }
+    const w = this.write ? this.held : this.wave[(this.waveAcc >>> 18) & 63];
+    return w / 63 * Math.min(32, this.gain) / 32 * this.master;
+  }
+
+  /** \u51FA\u53E3\u306E 1 \u30B5\u30F3\u30D7\u30EB\u30020 \u304B\u3089\u4E0A\u3002\u76F4\u6D41\u306F\u5916\u3067\u629C\u304F */
+  calc() {
+    this.frac += this.step;
+    const n = Math.floor(this.frac);
+    this.frac -= n;
+    let sum = 0;
+    for (let i = 0; i < n; i++) sum += this.tick();
+    const x = n > 0 ? sum / n * OUT_PEAK : this.lp;
+    this.lp += this.lpA * (x - this.lp);
+    return this.lp;
+  }
+}
+
+/**
+ * \u884C\u304D\u5148 1 \u3064\u3076\u3093\u306E\u51E6\u7406\u5668\u3002FDS \u306F 1 \u58F0\u306A\u306E\u3067\u3001\u91CD\u306A\u3063\u305F\u97F3\u7B26\u3054\u3068\u306B\u30C1\u30C3\u30D7\u3092\u8DB3\u3059\u3002
+ */
+class FdsBank extends AudioWorkletProcessor {
+  constructor(o) {
+    super();
+    const q = o.processorOptions || {};
+    this.events = (q.events || []).slice().sort((a, b) => a.t - b.t);
+    this.at = 0;
+    this.pool = [];
+    this.log = !!q.log;
+    this.logNow = 0;
+    this.dcX = 0;
+    this.dcY = 0;
+    this.dcR = 1 - 2 * Math.PI * 20 / sampleRate;   // 20Hz
+    this.cutAt = -1;
+    this.cutLen = Math.max(1, Math.round(sampleRate * 0.01));
+    this.port.onmessage = (e) => {
+      if (e.data && e.data.cut) { this.cut(); return; }
+      const add = e.data && e.data.add;
+      if (!add || !add.length) return;
+      this.cutAt = -1;
+      for (let i = 0; i < add.length; i++) this.events.push(add[i]);
+    };
+  }
+
+  grow() {
+    const c = new FDS(sampleRate);
+    const chip = { c, log: null, end: 0, wave: null, mod: null, ratio: 0, vs: null, ps: null };
+    if (this.log) {
+      const raw = c.writeReg.bind(c);
+      chip.log = [];
+      c.writeReg = (r, d) => { chip.log.push(this.logNow, r & 0xff, d & 0xff); raw(r, d); };
+    }
+    c.writeReg(0x29, 0x00);
+    c.writeReg(0x20, 0x80);
+    c.writeReg(0x24, 0x80);
+    c.writeReg(0x27, 0x80);
+    this.pool.push(chip);
+    return chip;
+  }
+
+  cut() {
+    this.events.length = 0;
+    this.at = 0;
+    for (const chip of this.pool) this.silence(chip);
+    if (this.cutAt < 0) this.cutAt = 0;
+  }
+
+  silence(chip) {
+    chip.end = 0; chip.vs = null; chip.ps = null;
+    chip.c.writeReg(0x20, 0x80);
+  }
+
+  pick(now) {
+    for (const chip of this.pool) if (chip.end <= now) return chip;
+    return this.grow();
+  }
+
+  /** \u5468\u671F\u3068\u3001\u305D\u308C\u306B\u4ED8\u3044\u3066\u304F\u308B\u5909\u8ABF\u306E\u901F\u3055\u3092\u66F8\u304F */
+  pitch(chip, p, force) {
+    const c = chip.c;
+    if (force || c.reg[0x22] !== (p & 0xff)) c.writeReg(0x22, p & 0xff);
+    if (force || (c.reg[0x23] & 15) !== ((p >> 8) & 15)) c.writeReg(0x23, (p >> 8) & 15);
+    if (chip.mod) {
+      const m = Math.max(0, Math.min(4095, Math.round(chip.ratio * p)));
+      if (force || c.reg[0x26] !== (m & 0xff)) c.writeReg(0x26, m & 0xff);
+      if (force || (c.reg[0x27] & 15) !== ((m >> 8) & 15)) c.writeReg(0x27, (m >> 8) & 15);
+    }
+  }
+
+  start(ev, now) {
+    const chip = this.pick(now);
+    const c = chip.c;
+    if (chip.end > 0) this.silence(chip);
+    // \u6CE2\u5F62\u30E1\u30E2\u30EA\u3002\u524D\u3068\u540C\u3058\u306A\u3089\u66F8\u304D\u76F4\u3055\u306A\u3044
+    if (chip.wave !== ev.wkey) {
+      c.writeReg(0x29, 0x80);
+      for (let i = 0; i < 64; i++) c.writeReg(0x40 + i, ev.wave[i]);
+      c.writeReg(0x29, 0x00);
+      chip.wave = ev.wkey;
+    }
+    // \u5909\u8ABF\u3002\u6B62\u3081\u3066\u8868\u3092\u66F8\u304D\u3001\u30AB\u30A6\u30F3\u30BF\u3092 0 \u306B\u3057\u3066\u304B\u3089\u56DE\u3059
+    chip.mod = ev.mod || null;
+    chip.ratio = ev.mod ? ev.mod.ratio : 0;
+    c.writeReg(0x27, 0x80);
+    if (ev.mod) {
+      for (let i = 0; i < 32; i++) c.writeReg(0x28, ev.mod.table[i]);
+      c.writeReg(0x25, 0);
+      c.writeReg(0x24, 0x80 | ev.mod.gain);
+    } else {
+      c.writeReg(0x24, 0x80);
+    }
+    c.writeReg(0x20, 0x80 | (ev.v & 63));
+    // \u9CF4\u3089\u3057\u306F\u3058\u3081\u306F\u6CE2\u5F62\u306E\u982D\u304B\u3089(bit7 \u3092\u7ACB\u3066\u3066\u623B\u3057\u3001\u3059\u3050\u4E0B\u308D\u3059)
+    c.writeReg(0x23, 0x80 | ((ev.p >> 8) & 15));
+    this.pitch(chip, ev.p, true);
+    chip.end = ev.t + ev.dur;
+    chip.vs = ev.vs && ev.vs.length ? { list: ev.vs, at: 0 } : null;
+    chip.ps = ev.ps && ev.ps.length ? { list: ev.ps, at: 0 } : null;
+  }
+
+  step(now) {
+    for (const chip of this.pool) {
+      if (chip.end <= 0) continue;
+      if (chip.end <= now) { this.silence(chip); continue; }
+      const c = chip.c;
+      if (chip.vs) {
+        const f = chip.vs;
+        while (f.at < f.list.length && f.list[f.at][0] <= now) c.writeReg(0x20, 0x80 | (f.list[f.at++][1] & 63));
+        if (f.at >= f.list.length) chip.vs = null;
+      }
+      if (chip.ps) {
+        const f = chip.ps;
+        while (f.at < f.list.length && f.list[f.at][0] <= now) this.pitch(chip, f.list[f.at++][1], false);
+        if (f.at >= f.list.length) chip.ps = null;
+      }
+    }
+  }
+
+  process(inputs, outputs) {
+    const out = outputs[0][0];
+    const n = out.length;
+    const base = currentTime;
+    const next = this.at < this.events.length ? this.events[this.at].t : Infinity;
+    if (!this.pool.some((c) => c.end > 0) && next >= base + n / sampleRate
+      && Math.abs(this.dcY) < 1e-6) {
+      out.fill(0);
+      this.dcX = 0; this.dcY = 0;
+      return true;
+    }
+    for (let i = 0; i < n; i++) {
+      const now = base + i / sampleRate;
+      if (this.log) this.logNow = now;
+      this.step(now);
+      while (this.at < this.events.length && this.events[this.at].t <= now) {
+        this.start(this.events[this.at++], now);
+      }
+      let raw = 0;
+      for (const chip of this.pool) if (chip.end > 0) raw += chip.c.calc();
+      const y = raw - this.dcX + this.dcR * this.dcY;
+      this.dcX = raw;
+      this.dcY = y;
+      let v = y;
+      if (this.cutAt >= 0) {
+        v *= Math.max(0, 1 - this.cutAt / this.cutLen);
+        this.cutAt++;
+        if (this.cutAt > this.cutLen) { this.cutAt = this.cutLen; v = 0; }
+      }
+      out[i] = v;
+    }
+    if (this.log) {
+      for (let k = 0; k < this.pool.length; k++) {
+        const chip = this.pool[k];
+        if (!chip.log.length) continue;
+        this.port.postMessage({ regs: chip.log, chip: k, type: 0 });
+        chip.log = [];
+      }
+    }
+    return true;
+  }
+}
+registerProcessor('mmsxx-fds', FdsBank);
+`;
+
+  // engine/sound/scc.js
+  var SCC_CLOCK = 3579545;
+  var SCC_OUT_GAIN = 0.1404;
+  function sccPeriod(freq) {
+    if (!(freq > 0)) return 4095;
+    return Math.max(9, Math.min(4095, Math.round(SCC_CLOCK / (32 * freq) - 1)));
+  }
+  var sccWave = (list) => Array.from(list, (v) => Math.max(-128, Math.min(127, Math.round(v * 127))));
+  var SCC_PRESETS = [
+    [
+      "sccSquare",
+      Array.from({ length: 32 }, (_, i) => i < 16 ? 1 : -1),
+      "lead",
+      "A 50% square on the SCC chip itself. The basic shape for porting a pulse part from another chip."
+    ],
+    [
+      "sccTriangle",
+      Array.from({ length: 32 }, (_, i) => i < 16 ? -1 + i / 7.5 : 1 - (i - 16) / 7.5),
+      "bass",
+      "A triangle on the SCC chip. The basic shape for porting a bass from another chip."
+    ],
+    [
+      "sccSaw",
+      WT_RAMP,
+      "lead",
+      "A sawtooth on the SCC chip. Bright and buzzy."
+    ],
+    [
+      "sccSine",
+      WT_SINE,
+      "chord",
+      "A sine on the SCC chip: thirty-two eight-bit samples, so the steps all but disappear."
+    ]
+  ];
+  function registerSCCPresets() {
+    for (const [name, wave, role, note] of SCC_PRESETS) {
+      try {
+        registerSCC(name, { wave: sccWave(wave) }, { role, note });
+      } catch (e) {
+      }
+    }
+  }
+  var SCC_CODE = `
+const CLK = ${SCC_CLOCK};
+const OUT_GAIN = ${SCC_OUT_GAIN};
+
+/**
+ * \u30C1\u30C3\u30D7 1 \u500B\u3002\u51FA\u53E3\u306E\u30B5\u30F3\u30D7\u30EB\u3054\u3068\u306B\u30AF\u30ED\u30C3\u30AF\u3092\u6570\u3048\u3066\u9032\u3081\u3001\u305D\u306E\u3042\u3044\u3060\u306E\u5024\u3092\u5E73\u5747\u3057\u3066\u304B\u3089
+ * \u6DF7\u305C\u308B(\u70B9\u3067\u62FE\u3046\u3068\u9AD8\u3044\u97F3\u3067\u6298\u308A\u8FD4\u3057\u304C\u51FA\u308B\u305F\u3081)\u3002
+ */
+class SCC {
+  constructor(rate) {
+    this.step = CLK / rate;
+    this.frac = 0;
+    this.reg = new Uint8Array(0xb0);
+    this.ram = new Int8Array(160);
+    this.period = new Uint16Array(5);
+    this.count = new Float64Array(5).fill(1);
+    this.pos = new Uint8Array(5);
+    this.vol = new Uint8Array(5);
+    this.on = 0;
+  }
+
+  writeReg(r, v) {
+    if (r >= 0xb0) return;
+    this.reg[r] = v;
+    if (r < 0xa0) { this.ram[r] = (v << 24) >> 24; return; }
+    if (r < 0xaa) {
+      const c = (r - 0xa0) >> 1;
+      this.period[c] = ((this.reg[0xa1 + c * 2] & 15) << 8) | this.reg[0xa0 + c * 2];
+      return;
+    }
+    if (r < 0xaf) { this.vol[r - 0xaa] = v & 15; return; }
+    this.on = v & 31;
+  }
+
+  /** \u51FA\u53E3\u306E 1 \u30B5\u30F3\u30D7\u30EB(\u304A\u3088\u305D -1..1) */
+  calc() {
+    this.frac += this.step;
+    const n = Math.floor(this.frac);
+    this.frac -= n;
+    if (n <= 0) return this.out || 0;
+    let mix = 0;
+    for (let c = 0; c < 5; c++) {
+      if (!(this.on & (1 << c)) || this.vol[c] === 0) continue;
+      const base = c * 32;
+      const per = this.period[c] + 1;
+      let left = n, sum = 0;
+      while (left >= this.count[c]) {
+        sum += this.ram[base + this.pos[c]] * this.count[c];
+        left -= this.count[c];
+        this.pos[c] = (this.pos[c] + 1) & 31;
+        this.count[c] = per;
+      }
+      sum += this.ram[base + this.pos[c]] * left;
+      this.count[c] -= left;
+      mix += sum / n * this.vol[c];
+    }
+    this.out = mix / (128 * 15) * OUT_GAIN;
+    return this.out;
+  }
+}
+
+/**
+ * \u884C\u304D\u5148 1 \u3064\u3076\u3093\u306E\u51E6\u7406\u5668\u3002\u4E2D\u306B\u30C1\u30C3\u30D7\u3092\u4F55\u500B\u3067\u3082\u6301\u3064(sound/ay.js \u3068\u540C\u3058\u8003\u3048\u65B9)\u3002
+ */
+class SccBank extends AudioWorkletProcessor {
+  constructor(o) {
+    super();
+    const q = o.processorOptions || {};
+    this.events = (q.events || []).slice().sort((a, b) => a.t - b.t);
+    this.at = 0;
+    this.pool = [];
+    this.log = !!q.log;
+    this.logNow = 0;
+    this.cutAt = -1;
+    this.cutLen = Math.max(1, Math.round(sampleRate * 0.01));
+    this.port.onmessage = (e) => {
+      if (e.data && e.data.cut) { this.cut(); return; }
+      const add = e.data && e.data.add;
+      if (!add || !add.length) return;
+      this.cutAt = -1;
+      for (let i = 0; i < add.length; i++) this.events.push(add[i]);
+    };
+  }
+
+  grow() {
+    const c = new SCC(sampleRate);
+    const chip = { c, log: null, v: [0, 1, 2, 3, 4].map(() => ({ end: 0, vs: null, ps: null })),
+      wave: [null, null, null, null, null] };
+    if (this.log) {
+      const raw = c.writeReg.bind(c);
+      chip.log = [];
+      c.writeReg = (r, d) => { chip.log.push(this.logNow, r & 0xff, d & 0xff); raw(r, d); };
+    }
+    c.writeReg(0xaf, 0);
+    this.pool.push(chip);
+    return chip;
+  }
+
+  cut() {
+    this.events.length = 0;
+    this.at = 0;
+    for (const chip of this.pool) for (let s = 0; s < 5; s++) this.silence(chip, s);
+    if (this.cutAt < 0) this.cutAt = 0;
+  }
+
+  silence(chip, s) {
+    const v = chip.v[s];
+    v.end = 0; v.vs = null; v.ps = null;
+    if (chip.c.reg[0xaa + s] !== 0) chip.c.writeReg(0xaa + s, 0);
+    const on = chip.c.reg[0xaf] & ~(1 << s);
+    if (chip.c.reg[0xaf] !== on) chip.c.writeReg(0xaf, on);
+  }
+
+  pick(wkey, now) {
+    for (const chip of this.pool) {
+      // \u540C\u3058\u6CE2\u5F62\u304C\u3059\u3067\u306B\u8F09\u3063\u3066\u3044\u308B\u58F0\u3092\u5148\u306B\u9078\u3076(\u66F8\u304D\u76F4\u3055\u305A\u306B\u6E08\u3080)
+      for (let s = 0; s < 5; s++) if (chip.wave[s] === wkey && chip.v[s].end <= now) return { chip, s };
+      for (let s = 0; s < 5; s++) if (chip.v[s].end <= now) return { chip, s };
+    }
+    return { chip: this.grow(), s: 0 };
+  }
+
+  start(ev, now) {
+    const { chip, s } = this.pick(ev.wkey, now);
+    const c = chip.c;
+    if (chip.v[s].end > 0) this.silence(chip, s);
+    if (chip.wave[s] !== ev.wkey) {
+      for (let i = 0; i < 32; i++) c.writeReg(s * 32 + i, ev.wave[i] & 0xff);
+      chip.wave[s] = ev.wkey;
+    }
+    c.writeReg(0xa0 + s * 2, ev.p & 0xff);
+    c.writeReg(0xa1 + s * 2, (ev.p >> 8) & 15);
+    c.writeReg(0xaa + s, ev.v & 15);
+    c.writeReg(0xaf, c.reg[0xaf] | (1 << s));
+    const v = chip.v[s];
+    v.end = ev.t + ev.dur;
+    v.vs = ev.vs && ev.vs.length ? { list: ev.vs, at: 0 } : null;
+    v.ps = ev.ps && ev.ps.length ? { list: ev.ps, at: 0 } : null;
+  }
+
+  step(now) {
+    for (const chip of this.pool) {
+      const c = chip.c;
+      for (let s = 0; s < 5; s++) {
+        const v = chip.v[s];
+        if (v.end <= 0) continue;
+        if (v.end <= now) { this.silence(chip, s); continue; }
+        if (v.vs) {
+          const f = v.vs;
+          while (f.at < f.list.length && f.list[f.at][0] <= now) {
+            const val = f.list[f.at++][1] & 15;
+            if (c.reg[0xaa + s] !== val) c.writeReg(0xaa + s, val);
+          }
+          if (f.at >= f.list.length) v.vs = null;
+        }
+        if (v.ps) {
+          const f = v.ps;
+          while (f.at < f.list.length && f.list[f.at][0] <= now) {
+            const p = f.list[f.at++][1];
+            if (c.reg[0xa0 + s * 2] !== (p & 0xff)) c.writeReg(0xa0 + s * 2, p & 0xff);
+            if (c.reg[0xa1 + s * 2] !== ((p >> 8) & 15)) c.writeReg(0xa1 + s * 2, (p >> 8) & 15);
+          }
+          if (f.at >= f.list.length) v.ps = null;
+        }
+      }
+    }
+  }
+
+  live(chip) {
+    for (let s = 0; s < 5; s++) if (chip.v[s].end > 0) return true;
+    return false;
+  }
+
+  process(inputs, outputs) {
+    const out = outputs[0][0];
+    const n = out.length;
+    const base = currentTime;
+    const next = this.at < this.events.length ? this.events[this.at].t : Infinity;
+    // \u6CE2\u5F62\u306F\u7B26\u53F7\u3064\u304D\u306A\u306E\u3067\u76F4\u6D41\u306F\u4E57\u3089\u306A\u3044\u3002\u9ED9\u3063\u3066\u3044\u308C\u3070\u56DE\u3055\u306A\u3044
+    if (!this.pool.some((c) => this.live(c)) && next >= base + n / sampleRate) {
+      out.fill(0);
+      return true;
+    }
+    for (let i = 0; i < n; i++) {
+      const now = base + i / sampleRate;
+      if (this.log) this.logNow = now;
+      this.step(now);
+      while (this.at < this.events.length && this.events[this.at].t <= now) {
+        this.start(this.events[this.at++], now);
+      }
+      let v = 0;
+      for (const chip of this.pool) if (this.live(chip)) v += chip.c.calc();
+      if (this.cutAt >= 0) {
+        v *= Math.max(0, 1 - this.cutAt / this.cutLen);
+        this.cutAt++;
+        if (this.cutAt > this.cutLen) { this.cutAt = this.cutLen; v = 0; }
+      }
+      out[i] = v;
+    }
+    if (this.log) {
+      for (let k = 0; k < this.pool.length; k++) {
+        const chip = this.pool[k];
+        if (!chip.log.length) continue;
+        this.port.postMessage({ regs: chip.log, chip: k, type: 0 });
+        chip.log = [];
+      }
+    }
+    return true;
+  }
+}
+registerProcessor('mmsxx-scc', SccBank);
+`;
+
+  // engine/sound/pce.js
+  var PCE_CLOCK = 3579545;
+  var PCE_OUT_GAIN = 0.1393;
+  function pcePeriod(freq) {
+    if (!(freq > 0)) return 4095;
+    return Math.max(1, Math.min(4095, Math.round(PCE_CLOCK / (32 * freq))));
+  }
+  function pceNoise(freq) {
+    if (!(freq > 0)) return 0;
+    const nf = Math.max(1, Math.min(31, Math.round(PCE_CLOCK / (64 * freq * 16))));
+    return 31 - nf;
+  }
+  var pceWave = (list) => Array.from(list, (v) => Math.max(0, Math.min(31, Math.round((v + 1) / 2 * 31))));
+  var PCE_PRESETS = [
+    [
+      "pceSquare",
+      Array.from({ length: 32 }, (_, i) => i < 16 ? 1 : -1),
+      "lead",
+      "A 50% square on the PC Engine chip itself. The basic shape for porting a pulse part from another chip."
+    ],
+    [
+      "pceTriangle",
+      Array.from({ length: 32 }, (_, i) => i < 16 ? -1 + i / 7.5 : 1 - (i - 16) / 7.5),
+      "bass",
+      "A triangle on the PC Engine chip. Five bits leave a visible staircase; the basic shape for porting a bass."
+    ],
+    [
+      "pceSaw",
+      WT_RAMP,
+      "lead",
+      "A sawtooth on the PC Engine chip. The five-bit steps make it buzz."
+    ],
+    [
+      "pceSine",
+      WT_SINE,
+      "chord",
+      "A sine on the PC Engine chip: thirty-two five-bit samples, so the staircase is audible."
+    ]
+  ];
+  function registerPCEPresets() {
+    for (const [name, wave, role, note] of PCE_PRESETS) {
+      try {
+        registerPCE(name, { wave: pceWave(wave) }, { role, note });
+      } catch (e) {
+      }
+    }
+    try {
+      registerPCE("pceNoise", { noise: true }, {
+        role: "noise",
+        note: "Noise from the PC Engine chip itself (voices 5 and 6 only). The note picks the noise clock; o4a lands mid-range, lower notes are coarser."
+      });
+    } catch (e) {
+    }
+  }
+  var PCE_CODE = `
+const CLK = ${PCE_CLOCK};
+const OUT_GAIN = ${PCE_OUT_GAIN};
+
+/** \u6E1B\u8870\u306E\u6BB5(1 \u6BB5 2^(-1/4))\u304B\u3089\u639B\u3051\u7387\u3078\u300231 \u6BB5\u4EE5\u4E0A\u306F\u7121\u97F3 */
+const ATT = Array.from({ length: 32 }, (_, i) => (i >= 31 ? 0 : Math.pow(2, -i / 4)));
+
+/**
+ * \u30C1\u30C3\u30D7 1 \u500B\u3002\u51FA\u53E3\u306E\u30B5\u30F3\u30D7\u30EB\u3054\u3068\u306B\u30AF\u30ED\u30C3\u30AF\u3092\u6570\u3048\u3066\u9032\u3081\u3001\u305D\u306E\u3042\u3044\u3060\u306E\u5024\u3092\u5E73\u5747\u3057\u3066\u304B\u3089
+ * \u6DF7\u305C\u308B(\u70B9\u3067\u62FE\u3046\u3068\u9AD8\u3044\u97F3\u3067\u6298\u308A\u8FD4\u3057\u304C\u51FA\u308B\u305F\u3081)\u3002
+ */
+class PSG {
+  constructor(rate) {
+    this.step = CLK / rate;
+    this.frac = 0;
+    this.sel = 0;
+    this.master = 0xff;
+    this.ch = Array.from({ length: 6 }, () => ({
+      period: 0, ctrl: 0, bal: 0xff, wave: new Uint8Array(32), wpos: 0, pos: 0, count: 1,
+      noise: 0, lfsr: 1, ncount: 1, nbit: 0,
+    }));
+    this.reg = new Uint8Array(16);
+  }
+
+  writeReg(r, v) {
+    this.reg[r] = v;
+    const c = this.ch[this.sel];
+    switch (r) {
+      case 0: this.sel = v & 7; if (this.sel > 5) this.sel = 5; break;
+      case 1: this.master = v; break;
+      case 2: c.period = (c.period & 0xf00) | v; break;
+      case 3: c.period = (c.period & 0xff) | ((v & 15) << 8); break;
+      case 4: {
+        // \u9CF4\u3089\u3055\u305A DDA \u3060\u3051\u7ACB\u3066\u308B\u3068\u3001\u66F8\u304D\u8FBC\u307F\u306E\u4F4D\u7F6E\u304C 0 \u306B\u623B\u308B
+        if ((v & 0xc0) === 0x40) c.wpos = 0;
+        c.ctrl = v;
+        break;
+      }
+      case 5: c.bal = v; break;
+      case 6:
+        // \u9CF4\u3089\u3057\u3066\u3044\u306A\u3044\u3068\u304D\u3060\u3051\u3001\u6CE2\u5F62\u30E1\u30E2\u30EA\u3078\u9806\u306B\u66F8\u304F
+        if (!(c.ctrl & 0x80)) { c.wave[c.wpos] = v & 31; c.wpos = (c.wpos + 1) & 31; }
+        break;
+      case 7: if (this.sel >= 4) c.noise = v; break;
+    }
+  }
+
+  /** \u305D\u306E\u58F0\u306E\u639B\u3051\u7387\u3002\u58F0\u306E\u97F3\u91CF\u30FB\u5DE6\u53F3\u30FB\u5168\u4F53\u306E\u6E1B\u8870\u3092\u5408\u308F\u305B\u308B(\u5DE6\u5074) */
+  gain(c) {
+    const al = c.ctrl & 31, lal = c.bal >> 4, lmal = this.master >> 4;
+    if (!(c.ctrl & 0x80) || al === 0 || lal === 0 || lmal === 0) return 0;
+    const att = (31 - al) + (15 - lal) * 2 + (15 - lmal) * 2;
+    return ATT[Math.min(31, att)];
+  }
+
+  /** \u51FA\u53E3\u306E 1 \u30B5\u30F3\u30D7\u30EB(\u304A\u3088\u305D -1..1) */
+  calc() {
+    this.frac += this.step;
+    const n = Math.floor(this.frac);
+    this.frac -= n;
+    if (n <= 0) return this.out || 0;
+    let mix = 0;
+    for (let i = 0; i < 6; i++) {
+      const c = this.ch[i];
+      const g = this.gain(c);
+      if (g === 0) continue;
+      let left = n, sum = 0;
+      if (i >= 4 && (c.noise & 0x80)) {
+        // \u30CE\u30A4\u30BA\u300231 \u306F\u6C7A\u307E\u3063\u3066\u3044\u306A\u3044\u306E\u3067\u300130 \u3068\u540C\u3058\u901F\u3055\u306B\u3059\u308B
+        const nf = 31 - Math.min(30, c.noise & 31);
+        const per = 64 * nf;
+        while (left >= c.ncount) {
+          sum += (c.nbit ? 31 : 0) * c.ncount;
+          left -= c.ncount;
+          // 18 \u30D3\u30C3\u30C8\u306E\u4E26\u3073\u3002\u30BF\u30C3\u30D7 0\u30FB1\u30FB11\u30FB12\u30FB17
+          const b = c.lfsr;
+          const fb = (b ^ (b >> 1) ^ (b >> 11) ^ (b >> 12) ^ (b >> 17)) & 1;
+          c.lfsr = (b >> 1) | (fb << 17);
+          c.nbit = c.lfsr & 1;
+          c.ncount = per;
+        }
+        sum += (c.nbit ? 31 : 0) * left;
+        c.ncount -= left;
+      } else {
+        const per = c.period === 0 ? 4096 : c.period;
+        while (left >= c.count) {
+          sum += c.wave[c.pos] * c.count;
+          left -= c.count;
+          c.pos = (c.pos + 1) & 31;
+          c.count = per;
+        }
+        sum += c.wave[c.pos] * left;
+        c.count -= left;
+      }
+      // \u4E2D\u5FC3\u3092 15.5 \u306B\u53D6\u308B(HuC6280A)\u3002\u521D\u671F\u306E\u30C1\u30C3\u30D7\u306E\u30DD\u30C3\u30D7\u30CE\u30A4\u30BA\u306F\u5199\u3055\u306A\u3044
+      mix += (sum / n - 15.5) / 15.5 * g;
+    }
+    this.out = mix * OUT_GAIN;
+    return this.out;
+  }
+}
+
+/** \u58F0\u306E\u7A2E\u985E\u3002\u30CE\u30A4\u30BA\u306F 5 \u3068 6(\u756A\u53F7\u306F 4 \u3068 5)\u3060\u3051 */
+const ANY = [0, 1, 2, 3, 4, 5];
+const NOISE = [4, 5];
+
+/**
+ * \u884C\u304D\u5148 1 \u3064\u3076\u3093\u306E\u51E6\u7406\u5668\u3002\u4E2D\u306B\u30C1\u30C3\u30D7\u3092\u4F55\u500B\u3067\u3082\u6301\u3064(sound/ay.js \u3068\u540C\u3058\u8003\u3048\u65B9)\u3002
+ */
+class PceBank extends AudioWorkletProcessor {
+  constructor(o) {
+    super();
+    const q = o.processorOptions || {};
+    this.events = (q.events || []).slice().sort((a, b) => a.t - b.t);
+    this.at = 0;
+    this.pool = [];
+    this.log = !!q.log;
+    this.logNow = 0;
+    this.cutAt = -1;
+    this.cutLen = Math.max(1, Math.round(sampleRate * 0.01));
+    this.port.onmessage = (e) => {
+      if (e.data && e.data.cut) { this.cut(); return; }
+      const add = e.data && e.data.add;
+      if (!add || !add.length) return;
+      this.cutAt = -1;
+      for (let i = 0; i < add.length; i++) this.events.push(add[i]);
+    };
+  }
+
+  grow() {
+    const c = new PSG(sampleRate);
+    const chip = { c, log: null, v: ANY.map(() => ({ end: 0, vs: null, ps: null, noise: false })),
+      wave: Array(6).fill(null) };
+    if (this.log) {
+      const raw = c.writeReg.bind(c);
+      chip.log = [];
+      c.writeReg = (r, d) => { chip.log.push(this.logNow, r & 0xff, d & 0xff); raw(r, d); };
+    }
+    c.writeReg(1, 0xff);
+    for (let s = 0; s < 6; s++) { c.writeReg(0, s); c.writeReg(4, 0); c.writeReg(5, 0xff); }
+    this.pool.push(chip);
+    return chip;
+  }
+
+  /** \u305D\u306E\u58F0\u3092\u9078\u3076(\u540C\u3058\u306A\u3089\u66F8\u304B\u306A\u3044) */
+  sel(c, s) { if (c.sel !== s) c.writeReg(0, s); }
+
+  cut() {
+    this.events.length = 0;
+    this.at = 0;
+    for (const chip of this.pool) for (let s = 0; s < 6; s++) this.silence(chip, s);
+    if (this.cutAt < 0) this.cutAt = 0;
+  }
+
+  silence(chip, s) {
+    const v = chip.v[s];
+    v.end = 0; v.vs = null; v.ps = null;
+    this.sel(chip.c, s);
+    chip.c.writeReg(4, 0);
+    if (v.noise) { chip.c.writeReg(7, 0); v.noise = false; }
+  }
+
+  pick(ev, now) {
+    const want = ev.noise ? NOISE : ANY;
+    for (const chip of this.pool) {
+      // \u540C\u3058\u6CE2\u5F62\u304C\u3059\u3067\u306B\u8F09\u3063\u3066\u3044\u308B\u58F0\u3092\u5148\u306B\u9078\u3076(\u66F8\u304D\u76F4\u3055\u305A\u306B\u6E08\u3080)
+      if (!ev.noise) for (const s of want) if (chip.v[s].end <= now && chip.wave[s] === ev.wkey) return { chip, s };
+      for (const s of want) if (chip.v[s].end <= now) return { chip, s };
+    }
+    return { chip: this.grow(), s: want[0] };
+  }
+
+  start(ev, now) {
+    const { chip, s } = this.pick(ev, now);
+    const c = chip.c;
+    if (chip.v[s].end > 0) this.silence(chip, s);
+    this.sel(c, s);
+    const v = chip.v[s];
+    if (ev.noise) {
+      c.writeReg(7, 0x80 | (ev.p & 31));
+      v.noise = true;
+    } else {
+      if (chip.wave[s] !== ev.wkey) {
+        // \u66F8\u304D\u8FBC\u307F\u306E\u4F4D\u7F6E\u3092 0 \u306B\u623B\u3057\u3066\u300132 \u500B\u3092\u9806\u306B\u66F8\u304F
+        c.writeReg(4, 0x40);
+        c.writeReg(4, 0x00);
+        for (let i = 0; i < 32; i++) c.writeReg(6, ev.wave[i]);
+        chip.wave[s] = ev.wkey;
+      }
+      c.writeReg(2, ev.p & 0xff);
+      c.writeReg(3, (ev.p >> 8) & 15);
+    }
+    c.writeReg(4, 0x80 | (ev.v & 31));
+    v.end = ev.t + ev.dur;
+    v.vs = ev.vs && ev.vs.length ? { list: ev.vs, at: 0 } : null;
+    v.ps = ev.ps && ev.ps.length ? { list: ev.ps, at: 0 } : null;
+  }
+
+  step(now) {
+    for (const chip of this.pool) {
+      const c = chip.c;
+      for (let s = 0; s < 6; s++) {
+        const v = chip.v[s];
+        if (v.end <= 0) continue;
+        if (v.end <= now) { this.silence(chip, s); continue; }
+        if (v.vs) {
+          const f = v.vs;
+          while (f.at < f.list.length && f.list[f.at][0] <= now) {
+            this.sel(c, s);
+            c.writeReg(4, 0x80 | (f.list[f.at++][1] & 31));
+          }
+          if (f.at >= f.list.length) v.vs = null;
+        }
+        if (v.ps) {
+          const f = v.ps;
+          while (f.at < f.list.length && f.list[f.at][0] <= now) {
+            const p = f.list[f.at++][1];
+            this.sel(c, s);
+            if (v.noise) c.writeReg(7, 0x80 | (p & 31));
+            else { c.writeReg(2, p & 0xff); c.writeReg(3, (p >> 8) & 15); }
+          }
+          if (f.at >= f.list.length) v.ps = null;
+        }
+      }
+    }
+  }
+
+  live(chip) {
+    for (let s = 0; s < 6; s++) if (chip.v[s].end > 0) return true;
+    return false;
+  }
+
+  process(inputs, outputs) {
+    const out = outputs[0][0];
+    const n = out.length;
+    const base = currentTime;
+    const next = this.at < this.events.length ? this.events[this.at].t : Infinity;
+    if (!this.pool.some((c) => this.live(c)) && next >= base + n / sampleRate) {
+      out.fill(0);
+      return true;
+    }
+    for (let i = 0; i < n; i++) {
+      const now = base + i / sampleRate;
+      if (this.log) this.logNow = now;
+      this.step(now);
+      while (this.at < this.events.length && this.events[this.at].t <= now) {
+        this.start(this.events[this.at++], now);
+      }
+      let v = 0;
+      for (const chip of this.pool) if (this.live(chip)) v += chip.c.calc();
+      if (this.cutAt >= 0) {
+        v *= Math.max(0, 1 - this.cutAt / this.cutLen);
+        this.cutAt++;
+        if (this.cutAt > this.cutLen) { this.cutAt = this.cutLen; v = 0; }
+      }
+      out[i] = v;
+    }
+    if (this.log) {
+      for (let k = 0; k < this.pool.length; k++) {
+        const chip = this.pool[k];
+        if (!chip.log.length) continue;
+        this.port.postMessage({ regs: chip.log, chip: k, type: 0 });
+        chip.log = [];
+      }
+    }
+    return true;
+  }
+}
+registerProcessor('mmsxx-pce', PceBank);
+`;
+
+  // engine/sound/opnarhythm.js
+  var OPNA_CLOCK = 7987200;
+  var OPNA_RHYTHM_OUT_GAIN = 0.36;
+  var OPNA_RHYTHM_KEYS = ["bd", "sd", "top", "hh", "tom", "rim"];
+  var OPNA_RHYTHM_PRESETS = [
+    ["opnaKick", "bd", "The OPNA rhythm bass drum. A short thump that drops from about 125Hz to 50Hz."],
+    ["opnaSnare", "sd", "The OPNA rhythm snare. A drum body at 200 and 306Hz, then noise takes over."],
+    ["opnaCymbal", "top", "The OPNA rhythm top cymbal. The longest of the six, with a ring that stays to the end."],
+    ["opnaHat", "hh", "The OPNA rhythm hi-hat. Short bright noise with a metallic ring."],
+    ["opnaTom", "tom", "The OPNA rhythm tom. Falls from about 206Hz to 135Hz, with a little noise on the hit."],
+    ["opnaRim", "rim", "The OPNA rhythm rim shot. A dry click under 30ms."]
+  ];
+  var REDRAWN = " Redrawn to sound like the YM2608 rhythm ROM, not the ROM data itself; played as 4-bit ADPCM-A at the chip's own rate. o4c plays it as recorded. The recording may be redrawn closer to the real chip later, so the sound can change.";
+  function registerOPNARhythmPresets() {
+    for (const [name, key2, note] of OPNA_RHYTHM_PRESETS) {
+      try {
+        registerOPNARhythm(name, { key: key2 }, { role: "perc", note: note + REDRAWN });
+      } catch (e) {
+      }
+    }
+  }
+  var OPNA_RHYTHM_DATA = {
+    bd: { rate: 18488.889, gain: 0.761, data: "777c72a13912a95189921078f820928c028a9921c81b92ca20d9089989e829c0091ad12ca31a99042bd130a84181822a070942a34aa35080328830873d85199209218029838a42900904a949d0209d911bb0889eb8889ca8be00bd819d80a918ca9908c929e90a81aa08c09b80a919b8ac11ca70c830920a34a0789339238268142841033144113154013105202314211422322327200320341122320242023419030911020aa88019c909b988cc88cb88cbabcaaccb9adc90bd99ab9ada9abbcbaadaabbcbbacbbdaaacaaacbbabda9bbbbcabbbbbbbabbaab99aaa99899a8880890880000001101111112112221222223232232234232422423423342342343233432342343234224234233332332333223322323222222322122212122111121111011010100010800080808808898888998989999999a999aa9aa9aaaaaaaaaaabaaaabaababaababaababaababaabaaabaaabaaaaaaaaaaa9aaa9aa9aa99a9a999a99999999989998998989889889888888888808808808080080008000000010001010101011011111111111111211211212121212122122122122212212222121112110110101000000080808888888888989899899998990" },
+    sd: { rate: 18488.889, gain: 0.796, data: "777770880889009b988889bb00cb038cc91429b9141ad271a919a151911fa030901ab89a268a019929f051801bd151809b271a921b8339049f91288018bd921a921cb89b260da118810ba32bf1519808b8729a131ba802628c9229b831b078ca03189a910a819e158c821a11bd15199099238a139d8328da031002afb020128d932cc902538cb108022022da11a271da368a991429d818823be821899800189a933dd140ba23089da2729aa01220ab8339841dc0418a88122abeb1629a01bc139c0428b989c8730d9138ca340ab120912cd141ab022ab268da248a129a89c053099ab1288449c038a81ac372bb049b060c9339aaa052be030981ac130b832ab149fa440aa018810121db1318139fa02320cc039c070ca349a81aa2689809921b9348a09d8358a9120ba141cc161ab020a80440dd83289809810812ac82419c820a171ca229932ba10919f278b920a13eb458d828a030900bb148820c821a82ad378b8309828c8428908cb2729a9801209998019d061bb128830fc23289bc812340db01111bf8418918cb231922bc03af924189b835be8428a820ab8340b9539d9100129c8328aaba2719901ad80189240bc81cb373bc01090128ba23aa749d8118118b019851ca248909809a272cb130ca252ad912109a9139b140a899129950fb459b831bc0338cb120912afa2428a9a982620a9899450a980073ae8219920a030d9109248ca019922ac168cb248a80111cc018072bc0209008140cb1220ad0529b9021ad1619b880218909b558e821a840c932ab8330da150aa118908821998ae8209378da229a138b912109ba13350b860b961d9240900ab03090538ab9fb0720a88aa821130ba9ca440b92289a8119139e0429c801029a8218980080" },
+    top: { rate: 18488.889, gain: 0.871, data: "77ff08f71aaaf1b1926c0a0c1cd18aa7749b288d481f3b34b9021dea0888019910882a19100b2188ac789a4b021a9481900c084a92b27e3b209a5880a28b219d39208b14b2f13b802d599008004c1b59810e281900a3b21b0088a7880d3a3a905c281c21c0119a40b4a094b0b79801901a812d129c2b799829859903ba5a3ab31a109881a1237e00082b90a1329c4f4a11b096b2809991970a90580a82b3c1298f4891a29108094bb480c80079a1118a839e20181fa42a0d2181a10b813d4b9395b0903c2811d003aa1f30098814d00801b0590a8020d19590910b11c048e2191c100090a780980880b408a2803bbc27a04a8b592bc4a2188818c490a2b592b1a28d878a5a0080a2809903a38f01923d805c10898a33a1a0b71c119b69008a0011d2810a5d3988a1108c122d8111c9692b1a830c2a3091c5099b7909108991820c8688828b8a17a89021c491c2958a1b130ab5d2019a3a820a91a017c09285b82a4b86a0a030ab3097c110b281a2c82000e38a40ba481d8599930a0a5928a6b2993d20b285c083990a42d1a21c009388a50c4c3a0939c309188a25d392a80080c4f102990810a111f8490999396b9384b2b100b813e2939a85d139a87a0809a38b418ab7080d01180a18a15a891034bb0813d0d3808499d21800b1a682d90831a8d40090a2a9178899050c88319a2819c8030f1011a888a7a8100b6a29b2196c2928a1b308d878890108a82a13e0193f003b93810b2b5b088690b23c2b1849a03989ab079923c97909089021d812a9c79008110b941f1893a03d028983d118a39b09491ad1791993980a2a6d020a1a02189886c208c299590b0580aa221d081985b8100949a3081c096d289288a2921ba07a18089a4b3b13f21a1c7999488808a6990029b580900a08298894a821e82a0680d01000ac41983a93f12909987a1984c00001a93b0102fa401c20d11881991201c0b7a3c2902a95b1b318b95008d289011a809868a1b4b2499b4982a185f113c8882a69a82895b091a408d3910b038b88709991158f0289290a82830f08210c883a21f108b35c80011d292a1913bb287a3e0100a83d2928b2a0384e89482c09102b3e109391b828010c00212f1a16a8983908b849092e3d28599a4b40b0882108c108a61b9a6199a113e1a58a18081a933f811a2b80025b18b241ac96c22a0a1b418b82a22a22fc5880a2a4a180a00b788a49098398811884f23f1a208901b83e58a91380b9184a28a3f0408aa03001cb304e4a89104b3e82009880d400c082819b854ba18218d280a3089b18079a8843bc020f3881b192109c182b70d00012c883918190b22997be48a3a1b2922f108a490b5a3c3b1101e01921ba39185aa1a252f81802c3a909590b112f1191b007a81a218a0181b97a2aa493f182a1a1000999699101c28a6a0a3091b841d8014b0813d2a83d8285bb284a89868b318d85b2891a50b00081908029b4c20a80494ab493af398a31f3a093a92186aa2913c9a693c11a1d32b8a0692bc2298a34d29820c91208f3880a183a9216d2b48a8192b6992a9319d8492c3a93a00924b915a91f39000a488c05b100a380c30ad287a929082c02b0025ac112a0d22a3c11d3d2098028a5c2a11b2b59921ac391028aa238d0b05a042d92a79981191b04b9195a1a3939f110c85981a096a1a129092a9291ac3825a8d23a2c1d4808a913c9385d0200bb5199b7890921a098419a191c12a2d907888a12913f088201f19021b839b339c08a46aa8101a13d02c50a99834bc21c68a93880388f282b09a50808983c489a3d239bc49288904b128d00b681c011a839d38192a0b5a192da6198a013c083b95b38ae221aa0211ad2099041ba1978ba790081901d0288b0359b8086b029884a199989700a8294d298a1142f90128bb682d3981a09498a132c9b54d81009080190e2280c2b7a2a9108010a0a0302f00119a190a4b4a4b0814af21b841c01b3b5b2a48982a2e0028a28091a1c7b14b8869a1a30c480c1101c88381b022f9130ba8700a0b03b34d90050b90113e000911b903d69911aa59090820989820904ab8521af02c699813d2b20a1181c0830b982058c979901091f380992889210a2f0409c81283e0189a4189f2280c19288812b9a610bd868888109a31a9939409c849a308903f49a3e13a92a58c00003e0100b12999907a18088914ab017a3e1809018093aa78b0298208b5aa22b9a7093b029c08294c21c28a07b849001e11a1d22909923ba080887a091a040bc37a018a92a15a99349d1929298209929f29a42d1191a3c0019e788a8282aa20293c2ba2a70d1082c292c28119a21e019a58b4a49a100a22e12c1880808830805ad14d198399090391d30a4a280f933c88c788092c101199a015ac4a2a3920d9493aa884a1909d6901a108895b0810a4b11a3bb360b3d10a3d3a0a2599009a5098893829f83a21a00a419c9860918e112c098223d1f118808a11292ae1a609880010a0ad2380ac50892b108a52aa8c68a00a70a8003ba834d00189a0211f102b2a28d1811a2c22f2099038920ac7b8101a9222e2b03b0201b8a27c9823b4d5b02a810b21b68a913a902086c2989b34a991325f9218a0219d1019aa40290e40b0839d220d18018c1201c1812f080019a40a914a2f2920ab690900009987899004d119089020b4e209003e01b33d081891b7a81a509a0290081ab117a0a812b408b94028bbb5498b4e1290080a13b5f181a18805b008948898a5b5a1d02081a181b33acc1350d8884a11a089278c902019c38199288b5a6a88291e012a008012f2a0802b58c0010982b8709891c31a1a941a3c99691893b3f2988a6901989482f01800a2a813ac1b619092d02a3b29b3799984a28a189480f1081891092b28d392189c051bf30b3896c1886b8002a2b8121f838b05980a02088d033c81c139803f804988b1041d1a18128ba88708991b7891a3b112e839913e1918290b120d1a3a7c2098813ba1f48090b5890180b027a9a211a8002ac2590d0113bc2b33bb003997900f2080b845c080802c1198139c8b2792f010080c398292c0001a882a97088983a988044db339a3f28932d08a1280f119499099383e010a2a011f0490883d1919081912ad318c9495989895b811b39307c8938088b12085d81b608892b28888ab270b2a295b0003d13f00092a80581b2d0118a929590a91828390d14ba2f292099598902903b849f14ab082314f818190a8a51898b9609082c2498e1800819895089a1040b887a89109a2593ca394d0093a028a8b054e1802980d38a823a0f2188b021a07b84b0b598811a20c4c3a9308883c1a2b14f3092b3e2982a1809029b0e34b8858b4d101b9222c9202e0038c1183e8000091a5a2a1a83b9297b3f289191011c13a8d2818a8509a5c12a8823ca381d19933cc68a1808081a13c85c19209104f11a83c12b915a80a21a912b79a87aa2083ba131d0822f1820bb60981b40a94918c038b3a8098214fb217a81a200b3a808068ae2039a08840c96a89409aa429a2a1801a7ac05908a122aa8249d149b01018f8380a9688b32abb7190c0308aa3290914ae0048d1821a1c28931a9b4b588d81110c1968a18a2a13b59d204d081190802d8831d8028190a01a06b3d8381c8915a21c821909e3a4a4a0981089a4a40989c5b290083a288be6981920c3a1d2905b110983d00c302d1019d388a21a030d800b123c58a958b28b0152a9e2002d1a2111d0a1096a9003a2bd12880191a878b99504c921982a9a24e59980011c8941880b1a111c82a582ad1a2380b21c4980bc2252da4981a3f2920a2bc5809a493c3890b12809a69190988048810aa68cb50a183b398f3891882c139f39a87918b32a80bc709098209a399006a2b8917ba3a2012e04b923bd4a0389d2802b2c488915bd3928b18488c13ab222d1a048ab01588904c0120f92840ba0112b8d12100a9aa370bb0528a098a5938c120bb149a3f409818aa1114e084a29d00100c3108e0209a31a5c209aa6a3a0001b281cd4a33d099480b8833b7b0b228b084a3a79a8196b118902bb4b2a698805b10d1011b82a48a99010798928803f893292f181929b395b3a8c3b31c08142d1c11189808a1799b04868c9132c8a2c500a88970a098283ba80022b9aa7292ae0212acc411a900b332cb90070bb41a0110c0a7098c31a4d2b31c195a801a208b3918e5a009103d91180b942c2920b1887c4c208990289b79829080a280091c41cb60b182939c3a2e8488a12082bd4a3b2a29928abb171d213e10a84a9291c50b2b3c699181900b2a1c52b0838a1d13c82929c2000aa1173d894a1b2090b72bb290599094a2990c139040d3a818aa1588c25b8892003f4a80108e29025d009289882c481999284a989412af029881a1102b2f88339f18059a09184a03e1913bc9303a09886919b4d3912e00819884c30c39a2a5a809400d01092a193aa38e00097a1a22b2b22f828918081b9055d0019190d3a20992003b1af200a02c968994ab378a9282a0a9398259b1e2599a112890e291010bb3313df8488a30bb60098b3200b00b2a7b2b8153db40902d2982880c113c894a2890b9580a10b682a980138e20c131f09023d0002f2b49809208a959088001aa210af498012b007c10a2a101990d5981b4909281f29198195992c389883b3e383e810819a3094e3ab24b82b2020d1b86908818010bb403c4c887991a1a31981e4a3d29800810b2a859902c395a8904f288190811980aa5198b859a48a949838b6c18002e18950ba580a102a9a78909010a2a3a3e288a19178d0118a0019118b5a9111aac27a2a01b3a40f3b1109a083903d3ab043d9b49790a9131b0c3011b2d1a3089a11b7d2809100900a8798908842f08101c193b3808aa680b4b06a803b8b258ab105b10b3b21a7b0048b4d002a9493f2880a3c59891189808818201f011aaa792a801a4c83180d30a11c8088284f291911c82a491ab49a079a13c228bc308a6988294b0a032ad5890a1c5a8183ac690a1094a08a492b28d4a208992921bda7810b1828e282ab349aa9279a822a83ba12a963e94910c3c1288b30c193a29f338d9210c1a38aa62b0b2140f0839a39888283e180018ab102ab232f0b278ad5098092909039bb7800b5a209882c12b5a99408b11c220f01a489b060a03e182b209a041a1f013a90a20008a98c620d829108b28b5958c804a2b81128c859c229898481c0895b1a4b11914f8038b2928a3998d397908921b3f2090a41abb78880000908938e829394d0189195a003c11f101b02912c1092e039a83090d1a4a1190194b00f926a1a0129a85b1a259b08292c9971a1b31be2180c2039c8129b2078a9140ca83598a12aa049d29140cc3008a1a509291e8858a00022d0911b2809192098f1021c849a1a81ab073ab26c190194d391c19490b2499a33baf391098838a1f5a088498a1008a0827a0819094b00a314f808194b3c2001f2b2912d83b4a1909104b9293ab3d2c790930a819a22f38a28a913f21a810013fa10209e0300c101b2a789a105aa831c2a218bc331dc310ab688a2b608a0823bb20c8583bc0212b0f2118c00b400a0d036aa88211a9a20582f88204b8904892c9a404b98a332d980284b2d1b32a0d18688908083a1d111a2b2f202e2a13a8ac5a3a82a1c402f01818098829009d16a1892c5a189082099c592a0901839c093982ac017880c02834bbc7893ba04a282e932a8a8318994bb415cd20209c03881c18190599b060a5c0108882c810808c032a93c30c393bc38a7b49901a268ad2029a9a79181c028829a8022d910c599281a223e09942be210c10911b9519b069b499192d409983a2a94b69b219d3090209a798801c11989398a94d48008c159980b233af0398198920a78b810a22c927a181c08916a9002b892905c249b85a18b2129c220e938198049aa4c1d38182c2a4b8188b411ab0c50b0078911098d05b2092b2b808b484895a0c4d181a3a18219f100812b802f02c1002f5980919019082a9180e20b50881991a021d0200a87ab32a48c195a908a115a812c00b5a1b339c0a8105d1048b1109f2189198490f181884b28b292c881026c83a0932f930928f1928a488094a29b184b81d308aa38c179198950b8b483980d381983da5081c88200b86a1180d2a101a912b198993887a3c7a080903d281a011b0a488b26aaaa72b895809018ba9708a194a2b807a80219b2b4b2881d482b5ca3080b293c2b6b2b21499b030c1b34e013bc4997a802889910b6b021c218d190001a81103c92b79b70a882a29a9340d3b3b00a7a80003bb9250a904b5c3c1a04899028589a02a249e080094d08491991b383bc09511cb24810c923c18b2a14d5a8814999880409bc2853e901194aa1a2020f002800b186aa599002c00a106b082893c84c1829a9955b098480c28a18294ac0402c81a30d10a92896a8a402a919938a97bc250b1a311aa26b8a12b0195099c708a18a490d00a1392c6b3929a80012aa902187e108490c1a3899b482095c08203f9110a9083a1025a932999f933d00911c39099117a8a04b0904c32c12a9b8709901091ba5a1213c3e3b1a85a2e13c0939c49181a00088d301f3088994899103bb150ac0879882991928d29185c2a2b02ba71b11880a13f39948c930929c300881a8e8592ba581b83c4a8121ad122e00082ab53e1880080b590a85a099338cb7908819190825d9112b09058b005b8922b29a287c8110a9392c9122f8138a8a2798c58981912c90409983b12b1a1f14990b303bc102904b3f1094bb692a1893a3d03c2a21b1e1109928909600e93188c0139c4919b6818a8a6892b812981a83c1195c0811c1b0493b12b7a0189d32b8c5819a1840c5b000888a10a792a91a79a10820c03a88b709821ab1111e896880a12d18288a18118f80288293da311f000288a02c02181ac0709b013bc6888a23a9e00699081088920d1048b8181898010114f80100c2a940b10c850891a408b811f2289c285989082923c98e283a0f13a38c0c691a08019182b8c5188982a0028b9187a18c409902a0d6a0198803c3c2a209a1299a134e008194d20a5c2800c28093b95a1a20b6c2a128a939a790a3a1821d93d300c003b01994ab700c00193e813ba409b5a1190b2799a38008b5898138f191109c01129bb78a122d0a2291f0029920b39a359f1118a089308e4a0080090a215e082099094b1012d8282abc5028e2091b590994a5a9810881c392b07b0082b6b0001a8183c8318d8112d1b23a8e409994099c6880a102c01a498a210ac41880b061f10091881b29823f818019b41c0209b294a19805c8281b3d22a9848d29294c08119b49909031bc13949ab519a0290d32b5c280881a80959a91041c1a8382a99b708b09418a9149a04b999531ea11291c298023c9f1281ba2508b82808b381a1a20ac17880a30990e21a112f000190a93108b985b0308b20b7980a011d4991a220c82a408b3e0838b3f391880891b3a49c389810829b59499a00931bc23018a8893109c048a88001b23990b50a89103ac0508a810804a89a8030c08032a98838882b0a013bc0301a82109a281c028808940aa9580a0292c8101d8214c90309b38908003b9003b9182a10a4a0b28949188a00920b0a328a01b18129901811bc4a1110d4b2089a2b0301c298001aa4a590a18a0913b1a79090080902b281a09a2210d193918f108182a8083b2981b6a20d810910a3004d188a13c109108a10b184199a22a9d218820892a181a8128990908b1382b4880a0a3a9490a288881a011829a82b09200801080a81090082b8801c288698080919800081908a0100890128a88081800a02008aa218080909101c09213aa828891092b4090c1838c2912a80099113a9a1490ca3108080992029ba4288b0828810a8005a988010b289182a1891010b00000b940a19180984a8884a8098000828b10180990008818892091808089288a00009181888029891189880090018800088809800009080000b308880088929090119880009881080800a0011c18288890009820988028981800a1080890008000888000a8003a880080910808081998100a182980008919188080808929000881900908082980901088800800898000090080009088008080910888000880818888008080880000980000890088008091818888188800809000090008808009081880808009188080088800090080800808808080800918808080080808808800808080088080800880800880800880090800808008088008808080088080080880808080808008808008808080808080808080800880808080808080088080808080808080808080808080808080808080808080808" },
+    hh: { rate: 18488.889, gain: 1, data: "27f7f032f727a802df8911eda80367c96d0536b2b49bc1c9a20b4a192a010f7192b4c5135406d9b65f92c39af512cf8af612ecc12dea000a4a956f982b4a8465b000a49a5b12d38b56f900902ed611b292c5701a04649929829818a39a48e6ce7fbfb3b3c3a18800a4d4a01a11b14fd5280b6611b3982b4c39a66f9009180893b05e3a00808081982b21e5c3981a180801c5b20b4b4d3b20a11c4a01a3d4b11b3993b101d39920f5a01c4a10a3c20b4a008818a5a84d28918092996c3a1a4b28a399290091a4b04d11b4b3e5b20b3993a803f3a018b6a01a02b280b6b20a2a2a10b59928a23f5b85c28808094c28a39929939801b15f4b2a3c3a1a3b20b4a2c5b13f28a4b28894b10a3a193e3b3a03f3a00894b10a291911e5b291a39c7b20a11b20b38c4994a82a10a2b5a83d39883e20c4993b2a4d3993a94b03d11b21c39920c5b288093c3c4b12e4b10882c3a192a84c289290a5b13f4b1091901c5b291a4b29093b05f3a10908081a2a2a2a290800918a7b2982b398080080" },
+    tom: { rate: 9244.444, gain: 0.486, data: "f777781b4b3c2008b81d2c2d809000a983e82a21a148410832824a9085a39b0a3e3d890e91899930c89014b0691110313b322a33991183f39aacbf9ca89891a8b380a01a5197221403171082800088099abd8bdabc0bbaa2ab4990d9b40304611432036818800a00901b8a8f8ad8c8bb8b9a80a0124b6101216842211430218308a88ab8afacbcada9c9a990982921a41922843724252232220188bd8aaaa9a1f08a8abdc9bb9c90001226211380100124a721323322193c9ea98bb88c1a10b8b0f9ca0ac009a09880c980d82805397121314111312414511410000b8dbbbdbca9aaab9dabaeaab9b8a1144534343233313222151134131199eadbccbcabbba9a989990999a99135637234423332321090a9baaaaac9bdadcbdbbcbbbbb99012336223122101234633623342211099bdacaaaa888012808accdbd9baaa88113342308add9bbba9a14543443413121008181136233422109cebdbbccabab9b9a98a9999cab88137444443343233221108999a9b9bacdbbfbcbcbdaabaa9a881122433324232425335343343312109aadbcac9aaa8909099abdcacbca9a90113522411089bcbdaa98114535233421200088001324524221289bdcdbbccaabaa9a99999abacbba992364444343342321218088998a9989abbebdbccbcbbbaba99002334342312121334534434334211189abccbbbaa9800201098abcbdbbbb9991113221188acbdbbaba9002542433342221110212343443333108acdbdbbcbbbbbbbaaabaabababa980135363352334222211010889889899abacccbdabcbabbaaa9801121221201111112133343343222100888899888081011001008889998a99a9a9aaaaabbacaaa9890000222232223121100080" },
+    rim: { rate: 9244.444, gain: 0.596, data: "77977f38b32f80892619dfa892001f19a51828b812e288a80c51181c800828ae28101893c0a132f891a321989b5b211d90215b88108a287c1c110882910e108289b2b411c813b00a830fa236c802b499390a92092c22b002f082b4d5a0091808291c01d389381e11800a1aa9581009823f00a100880918092928b01080" }
+  };
+  var OPNA_RHYTHM_CODE = `
+const CLK = ${OPNA_CLOCK};
+const OUT_GAIN = ${OPNA_RHYTHM_OUT_GAIN};
+const KEYS = ${JSON.stringify(OPNA_RHYTHM_KEYS)};
+const DATA = ${JSON.stringify(Object.fromEntries(OPNA_RHYTHM_KEYS.map((k) => [k, OPNA_RHYTHM_DATA[k] || null])))};
+const STEPS = Array.from({ length: 49 }, (_, i) => Math.floor(16 * Math.pow(1.1, i)));
+const ADJ = [-1, -1, -1, -1, 2, 5, 7, 9];
+
+/** 16 \u9032\u306E\u6587\u5B57\u5217\u3092\u30014 \u30D3\u30C3\u30C8\u305A\u3064\u306E\u4E26\u3073\u3078(\u4E0A\u4F4D\u304C\u5148) */
+function nibbles(hex) {
+  const out = new Uint8Array(hex.length);
+  for (let i = 0; i < hex.length; i++) out[i] = parseInt(hex[i], 16);
+  return out;
+}
+const SRC = KEYS.map((k) => DATA[k] ? { nib: nibbles(DATA[k].data), rate: DATA[k].rate, gain: DATA[k].gain } : null);
+
+/**
+ * \u30C1\u30C3\u30D7 1 \u500B\u3002\u6253\u697D\u5668\u3054\u3068\u306B 1 \u672C\u305A\u3064\u30016 \u672C\u306E\u8AAD\u307F\u624B\u3092\u6301\u3064\u3002
+ * 1 \u3064\u524D\u3068\u4ECA\u306E\u5024\u306E\u3042\u3044\u3060\u3092\u3064\u306A\u3044\u3067\u51FA\u3059(\u6298\u308A\u8FD4\u3057\u306E\u4F59\u8A08\u306A\u97F3\u3092\u6291\u3048\u308B)\u3002
+ */
+class Rhythm {
+  constructor(rate) {
+    this.out = 1 / rate;
+    this.reg = new Uint8Array(0x20);
+    this.tl = 63;
+    this.s = KEYS.map(() => ({ on: false, pos: 0, acc: 0, idx: 0, prev: 0, cur: 0, frac: 0, il: 31, ratio: 1 }));
+  }
+
+  writeReg(r, v) {
+    if (r >= 0x20) return;
+    this.reg[r] = v;
+    if (r === 0x10) {
+      for (let i = 0; i < 6; i++) {
+        if (!(v & (1 << i))) continue;
+        const s = this.s[i];
+        if (v & 0x80) { s.on = false; continue; }   // \u6B62\u3081\u308B(\u30C0\u30F3\u30D7)
+        s.on = !!SRC[i]; s.pos = 0; s.acc = 0; s.idx = 0; s.prev = 0; s.cur = 0; s.frac = 0;
+      }
+      return;
+    }
+    if (r === 0x11) { this.tl = v & 63; return; }
+    if (r >= 0x18 && r <= 0x1d) this.s[r - 0x18].il = v & 31;
+  }
+
+  /** \u5B9F\u6A5F\u306B\u7121\u3044\u3082\u306E\u3002\u8AAD\u3080\u901F\u3055\u3092\u6BD4\u3067\u5909\u3048\u308B(\u97F3\u7B26\u306E\u9AD8\u3055\u304B\u3089) */
+  setRatio(i, ratio) { this.s[i].ratio = ratio > 0 ? ratio : 1; }
+
+  /** 1 \u3064\u8AAD\u307F\u9032\u3081\u308B\u3002\u7D42\u308F\u308A\u307E\u3067\u6765\u305F\u3089\u6B62\u3081\u308B */
+  next(s, src) {
+    if (s.pos >= src.nib.length) { s.on = false; return; }
+    const n = src.nib[s.pos++];
+    const st = STEPS[s.idx];
+    let d = ((2 * (n & 7) + 1) * st) >> 3;
+    if (n & 8) d = -d;
+    let a = (s.acc + d) & 0xfff;
+    if (a & 0x800) a -= 0x1000;
+    s.acc = a;
+    s.idx = Math.min(48, Math.max(0, s.idx + ADJ[n & 7]));
+    s.prev = s.cur;
+    s.cur = a / 2048;
+  }
+
+  live() {
+    for (const s of this.s) if (s.on) return true;
+    return false;
+  }
+
+  /** \u51FA\u53E3\u306E 1 \u30B5\u30F3\u30D7\u30EB(\u304A\u3088\u305D -1..1) */
+  calc() {
+    let mix = 0;
+    const tl = (63 - this.tl) * 0.75;
+    for (let i = 0; i < 6; i++) {
+      const s = this.s[i];
+      if (!s.on) continue;
+      const src = SRC[i];
+      s.frac += src.rate * s.ratio * this.out;
+      while (s.frac >= 1 && s.on) { s.frac -= 1; this.next(s, src); }
+      if (!s.on) continue;
+      const v = s.prev + (s.cur - s.prev) * s.frac;
+      mix += v * src.gain * Math.pow(10, -(tl + (31 - s.il) * 0.75) / 20);
+    }
+    return mix * OUT_GAIN;
+  }
+}
+
+/**
+ * \u884C\u304D\u5148 1 \u3064\u3076\u3093\u306E\u51E6\u7406\u5668\u3002\u4E2D\u306B\u30C1\u30C3\u30D7\u3092\u4F55\u500B\u3067\u3082\u6301\u3064(sound/ay.js \u3068\u540C\u3058\u8003\u3048\u65B9)\u3002
+ */
+class OpnaRhythmBank extends AudioWorkletProcessor {
+  constructor(o) {
+    super();
+    const q = o.processorOptions || {};
+    this.events = (q.events || []).slice().sort((a, b) => a.t - b.t);
+    this.at = 0;
+    this.pool = [];
+    this.log = !!q.log;
+    this.logNow = 0;
+    this.cutAt = -1;
+    this.cutLen = Math.max(1, Math.round(sampleRate * 0.01));
+    this.port.onmessage = (e) => {
+      if (e.data && e.data.cut) { this.cut(); return; }
+      const add = e.data && e.data.add;
+      if (!add || !add.length) return;
+      this.cutAt = -1;
+      for (let i = 0; i < add.length; i++) this.events.push(add[i]);
+    };
+  }
+
+  grow() {
+    const c = new Rhythm(sampleRate);
+    const chip = { c, log: null };
+    if (this.log) {
+      const raw = c.writeReg.bind(c);
+      chip.log = [];
+      c.writeReg = (r, d) => { chip.log.push(this.logNow, r & 0xff, d & 0xff); raw(r, d); };
+    }
+    c.writeReg(0x11, 63);
+    this.pool.push(chip);
+    return chip;
+  }
+
+  cut() {
+    this.events.length = 0;
+    this.at = 0;
+    for (const chip of this.pool) if (chip.c.live()) chip.c.writeReg(0x10, 0x80 | 0x3f);
+    if (this.cutAt < 0) this.cutAt = 0;
+  }
+
+  start(ev) {
+    const i = KEYS.indexOf(ev.key);
+    // \u97F3\u91CF 0 \u306F\u9CF4\u3089\u3055\u306A\u3044\u3002\u5B9F\u6A5F\u306E 0 \u306F\u6D88\u97F3\u3067\u306F\u306A\u304F -23dB \u306A\u306E\u3067\u3001\u66F8\u304B\u305A\u306B\u98DB\u3070\u3059
+    if (i < 0 || !(ev.v > 0)) return;
+    let chip = this.pool.find((p) => !p.c.s[i].on);
+    if (!chip) chip = this.grow();
+    const c = chip.c;
+    c.writeReg(0x18 + i, 0xc0 | (ev.v & 31));
+    c.setRatio(i, ev.rp || 1);
+    c.writeReg(0x10, 1 << i);
+  }
+
+  process(inputs, outputs) {
+    const out = outputs[0][0];
+    const n = out.length;
+    const base = currentTime;
+    const next = this.at < this.events.length ? this.events[this.at].t : Infinity;
+    if (!this.pool.some((p) => p.c.live()) && next >= base + n / sampleRate) {
+      out.fill(0);
+      return true;
+    }
+    for (let i = 0; i < n; i++) {
+      const now = base + i / sampleRate;
+      if (this.log) this.logNow = now;
+      while (this.at < this.events.length && this.events[this.at].t <= now) {
+        this.start(this.events[this.at++]);
+      }
+      let v = 0;
+      for (const chip of this.pool) if (chip.c.live()) v += chip.c.calc();
+      if (this.cutAt >= 0) {
+        v *= Math.max(0, 1 - this.cutAt / this.cutLen);
+        this.cutAt++;
+        if (this.cutAt > this.cutLen) { this.cutAt = this.cutLen; v = 0; }
+      }
+      out[i] = v;
+    }
+    if (this.log) {
+      for (let k = 0; k < this.pool.length; k++) {
+        const chip = this.pool[k];
+        if (!chip.log.length) continue;
+        this.port.postMessage({ regs: chip.log, chip: k, type: 0 });
+        chip.log = [];
+      }
+    }
+    return true;
+  }
+}
+registerProcessor('mmsxx-opna-rhythm', OpnaRhythmBank);
+`;
+
+  // engine/sound/duty.js
   var DUTY_CODE = `
 const FRAME = ${TONE_FRAME};
 
@@ -9419,7 +11776,2059 @@ registerProcessor('mmsxx-duty', DutyBank);
     return Math.min(0.98, Math.max(0.02, x));
   };
 
-  // mmsxx-mml-studio/sound/demotunes.js
+  // engine/sound/modal.js
+  var MODAL_NODE = "mmsxx-modal";
+  var MODAL_VOICES = 24;
+  var MODAL_MODES = 1024;
+  var MODAL_STRINGS = 3;
+  function sourOf(def, f0) {
+    if (!def.sour) return f0;
+    let hh = (Math.round(f0 * 100) | 0) ^ Math.imul(def.sourSeed | 0, 2654435761);
+    hh = Math.imul(hh ^ hh >>> 15, 2246822507);
+    hh = Math.imul(hh ^ hh >>> 13, 3266489909);
+    hh ^= hh >>> 16;
+    return f0 * Math.pow(2, def.sour * ((hh >>> 0) / 4294967296 * 2 - 1) / 1200);
+  }
+  function modalFlaws(def, ev, vel, cnt, last) {
+    const out = { amp: 1, t60k: 1, fcK: 1, spot: 0, buzz: 0, head: null, extra: [] };
+    const fz = ev.f || def.base;
+    let hs = Math.imul(cnt, 2654435761) ^ Math.imul(Math.round(fz * 10) | 0, 2246822507) ^ Math.imul(ev.k == null ? Math.round(last * 10) | 0 : 0, 3266489909) ^ Math.imul((def.flawSeed | 0) + 1, 668265263);
+    const u = () => {
+      hs = Math.imul(hs ^ hs >>> 15, 2246822507);
+      hs = Math.imul(hs ^ hs >>> 13, 3266489909);
+      hs ^= hs >>> 16;
+      return (hs >>> 0) / 4294967296;
+    };
+    const roll = (c) => {
+      const a = u(), b = u(), d = u();
+      return [c > 0 && a < c, b, d];
+    };
+    const head = ev.h ? Object.assign({}, def.head, ev.h) : def.head || {};
+    const [nb, nb1, nb2] = roll(def.neighbor || 0);
+    if (nb && ev.f) out.extra.push({ t: ev.t + 6e-3 + 0.02 * nb1, p: ev.p, f: ev.f * Math.pow(2, (nb2 < 0.5 ? -1 : 1) / 12), v: vel * (0.45 + 0.25 * nb2), d: ev.d, k: ev.k, nf: 1 });
+    const [db, db1, db2] = roll(def.double || 0);
+    if (db) out.extra.push({ t: ev.t + 0.012 + 0.025 * db1, p: ev.p, f: ev.f, v: vel * (0.4 + 0.2 * db2), d: ev.d == null ? void 0 : Math.max(0.02, ev.d - 0.03), k: ev.k, nf: 1 });
+    const [bz, bz1] = roll((def.buzz || 0) * (0.5 + vel));
+    if (bz) out.buzz = (def.buzzLevel ?? 0.4) * (0.6 + 0.4 * bz1);
+    const [sl] = roll(def.slip || 0);
+    if (sl) {
+      out.amp *= 0.5;
+      out.head = { noise: Math.max(head.noise || 0, 0.85), bright: (head.bright ?? 0.6) - 0.1 };
+    }
+    const [gh] = roll((def.ghost || 0) * (1.3 - vel));
+    if (gh) {
+      out.t60k *= 0.05;
+      out.amp *= 0.7;
+      out.head = Object.assign({}, out.head, { noise: Math.max(head.noise || 0, 0.6) });
+    }
+    const [sp] = roll(def.splay || 0);
+    if (sp && head.grains > 0) {
+      out.head = Object.assign({}, out.head, { scatter: (head.scatter || 0) * 3.5 + 6 });
+      out.amp *= 1.5;
+    }
+    const [st, st1] = roll((def.spot || 0) * (0.5 + vel));
+    if (st) {
+      if (st1 < 0.6) {
+        out.spot = 1;
+        out.t60k *= 1.3;
+        out.fcK = 0.6;
+        out.amp *= 1.15;
+      } else out.spot = 2;
+    }
+    return out;
+  }
+  function modalModes(def, f0, t60k, spot, sr, max, maxStrings, onString, onMode) {
+    const kr = def.pitched ? f0 / 261.63 : 1;
+    const t60 = def.t60 * Math.pow(kr, -(def.decayKey || 0)) * t60k;
+    const bb = (def.stretch || 0) * Math.pow(kr, def.stretchKey || 0);
+    const damp = def.damp;
+    const guide = def.guide > 0 && f0 < def.guide;
+    let ns = 0;
+    if (guide) {
+      ns = Math.max(1, Math.min(maxStrings, def.strings | 0 || 1));
+      for (let s = 0; s < ns; s++) {
+        const c = ns === 1 ? 0 : (def.detune || 0) * (s / (ns - 1) - 0.5) * 2;
+        onString(s, f0 * Math.pow(2, c / 1200), t60 * (s === 0 ? 1 : def.after || 1), damp, bb);
+      }
+    }
+    const tb = def.table;
+    let n = 0;
+    for (let i = 0; i < tb.length && n < max; i += 4) {
+      const h = tb[i + 3];
+      if (guide && h >= 0) continue;
+      let f, tt;
+      if (h < 0) {
+        f = tb[i];
+        tt = tb[i + 2];
+      } else {
+        f = tb[i] * f0 * (h > 0 && bb > 0 ? Math.sqrt(1 + bb * h * h) : 1);
+        tt = t60 * tb[i + 2] / (1 + damp * (f / 1e3) * (f / 1e3));
+      }
+      if (f <= 20 || f >= sr * 0.45) continue;
+      let ga = 1;
+      if (spot === 1 && n < tb.length / 12) ga = 1.3;
+      else if (spot === 2) {
+        if (n < 8) {
+          ga = 3;
+          tt *= 2;
+        } else ga = 0.4;
+      }
+      onMode(n, f, tt, tb[i + 1] * ga);
+      n++;
+    }
+    return ns;
+  }
+  var MODAL_CODE = `
+const V = ${MODAL_VOICES};
+const M = ${MODAL_MODES};
+const B = 128;
+// \u5171\u632F\u5668 1 \u672C\u306E\u6301\u3061\u7269: a1 a2 b y1 y2 cos sin t60
+const S = 8;
+// \u58F0\u306E\u6301\u3061\u7269(\u5E73\u3089\u306A\u914D\u5217\u306E\u4E2D\u306E\u4F4D\u7F6E)
+const ON = 0, POS = 1, LEN = 2, LP1 = 3, LP2 = 4, COMB = 5, AMP = 6, LPC = 7,
+  NOISE = 8, DIRECT = 9, RATTLE = 10, RENV = 11, NM = 12, REL = 13, RELT = 14,
+  LEVEL = 15, OFF = 16, BORN = 17, NORM = 18, VARY = 19, HPOS = 20, RHP = 21,
+  WG = 22, WGAIN = 23, FELT = 24, TL1 = 25, TL2 = 26, TC = 27, TA1 = 28, TA2 = 29,
+  GN = 30, GL = 31, BZ = 32, BP = 33, PK = 34, PO = 35, PV = 36, PD = 37,
+  WD = 38, TD = 39, TR = 40;
+const K = 41;
+// \u982D\u306E\u7C92\u30021 \u58F0\u306B 32 \u7C92\u307E\u3067\u3002\u7C92\u3054\u3068\u306B \u59CB\u307E\u308A(\u30B5\u30F3\u30D7\u30EB)\u3068\u5927\u304D\u3055
+const G = 32;
+// \u5C0E\u6CE2\u7BA1(\u4F4E\u3044\u5F26)\u30021 \u58F0\u306B\u5F26 3 \u672C\u307E\u3067\u3002\u9045\u5EF6\u7DDA\u306E\u307B\u304B\u306B\u30011 \u672C\u305A\u3064\u6301\u3064\u3082\u306E:
+// N(\u9045\u5EF6\u306E\u6574\u6570\u3076\u3093) \u03B7(\u7AEF\u6570\u306E\u30AA\u30FC\u30EB\u30D1\u30B9) c(\u786C\u3055\u306E\u30AA\u30FC\u30EB\u30D1\u30B9) g a(\u640D\u5931) lp
+// t1 t2(\u7AEF\u6570\u306E\u30AA\u30FC\u30EB\u30D1\u30B9\u306E\u72B6\u614B) wp(\u66F8\u304F\u4F4D\u7F6E) t60 L(1 \u5468\u306E\u9577\u3055) \u3068\u3001\u786C\u3055\u306E\u30AA\u30FC\u30EB\u30D1\u30B9 6 \u6BB5\u306E\u72B6\u614B
+const WS = ${MODAL_STRINGS}, AP = 6, WK = 25;
+const WN = 0, WETA = 1, WC = 2, WGG = 3, WA = 4, WLP = 5, WT1 = 6, WT2 = 7, WP = 8,
+  WT60 = 9, WL = 10, WAPS = 11, WQ = 23, WLV = 24;
+// \u9045\u5EF6\u7DDA\u306E\u9577\u3055\u300220Hz \u306E 1 \u5468\u3088\u308A\u9577\u304F\u3059\u308B
+const WR = Math.ceil(sampleRate / 20) + 8;
+// \u5C0E\u6CE2\u7BA1\u306E\u51FA\u53E3\u306E\u5927\u304D\u3055\u3092\u3001\u5171\u632F\u5668\u306E\u675F\u3068\u63C3\u3048\u308B\u6570\u3002C5 \u306E\u3042\u305F\u308A\u3067\u6BB5\u5DEE\u304C\u51FA\u306A\u3044\u3088\u3046\u306B
+// \u6E2C\u3063\u3066\u6C7A\u3081\u305F\u3002\u5C0E\u6CE2\u7BA1\u306F\u4F4E\u3044\u307B\u3069\u5C0F\u3055\u304F\u51FA\u308B(\u982D\u304C 1 \u5468\u306B\u5360\u3081\u308B\u5272\u5408\u304C\u6E1B\u308B)\u306E\u3067\u3001
+// \u5468\u671F\u306E 0.73 \u4E57\u3067\u6301\u3061\u4E0A\u3052\u308B\u3002\u5C0E\u6CE2\u7BA1\u306B\u3082 tilt \u3092\u52B9\u304B\u305B\u3066\u4F4E\u97F3\u304C\u6697\u304F\u306A\u3063\u305F\u306E\u3067\u3001
+// \u9332\u97F3\u306E C2\u301CC4 \u306E\u5927\u304D\u3055\u306E\u5DEE\u306B\u5408\u308F\u305B\u3066\u6C7A\u3081\u305F(2026-10-05\u3002\u524D\u306F 0.35)
+// \u982D\u306E\u9577\u3055\u306E\u88DC\u6B63(NORM)\u3082\u5171\u632F\u5668\u306E\u675F\u3068\u540C\u3058\u306B\u639B\u3051\u308B\u3002\u639B\u3051\u306A\u3044\u3068\u3001\u30CF\u30F3\u30DE\u30FC\u3092
+// \u92ED\u304F\u3057\u305F\u3068\u304D\u306B\u5C0E\u6CE2\u7BA1\u3060\u3051\u5C0F\u3055\u304F\u306A\u3063\u3066\u3001\u5883\u76EE\u3067\u6BB5\u5DEE\u304C\u51FA\u308B
+const GUIDE_GAIN = 45, GUIDE_REF = 523;
+// \u982D\u306E\u6ADB\u306B\u4F7F\u3046\u9045\u5EF6\u3002\u3044\u3061\u3070\u3093\u4F4E\u3044\u97F3(\u304A\u3088\u305D 30Hz)\u306E\u534A\u5468\u671F\u3088\u308A\u9577\u304F\u3059\u308B
+const R = 1024;
+const TAU = Math.PI * 2;
+// 6.9078 = ln(1000)\u300260dB \u843D\u3061\u308B\u307E\u3067\u306E\u6642\u9593\u304B\u3089 1 \u30B5\u30F3\u30D7\u30EB\u3042\u305F\u308A\u306E\u6E1B\u308A\u65B9\u3092\u51FA\u3059
+const LN1000 = 6.907755278982137;
+// \u3053\u308C\u3092\u5272\u3063\u305F\u5171\u632F\u5668\u306F\u5916\u3059\u3002-100dB
+const QUIET = 1e-5;
+
+// \u540D\u524D\u3092\u66F8\u3044\u3066\u53D7\u3051\u53D6\u308B\u3002\u7E2E\u3081\u305F JS(esbuild --minify)\u3067\u306F\u95A2\u6570\u306E\u540D\u524D\u304C\u5909\u308F\u308B\u306E\u3067\u3001
+// \u4E2D\u8EAB\u3060\u3051\u57CB\u3081\u308B\u3068\u3001\u6587\u5B57\u5217\u306E\u4E2D\u306E\u547C\u3073\u51FA\u3057(sourOf(\u2026))\u3068\u540D\u524D\u304C\u98DF\u3044\u9055\u3063\u3066\u7121\u97F3\u306B\u306A\u308B
+const sourOf = ${sourOf};
+const modalFlaws = ${modalFlaws};
+const modalModes = ${modalModes};
+
+// \u30D4\u30C3\u30AF\u30A2\u30C3\u30D7\u306E\u5165\u53E3\u306E\u5927\u304D\u3055\u3002pickup 1\u3001ff \u306E\u771F\u3093\u4E2D\u306E\u97F3\u3067\u3001\u632F\u308C\u304C\u78C1\u77F3\u307E\u3067\u306E\u8DDD\u96E2\u306E 7 \u5272\u307B\u3069\u306B\u5C4A\u304F
+const PICKUP_SCALE = 1.2;
+
+/**
+ * \u78C1\u77F3\u304B\u3089\u306E\u8DDD\u96E2 1 \u2212 u \u3067\u898B\u305F\u78C1\u675F(1 / \u8DDD\u96E2\xB2 \u304B\u3089\u3001\u6B62\u307E\u3063\u3066\u3044\u308B\u3068\u304D\u306E\u3076\u3093\u3092\u5F15\u3044\u305F\u3082\u306E)\u3002
+ * \u78C1\u77F3\u306B\u5F53\u305F\u3089\u306A\u3044\u3088\u3046\u3001u \u306F 0.9 \u306E\u624B\u524D\u3067\u306A\u3081\u3089\u304B\u306B\u982D\u6253\u3061\u306B\u3059\u308B
+ */
+function pickup(u) {
+  const c = 0.9 * Math.tanh(u / 0.9);
+  const d = 1 - c;
+  return (1 / (d * d) - 1) / 2;
+}
+function pickupSlope(u) {
+  const c = 0.9 * Math.tanh(u / 0.9);
+  const d = 1 - c;
+  return 1 / (d * d * d);
+}
+
+class ModalBank extends AudioWorkletProcessor {
+  constructor(o) {
+    super();
+    const p = (o && o.processorOptions) || {};
+    this.modes = new Float64Array(V * M * S);
+    this.voice = new Float64Array(V * K);
+    this.ring = new Float64Array(V * R);
+    this.wg = new Float64Array(V * WS * WK);
+    this.grain = new Float64Array(V * G * 2);
+    this.wring = new Float64Array(V * WS * WR);
+    this.seed = new Uint32Array(V);       // \u7A2E\u3092\u56FA\u5B9A\u3057\u305F\u96D1\u97F3
+    this.free = 0x9e3779b9;               // \u6BCE\u56DE\u9055\u3046\u96D1\u97F3(\u5168\u90E8\u306E\u58F0\u3067 1 \u672C)
+    this.hb = new Float64Array(B);        // \u982D\u306E\u584A
+    this.vb = new Float64Array(B);        // \u58F0\u306E\u584A
+    this.tb = new Float64Array(B);        // \u5C0E\u6CE2\u7BA1\u3078\u5165\u308C\u308B\u982D(tilt \u3092\u639B\u3051\u305F\u3082\u306E)
+    this.ob = new Float32Array(B);        // \u51FA\u53E3\u304C 1 \u672C\u306E\u3068\u304D\u3001\u53F3\u3078\u884C\u304F\u675F\u3092\u7F6E\u304F
+    this.patch = p.patches || {};
+    this.events = [];
+    this.at = 0;
+    this.born = 0;
+    this.cutAt = -1;
+    // \u5931\u6557\u30FB\u5D29\u308C\u306E\u7A2E\u306B\u4F7F\u3046\u3001\u30D1\u30C3\u30C1\u3054\u3068\u306E\u97F3\u306E\u6570\u3068\u524D\u306E\u97F3\u306E\u9AD8\u3055
+    this.count = {};
+    this.lastF = {};
+    this.add(p.events || []);
+    this.port.onmessage = (e) => {
+      const d = e.data || {};
+      if (d.patch) this.patch[d.patch] = d.def;
+      if (d.add) this.add(d.add);
+      if (d.cut) { this.events = []; this.at = 0; this.cutAt = 0; }
+    };
+  }
+
+  /** \u97F3\u7B26\u3092\u8DB3\u3059\u3002\u6642\u523B\u9806\u306B\u4E26\u3079\u76F4\u3057\u3066\u3001\u6E08\u3093\u3060\u3076\u3093\u306F\u6368\u3066\u308B */
+  add(list) {
+    if (!list.length) return;
+    // \u9CF4\u308A\u306F\u3058\u3081\u308B\u6642\u523B(s0)\u3092\u5148\u306B\u6C7A\u3081\u3066\u304A\u304F\u3002align \u306E\u3042\u308B\u97F3\u8272\u306F\u3001\u982D\u306E\u3044\u3061\u3070\u3093\u5927\u304D\u3044
+    // \u3068\u3053\u308D\u304C\u97F3\u7B26\u306E\u6642\u523B\u306B\u6765\u308B\u3088\u3046\u306B\u3001\u305D\u306E\u3076\u3093\u65E9\u304F\u9CF4\u308A\u306F\u3058\u3081\u308B
+    for (const ev of list) ev.s0 = ev.t - this.lead(ev);
+    const rest = this.events.slice(this.at).concat(list);
+    rest.sort((a, b) => a.s0 - b.s0);
+    this.events = rest;
+    this.at = 0;
+  }
+
+  /** \u5C71 1 \u3064(\u7C92\u304C\u3042\u308B\u3068\u304D\u306F\u7C92 1 \u3064)\u306E\u9577\u3055(\u30B5\u30F3\u30D7\u30EB)\u3002\u5F37\u3055\u3067\u77ED\u304F\u3001\u9AD8\u3044\u97F3\u307B\u3069\u30CF\u30F3\u30DE\u30FC\u304C\u786C\u3044\u3076\u3093\u77ED\u304F\u306A\u308B */
+  bumpLen(def, h, vel, f0) {
+    const hk = def.pitched ? Math.pow(Math.max(1, f0 / (h.hardFrom || 261.63)), h.hardKey || 0) : 1;
+    return Math.max(2, Math.round(h.sharp * 0.001 * sampleRate * (1.4 - 0.6 * vel) / hk));
+  }
+
+  /** \u982D\u306E\u9577\u3055(\u30B5\u30F3\u30D7\u30EB)\u3002\u7C92\u304C\u3042\u308B\u3068\u304D\u306F\u3001\u6563\u3089\u3070\u308B\u5E45\u306E\u3076\u3093\u9577\u304F\u306A\u308B */
+  headLen(def, h, vel, f0) {
+    const b = this.bumpLen(def, h, vel, f0);
+    return h.grains > 0 ? b + Math.round((h.scatter || 0) * 0.001 * sampleRate) : b;
+  }
+
+  /**
+   * \u97F3\u7B26\u306E\u6642\u523B\u3088\u308A\u4F55\u79D2\u65E9\u304F\u9CF4\u308A\u306F\u3058\u3081\u308B\u304B\u3002\u982D\u306E\u5C71\u306F\u9577\u3055\u306E\u534A\u5206\u306E\u3068\u3053\u308D\u306B\u3042\u308B\u3002
+   * \u9045\u3089\u305B\u308B\u5074\u306F\u6301\u305F\u306A\u3044\u3002\u5F8C\u308D\u306B\u7F6E\u304F\u30CE\u30EA\u306F\u3001\u62CD\u3092\u57FA\u6E96\u306B\u3059\u3079\u3066\u306E\u30D1\u30FC\u30C8\u3078\u52B9\u304F\u6F14\u594F\u306E\u5C64\u306E
+   * \u8A71\u3067\u3001\u97F3\u8272\u306E\u88DC\u6B63\u3068\u306F\u5F79\u76EE\u304C\u9055\u3046(2026-10-05)
+   */
+  lead(ev) {
+    const def = this.patch[ev.p];
+    if (!def) return 0;
+    const h = ev.h ? Object.assign({}, def.head, ev.h) : def.head;
+    if (!(h.align > 0)) return 0;
+    const vel = ev.v == null ? 0.8 : Math.max(0, Math.min(1, ev.v));
+    return h.align * this.headLen(def, h, vel, ev.f || def.base) / 2 / sampleRate;
+  }
+
+  /** \u7A7A\u3044\u3066\u3044\u308B\u58F0\u3002\u7121\u3051\u308C\u3070\u3044\u3061\u3070\u3093\u53E4\u3044\u58F0\u3092\u53D6\u308B */
+  pick() {
+    const vo = this.voice;
+    let best = 0, oldest = Infinity;
+    for (let v = 0; v < V; v++) {
+      const o = v * K;
+      if (!vo[o + ON]) return v;
+      if (vo[o + BORN] < oldest) { oldest = vo[o + BORN]; best = v; }
+    }
+    return best;
+  }
+
+  start(ev, off) {
+    const def = this.patch[ev.p];
+    if (!def) return;
+    const sr = sampleRate;
+    const v = this.pick();
+    const o = v * K;
+    const vo = this.voice;
+    let h = ev.h ? Object.assign({}, def.head, ev.h) : def.head;
+    const vel = ev.v == null ? 0.8 : Math.max(0, Math.min(1, ev.v));
+    // \u5931\u6557\u30FB\u5D29\u308C\u3002\u8D77\u304D\u308B\u304B\u3069\u3046\u304B\u306F\u3001\u97F3\u7B26\u306E\u756A\u53F7\u30FB\u97F3\u306E\u9AD8\u3055\u30FB\u524D\u306E\u97F3\u306E\u9AD8\u3055\u30FB\u7A2E\u304B\u3089\u6C7A\u3081\u308B\u3002
+    // \u756A\u53F7\u306F\u3001\u9CF4\u3089\u3059\u5074\u304C\u4ED8\u3051\u308B k(\u66F8\u3044\u305F\u97F3\u7B26\u306E\u756A\u53F7\u3002\u7E70\u308A\u8FD4\u3057\u3092\u6570\u3048\u306A\u3044)\u3002#looptimes \u306E 2 \u5468\u76EE\u3082\u3001
+    // \u30A8\u30B3\u30FC\u306E\u5199\u3057\u3084\u548C\u97F3\u306E\u3088\u3046\u306B 1 \u3064\u306E\u97F3\u7B26\u304B\u3089\u4F5C\u3063\u305F\u30A4\u30D9\u30F3\u30C8\u3082\u3001\u540C\u3058\u3068\u3053\u308D\u3067\u8D77\u304D\u308B
+    // (\u713C\u3044\u305F WAV \u304C\u6BCE\u56DE\u540C\u3058\u306B\u306A\u308A\u3001\u6C17\u306B\u5165\u3063\u305F\u5931\u6557\u3092\u63B4\u3093\u3067\u6B8B\u305B\u308B\u30022026-10-07)\u3002
+    // k \u304C\u7121\u3044\u3068\u304D(\u805E\u304F\u30DA\u30FC\u30B8\u3001\u30C6\u30B9\u30C8)\u306F\u3001\u30D1\u30C3\u30C1\u3054\u3068\u306B\u9CF4\u3089\u3057\u305F\u9806\u306E\u6570\u3067\u4EE3\u308F\u308A\u306B\u3059\u308B\u3002
+    // \u5931\u6557\u3067\u8DB3\u3057\u305F\u97F3(nf)\u304B\u3089\u306F\u8D77\u3053\u3055\u306A\u3044
+    let amp = Math.pow(vel, 1.5), t60k = 1, fcK = 1, spot = 0, buzz = 0;
+    if (!ev.nf) {
+      this.count[ev.p] = (this.count[ev.p] || 0) + 1;
+      const last = this.lastF[ev.p] || 0;
+      this.lastF[ev.p] = ev.f || def.base;
+      const fl = modalFlaws(def, ev, vel, ev.k ?? this.count[ev.p], last);
+      amp *= fl.amp; t60k = fl.t60k; fcK = fl.fcK; spot = fl.spot; buzz = fl.buzz;
+      if (fl.head) h = Object.assign({}, h, fl.head);
+      if (fl.extra.length) this.add(fl.extra);
+    }
+    const f0 = sourOf(def, ev.f || def.base);
+    // \u5F37\u3055\u3067\u982D\u304C\u77ED\u304F\u3001\u660E\u308B\u304F\u306A\u308B\u3002\u6CE2\u5F62\u306F\u5DEE\u3057\u66FF\u3048\u306A\u3044
+    // \u97F3\u57DF\u3067\u5909\u308F\u308B\u3082\u306E\u3002\u771F\u3093\u4E2D\u306E C \u3092\u57FA\u6E96\u306B\u3059\u308B
+    const kr = def.pitched ? f0 / 261.63 : 1;
+    // \u9AD8\u3044\u97F3\u307B\u3069\u30CF\u30F3\u30DE\u30FC\u304C\u786C\u3044\u3002\u982D\u304C\u77ED\u304F\u3001\u660E\u308B\u304F\u306A\u308B\u3002
+    // hardFrom \u3088\u308A\u4F4E\u3044\u5074\u306B\u306F\u52B9\u304B\u305B\u306A\u3044\u3002\u52B9\u304B\u305B\u308B\u3068\u4F4E\u97F3\u306E\u30CF\u30F3\u30DE\u30FC\u304C\u67D4\u3089\u304B\u304F\u306A\u308A\u3059\u304E\u3066\u3001\u4E38\u304F\u306A\u308B\u3002
+    // \u65E2\u5B9A\u306F\u771F\u3093\u4E2D\u306E C\u3002\u30D9\u30FC\u30B9\u306E\u3088\u3046\u306B\u4F4E\u3044\u697D\u5668\u306F\u3001\u3082\u3063\u3068\u4E0B\u304B\u3089\u52B9\u304B\u305B\u308B
+    const hk = def.pitched ? Math.pow(Math.max(1, f0 / (h.hardFrom || 261.63)), h.hardKey || 0) : 1;
+    const len = this.headLen(def, h, vel, f0);
+    // \u5F37\u3055\u3067\u982D\u304C\u660E\u308B\u304F\u306A\u308B\u3002velo \u306F\u5F37\u3055 0\u301C1 \u3067\u4F55\u30AA\u30AF\u30BF\u30FC\u30D6\u52D5\u304F\u304B
+    const fc = Math.min(sr * 0.45, 100 * Math.pow(2, h.bright * 8 + (h.velo ?? 1.5) * (vel - 1)) * hk * fcK);
+    vo[o + ON] = 1;
+    vo[o + POS] = 0;
+    vo[o + LEN] = len;
+    vo[o + LP1] = 0;
+    vo[o + LP2] = 0;
+    vo[o + LPC] = 1 - Math.exp(-TAU * fc / sr);
+    // \u7AEF\u6570\u307E\u3067\u6301\u3064\u3002\u6574\u6570\u306B\u4E38\u3081\u308B\u3068\u3001\u5468\u671F\u306E\u77ED\u3044\u9AD8\u3044\u97F3\u307B\u3069\u53E9\u304F\u4F4D\u7F6E\u304C\u305A\u308C\u3066\u3001
+    // \u6ADB\u306E\u5C71\u304C\u51FA\u308B\u306F\u305A\u306E\u306A\u3044\u500D\u97F3\u306B\u6765\u308B(C6 \u3067 12 \u756A\u76EE\u304C\u7ACB\u3063\u3066\u3044\u305F)
+    vo[o + COMB] = Math.min(R - 2, h.comb * sr / f0);
+    vo[o + AMP] = amp;
+    vo[o + NOISE] = h.noise;
+    vo[o + VARY] = h.vary;
+    // \u30D5\u30A7\u30EB\u30C8\u306F\u5F37\u304F\u53E9\u304F\u307B\u3069\u786C\u304F\u306A\u308A\u3001\u529B\u306E\u5F62\u304C\u5C16\u308B\u3002\u5C71\u3092\u4F55\u4E57\u3059\u308B\u304B\u3067\u6301\u3064
+    vo[o + FELT] = 1 + (h.felt || 0) * vel * vel;
+    vo[o + DIRECT] = def.direct || 0;
+    vo[o + RATTLE] = def.rattle || 0;
+    vo[o + RENV] = 0;
+    vo[o + RHP] = 0;
+    vo[o + BZ] = buzz;
+    vo[o + BP] = 0;
+    vo[o + PK] = def.pickup || 0;
+    vo[o + PO] = def.pickupOffset || 0;
+    vo[o + PV] = 0;
+    // \u632F\u308C\u306E\u901F\u3055\u3092\u51FA\u3059(\u30C6\u30A3\u30F3)\u3002\u30B3\u30A4\u30EB\u304C\u62FE\u3046\u306E\u306F\u78C1\u675F\u306E\u5909\u5316\u306E\u901F\u3055\u3067\u3001\u751F\u97F3\u3067\u7A7A\u6C17\u3078\u51FA\u308B\u306E\u3082
+    // \u632F\u308C\u306E\u901F\u3055\u306A\u306E\u3067\u3001\u30D4\u30C3\u30AF\u30A2\u30C3\u30D7\u306E\u6709\u308B\u7121\u3057\u306B\u3088\u3089\u306A\u3044\u30021 \u30B5\u30F3\u30D7\u30EB\u306E\u5DEE\u3092\u3068\u308A\u3001\u57FA\u97F3\u3067
+    // 2 sin(\u03C0f/sr) \u500D\u306B\u306A\u308B\u3076\u3093\u3092\u5272\u3063\u3066\u57FA\u97F3\u306E\u5927\u304D\u3055\u3092\u63C3\u3048\u308B\u3002\u4E0A\u306E\u500D\u97F3\u306F\u3001\u9AD8\u3055\u306B\u6BD4\u4F8B\u3057\u3066\u5F37\u304F\u306A\u308B\u3002
+    // \u30D4\u30C3\u30AF\u30A2\u30C3\u30D7\u306E\u91CF\u3067\u5207\u308A\u66FF\u3048\u308B\u3068\u3001Smart \u3092 0 \u304B\u3089\u5C11\u3057\u4E0A\u3052\u305F\u3068\u3053\u308D\u3067\u30AD\u30F3\u304C 16dB \u8DF3\u306D\u308B
+    vo[o + PD] = def.speed ? 1 / (2 * Math.sin(Math.PI * Math.min(f0, sr * 0.45) / sr)) : 0;
+    vo[o + WD] = def.width || 0;
+    vo[o + TD] = def.tremolo || 0;
+    vo[o + TR] = def.tremoloRate || 0;
+    // \u9AD8\u3044\u97F3\u3092\u6301\u3061\u4E0A\u3052\u308B\u3002\u4E2D\u592E\u306E C \u304B\u3089\u4E0A\u3078 1 \u30AA\u30AF\u30BF\u30FC\u30D6\u3054\u3068\u306B trebleGain dB\u3002
+    // \u672C\u7269\u306E\u30D4\u30A2\u30CE\u306F\u9AD8\u97F3\u3067\u3082\u51FA\u3060\u3057\u306E\u5927\u304D\u3055\u304C\u3042\u307E\u308A\u843D\u3061\u306A\u3044(\u9332\u97F3\u3067\u6E2C\u3063\u305F)
+    const tg = def.trebleGain ? Math.pow(10, def.trebleGain * Math.max(0, Math.log2(kr)) / 20) : 1;
+    vo[o + LEVEL] = (def.level == null ? 0.5 : def.level) * tg;
+    vo[o + OFF] = off;
+    vo[o + BORN] = ++this.born;
+    vo[o + REL] = ev.d == null ? -1 : ev.t + ev.d;
+    vo[o + RELT] = def.release || 0.15;
+    vo[o + HPOS] = 0;
+    // \u982D\u304C\u9577\u3044\u307B\u3069\u4F4E\u3044\u5171\u632F\u5668\u3078\u591A\u304F\u5165\u308B\u306E\u3067\u3001\u305D\u306E\u3076\u3093\u5272\u308B\u3002
+    // \u92ED\u3055\u306F\u660E\u308B\u3055\u3060\u3051\u3092\u5909\u3048\u3001\u5927\u304D\u3055\u306F\u5909\u3048\u306A\u3044
+    // \u30D5\u30A7\u30EB\u30C8\u3067\u5C71\u304C\u5C16\u308B\u3068\u9762\u7A4D\u304C\u6E1B\u308B\u306E\u3067\u3001\u305D\u306E\u9762\u7A4D\u3067\u5272\u308B\u3002\u5272\u3089\u306A\u3044\u3068\u3001\u30D5\u30A7\u30EB\u30C8\u3092
+    // \u786C\u304F\u3057\u305F\u3060\u3051\u3067\u97F3\u304C\u5C0F\u3055\u304F\u306A\u308B(\u660E\u308B\u3055\u3060\u3051\u3092\u5909\u3048\u305F\u3044\u30D1\u30E9\u30E1\u30FC\u30BF)
+    let area = 0;
+    for (let i = 0; i < 32; i++) area += Math.pow(Math.sin(Math.PI * (i + 0.5) / 32), vo[o + FELT]);
+    area /= 32;
+    // \u7C92\u3002\u982D\u3092 1 \u3064\u306E\u5C71\u3067\u306F\u306A\u304F\u3001\u5C11\u3057\u305A\u3064\u305A\u308C\u3066\u5F53\u305F\u308B\u7D30\u304B\u3044\u5C71\u306E\u96C6\u307E\u308A\u306B\u3059\u308B
+    // (\u30D6\u30E9\u30B7\u306E\u7DDA\u304C\u4F55\u5341\u672C\u3082\u305A\u308C\u3066\u5F53\u305F\u308B\u300C\u30D1\u30B7\u30E3\u300D)\u3002\u6642\u523B\u3068\u5927\u304D\u3055\u306F\u7A2E\u3067\u6C7A\u3081\u3001
+    // vary \u306E\u3076\u3093\u3060\u3051\u6BCE\u56DE\u305A\u3089\u3059\u3002\u9762\u7A4D\u306F\u7C92\u306E\u5927\u304D\u3055\u306E\u5408\u8A08\u3067\u6570\u3048\u308B
+    const gn = Math.max(0, Math.min(G, h.grains | 0));
+    vo[o + GN] = gn;
+    if (gn > 0) {
+      const gl = this.bumpLen(def, h, vel, f0);
+      const span = Math.max(0, len - gl);
+      vo[o + GL] = gl;
+      let gs = ((h.seed | 0) * 747796405 + 2891336453) >>> 0 || 1;
+      const u = () => { gs ^= gs << 13; gs >>>= 0; gs ^= gs >>> 17; gs ^= gs << 5; gs >>>= 0; return gs / 4294967296; };
+      let sum = 0;
+      for (let k = 0; k < gn; k++) {
+        const t = (1 - h.vary) * u() + h.vary * Math.random();
+        const a = 0.4 + 0.6 * ((1 - h.vary) * u() + h.vary * Math.random());
+        this.grain[(v * G + k) * 2] = Math.round(t * span);
+        this.grain[(v * G + k) * 2 + 1] = a / Math.sqrt(gn);
+        sum += a / Math.sqrt(gn);
+      }
+      vo[o + NORM] = 1 / Math.max(1, area * gl * sum);
+    } else {
+      vo[o + NORM] = 1 / Math.max(1, area * len);
+    }
+    this.ring.fill(0, v * R, v * R + R);
+    this.seed[v] = (h.seed | 0) * 2654435761 + 1 >>> 0 || 1;
+    // \u4FC2\u6570\u3092\u4F5C\u308B\u3002\u30CA\u30A4\u30AD\u30B9\u30C8\u306B\u8FD1\u3044\u3082\u306E\u306F\u8F09\u305B\u306A\u3044
+    const tb = def.table;
+    const md = this.modes;
+    // \u5171\u632F\u5668\u3068\u5C0E\u6CE2\u7BA1\u306E\u5F26\u306E\u4E26\u3073\u3068\u6E1B\u308A\u65B9\u306F modalModes \u3067\u6C7A\u3081\u308B(\u4F59\u97FB\u306E\u9577\u3055 modalTail \u3068\u540C\u3058\u9053)
+    vo[o + WG] = 0;
+    vo[o + NM] = 0;
+    const ns = modalModes(def, f0, t60k, spot, sr, M, WS, (s, f, t60s, damp, bb) => {
+      this.string(v, s, f, t60s, damp, bb);
+      this.wg[(v * WS + s) * WK + WLV] = s === 0 ? 1 : (def.afterLevel ?? 1);
+    }, (n, f, tt, a) => {
+      const w = TAU * f / sr;
+      const r = Math.exp(-LN1000 / (Math.max(0.005, tt) * sr));
+      const c = Math.cos(w), s = Math.sin(w);
+      const m = (v * M + n) * S;
+      md[m] = 2 * r * c;
+      md[m + 1] = r * r;
+      md[m + 2] = a * s;
+      md[m + 3] = 0;
+      md[m + 4] = 0;
+      md[m + 5] = c;
+      md[m + 6] = s;
+      md[m + 7] = tt;
+      vo[o + NM] = n + 1;
+    });
+    vo[o + WG] = ns;
+    if (ns) {
+      // \u4E0A\u306E\u500D\u97F3\u3092\u5F31\u3081\u308B\u91CF(tilt)\u3092\u3001\u5C0E\u6CE2\u7BA1\u306B\u3082\u540C\u3058\u610F\u5473\u3067\u52B9\u304B\u305B\u308B\u3002\u5171\u632F\u5668\u306E\u675F\u306F\u8868\u306E\u632F\u5E45\u3067
+      // 1/n^tilt \u306B\u3057\u3066\u3044\u308B\u304C\u3001\u5C0E\u6CE2\u7BA1\u306B\u306F\u8868\u304C\u7121\u3044\u3002\u57FA\u97F3\u306E\u3068\u3053\u308D\u3067\u5207\u308C\u308B 1 \u6B21\u306E\u30ED\u30FC\u30D1\u30B9\u3092
+      // \u982D\u306B\u639B\u3051\u3066\u8FD1\u3065\u3051\u308B(1 \u6BB5\u3067 1/n\u30012 \u6BB5\u76EE\u3092\u6DF7\u305C\u3066 2 \u307E\u3067)\u3002\u52B9\u304B\u305B\u306A\u3044\u3068\u3001\u982D\u3092
+      // \u660E\u308B\u304F\u3057\u305F\u3068\u304D\u306B\u5C0E\u6CE2\u7BA1\u3060\u3051\u4E0A\u306E\u500D\u97F3\u304C\u5897\u3048\u3001\u5883\u76EE(B4 \u3068 C5)\u3067\u6BB5\u5DEE\u304C\u51FA\u308B
+      const tl = def.tilt == null ? 1 : def.tilt;
+      vo[o + TC] = 1 - Math.exp(-TAU * f0 / sr);
+      vo[o + TA1] = Math.min(1, Math.max(0, tl));
+      vo[o + TA2] = Math.min(1, Math.max(0, tl - 1));
+      vo[o + TL1] = 0;
+      vo[o + TL2] = 0;
+      // 2 \u672C\u76EE\u304B\u3089\u4E0B\u3052\u305F\u3076\u3093(afterLevel)\u3092\u8DB3\u3057\u623B\u3059\u3002\u5F26\u306E\u6570\u3068\u6B8B\u308B\u5F26\u306E\u5927\u304D\u3055\u3067\u3001\u5168\u4F53\u306E\u5927\u304D\u3055\u306F\u5909\u3048\u306A\u3044
+      const share = 1 + (ns - 1) * (def.afterLevel ?? 1);
+      vo[o + WGAIN] = GUIDE_GAIN / share * Math.pow(GUIDE_REF / f0, 0.73) * vo[o + NORM];
+    }
+  }
+
+  /**
+   * \u5C0E\u6CE2\u7BA1\u306E\u5F26\u3092 1 \u672C\u5F35\u308B\u3002
+   *
+   * \u30EB\u30FC\u30D7\u306F \u9045\u5EF6\u7DDA \u2192 \u640D\u5931(1 \u6B21\u306E\u30ED\u30FC\u30D1\u30B9)\u2192 \u786C\u3055(1 \u6B21\u306E\u30AA\u30FC\u30EB\u30D1\u30B9 6 \u6BB5)\u2192
+   * \u7AEF\u6570(1 \u6B21\u306E\u30AA\u30FC\u30EB\u30D1\u30B9)\u2192 \u9045\u5EF6\u7DDA\u30021 \u5468\u306E\u9577\u3055\u304C\u57FA\u97F3\u306E\u5468\u671F\u306B\u306A\u308B\u3088\u3046\u306B\u3001
+   * \u640D\u5931\u3068\u786C\u3055\u304C\u98DF\u3046\u9045\u308C\u3092\u5DEE\u3057\u5F15\u3044\u3066\u9045\u5EF6\u306E\u9577\u3055\u3092\u6C7A\u3081\u308B\u3002
+   *
+   * \u786C\u3055\u306F\u3001\u4E0A\u306E\u500D\u97F3\u307B\u3069 1 \u5468\u3092\u77ED\u304F\u3057\u3066\u9AD8\u304F\u305A\u3089\u3059\u3002\u4F55\u756A\u76EE\u304B\u306E\u500D\u97F3\u304C
+   * \u5171\u632F\u5668\u306E\u675F\u3068\u540C\u3058\u9AD8\u3055(n f sqrt(1 + B n^2))\u306B\u6765\u308B\u307E\u3067\u3001\u30AA\u30FC\u30EB\u30D1\u30B9\u306E\u4FC2\u6570\u3092\u4E8C\u5206\u6CD5\u3067\u63A2\u3059
+   */
+  string(v, s, f, t60, damp, bb) {
+    const sr = sampleRate, wg = this.wg;
+    const wi = (v * WS + s) * WK;
+    const L0 = sr / f;
+    const w0 = TAU * f / sr;
+    // \u640D\u5931\u3002\u57FA\u97F3\u3067 t60\u30012kHz \u3067\u5171\u632F\u5668\u306E\u675F\u3068\u540C\u3058\u6E1B\u308A\u65B9\u306B\u306A\u308B\u3088\u3046\u306B
+    const g = Math.pow(10, -3 * L0 / (sr * t60));
+    let a = 0;
+    const f1 = Math.min(2000, 0.35 * sr);
+    if (f1 > 1.5 * f && damp > 0) {
+      const t1 = t60 / (1 + damp * (f1 / 1000) * (f1 / 1000));
+      const r = Math.pow(10, -3 * L0 / sr * (1 / t1 - 1 / t60));
+      const q = r * r, c1 = Math.cos(TAU * f1 / sr);
+      if (q < 1) a = ((1 - q * c1) - Math.sqrt(Math.max(0, (1 - q * c1) ** 2 - (1 - q) ** 2))) / (1 - q);
+    }
+    const ap = (c, w) => -(Math.atan2(-Math.sin(w), c + Math.cos(w))
+      - Math.atan2(-c * Math.sin(w), 1 + c * Math.cos(w))) / w;
+    const lossD = (w) => a === 0 ? 0 : Math.atan2(a * Math.sin(w), 1 - a * Math.cos(w)) / w;
+    // \u4FC2\u6570 c \u306E\u3068\u304D\u306E\u9045\u5EF6\u306E\u9577\u3055\u3068\u7AEF\u6570\u3002\u77ED\u3059\u304E\u3066\u7D44\u3081\u306A\u3051\u308C\u3070 null
+    const fit = (c) => {
+      const rest = L0 - lossD(w0) - AP * ap(c, w0);
+      const N = Math.floor(rest - 0.5);
+      if (N < 2 || N >= WR - 1) return null;
+      const d = rest - N;
+      return { N, eta: (1 - d) / (1 + d) };
+    };
+    let c = 0;
+    const nt = Math.max(2, Math.min(12, Math.floor(0.3 * sr / f)));
+    if (bb > 0) {
+      const ft = nt * f * Math.sqrt(1 + bb * nt * nt);
+      const wt = TAU * ft / sr;
+      const err = (c) => {
+        const z = fit(c);
+        if (!z) return -1;
+        return z.N + lossD(wt) + AP * ap(c, wt) + ap(z.eta, wt) - nt * sr / ft;
+      };
+      if (err(0) > 0) {
+        let lo = -0.95, hi = 0;
+        for (let k = 0; k < 28; k++) {
+          const mid = (lo + hi) / 2;
+          if (err(mid) > 0) hi = mid; else lo = mid;
+        }
+        c = hi;
+      }
+    }
+    const z = fit(c) || fit(0);
+    wg.fill(0, wi, wi + WK);
+    wg[wi + WN] = z.N;
+    wg[wi + WETA] = z.eta;
+    wg[wi + WC] = c;
+    wg[wi + WGG] = g;
+    wg[wi + WA] = a;
+    wg[wi + WT60] = t60;
+    wg[wi + WL] = L0;
+    this.wring.fill(0, (v * WS + s) * WR, (v * WS + s + 1) * WR);
+  }
+
+  /** \u5C0E\u6CE2\u7BA1\u306E\u5F26\u3092\u56DE\u3057\u3066 vb \u3078\u8DB3\u3059\u3002\u307E\u3060\u9CF4\u3063\u3066\u3044\u308B\u5F26\u306E\u6570\u3092\u8FD4\u3059 */
+  strings(v, live) {
+    const vo = this.voice, wg = this.wg, ring = this.wring, vb = this.vb;
+    const o = v * K;
+    // \u982D\u306B tilt \u306E\u30ED\u30FC\u30D1\u30B9\u3092\u639B\u3051\u305F\u3082\u306E\u3002\u57FA\u97F3\u3067\u306E\u5927\u304D\u3055\u306F\u5909\u3048\u306A\u3044(\u221A2 \u3092\u639B\u3051\u623B\u3059)
+    const hb = this.tb;
+    if (live) {
+      const c = vo[o + TC], a1 = vo[o + TA1], a2 = vo[o + TA2];
+      let l1 = vo[o + TL1], l2 = vo[o + TL2];
+      for (let i = 0; i < B; i++) {
+        const x = this.hb[i];
+        l1 += c * (x - l1);
+        const y1 = (1 - a1) * x + a1 * 1.4142 * l1;
+        l2 += c * (y1 - l2);
+        hb[i] = (1 - a2) * y1 + a2 * 1.4142 * l2;
+      }
+      vo[o + TL1] = l1; vo[o + TL2] = l2;
+    }
+    const ns = vo[o + WG];
+    const gin = vo[o + WGAIN];
+    let alive = 0;
+    for (let s = 0; s < ns; s++) {
+      const wi = (v * WS + s) * WK;
+      const N = wg[wi + WN];
+      if (!N) continue;
+      const rb = (v * WS + s) * WR;
+      const eta = wg[wi + WETA], c = wg[wi + WC], a = wg[wi + WA];
+      const gg = wg[wi + WGG] * (1 - a);
+      const gl = gin * wg[wi + WLV];
+      let lp = wg[wi + WLP], t1 = wg[wi + WT1], t2 = wg[wi + WT2], wp = wg[wi + WP];
+      let e = 0;
+      for (let i = 0; i < B; i++) {
+        let rd = wp - N;
+        if (rd < 0) rd += WR;
+        const x = ring[rb + rd];
+        lp = gg * x + a * lp;
+        let u = lp;
+        for (let k = 0; k < AP; k++) {
+          const j = wi + WAPS + 2 * k;
+          const y = c * u + wg[j] - c * wg[j + 1];
+          wg[j] = u; wg[j + 1] = y; u = y;
+        }
+        const yt = eta * u + t1 - eta * t2;
+        t1 = u; t2 = yt;
+        ring[rb + wp] = live ? yt + hb[i] : yt;
+        if (++wp >= WR) wp = 0;
+        vb[i] += x * gl;
+        e += x * x;
+      }
+      wg[wi + WLP] = lp; wg[wi + WT1] = t1; wg[wi + WT2] = t2; wg[wi + WP] = wp;
+      // \u6E1B\u308A\u304D\u3063\u305F\u5F26\u306F\u6B62\u3081\u308B\u3002\u8AAD\u3080\u4F4D\u7F6E\u306F\u66F8\u304F\u4F4D\u7F6E\u306E N \u30B5\u30F3\u30D7\u30EB\u5F8C\u308D\u306A\u306E\u3067\u3001
+      // 1 \u5468\u3076\u3093\u9759\u304B\u306A\u306E\u3092\u898B\u3066\u304B\u3089\u306B\u3059\u308B\u3002\u3067\u306A\u3044\u3068\u982D\u304C\u56DE\u3063\u3066\u304F\u308B\u524D\u306B\u6B62\u3081\u3066\u3057\u307E\u3046
+      if (!live && e < B * QUIET * QUIET) wg[wi + WQ] += B;
+      else wg[wi + WQ] = 0;
+      if (wg[wi + WQ] > N + B) wg[wi + WN] = 0;
+      else alive++;
+    }
+    return alive;
+  }
+
+  /** \u96E2\u3059\u3002\u6E1B\u8870\u3092\u7E2E\u3081\u308B\u3060\u3051\u3067\u3001\u9CF4\u3063\u3066\u3044\u308B\u5F62\u306F\u5D29\u3055\u306A\u3044 */
+  release(v) {
+    const vo = this.voice, md = this.modes, sr = sampleRate;
+    const o = v * K;
+    const rt = vo[o + RELT];
+    vo[o + REL] = -1;
+    for (let s = 0; s < vo[o + WG]; s++) {
+      const wi = (v * WS + s) * WK;
+      if (this.wg[wi + WT60] <= rt) continue;
+      this.wg[wi + WGG] = Math.pow(10, -3 * this.wg[wi + WL] / (sr * rt));
+      this.wg[wi + WT60] = rt;
+    }
+    for (let k = 0; k < vo[o + NM]; k++) {
+      const m = (v * M + k) * S;
+      if (md[m + 7] <= rt) continue;
+      const r = Math.exp(-LN1000 / (rt * sr));
+      md[m] = 2 * r * md[m + 5];
+      md[m + 1] = r * r;
+      md[m + 7] = rt;
+    }
+  }
+
+  /** \u982D\u306E\u584A\u3092\u4F5C\u308B\u3002\u7D42\u308F\u3063\u3066\u3044\u305F\u3089 false */
+  head(v) {
+    const vo = this.voice, hb = this.hb, ring = this.ring;
+    const o = v * K;
+    hb.fill(0);
+    let pos = vo[o + POS];
+    const len = vo[o + LEN];
+    const comb = vo[o + COMB];
+    const ci = Math.floor(comb), cf = comb - ci;
+    const lpc = vo[o + LPC];
+    const nz = vo[o + NOISE], vary = vo[o + VARY], amp = vo[o + AMP], felt = vo[o + FELT];
+    const gn = vo[o + GN], gl = vo[o + GL], gb = v * G * 2, gr = this.grain;
+    let lp1 = vo[o + LP1], lp2 = vo[o + LP2];
+    let hp = vo[o + HPOS];
+    let sd = this.seed[v], fr = this.free;
+    const base = v * R;
+    const off = vo[o + OFF];
+    vo[o + OFF] = 0;
+    // \u982D\u304C\u5C3D\u304D\u3066\u3082\u3001\u30ED\u30FC\u30D1\u30B9\u3068\u6ADB\u306E\u5C3E\u304C R \u30B5\u30F3\u30D7\u30EB\u6B8B\u308B
+    if (pos >= len + R) return false;
+    for (let i = off; i < B; i++) {
+      let x = 0;
+      if (pos < len) {
+        let env;
+        if (gn > 0) {
+          // \u7C92\u306E\u5C71\u3092\u8DB3\u3057\u5408\u308F\u305B\u308B
+          env = 0;
+          for (let k = 0; k < gn; k++) {
+            const q = pos - gr[gb + k * 2];
+            if (q >= 0 && q < gl) env += gr[gb + k * 2 + 1] * Math.pow(Math.sin(Math.PI * q / gl), felt);
+          }
+        } else {
+          env = Math.pow(Math.sin(Math.PI * pos / len), felt);
+        }
+        sd ^= sd << 13; sd >>>= 0; sd ^= sd >>> 17; sd ^= sd << 5; sd >>>= 0;
+        fr ^= fr << 13; fr >>>= 0; fr ^= fr >>> 17; fr ^= fr << 5; fr >>>= 0;
+        const a = sd / 2147483648 - 1, b = fr / 2147483648 - 1;
+        // \u885D\u6483(\u6ED1\u3089\u304B\u306A\u5C71)\u3068\u96D1\u97F3\u3092\u6DF7\u305C\u308B\u3002\u64E6\u308B \u2194 \u53E9\u304F
+        x = env * amp * ((1 - nz) + nz * 1.7 * ((1 - vary) * a + vary * b));
+      }
+      // 2 \u6BB5\u306E\u30ED\u30FC\u30D1\u30B9\u3002\u6728 \u2194 \u91D1\u5C5E
+      lp1 += lpc * (x - lp1);
+      lp2 += lpc * (lp1 - lp2);
+      // \u6ADB\u3002\u53E9\u304F\u4F4D\u7F6E\u3067\u3001\u305D\u306E\u4F4D\u7F6E\u306B\u7BC0\u304C\u3042\u308B\u5171\u632F\u5668\u304C\u9CF4\u3089\u306A\u304F\u306A\u308B
+      // \u7AEF\u6570\u306F\u524D\u5F8C 2 \u3064\u306E\u3042\u3044\u3060\u3092\u76F4\u7DDA\u3067\u57CB\u3081\u308B
+      const y = comb > 0
+        ? lp2 - ((1 - cf) * ring[base + ((hp - ci + R) % R)] + cf * ring[base + ((hp - ci - 1 + R) % R)])
+        : lp2;
+      ring[base + hp] = lp2;
+      hp = (hp + 1) % R;
+      hb[i] = y;
+      pos++;
+    }
+    vo[o + POS] = pos; vo[o + LP1] = lp1; vo[o + LP2] = lp2; vo[o + HPOS] = hp;
+    this.seed[v] = sd; this.free = fr;
+    return true;
+  }
+
+  /**
+   * 1 \u58F0\u3076\u3093\u3092 2 \u672C\u306E\u51FA\u53E3(a \u3068 b)\u3078\u8DB3\u3059\u3002\u9CF4\u308A\u7D42\u308F\u3063\u3066\u3044\u305F\u3089\u58F0\u3092\u7A7A\u3051\u308B\u3002
+   * a \u306F\u5DE6\u3078\u884C\u304F\u675F\u3001b \u306F\u53F3\u3078\u884C\u304F\u675F\u3002\u3069\u3053\u306B\u7F6E\u304F\u304B\u306F\u30A8\u30F3\u30B8\u30F3\u304C\u6C7A\u3081\u308B(@p{\u2026} \u306E\u4E21\u5074)\u3002
+   * \u7573\u3080\u3068\u304D\u306F\u8DB3\u3057\u7B97\u306A\u306E\u3067\u3001a + b \u304C\u3044\u3064\u3082\u58F0\u305D\u306E\u3082\u306E\u306B\u306A\u308B\u3088\u3046\u306B\u5206\u3051\u308B
+   */
+  render(v, a, b, t0) {
+    const vo = this.voice, md = this.modes, hb = this.hb, vb = this.vb;
+    const o = v * K;
+    const live = this.head(v);
+    const norm = vo[o + NORM];
+    vb.fill(0);
+    let n = vo[o + NM];
+    for (let k = 0; k < n; k++) {
+      const m = (v * M + k) * S;
+      const a1 = md[m], a2 = md[m + 1], b = md[m + 2] * norm;
+      let y1 = md[m + 3], y2 = md[m + 4];
+      if (live) {
+        for (let i = 0; i < B; i++) {
+          const y = a1 * y1 - a2 * y2 + b * hb[i];
+          y2 = y1; y1 = y; vb[i] += y;
+        }
+      } else {
+        for (let i = 0; i < B; i++) {
+          const y = a1 * y1 - a2 * y2;
+          y2 = y1; y1 = y; vb[i] += y;
+        }
+        // \u632F\u5E45\u306E 2 \u4E57 \xD7 sin^2 \u306F y1^2 + y2^2 - 2cos y1 y2 \u3067\u3001\u4F4D\u76F8\u306B\u3088\u3089\u306A\u3044
+        const s = md[m + 6];
+        const e = y1 * y1 + y2 * y2 - 2 * md[m + 5] * y1 * y2;
+        if (e < QUIET * QUIET * s * s) {
+          // \u5916\u3059\u3002\u6700\u5F8C\u306E\u5171\u632F\u5668\u3092\u3053\u3053\u3078\u6301\u3063\u3066\u304D\u3066\u3001\u6570\u3092 1 \u3064\u6E1B\u3089\u3059
+          n--;
+          const last = (v * M + n) * S;
+          for (let j = 0; j < S; j++) md[m + j] = md[last + j];
+          k--;
+          continue;
+        }
+      }
+      md[m + 3] = y1; md[m + 4] = y2;
+    }
+    vo[o + NM] = n;
+    const wgAlive = vo[o + WG] ? this.strings(v, live) : 0;
+    // \u30D4\u30C3\u30AF\u30A2\u30C3\u30D7(\u30A8\u30EC\u30D4)\u3002\u78C1\u77F3\u306B\u8FD1\u3065\u304F\u307B\u3069\u78C1\u675F\u304C\u6025\u306B\u5897\u3048\u308B(1/\u8DDD\u96E2\xB2)\u306E\u3067\u3001\u632F\u308C\u5E45\u304C\u5927\u304D\u3044\u307B\u3069
+    // \u6B6A\u307F\u3001\u5076\u6570\u500D\u97F3\u304C\u5897\u3048\u308B(\u30D0\u30FC\u30AF)\u3002\u5C0F\u3055\u3044\u632F\u308C\u3067\u306F\u7D20\u901A\u308A\u306B\u306A\u308B\u3088\u3046\u3001\u50BE\u304D\u3067\u5272\u3063\u3066\u3042\u308B\u3002
+    // \u6B6A\u307F\u306E\u91CF\u306F\u632F\u308C\u5E45\u3060\u3051\u3067\u6C7A\u307E\u308B\u306E\u3067\u3001\u5F37\u304F\u5F3E\u3051\u3070\u6B6A\u307F\u3001\u6E1B\u308B\u306B\u3064\u308C\u3066\u4E38\u304F\u306A\u308B\u3002
+    // \u51FA\u3059\u306E\u306F\u78C1\u675F\u3067\u306F\u306A\u304F\u3001\u305D\u306E\u5909\u5316\u306E\u901F\u3055(\u30B3\u30A4\u30EB\u306B\u8D77\u304D\u308B\u96FB\u5727)\u3002\u78C1\u675F\u306F\u7247\u5074\u3078\u5927\u304D\u304F\u632F\u308C\u308B\u306E\u3067\u3001
+    // \u305D\u306E\u307E\u307E\u51FA\u3059\u3068\u76F4\u6D41\u304C\u4E57\u308A\u3001\u548C\u97F3\u3067\u540C\u3058\u5411\u304D\u306B\u7A4D\u307F\u4E0A\u304C\u3063\u3066\u3044\u305F(ff \u306E C4 \u3067\u5B9F\u52B9\u5024\u306E 0.38 \u500D)
+    const pk = vo[o + PK], pd = vo[o + PD];
+    if (pk > 0) {
+      const off = vo[o + PO], g = PICKUP_SCALE * pk;
+      const p0 = pickup(off), d0 = pickupSlope(off);
+      for (let i = 0; i < B; i++) vb[i] = (pickup(off + g * vb[i]) - p0) / (d0 * g);
+    }
+    if (pd > 0) {
+      let pv = vo[o + PV];
+      for (let i = 0; i < B; i++) {
+        const q = vb[i];
+        vb[i] = (q - pv) * pd;
+        pv = q;
+      }
+      vo[o + PV] = pv;
+    }
+    // \u97FF\u304D\u7DDA(\u30B9\u30CD\u30A2\u306E\u88CF\u306E\u7DDA)\u3002\u80F4\u306E\u63FA\u308C\u306E\u5927\u304D\u3055\u3067\u96D1\u97F3\u3092\u958B\u304F\u3002
+    // \u3073\u3073\u308A(\u5931\u6557)\u3082\u540C\u3058\u5305\u7D61\u3092\u4F7F\u3046\u3002\u63FA\u308C\u304C\u5927\u304D\u3044\u3046\u3061\u3060\u3051\u3001\u5F26\u304C\u4F55\u304B\u306B\u5F53\u305F\u3063\u3066\u96D1\u97F3\u304C\u4E57\u308B\u3002
+    // \u63FA\u308C\u306E\u5C71\u306E 35% \u3092\u5207\u308B\u3068\u6B62\u307E\u308A\u3001\u63FA\u308C\u306E\u5C71\u306E\u5411\u304D\u306B\u5408\u308F\u305B\u3066\u958B\u304F\u306E\u3067\u3001\u97F3\u7A0B\u306E\u5468\u671F\u3067\u8108\u6253\u3064
+    const rt = vo[o + RATTLE], bzl = vo[o + BZ];
+    let renv = vo[o + RENV];
+    if (rt || bzl) {
+      let fr = this.free, hp = vo[o + RHP], bp = vo[o + BP];
+      for (let i = 0; i < B; i++) {
+        const a = vb[i] < 0 ? -vb[i] : vb[i];
+        renv += (a > renv ? 0.2 : 0.0015) * (a - renv);
+        if (renv > bp) bp = renv;
+        fr ^= fr << 13; fr >>>= 0; fr ^= fr >>> 17; fr ^= fr << 5; fr >>>= 0;
+        const z = fr / 2147483648 - 1;
+        // 1 \u3064\u524D\u3068\u306E\u5DEE\u3067\u4F4E\u3044\u307B\u3046\u3092\u629C\u304F\u3002\u7DDA\u306E\u97F3\u306F\u9AD8\u3044
+        let add = rt * renv;
+        if (bzl && renv > 0.35 * bp && a > 0.5 * renv) add += bzl * 3 * (renv - 0.35 * bp);
+        vb[i] += add * (z - hp);
+        hp = z;
+      }
+      this.free = fr; vo[o + RHP] = hp; vo[o + BP] = bp;
+      if (renv < 1e-6) renv = 0;
+      vo[o + RENV] = renv;
+    }
+    // \u982D\u3092\u305D\u306E\u307E\u307E\u805E\u304B\u305B\u308B\u3076\u3093\u3002\u97FF\u304D\u7DDA\u3088\u308A\u5F8C\u306B\u8DB3\u3059\u306E\u3067\u3001\u7DDA\u306F\u3053\u308C\u306B\u53CD\u5FDC\u3057\u306A\u3044
+    if (live) {
+      const dr = vo[o + DIRECT];
+      if (dr) for (let i = 0; i < B; i++) vb[i] += dr * hb[i];
+    }
+    const lv = vo[o + LEVEL];
+    // 2 \u672C\u3078\u5206\u3051\u308B\u3002\u63FA\u308C\u304C\u7121\u3051\u308C\u3070\u534A\u5206\u305A\u3064\u3002
+    // \u30C8\u30EC\u30E2\u30ED\u306F\u3001\u30B9\u30FC\u30C4\u30B1\u30FC\u30B9\u306E\u30A2\u30F3\u30D7\u304C\u540C\u3058\u97F3\u3092 2 \u30C1\u30E3\u30F3\u30CD\u30EB\u3078\u914D\u3063\u3066\u3001\u7247\u65B9\u3092\u5927\u304D\u304F\u3001\u3082\u3046\u7247\u65B9\u3092
+    // \u5C0F\u3055\u304F\u3059\u308B\u5F62\u3002\u4F4D\u76F8\u306F\u9006\u306B\u3057\u306A\u3044\u306E\u3067\u3001\u8DB3\u305B\u3070\u63FA\u308C\u306F\u6D88\u3048\u3066\u5143\u306E\u97F3\u306B\u623B\u308B\u3002
+    // \u63FA\u308C\u306E\u4F4D\u76F8\u306F\u6587\u8108\u306E\u6642\u8A08(currentTime)\u304B\u3089\u51FA\u3059\u3002\u30CE\u30FC\u30C9\u3092\u4F5C\u3063\u305F\u6642\u523B\u3092\u8D77\u70B9\u306B\u3059\u308B\u3068\u3001
+    // \u540C\u3058\u66F2\u3067\u3082\u9CF4\u3089\u3057\u65B9\u3067\u63FA\u308C\u65B9\u304C\u5909\u308F\u308B\u3002\u6642\u8A08\u304B\u3089\u51FA\u305B\u3070\u3001\u540C\u3058\u30CE\u30FC\u30C9\u306E\u58F0\u306F 1 \u53F0\u306E\u30A2\u30F3\u30D7\u306E\u3088\u3046\u306B\u63C3\u3046
+    const sw = vo[o + WD] * vo[o + TD], rate = vo[o + TR];
+    if (sw > 0 && rate > 0) {
+      const ph = TAU * ((rate * t0) % 1), step = TAU * rate / sampleRate;
+      for (let i = 0; i < B; i++) {
+        const y = vb[i] * lv * 0.5, m = sw * Math.sin(ph + step * i);
+        a[i] += y * (1 + m);
+        b[i] += y * (1 - m);
+      }
+    } else {
+      for (let i = 0; i < B; i++) {
+        const y = vb[i] * lv * 0.5;
+        a[i] += y;
+        b[i] += y;
+      }
+    }
+    if (!live && n === 0 && renv === 0 && wgAlive === 0) vo[o + ON] = 0;
+  }
+
+  process(inputs, outputs) {
+    const chs = outputs[0];
+    // \u51FA\u53E3\u306F 2 \u672C(\u5DE6\u3078\u884C\u304F\u675F\u3068\u53F3\u3078\u884C\u304F\u675F)\u30021 \u672C\u3057\u304B\u7121\u3051\u308C\u3070\u3001\u53F3\u306E\u675F\u306F\u8107\u3078\u7F6E\u3044\u3066\u6700\u5F8C\u306B\u8DB3\u3059
+    const out = chs[0], rb = chs.length > 1 ? chs[1] : this.ob;
+    out.fill(0);
+    rb.fill(0);
+    const sr = sampleRate;
+    const t0 = currentTime;
+    const tEnd = t0 + B / sr;
+    const vo = this.voice;
+    // \u96E2\u3059\u306E\u306F\u584A\u306E\u5883\u76EE\u3067\u3002\u305A\u308C\u306F 2.9 \u30DF\u30EA\u79D2\u307E\u3067
+    for (let v = 0; v < V; v++) {
+      const o = v * K;
+      if (vo[o + ON] && vo[o + REL] >= 0 && vo[o + REL] < tEnd) this.release(v);
+    }
+    while (this.at < this.events.length && this.events[this.at].s0 < tEnd) {
+      const ev = this.events[this.at++];
+      this.start(ev, Math.max(0, Math.min(B - 1, Math.round((ev.s0 - t0) * sr))));
+    }
+    for (let v = 0; v < V; v++) if (vo[v * K + ON]) this.render(v, out, rb, t0);
+    // \u6B62\u3081\u3066\u3044\u308B\u6700\u4E2D\u306A\u3089\u3001\u3077\u3064\u3063\u3068\u9CF4\u3089\u306A\u3044\u3088\u3046 10 \u30DF\u30EA\u79D2\u3067\u843D\u3068\u3059
+    if (this.cutAt >= 0) {
+      const len = Math.max(1, Math.round(sr * 0.01));
+      for (let i = 0; i < out.length; i++) {
+        const k = Math.max(0, 1 - this.cutAt / len);
+        out[i] *= k;
+        rb[i] *= k;
+        this.cutAt++;
+      }
+      if (this.cutAt >= len) { vo.fill(0); this.cutAt = -1; }
+    }
+    if (chs.length === 1) for (let i = 0; i < out.length; i++) out[i] += rb[i];
+    // 3 \u672C\u76EE\u304B\u3089\u5148\u306F\u4F7F\u308F\u306A\u3044
+    for (let c = 2; c < chs.length; c++) chs[c].fill(0);
+    return true;
+  }
+}
+registerProcessor('${MODAL_NODE}', ModalBank);
+`;
+  function rng(seed) {
+    let a = seed | 0 || 1;
+    return () => {
+      a = a + 1831565813 | 0;
+      let t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  var MEMBRANE = [
+    1,
+    1.594,
+    2.136,
+    2.296,
+    2.653,
+    2.918,
+    3.156,
+    3.501,
+    3.6,
+    3.652,
+    4.06,
+    4.154,
+    4.23,
+    4.601,
+    4.651,
+    4.832,
+    5.061,
+    5.131,
+    5.412,
+    5.473
+  ];
+  var MODAL_PATCHES = {
+    brush: {
+      note: "Wire brush on a snare. Mostly the sweep heard straight through, a short drum body and wires underneath.",
+      series: "membrane",
+      pitched: false,
+      base: 190,
+      // 頭は 16 粒を 6ms に散らす。線が何十本もずれて当たる「パシャ」。前は 9ms の山 1 つで、
+      // 大きさと帯域は同じまま、粒立ちだけが加わる(2026-10-05)。sharp は粒 1 つの長さ
+      head: { sharp: 2, bright: 0.86, comb: 0.18, noise: 0.95, vary: 0.8, seed: 7, grains: 16, scatter: 6 },
+      count: 20,
+      tilt: 0.6,
+      warp: 1,
+      spread: 0.02,
+      seed: 3,
+      t60: 0.22,
+      damp: 0.6,
+      release: 0.1,
+      direct: 0.32,
+      rattle: 1.6,
+      level: 0.9,
+      // 失敗: ときどきワイヤーがばらけて当たる
+      splay: 0.1,
+      flawSeed: 1,
+      range: {
+        "head.sharp": [0.8, 4],
+        "head.bright": [0.7, 0.95],
+        "head.comb": [0, 0.4],
+        "head.noise": [0.7, 1],
+        "head.vary": [0.3, 1],
+        "head.seed": [1, 9999],
+        "head.grains": [4, 32],
+        "head.scatter": [1, 14],
+        count: [8, 60],
+        tilt: [0.2, 1.2],
+        warp: [0.85, 1.15],
+        spread: [0, 0.08],
+        seed: [1, 9999],
+        t60: [0.08, 0.6],
+        damp: [0, 3],
+        release: [0.05, 0.3],
+        direct: [0.1, 0.6],
+        rattle: [0.5, 3],
+        level: [0.3, 2],
+        splay: [0, 0.4],
+        flawSeed: [1, 9999]
+      },
+      macros: {
+        fan: {
+          note: "How wide the wires of the brush are fanned out. 0 is a narrow, gathered fan with a tight, focused tap. 2 is a wide fan whose wires land spread out, softer and splashier.",
+          min: 0,
+          max: 2,
+          neutral: {
+            "head.grains": 6,
+            "head.scatter": 2,
+            "head.sharp": 1.2,
+            "head.bright": 0.9
+          },
+          levelDb: [-6.4, 2.6]
+        }
+      }
+    },
+    brushSweep: {
+      note: "Wire brush swept in circles on a snare. A long, slightly muffled scrape heard straight through, centred near 3 kHz; the drum body and wires barely sound.",
+      // ブラシの擦る音。叩く音(brush)と同じ作りで、頭だけが違う。前は聞くページの側で
+      // 頭を上書きしていたので、頭のパラメータが効かず、MML からも呼べなかった(2026-10-05)。
+      // 小さな櫛で低いところを削り、3kHz 前後を持ち上げている。削らないと 1kHz より下の
+      // 「ゴー」が強く、曲の中で浮いた。前は 6kHz 前後に寄せていたが、きれいすぎて
+      // こもった感じが無かった。櫛を少し長くし、明るさも下げた(2026-10-05)。
+      // 大きさは測った値(RMS)では前より 3dB 小さい。耳は 3kHz あたりがいちばん敏感なので、
+      // 下げた帯域へ寄せると同じ RMS でも大きく聞こえる。セッションの中で大きかった
+      series: "membrane",
+      pitched: false,
+      base: 190,
+      // align 1: 頭が 260ms かけてふくらむので、そのままだと 0.1 秒以上遅れて聞こえる。
+      // ドラマーは手を拍より前から動かして、いちばん鳴るところを拍に合わせる
+      head: { sharp: 260, bright: 0.72, comb: 0.03, noise: 1, vary: 0.8, seed: 7, align: 1 },
+      count: 20,
+      tilt: 0.6,
+      warp: 1,
+      spread: 0.02,
+      seed: 3,
+      t60: 0.22,
+      damp: 0.6,
+      release: 0.1,
+      direct: 0.32,
+      rattle: 1.6,
+      level: 0.9,
+      range: {
+        "head.sharp": [120, 300],
+        "head.bright": [0.6, 0.9],
+        "head.comb": [5e-3, 0.04],
+        "head.noise": [0.85, 1],
+        "head.vary": [0.3, 1],
+        "head.seed": [1, 9999],
+        "head.align": [0, 1],
+        count: [8, 60],
+        tilt: [0.2, 1.2],
+        warp: [0.85, 1.15],
+        spread: [0, 0.08],
+        seed: [1, 9999],
+        t60: [0.08, 0.6],
+        damp: [0, 3],
+        release: [0.05, 0.3],
+        direct: [0.15, 0.6],
+        rattle: [0.5, 3],
+        level: [0.3, 2]
+      }
+    },
+    bass: {
+      note: "Upright bass, plucked. A finger strike with plenty of finger noise, heavy loss in the highs, a long ring, muted when let go. Fitted to recordings of a plucked double bass.",
+      // 録音(アイオワ大学のコントラバスのピチカート、E1〜C4 を 3 つの強さ)に寄せた(2026-10-05)。
+      // 前は 1 秒で 25dB 落ちていたが、録音は 10〜20dB。弱く弾いた C4 が録音より 17dB 小さかった。
+      // 頭の山が長く(約 5ms)、その形が 300Hz あたりを打ち消していたため。
+      // hardKey を 60Hz から効かせて、高い音ほど頭を短くしている。
+      // 雑音が多いのは、録音に指の擦れが入っているぶん
+      series: "string",
+      pitched: true,
+      head: { sharp: 4, bright: 0.875, comb: 0.226, noise: 0.6, vary: 0.3, seed: 11, velo: 0, felt: 1.13, hardKey: 0.5, hardFrom: 60 },
+      count: 35,
+      stretch: 6e-4,
+      strings: 1,
+      detune: 0,
+      tilt: 0.635,
+      warp: 1,
+      spread: 0,
+      t60: 5.07,
+      decayKey: 0.175,
+      damp: 20,
+      release: 0.09,
+      direct: 0,
+      rattle: 0,
+      level: 0.37,
+      // 失敗: 強く弾くとときどきびびり、ときどき指がすべり、弱いときにときどき鳴らしそこねる
+      buzz: 0.08,
+      buzzLevel: 0.3,
+      slip: 0.04,
+      ghost: 0.03,
+      flawSeed: 1,
+      range: {
+        "head.sharp": [2, 8],
+        "head.bright": [0.6, 0.95],
+        "head.comb": [0.1, 0.35],
+        "head.noise": [0.2, 0.8],
+        "head.vary": [0, 0.6],
+        "head.seed": [1, 9999],
+        "head.velo": [0, 1.5],
+        "head.felt": [0, 3],
+        "head.hardKey": [0, 1],
+        "head.hardFrom": [40, 120],
+        count: [12, 60],
+        stretch: [0, 1e-3],
+        strings: [1, 2],
+        detune: [0, 3],
+        tilt: [0.4, 1.2],
+        warp: [0.95, 1.05],
+        spread: [0, 0.02],
+        t60: [2.5, 8],
+        decayKey: [0, 0.5],
+        damp: [8, 20],
+        release: [0.05, 0.2],
+        direct: [0, 0.1],
+        rattle: [0, 0],
+        level: [0.2, 0.7],
+        buzz: [0, 0.4],
+        buzzLevel: [0.2, 1.2],
+        slip: [0, 0.2],
+        ghost: [0, 0.2],
+        flawSeed: [1, 9999]
+      },
+      macros: {
+        // 0 は録音に寄せる前の値。丸く短い音で、曲の中で邪魔をしない
+        upright: {
+          note: "How much it sounds like a plucked upright bass. 1 is the default, fitted to recordings. 0 is a soft, round, short thump with little finger noise, closer to a muted electric bass. Above 1 the finger noise, the brightness and the ring grow.",
+          min: 0,
+          max: 2,
+          neutral: {
+            "head.bright": 0.42,
+            "head.comb": 0.18,
+            "head.noise": 0.08,
+            "head.felt": 0,
+            "head.hardKey": 0,
+            stretch: 8e-5,
+            tilt: 0.7,
+            t60: 2.6,
+            decayKey: 0,
+            damp: 9
+          },
+          // 2 では雑音が増えて基音が細り、7dB 小さく聞こえる
+          levelDb: [-0.9, 7.2]
+        }
+      }
+    },
+    piano: {
+      note: "Piano-like. Stiff strings in pairs that beat and fall in two stages, a felt hammer whose brightness follows the velocity, and a wooden knock. Fitted to recordings of a grand piano.",
+      series: "string",
+      pitched: true,
+      head: { sharp: 0.74, bright: 0.68, comb: 0.125, noise: 0.05, vary: 0.2, seed: 5, velo: 4.1, hardKey: 0.22, felt: 3.1 },
+      count: 100,
+      stretch: 7e-4,
+      stretchKey: 1.25,
+      strings: 2,
+      detune: 1.2,
+      tilt: 0.63,
+      warp: 1,
+      spread: 0,
+      guide: 523,
+      knock: 0.25,
+      sour: 0,
+      sourSeed: 1,
+      t60: 4.1,
+      decayKey: 0.36,
+      after: 4.8,
+      afterLevel: 0.42,
+      damp: 0.63,
+      release: 0.25,
+      direct: 0,
+      rattle: 0,
+      trebleGain: 3.5,
+      level: 0.16,
+      // 失敗: ときどきとなりの鍵盤も押し、ときどきハンマーが二度当たり、まれに弦がびびる
+      neighbor: 0.03,
+      double: 0.02,
+      buzz: 0.02,
+      buzzLevel: 0.3,
+      flawSeed: 1,
+      range: {
+        "head.sharp": [0.5, 2.5],
+        "head.bright": [0.55, 0.8],
+        "head.comb": [0.1, 0.15],
+        "head.noise": [0, 0.12],
+        "head.vary": [0, 0.5],
+        "head.seed": [1, 9999],
+        "head.velo": [2.5, 6],
+        "head.hardKey": [0.2, 1.2],
+        "head.felt": [1, 5],
+        count: [40, 160],
+        stretch: [2e-4, 15e-4],
+        stretchKey: [0.8, 2],
+        strings: [2, 3],
+        detune: [0.3, 3],
+        tilt: [0.5, 1.6],
+        warp: [0.98, 1.02],
+        spread: [0, 5e-3],
+        guide: [300, 900],
+        knock: [0.1, 0.5],
+        sour: [0, 15],
+        sourSeed: [1, 9999],
+        t60: [2, 8],
+        decayKey: [0.2, 0.8],
+        after: [2, 8],
+        afterLevel: [0.2, 0.8],
+        damp: [0.2, 0.8],
+        release: [0.12, 0.5],
+        direct: [0, 0.05],
+        rattle: [0, 0],
+        trebleGain: [0, 8],
+        level: [0.12, 0.8],
+        neighbor: [0, 0.2],
+        double: [0, 0.15],
+        buzz: [0, 0.2],
+        buzzLevel: [0.1, 1],
+        flawSeed: [1, 9999]
+      },
+      macros: {
+        // ちゃんとしたピアノの中での違いを 3 本。どちらの端もピアノのまま、
+        // 性格だけが変わる。ソロで聞いて分かる違いのうち、声の中で作れるもの(2026-10-05)。
+        // 響板、ペダルの共鳴、部屋、マイクの距離は声の外なので入れない
+        voicing: {
+          note: "Voicing of the hammers, as a piano technician does it. 0 is soft and round, 2 is hard and bright.",
+          min: 0,
+          max: 2,
+          neutral: {
+            "head.felt": 0.5,
+            "head.bright": 0.55,
+            "head.hardKey": 0,
+            knock: 0.15
+          },
+          // 大きさの補正(dB)。0 のときと max のとき。1 では 0。測って決めた(C3・C4・C5 の平均)
+          levelDb: [2.6, -1.2]
+        },
+        size: {
+          note: "Size of the instrument. 0 is an upright with short, stiff strings and a shorter ring. 2 leans to a concert grand with long strings.",
+          min: 0,
+          max: 2,
+          neutral: {
+            stretch: 16e-4,
+            t60: 2.2,
+            after: 3
+          },
+          levelDb: [1.7, -0.8]
+        },
+        unison: {
+          note: "How the strings of one key agree. 0 is a single dry, pure string. 2 is a fuller sound from strings slightly apart.",
+          min: 0,
+          max: 2,
+          neutral: {
+            afterLevel: 0,
+            detune: 0
+          },
+          levelDb: [-0.3, 0.5]
+        }
+      }
+    },
+    rhodes: {
+      note: "Electric piano with tines, like a Rhodes. A neoprene hammer strikes a thin tine; the metallic ping dies fast and the round tone of the tone bar stays. Played hard, the pickup barks.",
+      // まだ録音に寄せていない。値は見当(2026-10-06)。
+      // 頭はネオプレンのハンマー。強いほど短く明るくなり、ティンの上の倍音(キン)が出る。
+      // 高い音ほど短く当てる(hardKey を C3 から効かせる)。前は C3 でしか「キン」が聞こえなかった。
+      // 頭の山の形が 900Hz あたりを打ち消していて、C4 から上では 6.27 倍の倍音がそこへ入っていた
+      // (C4 で基音より 37dB 下。いまは C3 から C5 まで 6〜13dB 下)
+      series: "tine",
+      pitched: true,
+      head: { sharp: 1.2, bright: 0.66, comb: 0.06, noise: 0.03, vary: 0.2, seed: 9, velo: 3.2, hardKey: 0.9, hardFrom: 130, felt: 2 },
+      // tilt はティンの振れ(変位)の傾き。ピックアップが変化の速さを拾うので、上の倍音は高さの倍率ぶん
+      // 強く出る。その 1 ぶんを足して、磁束のまま出していたとき(0.5)と同じ釣り合いにしてある
+      count: 6,
+      tilt: 1.5,
+      warp: 1,
+      spread: 0,
+      seed: 1,
+      // ティンとトーンバーで、1 音に 2 本鳴る。detune・after・afterLevel は strings が 2 以上で効く決まりなので 2 にする
+      // (tine の並びは strings の数を読まない)
+      strings: 2,
+      detune: 0.8,
+      after: 1.8,
+      afterLevel: 0.6,
+      t60: 5,
+      decayKey: 0.5,
+      damp: 0.15,
+      release: 0.22,
+      direct: 0,
+      rattle: 0,
+      pickup: 0.7,
+      pickupOffset: 0.1,
+      level: 0.23,
+      // スーツケースのアンプのトレモロ。2 チャンネルへ配って交互に大きくする。値は見当(2026-10-07)
+      width: 1,
+      tremolo: 0.5,
+      tremoloRate: 4.5,
+      range: {
+        "head.sharp": [0.8, 3],
+        "head.bright": [0.5, 0.8],
+        "head.comb": [0, 0.15],
+        "head.noise": [0, 0.1],
+        "head.vary": [0, 0.5],
+        "head.seed": [1, 9999],
+        "head.velo": [2, 5],
+        "head.hardKey": [0.5, 1.3],
+        "head.hardFrom": [100, 200],
+        "head.felt": [0.5, 4],
+        count: [3, 6],
+        tilt: [1.2, 2],
+        warp: [0.97, 1.03],
+        spread: [0, 0.01],
+        seed: [1, 9999],
+        strings: [2, 2],
+        detune: [0, 3],
+        after: [1, 3],
+        afterLevel: [0.15, 1],
+        t60: [3, 9],
+        decayKey: [0.2, 0.8],
+        damp: [0, 0.5],
+        release: [0.12, 0.4],
+        direct: [0, 0.05],
+        rattle: [0, 0],
+        pickup: [0, 1.2],
+        pickupOffset: [-0.2, 0.3],
+        level: [0.1, 0.6],
+        width: [0.5, 1],
+        tremolo: [0, 1],
+        tremoloRate: [2, 8]
+      },
+      macros: {
+        // 0 はピックアップとトーンバーを抜いた音。金属の棒をハンマーで叩いて生音で聞く楽器で、
+        // チェレスタ(鍵盤で鳴らす鉄琴)に近い。本物から取れる端なので、ここを 0 にした
+        rhodes: {
+          note: "How much it sounds like a Rhodes. 1 is the default. 0 takes away the pickup and most of the tone bar and hardens the hammer: a struck metal bar heard acoustically, close to a celesta. Above 1 the bark, the metallic ping and the ring of the tone bar all grow.",
+          min: 0,
+          max: 2,
+          neutral: {
+            pickup: 0,
+            pickupOffset: 0,
+            afterLevel: 0.15,
+            after: 1,
+            t60: 2.5,
+            "head.sharp": 0.8,
+            "head.velo": 1.5,
+            "head.felt": 0.5,
+            "head.bright": 0.75
+          },
+          // 0 はピックアップもトーンバーも抜けて 8dB 小さく、2 は 11dB 大きく出る。
+          // C3・C4・C5 を強さ 0.4・0.7・1 で 1 秒ずつ鳴らした実効値を、1 と比べた(2026-10-07)
+          levelDb: [7.9, -11.1]
+        }
+      }
+    },
+    ride: {
+      note: "Ride cymbal. A dense cloud of long, inharmonic modes struck by a stick tip.",
+      series: "cymbal",
+      pitched: false,
+      base: 300,
+      head: { sharp: 0.5, bright: 0.84, comb: 0, noise: 0.25, vary: 0.4, seed: 19 },
+      count: 140,
+      lo: 1.1,
+      hi: 38,
+      tilt: 0.25,
+      warp: 1,
+      spread: 0,
+      seed: 23,
+      t60: 3.5,
+      damp: 4e-3,
+      release: 0.6,
+      direct: 0.04,
+      rattle: 0,
+      level: 0.06,
+      // 失敗: ときどき縁寄りかカップ寄りに当たる
+      spot: 0.1,
+      flawSeed: 1,
+      range: {
+        "head.sharp": [0.3, 1.5],
+        "head.bright": [0.75, 0.95],
+        "head.comb": [0, 0.1],
+        "head.noise": [0.1, 0.5],
+        "head.vary": [0.1, 0.8],
+        "head.seed": [1, 9999],
+        count: [60, 200],
+        lo: [1, 2],
+        hi: [20, 45],
+        tilt: [0.1, 0.5],
+        warp: [0.9, 1.1],
+        spread: [0, 0.05],
+        seed: [1, 9999],
+        t60: [2, 6],
+        damp: [0, 0.02],
+        release: [0.3, 1],
+        direct: [0, 0.1],
+        rattle: [0, 0],
+        level: [0.03, 0.12],
+        spot: [0, 0.4],
+        flawSeed: [1, 9999]
+      },
+      macros: {
+        ride: {
+          note: "How much it sounds like a ride cymbal. 1 is the default ride. 0 leaves a short, dark, narrow cluster, closer to a small bell or a cowbell. Above 1 the wash grows longer and brighter. The number of resonators is set apart, by the steps.",
+          min: 0,
+          max: 2,
+          neutral: {
+            t60: 0.4,
+            tilt: 1.5,
+            hi: 6,
+            lo: 1,
+            damp: 0.1,
+            "head.bright": 0.5,
+            "head.noise": 0
+          }
+        }
+      }
+    }
+  };
+  var TINE = [1, 6.267, 17.547, 34.386, 56.843, 84.913];
+  var TINE_DECAY = [1, 0.12, 0.05, 0.03, 0.02, 0.015];
+  var KNOCK = [[110, 1, 0.06], [290, 0.7, 0.04], [620, 0.5, 0.03], [1400, 0.35, 0.02]];
+  function modalTable(def) {
+    const out = [];
+    const r = rng(def.seed || 1);
+    const warp = def.warp == null ? 1 : def.warp;
+    const spread = def.spread || 0;
+    const tilt = def.tilt == null ? 1 : def.tilt;
+    const count = Math.max(1, Math.min(MODAL_MODES, def.count | 0 || 1));
+    const push = (ratio, amp, dec, h = 0) => {
+      let x = Math.pow(ratio, warp);
+      if (spread) x *= 1 + spread * (r() * 2 - 1);
+      out.push(x, amp, dec, h);
+    };
+    if (def.series === "string") {
+      const strings = Math.max(1, def.strings | 0 || 1);
+      const per = Math.max(1, Math.floor(count / strings));
+      for (let s = 0; s < strings; s++) {
+        const c = strings === 1 ? 0 : (def.detune || 0) * (s / (strings - 1) - 0.5) * 2;
+        const k = Math.pow(2, c / 1200);
+        const dec = s === 0 ? 1 : def.after || 1;
+        const lv = s === 0 ? 1 : def.afterLevel ?? 1;
+        const share = 1 + (strings - 1) * (def.afterLevel ?? 1);
+        for (let n = 1; n <= per; n++) {
+          push(n * k, lv / (Math.pow(n, tilt) * share), dec, n);
+        }
+      }
+    } else if (def.series === "membrane") {
+      for (let n = 0; n < count; n++) {
+        const ratio = n < MEMBRANE.length ? MEMBRANE[n] : MEMBRANE[MEMBRANE.length - 1] * (1 + 0.08 * (n - MEMBRANE.length + 1));
+        push(ratio, (0.5 + 0.5 * r()) / Math.pow(n + 1, tilt), 1 / (1 + 0.15 * n));
+      }
+    } else if (def.series === "tine") {
+      for (let n = 0; n < Math.min(count, TINE.length); n++) push(TINE[n], 1 / Math.pow(TINE[n], def.tilt ?? 1), TINE_DECAY[n]);
+      if ((def.afterLevel ?? 0) > 0) push(Math.pow(2, (def.detune || 0) / 1200), def.afterLevel, def.after || 1);
+    } else {
+      const lo = def.lo || 1, hi = Math.max(lo * 1.01, def.hi || 40);
+      for (let n = 0; n < count; n++) {
+        const u = Math.pow(r(), 0.6);
+        const ratio = Math.exp(Math.log(lo) + (Math.log(hi) - Math.log(lo)) * u);
+        push(ratio, (0.3 + 0.7 * r()) / Math.pow(ratio / lo, tilt), 0.5 + r());
+      }
+    }
+    if (def.knock) for (const [f, a, t] of KNOCK) out.push(f, a * def.knock, t, -1);
+    return out;
+  }
+  function compileModal(def) {
+    const h = def.head || {};
+    return {
+      table: modalTable(def),
+      base: def.base || 220,
+      head: {
+        sharp: h.sharp ?? 2,
+        bright: h.bright ?? 0.6,
+        comb: h.comb ?? 0,
+        noise: h.noise ?? 0,
+        vary: h.vary ?? 0,
+        seed: h.seed ?? 1,
+        velo: h.velo ?? 1.5,
+        hardKey: h.hardKey ?? 0,
+        hardFrom: h.hardFrom ?? 261.63,
+        felt: h.felt ?? 0,
+        align: h.align ?? 0,
+        grains: h.grains ?? 0,
+        scatter: h.scatter ?? 0
+      },
+      pitched: !!def.pitched,
+      trebleGain: def.trebleGain ?? 0,
+      tilt: def.tilt ?? 1,
+      sour: def.sour ?? 0,
+      sourSeed: def.sourSeed ?? 1,
+      guide: def.series === "string" ? def.guide ?? 0 : 0,
+      strings: def.strings ?? 1,
+      detune: def.detune ?? 0,
+      after: def.after ?? 1,
+      afterLevel: def.afterLevel ?? 1,
+      stretch: def.stretch ?? 0,
+      stretchKey: def.stretchKey ?? 0,
+      decayKey: def.decayKey ?? 0,
+      t60: def.t60 ?? 2,
+      damp: def.damp ?? 0,
+      release: def.release ?? 0.15,
+      direct: def.direct ?? 0,
+      rattle: def.rattle ?? 0,
+      pickup: def.pickup ?? 0,
+      pickupOffset: def.pickupOffset ?? 0,
+      // 振れではなく振れの速さを出す(ティン)。並びで決まるのでパラメータにはしない
+      speed: def.series === "tine",
+      width: def.width ?? 0,
+      tremolo: def.tremolo ?? 0,
+      tremoloRate: def.tremoloRate ?? 0,
+      neighbor: def.neighbor ?? 0,
+      double: def.double ?? 0,
+      buzz: def.buzz ?? 0,
+      buzzLevel: def.buzzLevel ?? 0.4,
+      slip: def.slip ?? 0,
+      ghost: def.ghost ?? 0,
+      splay: def.splay ?? 0,
+      spot: def.spot ?? 0,
+      flawSeed: def.flawSeed ?? 1,
+      level: (def.level ?? 0.5) * Object.values(def.macroLevel || {}).reduce((a, b) => a * b, 1)
+    };
+  }
+
+  // engine/sound/brass.js
+  var BRASS_NODE = "mmsxx-brass";
+  var BRASS_VOICES = 16;
+  var BRASS_HOLD = 1;
+  var BRASS_CODE = `
+const V = ${BRASS_VOICES};
+const B = 128;
+// \u660E\u308B\u3055\u3068\u97F3\u7A0B\u3092\u4F5C\u308A\u76F4\u3059\u9593\u9694
+const SUB = 16;
+const TAU = Math.PI * 2;
+// \u58F0\u306E\u6301\u3061\u7269(\u5E73\u3089\u306A\u914D\u5217\u306E\u4E2D\u306E\u4F4D\u7F6E)
+const ON = 0, PH = 1, P = 2, TGT = 3, AGE = 4, REL = 5, F0 = 6, VEL = 7,
+  K = 8, DC = 9, NRM = 10, INC = 11, LP = 12, BORN = 13, GONE = 14, OFF = 15, SC = 16, ST = 17,
+  CR = 18, CD = 19, PG = 20, KG = 21, WR = 22, FR = 23, FS = 24, FE = 25, SG = 26;
+const W = 27;
+
+/** e^-x I0(x)\u3002\u6307\u6570\u3067\u5272\u3063\u305F\u5F62\u3067\u6301\u3064\u3068\u3001\u5927\u304D\u306A x \u3067\u3082\u6841\u304C\u3042\u3075\u308C\u306A\u3044 */
+function i0e(x) {
+  if (x < 15) {
+    let s = 1, t = 1;
+    const q = x * x / 4;
+    for (let m = 1; m < 60; m++) {
+      t *= q / (m * m);
+      s += t;
+      if (t < s * 1e-12) break;
+    }
+    return s * Math.exp(-x);
+  }
+  return (1 + 1 / (8 * x) + 9 / (128 * x * x)) / Math.sqrt(TAU * x);
+}
+
+/**
+ * \u9CF4\u3089\u3059\u97F3\u304C\u3001\u7BA1\u306E\u4F55\u756A\u76EE\u306E\u500D\u97F3\u304B\u3002\u30B9\u30E9\u30A4\u30C9\u3084\u30D0\u30EB\u30D6\u3067\u7BA1\u304C\u4F38\u3073\u308B\u3068\u3001\u500D\u97F3\u306E\u4E26\u3073\u306E\u57FA\u97F3\u306F
+ * pedal \u304B\u3089\u6700\u5927 6 \u534A\u97F3\u4E0B\u304C\u308B\u3002\u57FA\u97F3\u304C pedal \u4EE5\u4E0B\u306B\u53CE\u307E\u308B\u3001\u3044\u3061\u3070\u3093\u5C0F\u3055\u3044\u756A\u53F7\u306B\u3059\u308B
+ * (\u4E38\u3081\u308B\u3068\u3001\u4F4E\u3044\u97F3\u3067\u756A\u53F7\u304C 1 \u3064\u5C0F\u3055\u304F\u51FA\u3066\u3001\u88CF\u8FD4\u308A\u306E\u8DF3\u3073\u5E45\u304C\u5927\u304D\u3059\u304E\u305F)
+ */
+function partialOf(f0, pedal) { return Math.max(1, Math.ceil(f0 / pedal - 1e-6)); }
+
+/**
+ * \u500D\u97F3\u306E\u756A\u53F7\u306B\u3088\u308B\u5916\u308C\u3084\u3059\u3055\u3002\u756A\u53F7\u304C\u5927\u304D\u3044\u307B\u3069\u3068\u306A\u308A\u306E\u500D\u97F3\u304C\u8FD1\u304F\u3001\u5507\u304C\u5C11\u3057\u305A\u308C\u308B\u3060\u3051\u3067
+ * \u96A3\u306B\u4E57\u308B\u3002\u4F4E\u3044\u97F3\u306F\u3068\u306A\u308A\u304C\u9060\u304F(\u30AA\u30AF\u30BF\u30FC\u30D6\u30015 \u5EA6)\u3001\u3081\u3063\u305F\u306B\u5916\u3055\u306A\u3044\u30026 \u756A\u76EE\u3067 1
+ */
+function slip(n) { return Math.min(2, Math.pow(n / 6, 1.5)); }
+
+class BrassBank extends AudioWorkletProcessor {
+  constructor(o) {
+    super();
+    const p = (o && o.processorOptions) || {};
+    this.voice = new Float64Array(V * W);
+    this.patch = p.patches || {};
+    this.def = new Array(V).fill(null);
+    this.events = [];
+    this.at = 0;
+    this.born = 0;
+    this.noise = 0x2545f491;
+    this.cutAt = -1;
+    // \u30D1\u30C3\u30C1\u3054\u3068\u306E\u3001\u524D\u306E\u97F3\u306E\u9AD8\u3055(\u88CF\u8FD4\u308A\u306E\u8DF3\u8E8D\u3068\u7A2E\u306B\u4F7F\u3046)
+    this.last = {};
+    this.add(p.events || []);
+    this.port.onmessage = (e) => {
+      const d = e.data || {};
+      if (d.patch) this.patch[d.patch] = d.def;
+      if (d.add) this.add(d.add);
+      if (d.cut) { this.events = []; this.at = 0; this.cutAt = 0; }
+    };
+  }
+
+  add(list) {
+    if (!list.length) return;
+    const rest = this.events.slice(this.at).concat(list);
+    rest.sort((a, b) => a.t - b.t);
+    this.events = rest;
+    this.at = 0;
+  }
+
+  pick() {
+    const vo = this.voice;
+    let best = 0, oldest = Infinity;
+    for (let v = 0; v < V; v++) {
+      const o = v * W;
+      if (!vo[o + ON]) return v;
+      if (vo[o + BORN] < oldest) { oldest = vo[o + BORN]; best = v; }
+    }
+    return best;
+  }
+
+  start(ev, off) {
+    const def = this.patch[ev.p];
+    if (!def) return;
+    const v = this.pick();
+    const o = v * W;
+    const vo = this.voice;
+    vo.fill(0, o, o + W);
+    vo[o + ON] = 1;
+    vo[o + F0] = ev.f || 440;
+    vo[o + VEL] = ev.v == null ? 0.8 : Math.max(0, Math.min(1, ev.v));
+    vo[o + TGT] = vo[o + VEL];
+    // \u9577\u3055\u3092\u66F8\u304B\u306A\u3044\u97F3\u306F BRASS_HOLD \u79D2\u3067\u96E2\u3059\u3002\u5439\u304D\u3063\u3071\u306A\u3057\u306B\u306F\u3057\u306A\u3044
+    vo[o + REL] = ev.t + (ev.d == null ? ${BRASS_HOLD} : ev.d);
+    vo[o + BORN] = ++this.born;
+    vo[o + OFF] = off;
+    // \u97F3\u3054\u3068\u306B\u3001\u3069\u3053\u304B\u3089\u5165\u308B\u304B\u3092\u4E0A\u66F8\u304D\u3067\u304D\u308B\u3002\u524D\u306E\u97F3\u306E\u9AD8\u3055\u304B\u3089\u5165\u308C\u308C\u3070\u30B9\u30E9\u30A4\u30C9\u306B\u306A\u308B
+    vo[o + SC] = ev.s == null ? def.scoop : ev.s;
+    vo[o + ST] = ev.st == null ? def.scoopTime : ev.st;
+    vo[o + NRM] = 1;
+    vo[o + SG] = 1;
+    // \u9AD8\u3044\u97F3\u307B\u3069\u62BC\u3057\u304C\u5F37\u3044\u3002A4 \u3067 1\u3001\u534A\u5206\u304B\u3089 2 \u500D\u307E\u3067\u306B\u53CE\u3081\u308B
+    const f0 = vo[o + F0], vel = vo[o + VEL];
+    const reg = Math.min(2, Math.max(0.5, Math.sqrt(f0 / 440)));
+    vo[o + PG] = (def.push || 0) * vel * reg;
+    // \u97F3\u306E\u9AD8\u3055\u306B\u3088\u308B\u5927\u304D\u3055\u306E\u5DEE\u3002A4 \u3092\u57FA\u6E96\u306B\u30011 \u30AA\u30AF\u30BF\u30FC\u30D6\u306B\u3064\u304D keyGain dB
+    vo[o + KG] = def.keyGain ? Math.pow(10, def.keyGain * Math.log2(f0 / 440) / 20) : 1;
+    vo[o + CR] = 1;
+    vo[o + CD] = 0;
+    const last = this.last[ev.p];
+    if (def.crack > 0 && def.pedal > 0) {
+      const n = partialOf(f0, def.pedal);
+      // \u8DF3\u8E8D(\u30AA\u30AF\u30BF\u30FC\u30D6\u3067 1 \u307E\u3067)\u3002\u524D\u306E\u97F3\u304C\u7121\u3051\u308C\u3070\u4E2D\u304F\u3089\u3044\u3068\u898B\u308B
+      const leap = last ? Math.min(1, Math.abs(Math.log2(f0 / last))) : 0.5;
+      const chance = Math.min(1, def.crack * vel * slip(n) * (0.5 + 1.5 * leap));
+      let h = (Math.round(f0 * 10) | 0) ^ Math.imul(ev.k == null ? Math.round((last || 0) * 10) | 0 : 0, 0x85ebca6b) ^ Math.imul(def.crackSeed | 0, 0x9e3779b1) ^ Math.imul((ev.k ?? -1) + 1, 0x27d4eb2f);
+      const u = () => { h = Math.imul(h ^ (h >>> 15), 2246822507); h = Math.imul(h ^ (h >>> 13), 3266489909); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
+      if (u() < chance) {
+        // \u591A\u304F\u306F\u4E0A\u306E\u500D\u97F3\u3078\u3002\u3044\u3061\u3070\u3093\u4E0B\u306E\u500D\u97F3\u304B\u3089\u306F\u4E0A\u306B\u3057\u304B\u884C\u3051\u306A\u3044
+        const up = n < 2 || u() < 0.7;
+        vo[o + CR] = (n + (up ? 1 : -1)) / n;
+        vo[o + CD] = def.crackTime * (0.6 + 0.8 * u());
+      }
+    }
+    // \u30AD\u30FC\u30AF\u3002\u30EA\u30FC\u30C9\u304C\u9CF4\u308A\u305D\u3053\u306D\u3066\u3001\u72D9\u3063\u305F\u97F3\u306E\u500D\u97F3\u306E\u3046\u3061 2.8kHz \u306B\u8FD1\u3044\u3082\u306E\u3067\u300C\u30AD\u30C3\u300D\u3068\u9CF4\u308B\u3002
+    // \u51FA\u3060\u3057\u306E\u88CF\u8FD4\u308A\u304C\u8D77\u304D\u306A\u304B\u3063\u305F\u97F3\u3060\u3051\u3002\u8DF3\u8E8D\u306E\u3042\u3068\u3068\u3001\u5F37\u3044\u97F3\u3067\u8D77\u304D\u3084\u3059\u3044
+    if (def.squeak > 0 && vo[o + CD] === 0) {
+      const leap = last ? Math.min(1, Math.abs(Math.log2(f0 / last))) : 0.5;
+      const chance = Math.min(1, def.squeak * vel * (0.5 + 1.5 * leap));
+      let q = (Math.round(f0 * 10) | 0) ^ Math.imul(ev.k == null ? Math.round((last || 0) * 10) | 0 : 0, 0x2c1b3c6d) ^ Math.imul(def.crackSeed | 0, 0x297a2d39) ^ Math.imul((ev.k ?? -1) + 1, 0x165667b1);
+      const u = () => { q = Math.imul(q ^ (q >>> 15), 2246822507); q = Math.imul(q ^ (q >>> 13), 3266489909); q ^= q >>> 16; return (q >>> 0) / 4294967296; };
+      if (u() < chance) {
+        vo[o + CR] = Math.max(2, Math.round(2800 / f0));
+        vo[o + CD] = def.crackTime * (0.5 + 0.5 * u());
+        // \u9CF4\u308A\u305D\u3053\u306D\u305F\u4E00\u77AC\u306E\u97F3\u306A\u306E\u3067\u3001\u5143\u306E\u97F3\u307B\u3069\u5927\u304D\u304F\u306A\u3044\u3002\u5143\u306E\u5927\u304D\u3055\u306E\u307E\u307E\u3060\u3068\u3001\u8033\u304C\u3044\u3061\u3070\u3093\u654F\u611F\u306A
+        // 2.8kHz \u3042\u305F\u308A\u306B\u80F4\u306E\u9AD8\u3044\u5C71\u3082\u91CD\u306A\u3063\u3066\u3001\u672C\u7269\u3088\u308A\u305A\u3063\u3068\u3046\u308B\u3055\u304F\u805E\u3053\u3048\u305F(2026-10-07)
+        vo[o + SG] = 0.3;
+      }
+    }
+    this.last[ev.p] = f0;
+    // \u9014\u4E2D\u306E\u88CF\u8FD4\u308A\u306E\u7A2E\u3068\u3001\u8DF3\u306D\u3066\u3044\u308B\u3042\u3044\u3060\u306E\u500D\u97F3\u306E\u6BD4\u30FB\u59CB\u307E\u308A\u30FB\u7D42\u308F\u308A(\u30B5\u30F3\u30D7\u30EB)
+    let w = (Math.round(f0 * 10) | 0) ^ Math.imul(def.crackSeed | 0, 0x51ed270b) ^ Math.imul((ev.k ?? -1) + 1, 0x7feb352d);
+    w = Math.imul(w ^ (w >>> 16), 0x45d9f3b); w ^= w >>> 16;
+    vo[o + WR] = (w >>> 0) || 1;
+    vo[o + FR] = 1;
+    vo[o + FS] = -1;
+    vo[o + FE] = -1;
+    this.def[v] = def;
+  }
+
+  /** \u660E\u308B\u3055\u30FB\u97F3\u7A0B\u30FB\u6B63\u898F\u5316\u3092\u4F5C\u308A\u76F4\u3059\u300216 \u30B5\u30F3\u30D7\u30EB\u306B 1 \u56DE */
+  control(v, sr) {
+    const vo = this.voice, d = this.def[v];
+    const o = v * W;
+    const f0 = vo[o + F0];
+    const age = vo[o + AGE] / sr;
+    // \u9CF4\u308A\u306F\u3058\u3081\u306F\u5C11\u3057\u4E0B\u304B\u3089\u5165\u3063\u3066\u3001\u305B\u308A\u4E0A\u304C\u308B
+    let cents = vo[o + SC] * Math.exp(-age / Math.max(1e-3, vo[o + ST]));
+    // \u51FA\u3060\u3057\u306E\u62BC\u3057\u3002\u5C11\u3057\u4E0A\u305A\u3063\u3066\u3001\u660E\u308B\u304F\u306A\u308B
+    const push = vo[o + PG] > 0 ? vo[o + PG] * Math.exp(-age / Math.max(1e-3, d.pushTime)) : 0;
+    cents += 25 * push;
+    // \u30D3\u30D6\u30E9\u30FC\u30C8\u306F\u9045\u308C\u3066\u5165\u308B
+    let vibUp = 0;
+    if (d.vib > 0) {
+      const fade = Math.min(1, Math.max(0, (age - d.vibDelay) / 0.4));
+      const sv = Math.sin(TAU * d.vibRate * age);
+      cents += d.vib * fade * sv;
+      vibUp = fade * Math.max(0, sv);
+    }
+    // \u9014\u4E2D\u306E\u88CF\u8FD4\u308A\u3002\u8DF3\u306D\u3066\u3044\u308B\u3042\u3044\u3060\u306F\u3068\u306A\u308A\u306E\u500D\u97F3\u3067\u9CF4\u308B\u3002\u51FA\u3060\u3057\u306E\u88CF\u8FD4\u308A\u3068\u62BC\u3057\u304C
+    // \u6E08\u3093\u3067\u3001\u4F38\u3070\u3057\u3066\u3044\u308B\u3068\u3053\u308D\u3060\u3051\u3067\u8D77\u304D\u308B
+    let flip = 1;
+    if (d.wobble > 0 && d.pedal > 0) {
+      const a = vo[o + AGE];
+      if (a < vo[o + FE]) flip = vo[o + FR];
+      else if (age > Math.max(0.15, vo[o + CD]) && !vo[o + GONE]) {
+        const vel = vo[o + VEL];
+        const n = partialOf(f0, d.pedal);
+        const chance = d.wobble * vel * slip(n) * (1 + 2 * vibUp) * SUB / sr;
+        let r = vo[o + WR];
+        const u = () => { r ^= r << 13; r >>>= 0; r ^= r >>> 17; r ^= r << 5; r >>>= 0; return r / 4294967296; };
+        if (u() < chance) {
+          const up = n < 2 || u() < 0.7;
+          vo[o + FR] = (n + (up ? 1 : -1)) / n;
+          vo[o + FS] = a;
+          vo[o + FE] = a + d.crackTime * (0.6 + 0.8 * u()) * sr;
+          flip = vo[o + FR];
+        }
+        vo[o + WR] = r;
+      }
+    }
+    // \u88CF\u8FD4\u3063\u3066\u3044\u308B\u3042\u3044\u3060\u306F\u3001\u3068\u306A\u308A\u306E\u500D\u97F3\u3067\u9CF4\u308B
+    const f = f0 * (age < vo[o + CD] ? vo[o + CR] : 1) * flip * Math.pow(2, cents / 1200);
+    vo[o + INC] = f / sr;
+    // \u660E\u308B\u3055\u306F\u606F\u306E\u5727\u304B\u3089\u3002\u30CA\u30A4\u30AD\u30B9\u30C8\u3092\u8D8A\u3048\u308B\u500D\u97F3\u304C\u51FA\u306A\u3044 k \u3067\u6B62\u3081\u308B\u3002
+    // brassKey \u306F\u97F3\u306E\u9AD8\u3055\u3067\u660E\u308B\u3055\u3092\u5909\u3048\u308B\u3002\u672C\u7269\u306E\u91D1\u7BA1\u306F\u3001\u660E\u308B\u3055\u304C\u500D\u97F3\u306E\u756A\u53F7\u3067\u306F\u306A\u304F
+    // \u5468\u6CE2\u6570(Hz)\u3067\u6C7A\u307E\u308B(\u9332\u97F3\u3067\u6E2C\u3063\u305F)\u3002\u500D\u97F3\u306E\u5E83\u304C\u308A\u306F\u304A\u3088\u305D sqrt(k) \u672C\u306A\u306E\u3067\u3001
+    // 2 \u3067\u3001\u3069\u306E\u9AD8\u3055\u3067\u3082\u540C\u3058 Hz \u307E\u3067\u500D\u97F3\u304C\u5C4A\u304F\u3002A4 \u3092\u57FA\u6E96\u306B\u3059\u308B
+    const h = 0.45 * sr / f;
+    const cap = Math.max(0.05, h - 3 * Math.sqrt(h));
+    const p = vo[o + P];
+    const kk = d.brassKey ? Math.pow(440 / f0, d.brassKey) : 1;
+    const k = Math.min(cap, Math.max(1e-4, d.brass * kk * Math.pow(p, d.curve) * (1 + 3 * push)));
+    const dc = i0e(k);
+    const ac = Math.sqrt(Math.max(1e-12, i0e(2 * k) - dc * dc));
+    vo[o + K] = k;
+    vo[o + DC] = dc;
+    vo[o + NRM] = 1 / ac;
+  }
+
+  render(v, out, sr, tEnd) {
+    const vo = this.voice, d = this.def[v];
+    const o = v * W;
+    if (vo[o + REL] < tEnd && !vo[o + GONE]) { vo[o + GONE] = 1; vo[o + TGT] = 0; }
+    const vel = vo[o + VEL];
+    // \u606F\u306E\u5727\u306E\u8FFD\u3044\u304B\u3051\u65B9\u3002\u5F37\u304F\u5439\u304F\u307B\u3069\u901F\u304F\u7ACB\u3061\u4E0A\u304C\u308B
+    const ta = d.attack * (1.5 - vel);
+    const ka = 1 - Math.exp(-1 / (Math.max(1e-3, ta) * sr));
+    const kr = 1 - Math.exp(-1 / (Math.max(1e-3, d.release) * sr));
+    const lv = d.level * vo[o + KG];
+    let ph = vo[o + PH], p = vo[o + P], age = vo[o + AGE], lp = vo[o + LP];
+    let nz = this.noise;
+    // \u88CF\u8FD4\u308A\u304B\u3089\u843D\u3061\u305F\u3068\u3053\u308D(\u30B5\u30F3\u30D7\u30EB)\u3002\u305D\u3053\u3067\u4E00\u5EA6\u3060\u3051\u5927\u304D\u3055\u304C\u629C\u3051\u308B
+    const cdS = vo[o + CD] * sr;
+    const off = vo[o + OFF];
+    vo[o + OFF] = 0;
+    for (let i = off; i < B; i++) {
+      if ((i - off) % SUB === 0) {
+        vo[o + P] = p; vo[o + AGE] = age;
+        this.control(v, sr);
+      }
+      // \u5F37\u304F\u5439\u304F\u3068\u3001\u51FA\u3060\u3057\u3067\u4E00\u5EA6\u884C\u304D\u904E\u304E\u3066\u304B\u3089\u843D\u3061\u7740\u304F
+      let tgt = vo[o + TGT];
+      if (tgt > 0) tgt *= 1 + d.blat * vel * Math.exp(-age / (0.06 * sr));
+      p += (tgt > p ? ka : kr) * (tgt - p);
+      const cs = Math.cos(TAU * ph);
+      const y = (Math.exp(vo[o + K] * (cs - 1)) - vo[o + DC]) * vo[o + NRM];
+      ph += vo[o + INC];
+      if (ph >= 1) ph -= 1;
+      // \u30BF\u30F3\u30AE\u30F3\u30B0\u306E\u96D1\u97F3\u3068\u3001\u606F\u306E\u96D1\u97F3\u3002\u606F\u306F airCurve \u304C\u5C0F\u3055\u3044\u307B\u3069\u3001\u5F31\u304F\u5439\u3044\u305F\u3068\u304D\u306B
+      // \u76F8\u5BFE\u7684\u306B\u5927\u304D\u304F\u6B8B\u308B(\u30B5\u30C3\u30AF\u30B9\u306E\u304B\u3059\u308C\u305F\u5F31\u97F3)\u3002airPulse \u306F\u30EA\u30FC\u30C9\u304C\u958B\u3044\u3066\u3044\u308B
+      // \u3042\u3044\u3060\u3060\u3051\u96D1\u97F3\u304C\u901A\u308B\u5272\u5408\u3067\u3001\u96D1\u97F3\u304C\u97F3\u7A0B\u306E\u5468\u671F\u3067\u8108\u6253\u3064
+      nz ^= nz << 13; nz >>>= 0; nz ^= nz >>> 17; nz ^= nz << 5; nz >>>= 0;
+      const n = nz / 2147483648 - 1;
+      const gate = 1 - d.airPulse + d.airPulse * (1 + cs);
+      const air = n * (d.tongue * vel * Math.exp(-age / (0.012 * sr))
+        + d.breath * Math.pow(p, d.airCurve) * gate);
+      lp += 0.35 * (air - lp);
+      let dip = cdS > 0 && age >= cdS && age - cdS < 0.05 * sr ? 1 - 0.6 * Math.exp(-(age - cdS) / (0.006 * sr)) : 1;
+      // \u9014\u4E2D\u306E\u88CF\u8FD4\u308A\u3002\u8DF3\u306D\u305F\u77AC\u9593\u3068\u623B\u3063\u305F\u77AC\u9593\u306B\u629C\u3051\u308B
+      const fs = vo[o + FS];
+      if (fs >= 0 && age >= fs && age - fs < 0.2 * sr) {
+        const fe = vo[o + FE];
+        dip *= 1 - 0.5 * Math.exp(-(age - fs) / (0.004 * sr));
+        if (age >= fe) dip *= 1 - 0.5 * Math.exp(-(age - fe) / (0.004 * sr));
+      }
+      // \u30AD\u30FC\u30AF\u306E\u3042\u3044\u3060\u3060\u3051\u5C0F\u3055\u304F\u3059\u308B(\u51FA\u3060\u3057\u306E\u88CF\u8FD4\u308A\u306F\u5143\u306E\u5927\u304D\u3055\u306E\u307E\u307E)
+      const sq = age < cdS ? vo[o + SG] : 1;
+      out[i] += lv * (p * y * dip * sq + lp);
+      age++;
+    }
+    vo[o + PH] = ph; vo[o + P] = p; vo[o + AGE] = age; vo[o + LP] = lp;
+    this.noise = nz;
+    if (vo[o + GONE] && p < 1e-4) vo[o + ON] = 0;
+  }
+
+  process(inputs, outputs) {
+    const chs = outputs[0];
+    const out = chs[0];
+    out.fill(0);
+    const sr = sampleRate;
+    const t0 = currentTime;
+    const tEnd = t0 + B / sr;
+    const vo = this.voice;
+    while (this.at < this.events.length && this.events[this.at].t < tEnd) {
+      const ev = this.events[this.at++];
+      this.start(ev, Math.max(0, Math.min(B - 1, Math.round((ev.t - t0) * sr))));
+    }
+    for (let v = 0; v < V; v++) if (vo[v * W + ON]) this.render(v, out, sr, tEnd);
+    if (this.cutAt >= 0) {
+      const len = Math.max(1, Math.round(sr * 0.01));
+      for (let i = 0; i < out.length; i++) {
+        out[i] *= Math.max(0, 1 - this.cutAt / len);
+        this.cutAt++;
+      }
+      if (this.cutAt >= len) { vo.fill(0); this.cutAt = -1; }
+    }
+    for (let c = 1; c < chs.length; c++) chs[c].set(out);
+    return true;
+  }
+}
+registerProcessor('${BRASS_NODE}', BrassBank);
+`;
+  var BRASS_PARAMS = {
+    brass: {
+      live: false,
+      min: 0,
+      max: 40,
+      note: "How bright it gets at full breath, at A4. 0 is a pure sine at any loudness."
+    },
+    brassKey: {
+      live: false,
+      min: 0,
+      max: 3,
+      when: [{ key: "brass", gt: 0 }],
+      note: "How much brighter low notes get, as a power of the pitch below A4. 0 gives every note the same number of harmonics; 2 makes the harmonics reach the same frequency at every pitch, as on a real horn."
+    },
+    curve: {
+      live: false,
+      min: 0.3,
+      max: 4,
+      when: [{ key: "brass", gt: 0 }],
+      note: "How fast brightness follows loudness. High values stay dark until played hard."
+    },
+    attack: {
+      live: false,
+      min: 3e-3,
+      max: 0.5,
+      unit: "s",
+      note: "How fast the breath pressure builds. Harder notes build faster."
+    },
+    blat: {
+      live: false,
+      min: 0,
+      max: 1,
+      note: "Overshoot of the breath on hard attacks, settling within about 60 ms."
+    },
+    release: {
+      live: false,
+      min: 0.01,
+      max: 1,
+      unit: "s",
+      note: "How fast the breath falls when the note is let go. The tone darkens as it falls."
+    },
+    scoop: {
+      live: false,
+      min: -300,
+      max: 300,
+      unit: "cent",
+      note: "Where the pitch starts, before it settles on the note. Negative comes up from below."
+    },
+    scoopTime: {
+      live: false,
+      min: 5e-3,
+      max: 0.3,
+      unit: "s",
+      when: [{ key: "scoop", ne: 0 }],
+      note: "How long the pitch takes to settle."
+    },
+    vib: {
+      live: false,
+      min: 0,
+      max: 100,
+      unit: "cent",
+      note: "Vibrato depth."
+    },
+    vibRate: {
+      live: false,
+      min: 2,
+      max: 9,
+      unit: "Hz",
+      when: [{ key: "vib", gt: 0 }],
+      note: "Vibrato speed."
+    },
+    vibDelay: {
+      live: false,
+      min: 0,
+      max: 2,
+      unit: "s",
+      when: [{ key: "vib", gt: 0 }],
+      note: "How long a note is held before the vibrato fades in."
+    },
+    tongue: {
+      live: false,
+      min: 0,
+      max: 1,
+      note: "Noise burst of the tongue at the start of a note."
+    },
+    breath: {
+      live: false,
+      min: 0,
+      max: 0.3,
+      note: "Air noise that follows the breath pressure."
+    },
+    airCurve: {
+      live: false,
+      min: 0.1,
+      max: 2,
+      when: [{ key: "breath", gt: 0 }],
+      note: "How the air noise follows the breath. Below 1, soft notes keep more air, as in a breathy saxophone."
+    },
+    airPulse: {
+      live: false,
+      min: 0,
+      max: 1,
+      when: [{ key: "breath", gt: 0 }],
+      note: "How much the air noise pulses with each cycle of the reed. 0 is steady hiss."
+    },
+    push: {
+      live: false,
+      group: "flaw",
+      min: 0,
+      max: 1,
+      note: "How hard the start of a note is pushed: brighter and a little sharp, then it settles. Grows with velocity and pitch."
+    },
+    pushTime: {
+      live: false,
+      group: "flaw",
+      min: 0.01,
+      max: 0.4,
+      unit: "s",
+      when: [{ key: "push", gt: 0 }],
+      note: "How long the push takes to settle."
+    },
+    crack: {
+      live: false,
+      group: "flaw",
+      min: 0,
+      max: 1,
+      note: "How likely the lips catch the neighbouring harmonic for a moment before landing on the note. More likely on loud notes, high in the harmonic series where the harmonics sit close together, and after a leap. Low notes rarely crack, but jump far when they do."
+    },
+    crackTime: {
+      live: false,
+      group: "flaw",
+      min: 0.01,
+      max: 0.15,
+      unit: "s",
+      note: "How long the note stays on the wrong harmonic, for crack and wobble."
+    },
+    pedal: {
+      live: false,
+      group: "flaw",
+      min: 20,
+      max: 400,
+      unit: "Hz",
+      note: "Lowest harmonic of the tube. Sets which harmonic a note is, and so how far a crack or a wobble jumps."
+    },
+    crackSeed: {
+      live: false,
+      group: "flaw",
+      min: 1,
+      max: 9999,
+      step: 1,
+      note: "Seed for which leaps crack and where held notes wobble. The same leap always cracks the same way."
+    },
+    squeak: {
+      live: false,
+      group: "flaw",
+      min: 0,
+      max: 1,
+      note: "How likely the reed squeaks at the start of a note, jumping to a harmonic near 2.8 kHz for a moment. More likely on loud notes and after a leap."
+    },
+    wobble: {
+      live: false,
+      group: "flaw",
+      min: 0,
+      max: 5,
+      unit: "/s",
+      note: "How often a held note flips to the neighbouring harmonic for a moment and comes back, per second. More likely on loud notes high in the harmonic series and at the top of the vibrato."
+    },
+    keyGain: {
+      live: false,
+      min: -12,
+      max: 12,
+      unit: "dB",
+      note: "Level change per octave above A4. Positive makes low notes quieter, as on a real trumpet, whose low register speaks softly at every dynamic."
+    },
+    level: {
+      live: false,
+      min: 0.01,
+      max: 4,
+      note: "Output level of this patch."
+    }
+  };
+  var BRASS_PATCHES = {
+    trumpet: {
+      note: "Trumpet, open. Bright when pushed, a short scoop into each note and a late vibrato. Fitted to recordings of a B-flat trumpet.",
+      // 録音(アイオワ大学の B♭ トランペット、ビブラートなし、E3〜C6 を 3 つの強さ)に寄せた(2026-10-05)。
+      // 前は低い音ほど暗かった(E3 mf で重心 4.2、録音は 9.1)。本物は明るさが倍音の番号ではなく
+      // Hz で決まり、1.1kHz あたりに山がある。brassKey と、山の立ったベルで合わせた。
+      // 明るくなったぶん大きく出るので、セッションの大きさが前と同じになるよう level を下げている
+      brass: 37.5,
+      brassKey: 1.38,
+      curve: 1.41,
+      attack: 0.0222,
+      blat: 0.33,
+      release: 0.06,
+      scoop: -40,
+      scoopTime: 0.035,
+      vib: 18,
+      vibRate: 5.6,
+      vibDelay: 0.35,
+      tongue: 0.25,
+      breath: 0.03,
+      airCurve: 1,
+      airPulse: 0,
+      level: 0.09,
+      // 管のいちばん低い倍音は B♭2
+      // 裏返りは短いほうが本物らしい(40ms では長く聞こえた。2026-10-05)
+      push: 0.4,
+      pushTime: 0.08,
+      crack: 0.15,
+      crackTime: 0.025,
+      pedal: 116.5,
+      crackSeed: 1,
+      wobble: 0.2,
+      squeak: 0,
+      // 録音は pp・mf・ff のどれでも、低い音ほど 1 オクターブにつき約 5dB 小さい。
+      // 強さによらないので楽器の特徴と見た。4 で mf の並びが録音に合う。
+      // セッションは低いところで吹かせていて 5dB 小さくなるので、level で前の大きさに戻した
+      keyGain: 4,
+      bell: { freq: 1100, resonance: 0.72 },
+      range: {
+        brass: [25, 40],
+        brassKey: [1, 2],
+        curve: [1.1, 2.2],
+        attack: [0.012, 0.05],
+        blat: [0.1, 0.45],
+        release: [0.03, 0.12],
+        scoop: [-80, 0],
+        scoopTime: [0.015, 0.07],
+        vib: [0, 35],
+        vibRate: [4.5, 6.5],
+        vibDelay: [0.15, 0.7],
+        tongue: [0.1, 0.4],
+        breath: [0.01, 0.06],
+        airCurve: [0.8, 1.2],
+        airPulse: [0, 0.3],
+        level: [0.02, 0.12],
+        push: [0, 0.8],
+        pushTime: [0.04, 0.15],
+        crack: [0, 0.4],
+        crackTime: [0.012, 0.05],
+        pedal: [110, 120],
+        crackSeed: [1, 9999],
+        wobble: [0, 1],
+        squeak: [0, 0],
+        keyGain: [2, 7],
+        "bell.freq": [800, 1800],
+        "bell.resonance": [0.5, 0.85]
+      }
+    },
+    trombone: {
+      note: "Trombone. Darker and slower to speak than the trumpet. Fitted to recordings of a tenor trombone.",
+      // 録音(アイオワ大学のテナートロンボーン、E2〜C5 を 3 つの強さ)に寄せた(2026-10-05)。
+      // トランペットと同じく低い音ほど暗かったので、brassKey とベルの山で合わせた。
+      // 低い音ほど小さいのも同じで、keyGain 3.6。誤差は 3.75 → 3.14。残りの多くは E2 の録音で、
+      // mf が pp より暗く出ている(録音の癖と見て追わなかった)。
+      // 明るくなったぶん大きく出るので、セッションの大きさが前と同じになるよう level を下げている
+      brass: 20,
+      brassKey: 1.38,
+      curve: 1.8,
+      attack: 0.0712,
+      blat: 0.15,
+      release: 0.09,
+      scoop: -25,
+      scoopTime: 0.05,
+      vib: 10,
+      vibRate: 5,
+      vibDelay: 0.5,
+      tongue: 0.18,
+      breath: 0.025,
+      airCurve: 1,
+      airPulse: 0,
+      level: 0.21,
+      // 管のいちばん低い倍音は B♭1
+      push: 0.3,
+      pushTime: 0.1,
+      crack: 0.1,
+      crackTime: 0.05,
+      pedal: 58.3,
+      crackSeed: 1,
+      wobble: 0.15,
+      squeak: 0,
+      keyGain: 3.6,
+      bell: { freq: 565, resonance: 0.472 },
+      range: {
+        brass: [12, 30],
+        brassKey: [1, 2],
+        curve: [1.2, 2.4],
+        attack: [0.03, 0.1],
+        blat: [0.05, 0.3],
+        release: [0.05, 0.15],
+        scoop: [-60, 0],
+        scoopTime: [0.02, 0.09],
+        vib: [0, 20],
+        vibRate: [4, 6],
+        vibDelay: [0.3, 0.9],
+        tongue: [0.08, 0.3],
+        breath: [0.01, 0.05],
+        airCurve: [0.8, 1.2],
+        airPulse: [0, 0.3],
+        level: [0.1, 0.35],
+        push: [0, 0.7],
+        pushTime: [0.05, 0.2],
+        crack: [0, 0.3],
+        crackTime: [0.03, 0.08],
+        pedal: [55, 62],
+        crackSeed: [1, 9999],
+        wobble: [0, 0.8],
+        squeak: [0, 0],
+        keyGain: [2, 6],
+        "bell.freq": [300, 800],
+        "bell.resonance": [0.3, 0.7]
+      }
+    },
+    tenor: {
+      note: "Tenor saxophone. Breathy when soft, edgy when pushed, a wide scoop and a jaw vibrato. The honk and the edge come from two body peaks. Fitted to recordings of an alto saxophone, scaled down a fifth.",
+      // テナーの録音は無いので、アルトサックス(アイオワ大学、D♭3・C4・C5 を 3 つの強さ)を
+      // 物差しにした(2026-10-05)。テナーはアルトをおよそ 1.5 倍にした相似形なので、アルトの音を
+      // 5 度下で鳴らし、倍音の番号ごとの並びで比べる。胴の山もその比で縮むので、テナーの値のまま比べられる。
+      // ホンクの山は 450Hz から 700Hz に上がって鋭くなった。誤差は 5.89 → 4.41。
+      // 残りの多くは弱く吹いたときの立ち上がりで、録音は D♭3 pp で 0.26 秒かけてふくらむ。
+      // いまの attack は強さに比例して縮むだけなので、そこまで遅くできない
+      brass: 13.1,
+      brassKey: 0.7,
+      curve: 1.62,
+      attack: 0.048,
+      blat: 0.05,
+      release: 0.08,
+      scoop: -60,
+      scoopTime: 0.05,
+      vib: 22,
+      vibRate: 5.2,
+      vibDelay: 0.3,
+      // 大きさは、声の外の bell と body まで通して、トランペットに揃えている。
+      // bell が低い(120Hz)ので低いほうが削れず、body で 2 か所持ち上がるぶん、
+      // 同じ level だと 7dB 大きかった。セッションの中で目立ちすぎた(2026-10-05)。
+      // 録音に寄せたあとも、セッションでの大きさは前と同じに揃えてある
+      tongue: 0.12,
+      breath: 0.12,
+      airCurve: 0.4,
+      airPulse: 0.8,
+      level: 0.1,
+      // サックスの裏返りは、リードがひっくり返って上の倍音へ跳ぶもの。管のいちばん下は A♭2
+      push: 0.25,
+      pushTime: 0.08,
+      crack: 0.05,
+      crackTime: 0.05,
+      pedal: 103.8,
+      crackSeed: 1,
+      wobble: 0.1,
+      squeak: 0.04,
+      // サックスは低い音ほど大きい。録音の C4 が D♭3 と C5 の両方より小さく、1 本の傾きでは
+      // 合わない。合わせると −8 まで行くが、それだと C5 が 9dB 小さくなるので、間を取った
+      keyGain: -2,
+      bell: { freq: 120, resonance: 0 },
+      body: [{ freq: 700, gain: 7.34, resonance: 0.84 }, { freq: 1900, gain: 9, resonance: 0.549 }],
+      range: {
+        brass: [9, 20],
+        brassKey: [0.3, 1.2],
+        curve: [1.2, 2],
+        attack: [0.025, 0.08],
+        blat: [0, 0.15],
+        release: [0.05, 0.15],
+        scoop: [-120, -10],
+        scoopTime: [0.03, 0.1],
+        vib: [8, 40],
+        vibRate: [4.5, 6],
+        vibDelay: [0.15, 0.5],
+        tongue: [0.05, 0.2],
+        breath: [0.05, 0.2],
+        airCurve: [0.25, 0.7],
+        airPulse: [0.5, 1],
+        level: [0.05, 0.18],
+        push: [0, 0.6],
+        pushTime: [0.04, 0.15],
+        crack: [0, 0.2],
+        crackTime: [0.03, 0.08],
+        pedal: [100, 108],
+        crackSeed: [1, 9999],
+        wobble: [0, 0.6],
+        squeak: [0, 0.2],
+        keyGain: [-8, 2],
+        "bell.freq": [100, 250],
+        "bell.resonance": [0, 0.3],
+        "body.0.freq": [450, 850],
+        "body.0.gain": [3, 10],
+        "body.0.resonance": [0.5, 0.9],
+        "body.1.freq": [1400, 2400],
+        "body.1.gain": [4, 12],
+        "body.1.resonance": [0.35, 0.75]
+      }
+    }
+  };
+  function compileBrass(def) {
+    const out = {};
+    for (const k of Object.keys(BRASS_PARAMS)) out[k] = def[k] ?? 0;
+    if (def.level == null) out.level = 0.5;
+    out.level *= Object.values(def.macroLevel || {}).reduce((a, b) => a * b, 1);
+    if (def.airCurve == null) out.airCurve = 1;
+    return out;
+  }
+
+  // engine/sound/demotunes.js
   var SE_SYS_PAUSE = "sys.pause";
   var SYSTEM_SE = {
     [SE_SYS_PAUSE]: [
@@ -9436,7 +13845,10 @@ registerProcessor('mmsxx-duty', DutyBank);
   var BEAT_BUNDLES = [
     "#bundle beatBass1  = @{waveRamp} @e{piano} @s{8,2}",
     "#bundle beatBass2  = @{triangle} @e{flat}",
-    "#bundle beatKick   = @{opllKick} @e{percussive},   @{noise} v11 @e{snap}",
+    // **キックに @o+2 を足す。**トラックが書く o2 はノイズのため(低い胴)で、
+    // リズム音源のキックはそれに付き合うと 2 オクターブ下がって底を打つ。
+    // ここで戻しておくと、キックは実機のドライバの高さで鳴る
+    "#bundle beatKick   = @{opllKick} @e{percussive} @o+2,   @{noise} v11 @e{snap}",
     "#bundle beatSnare  = @{opllSnare} @e{percussive},  @{noise} v8 @o+1 @e{snap}",
     "#bundle beatHat    = @{opllCymbal} @e{percussive}",
     "#bundle beatHatAir = @{opllCymbal} @e{percussive}, @{noise} v3 @e{percussive}",
@@ -9507,7 +13919,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     BEAT_TOM_FILL
   ]);
 
-  // mmsxx-mml-studio/sound/se.js
+  // engine/sound/se.js
   var SE_FRAME = 1 / 60;
   var SE_WHOLE = 64;
   var SE_TEMPO = Math.round(240 / (SE_WHOLE * SE_FRAME));
@@ -9656,7 +14068,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     }
   };
 
-  // mmsxx-mml-studio/sound/layerpresets.js
+  // engine/sound/layerpresets.js
   var DETUNE_STEPS = [
     { key: "", value: "none", c: 0, en: "no detune" },
     {
@@ -9817,21 +14229,55 @@ registerProcessor('mmsxx-duty', DutyBank);
     }
   }
 
-  // mmsxx-mml-studio/sound/version.js
-  var SOUND_VERSION = "0.27.0";
+  // engine/sound/version.js
+  var SOUND_VERSION = "0.30.1";
 
-  // mmsxx-mml-studio/sound/audio.js
+  // engine/sound/audio.js
   registerDefaultWaves();
   registerDefaultFM();
   registerDefaultBeeps();
-  registerDefaultFDS();
-  registerDefaultFM4();
+  registerOPMPresets();
   registerOPLLPresets();
+  registerAYPresets();
+  registerNESPresets();
+  registerFDSPresets();
+  registerSCCPresets();
+  registerPCEPresets();
+  registerOPNARhythmPresets();
   registerExtraWaves();
   registerNoiseVariants();
+  registerModalVoices();
   registerDefaultTones();
   registerDefaultLayers();
   sealPresets();
+  function registerModalVoices() {
+    registerFamily("model", {
+      note: "Instruments computed from scratch for every note, with no stored waveform. The timbre moves with how hard, how high and how long you play, which a wavetable cannot do. Not for real chips.",
+      params: [{
+        name: "instrument",
+        default: "piano",
+        note: "Which instrument to build.",
+        values: [...Object.entries(MODAL_PATCHES), ...Object.entries(BRASS_PATCHES)].map(([value, d]) => ({ value, note: d.note }))
+      }]
+    });
+    const ROLE = {
+      brush: "perc",
+      brushSweep: "perc",
+      ride: "perc",
+      bass: "bass",
+      piano: "lead",
+      rhodes: "lead",
+      trumpet: "lead",
+      trombone: "counter",
+      tenor: "lead"
+    };
+    for (const [name, def] of Object.entries(MODAL_PATCHES)) {
+      registerModal(`model(${name})`, { patch: name }, { role: ROLE[name], note: def.note });
+    }
+    for (const [name, def] of Object.entries(BRASS_PATCHES)) {
+      registerBrass(`model(${name})`, { patch: name }, { role: ROLE[name], note: def.note });
+    }
+  }
   var MASTER_VOL = 0.14;
   var BEEP_CURVE = (() => {
     const c = new Float32Array(1024);
@@ -9893,7 +14339,11 @@ registerProcessor('mmsxx-duty', DutyBank);
     if (wf.kind === "layer") return null;
     if ((wf.special || []).includes("exact")) return 0;
     if (wf.snapDiv > 0) return wf.snapDiv;
-    if (["fm", "opm", "opll", "noise", "baked", "beep"].includes(wf.kind)) return 0;
+    if (["fm", "opm", "opll", "noise", "baked", "beep", "opnaRhythm"].includes(wf.kind)) return 0;
+    if (wf.kind === "ay" && wf.mode === "noise") return 0;
+    if (wf.kind === "nes") return wf.mode === "noise" ? 0 : wf.mode === "triangle" ? 32 : 16;
+    if (wf.kind === "fds") return 0;
+    if (wf.kind === "pce") return wf.noise ? 0 : 16;
     return wf.kind === "triangle" ? 32 : 16;
   }
   function psgSnap(freq, wave) {
@@ -9904,20 +14354,60 @@ registerProcessor('mmsxx-duty', DutyBank);
     const tp = Math.max(1, Math.min(max, Math.round(PSG_CLOCK / (div * freq))));
     return PSG_CLOCK / (div * tp);
   }
-  function toneSnap(freq) {
-    if (!(freq > 0)) return freq;
-    const tp = Math.max(1, Math.min(4095, Math.round(PSG_CLOCK / (16 * freq))));
-    return PSG_CLOCK / (16 * tp);
-  }
   var WORKLETS = {
     opm: { node: "mmsxx-opm", code: OPM_CODE },
     opll: { node: "mmsxx-opll", code: OPLL_CODE },
-    duty: { node: "mmsxx-duty", code: DUTY_CODE }
+    ay: { node: "mmsxx-ay", code: AY_CODE },
+    nes: { node: "mmsxx-nes", code: NES_CODE },
+    fds: { node: "mmsxx-fds", code: FDS_CODE },
+    scc: { node: "mmsxx-scc", code: SCC_CODE },
+    pce: { node: "mmsxx-pce", code: PCE_CODE },
+    opnaRhythm: { node: "mmsxx-opna-rhythm", code: OPNA_RHYTHM_CODE },
+    duty: { node: "mmsxx-duty", code: DUTY_CODE },
+    // 波形を持たない音源。音符のほかにパッチ(鳴らし方の定義)を渡すので、
+    // 作るときの引数を自分で組む `options` を持つ。
+    // 止める合図(`{ cut: true }`)は chip と同じ名前
+    // modal は出口を 2 本持つ(`buses`)。1 本目が左へ行く束、2 本目が右へ行く束で、
+    // 足せばいつも声そのものに戻る。どこに置くかはエンジンが決める(`_panPair`)
+    modal: {
+      node: MODAL_NODE,
+      code: MODAL_CODE,
+      voices: MODAL_VOICES,
+      buses: 2,
+      options: (list) => ({
+        numberOfInputs: 0,
+        outputChannelCount: [2],
+        processorOptions: { events: list, patches: patchesOf(MODAL_PATCHES, compileModal) }
+      })
+    },
+    brass: {
+      node: BRASS_NODE,
+      code: BRASS_CODE,
+      voices: BRASS_VOICES,
+      options: (list) => ({
+        numberOfInputs: 0,
+        outputChannelCount: [1],
+        processorOptions: { events: list, patches: patchesOf(BRASS_PATCHES, compileBrass) }
+      })
+    }
   };
+  function patchesOf(table, compile) {
+    const out = {};
+    for (const [k, d] of Object.entries(table)) out[k] = compile(d);
+    return out;
+  }
   function workletOf(wf) {
     if (!wf) return null;
     if (wf.kind === "opm") return "opm";
     if (wf.kind === "opll") return "opll";
+    if (wf.kind === "ay") return "ay";
+    if (wf.kind === "nes") return "nes";
+    if (wf.kind === "fds") return "fds";
+    if (wf.kind === "scc") return "scc";
+    if (wf.kind === "pce") return "pce";
+    if (wf.kind === "opnaRhythm") return "opnaRhythm";
+    if (wf.kind === "modal") return "modal";
+    if (wf.kind === "brass") return "brass";
     if (wf.tone && wf.tone.duty) return "duty";
     return null;
   }
@@ -9963,7 +14453,8 @@ registerProcessor('mmsxx-duty', DutyBank);
   }
   function snapVol(v, steps) {
     if (!(steps > 0) || !(v > 0)) return v;
-    const step = 15 / steps;
+    if (steps === 1) return 15;
+    const step = 15 / (steps - 1);
     return Math.min(15, Math.max(step, Math.round(v / step) * step));
   }
   function levelAt(ev, age) {
@@ -10068,6 +14559,7 @@ registerProcessor('mmsxx-duty', DutyBank);
       takes,
       bars,
       cues,
+      texts,
       problems,
       laneLabels
     } = data;
@@ -10098,6 +14590,9 @@ registerProcessor('mmsxx-duty', DutyBank);
       // 合図と切れ目も選択肢で入れ替わるので、素の並びを取っておく
       cues: cues ?? [],
       baseCues: cues ?? [],
+      // 字(`"…"`)も同じ扱い。選択肢で入れ替わるので素の並びを取っておく
+      texts: texts ?? [],
+      baseTexts: texts ?? [],
       baseBars: bars ?? [],
       name: meta.name ?? meta.ch ?? null,
       role: meta.role ?? null,
@@ -10295,6 +14790,9 @@ registerProcessor('mmsxx-duty', DutyBank);
       this._muteFor = null;
       this._group = null;
       this._cues = [];
+      this._texts = [];
+      this.onText = null;
+      this._textSeq = 0;
       this.onCue = null;
       this._cueMute = /* @__PURE__ */ new Set();
       this._cueSeq = 0;
@@ -10428,8 +14926,52 @@ registerProcessor('mmsxx-duty', DutyBank);
       const hit = bank.get(key2);
       if (hit) return hit;
       const inp = mode === "hrtf" ? this._panHRTF(dest, pos) : this._panStereo(dest, pos);
+      inp.__spot = { dest, pos, mode };
       bank.set(key2, inp);
       return inp;
+    }
+    /**
+     * 出口を 2 本持つ音源の行き先。1 本目が左へ行く束、2 本目が右へ行く束。
+     *
+     * モノラルでは足して 1 本に戻す。ステレオでは `@p{…}` の両側へ置き、
+     * 横へ寄るほど狭めて、端では 2 本が重なる。位置は曲が持ち、広さは音色が持つ。
+     *
+     * 広げていない音色(2 本に半分ずつ)が、モノラルの音源と同じ大きさで鳴るように
+     * 持ち上げる。等パワーの振り方では、両側へ置いた 2 本の和が
+     * `cos(s·π/4)` 倍になる(s は広さ)。その逆を掛けると、ちょうど一致する。
+     * 広げたぶんは片側が大きくなるが、それは広げたことの結果なのでそのままにする
+     */
+    _panPair(d) {
+      if (!d || !this.ctx) return d;
+      if (d.__pair) return d.__pair;
+      const ctx = this.ctx;
+      const split = ctx.createChannelSplitter(2);
+      const spot = d.__spot;
+      if (!spot) {
+        const sum = ctx.createGain();
+        split.connect(sum, 0);
+        split.connect(sum, 1);
+        sum.connect(d);
+        d.__pair = split;
+        return split;
+      }
+      const { dest, pos, mode } = spot;
+      const h = Math.hypot(pos[0], pos[2]);
+      const pan = h > 0 ? pos[0] / h : 0;
+      const s = 1 - Math.abs(pan);
+      const lift = ctx.createGain();
+      lift.gain.value = Math.round(1e6 / Math.cos(s * Math.PI / 4)) / 1e6;
+      lift.connect(split);
+      const put = (ch, x) => {
+        const q = Math.max(-1, Math.min(1, pan + x));
+        const at = mode === "hrtf" ? [q, pos[1], pos[2]] : [q, 0, Math.sqrt(Math.max(0, 1 - q * q))];
+        const inp = mode === "hrtf" ? this._panHRTF(dest, at) : this._panStereo(dest, at);
+        split.connect(inp, ch);
+      };
+      put(0, -s);
+      put(1, s);
+      d.__pair = lift;
+      return lift;
     }
     /**
      * 自前の左右振り(等パワー)。音量差だけを作る。
@@ -10905,6 +15447,62 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       }
     }
     /**
+     * 字(`"…"`)を、聞こえる時刻に合わせて予約する。
+     *
+     * 合図(`_scheduleCues`)と同じ作り。**いつ消すかは予約しない。**
+     * 出すところだけを渡して、消し方は受けた側に委ねる —
+     * 時間で消すのか、次の字で入れ替えるのかは画面の都合だからです
+     * (docs/DYNAMIC.md)。
+     *
+     * @param {object} track トラック
+     * @param {number} ch 何本目か
+     * @param {object} state 鳴らしている状態
+     * @param {number} from 積む範囲の始まり(曲の中の秒)
+     * @param {number} to 積む範囲の終わり
+     */
+    _scheduleTexts(track, ch, state, from, to) {
+      const list = track.texts;
+      if (!list || !list.length) return;
+      for (const x of list) {
+        if (x.t < from || x.t >= to) continue;
+        const at = state.base + x.t;
+        const wait = Math.max(0, (at - this.ctx.currentTime) * 1e3);
+        const said = { id: ++this._textSeq, text: x.text, t: x.t, ch };
+        const timer = setTimeout(() => {
+          if (this.bgmState !== state) return;
+          this._texts.push(said);
+          if (this._texts.length > 256) this._texts.splice(0, this._texts.length - 256);
+          if (typeof this.onText === "function") {
+            try {
+              this.onText(said);
+            } catch (e) {
+              console.warn("[ChpTnSnd] onText:", e);
+            }
+          }
+        }, wait);
+        state.cueTimers.push(timer);
+      }
+    }
+    /**
+     * 溜まった字を取り出して空にする。
+     *
+     * 合図(`takeCues()`)と同じ使い方。**いつ消すかはこちらが決めない。**
+     * 一定時間で消すのか、次の字が来たら入れ替えるのかは、受けた側が選びます。
+     *
+     * ```js
+     * for (const said of audio.takeTexts()) {
+     *   screen.show(said.ch, said.text);     // ch で分けても、1 か所にまとめてもよい
+     * }
+     * ```
+     *
+     * @returns {{id:number,text:string,t:number,ch:number}[]} 出た順
+     */
+    takeTexts() {
+      const out = this._texts;
+      this._texts = [];
+      return out;
+    }
+    /**
      * 溜まった合図を取り出して空にする。
      *
      * 毎フレーム呼ぶ使い方を想定している。実機の鳴らし手も同じ形になるので、
@@ -10956,20 +15554,24 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       const inBox = (t) => track.takes.some((b) => t >= b.at - 1e-9 && t < b.at + b.dur - 1e-9);
       const out = track.base.filter((e) => !inBox(e.t));
       const cues = (track.baseCues || []).filter((c) => !inBox(c.t));
+      const texts = (track.baseTexts || []).filter((x) => !inBox(x.t));
       const bars = (track.baseBars || []).filter((b) => !inBox(b));
       for (const box of track.takes) {
         const want = picks[box.group];
         const opt = box.options.find((o) => o.name === want) || box.options[0];
         for (const e of opt.events) out.push({ ...e, t: e.t + box.at });
         for (const c of opt.cues || []) cues.push({ ...c, t: c.t + box.at });
+        for (const x of opt.texts || []) texts.push({ ...x, t: x.t + box.at });
         for (const b of opt.bars || []) bars.push(b + box.at);
       }
       out.sort((a, b) => a.t - b.t);
       cues.sort((a, b) => a.t - b.t);
+      texts.sort((a, b) => a.t - b.t);
       bars.sort((a, b) => a - b);
       track.events = addEchoes(out, track.total);
       markRooms(track.events, track.loop ? track.loop.to : Infinity);
       track.cues = cues;
+      track.texts = texts;
       track.bars = bars;
     }
     /**
@@ -11059,6 +15661,9 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         problems: def.problems || [],
         // 曲に置いた合図。選んである選択肢のぶんだけ並ぶ
         cues: def.flatMap((t, i) => (t.cues || []).map((c) => ({ ...c, ch: i }))).sort((a, b) => a.t - b.t),
+        // 曲に置いた字。どのチャンネルに書いても並ぶ。分けて出すか 1 か所に
+        // まとめるかは、受けた側が決める
+        texts: def.flatMap((t, i) => (t.texts || []).map((x) => ({ ...x, ch: i }))).sort((a, b) => a.t - b.t),
         // 曲ぜんぶの覚え書き。チャンネルごとの `name` と `role` は外してある
         // (あちらは tracks に入っている)。版と組の一覧はここへ入れる —
         // 曲ぜんぶの持ち物で、出てきた順に並ぶ
@@ -11096,7 +15701,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     /**
      * 版を選び、その中の組を on / off する。
      *
-     * **鳴らしたまま差し替える。**止めて鳴らし直すと聞き比べられない。
+     * 鳴らしたまま差し替える。止めて鳴らし直すと聞き比べられない。
      * 黙らせ方は音量 0 なので、後ろが詰まらない。
      *
      * 版を替えると、その版の組は全部 on に戻る。前の版の組の名前は、
@@ -11354,6 +15959,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
               state.laps > 0 && !state.inEnding
             );
             this._scheduleCues(tracks[i], i, state, state.cursor, to);
+            this._scheduleTexts(tracks[i], i, state, state.cursor, to);
           }
           this._wkFlushAll(state.nodes);
           state.cursor = to;
@@ -11451,6 +16057,8 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       }
       const off = s.offset || 0;
       s.base = this.ctx.currentTime + 0.05 - off;
+      s.showBase = s.base;
+      s.wraps = [];
       s.cursor = off;
       s.offset = 0;
       s.pump();
@@ -11734,19 +16342,36 @@ registerProcessor('mmsxx-tap', MmsxxTap);
      *
      * 記録は処理器から `port` に積まれていて、受け口を開いた時点で順に届く。
      * 1 通ずつ別のタスクで届くので、増えなくなるまでタイマーを挟んで待つ。
-     * 返すのは処理器の種類ごとの平らな並び `[時刻, レジスタ, 値, …]`
-     * (チャンネルごとではなく、チップに書いた順そのまま)
+     *
+     * 返すのは処理器の種類ごとの、チップの並び
+     * `{ opll: [{ id, type, regs: [時刻, レジスタ, 値, …] }, …], … }`。
+     * チップは行き先(トラック)ごとに立ち、AY は 1 つの行き先が何個でも持つので、
+     * チップごとに分けて返す。混ぜると、どのチップへの書き込みかが分からなくなる
+     * (VGM へ出すときは、1 個ずつ別のチップとして書く)。
+     * `id` は `行き先の番号.その中のチップの番号`、`type` は AY の音量の表
+     * (0 = YM2149、1 = AY-3-8910。ほかのチップは 0)
      */
     async _collectRegs() {
       const out = {};
       if (this._wk) {
         for (const [kind, bank] of this._wk) {
+          let n = 0;
           for (const node of bank.node.values()) {
             if (!node.port) continue;
+            const at = n++;
             const list = out[kind] || (out[kind] = []);
+            const chips = /* @__PURE__ */ new Map();
             node.port.onmessage = (e) => {
               const r = e.data && e.data.regs;
-              if (r) for (let i = 0; i < r.length; i++) list.push(r[i]);
+              if (!r) return;
+              const k = e.data.chip | 0;
+              let c = chips.get(k);
+              if (!c) {
+                c = { id: `${at}.${k}`, type: e.data.type | 0, regs: [] };
+                chips.set(k, c);
+                list.push(c);
+              }
+              for (let i = 0; i < r.length; i++) c.regs.push(r[i]);
             };
           }
         }
@@ -11754,7 +16379,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       let seen = -1;
       for (; ; ) {
         await new Promise((done) => setTimeout(done, 5));
-        const n = Object.values(out).reduce((a, l) => a + l.length, 0);
+        const n = Object.values(out).reduce((a, l) => a + l.reduce((b, c) => b + c.regs.length, 0), 0);
         if (n === seen) break;
         seen = n;
       }
@@ -12575,7 +17200,6 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     _makeOscillator(ev, freq) {
       const ctx = this.ctx;
       const wf = WAVEFORMS[ev.wave] || WAVEFORMS[2];
-      if (wf.kind === "wave" && wf.modRatio) return this._makeModWave(wf, freq);
       if (wf.kind === "wave") {
         const osc2 = ctx.createOscillator();
         osc2.setPeriodicWave(this._periodicWave(wf));
@@ -12921,8 +17545,8 @@ registerProcessor('mmsxx-tap', MmsxxTap);
      *
      * ---- なぜ要るか ----
      *
-     * 止めるところは `n.stop(0)` で済ませているが、**`AudioWorkletNode` は
-     * `stop()` を持たない**(あれは `AudioScheduledSourceNode` のメソッド)。
+     * 止めるところは `n.stop(0)` で済ませているが、`AudioWorkletNode` は
+     * `stop()` を持たない(あれは `AudioScheduledSourceNode` のメソッド)。
      * 例外になって catch で飲まれるので、処理器へは何も届かない。発音ノードだけが
      * 止まり、OPLL / 4 オペ / 幅の表はそのまま鳴り続けていた(docs/BUGS.md)。
      *
@@ -12959,7 +17583,8 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         node.port.postMessage({ add: list });
         return node;
       }
-      node = new AudioWorkletNode(this.ctx, WORKLETS[kind].node, {
+      const spec = WORKLETS[kind];
+      node = new AudioWorkletNode(this.ctx, spec.node, spec.options ? spec.options(list) : {
         processorOptions: {
           events: list,
           voices: this.maxVoices * 4,
@@ -13012,48 +17637,6 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         for (const e of t.events) this._wkKindsOf(e.wave, need);
       }
       return need;
-    }
-    /**
-     * 波形メモリ + 変調ユニット(ファミコンディスクにあたるもの)。
-     *
-     * 実機は波形メモリの音程を別の表で揺らす。ゆっくり揺らせばビブラート、
-     * 音の高さで揺らすと金属質になる(側帯波が生えて FM に近いことが起きる)。
-     * これが FDS の音の半分で、波形メモリだけでは出ない。
-     */
-    _makeModWave(wf, freq) {
-      const ctx = this.ctx;
-      const osc = ctx.createOscillator();
-      osc.setPeriodicWave(this._periodicWave(wf));
-      osc.frequency.value = freq;
-      const lfo = ctx.createOscillator();
-      lfo.frequency.value = freq * wf.modRatio;
-      lfo.setPeriodicWave(this._modWave(wf));
-      const depth = ctx.createGain();
-      depth.gain.value = freq * wf.modDepth;
-      lfo.connect(depth).connect(osc.frequency);
-      osc.__beep = { out: osc, extras: [lfo] };
-      return osc;
-    }
-    /** ビブラートの形の表を PeriodicWave に直す(キャッシュ付き) */
-    _modWave(wf) {
-      if (!this._modCache) this._modCache = /* @__PURE__ */ new Map();
-      const hit = this._modCache.get(wf.name);
-      if (hit) return hit;
-      const s = wf.modTable, N2 = s.length, half = N2 >> 1;
-      const real = new Float32Array(half), imag = new Float32Array(half);
-      for (let k = 1; k < half; k++) {
-        let re = 0, im = 0;
-        for (let n = 0; n < N2; n++) {
-          const a = 2 * Math.PI * k * n / N2;
-          re += s[n] * Math.cos(a);
-          im += s[n] * Math.sin(a);
-        }
-        real[k] = re * 2 / N2;
-        imag[k] = im * 2 / N2;
-      }
-      const pw = this.ctx.createPeriodicWave(real, imag);
-      this._modCache.set(wf.name, pw);
-      return pw;
     }
     /**
      * カセットのロード音を波形として作る。
@@ -13270,6 +17853,359 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       }
       return { fr, du, gv };
     }
+    /**
+     * 段で下ろす音の形。1 フレームずつ読む。
+     *
+     * 実機の駆動系は 1 フレームに 1 回しか音量レジスタを書き換えられなかった。
+     * Web Audio の道(`_applyEnvelope`)と、チップで鳴らす道(`_ayEvent`)が
+     * 同じものを使う。2 か所に書くと、片方だけ直したときに音が食い違う。
+     *
+     * @returns {{n:number, end:number, shapeAt:(age:number)=>number}}
+     *   n = フレームの数 / end = 余韻まで含めた長さ(秒)/ shapeAt = その時刻の高さ(0〜1)
+     */
+    _stepShape(ev, t0, t1) {
+      const e = envOf(ev);
+      const tail = Math.max(0, Math.min(ev.relTail || 0, t1 - t0 - 0.01));
+      const len = Math.max(0.02, t1 - tail - t0);
+      const span = ev.tieSpan > 0 ? Math.max(0.02, ev.tieSpan - tail) : len;
+      const since = ev.tieAt > 0 ? ev.tieAt : 0;
+      const r2 = tail > 0 && !e.table && e.s > 0 ? Math.min(envSec(e.r, len), tail) : 0;
+      const { a, d, rel } = envShape(e, span);
+      const room = tail > 0 ? 0 : ev.open ? 2e-3 : rel;
+      const hold = Math.max(a + d, span - room);
+      const end = len + r2;
+      const n = Math.max(1, Math.ceil(end / TONE_FRAME));
+      const shapeAt = (age) => {
+        const at = since + age;
+        if (at < a) return a > 0 ? at / a : 1;
+        if (at < a + d) return 1 - (1 - e.s) * ((at - a) / Math.max(1e-6, d));
+        if (at < hold) return e.s;
+        return Math.max(0, e.s * (1 - (at - hold) / Math.max(1e-6, span + r2 - hold)));
+      };
+      return { n, end, shapeAt };
+    }
+    /**
+     * チップで鳴らす音符の、音量の形。AY・ファミコン・ディスクシステムが同じものを読む。
+     *
+     * 音量の表 > 配列式のエンベロープ > ADSR の順に勝つ。ADSR は段で下ろす音と
+     * 同じもの(`_stepShape`)。
+     *
+     * @returns {{n:number, shapeAt:(age:number)=>number}} n = フレームの数 / shapeAt = 0〜1
+     */
+    _chipShape(ev, tone, t0, t1) {
+      const e = envOf(ev);
+      if (tone.vol) {
+        return {
+          n: Math.max(1, Math.ceil((t1 - t0) / TONE_FRAME)),
+          shapeAt: (age) => Math.max(0, Math.min(
+            15,
+            readTable(tone.vol, Math.floor(age / TONE_FRAME), tone.loop.vol)
+          )) / 15
+        };
+      }
+      if (e.table) {
+        return {
+          n: Math.max(1, Math.ceil((t1 - t0) / TONE_FRAME)),
+          shapeAt: (age) => envTableAt(e, Math.floor(age / TONE_FRAME))
+        };
+      }
+      const { n, shapeAt } = this._stepShape(ev, t0, t1);
+      return { n, shapeAt };
+    }
+    /**
+     * チップ(PC エンジン)で鳴らす音符を、常駐の処理器へ渡す形にする。
+     *
+     * 音量は 5 ビット(0〜31)で 1 段およそ 1.5dB。v15 が 31 になるよう比で直す。
+     * 重ねる音で下げた比は、1.5dB の段で引く(対数なので)。
+     */
+    _pceEvent(ev, wf, freq, amp, t0, t1) {
+      const tone = wf.tone || { loop: {} };
+      const steps = ev.vsteps ?? wf.vsteps;
+      const { n, shapeAt } = this._chipShape(ev, tone, t0, t1);
+      const top = ampFor(ev);
+      const down = top > 0 && amp < top * 0.999 ? Math.round(-20 * Math.log10(Math.max(1e-6, amp / top)) / 1.5) : 0;
+      const volOf = (age) => {
+        const al = Math.round(snapVol(volAt(ev, age) * shapeAt(age), steps) * 31 / 15);
+        return al > 0 ? Math.max(0, Math.min(31, al - down)) : 0;
+      };
+      const { fr } = this._dutyFrames(tone, ev, freq, n * TONE_FRAME, false);
+      const per = (i) => (wf.noise ? pceNoise : pcePeriod)(fr[Math.min(i, fr.length - 1)]);
+      const v0 = volOf(0), p0 = per(0);
+      const vs = [], ps = [];
+      let lv = v0, lp = p0;
+      for (let i = 1; i < n; i++) {
+        const t = t0 + i * TONE_FRAME;
+        if (t >= t1) break;
+        const v = volOf(i * TONE_FRAME), p = per(i);
+        if (v !== lv) {
+          vs.push([t, v]);
+          lv = v;
+        }
+        if (p !== lp) {
+          ps.push([t, p]);
+          lp = p;
+        }
+      }
+      return {
+        t: t0,
+        dur: Math.max(0.01, t1 - t0),
+        v: v0,
+        p: p0,
+        ...wf.noise ? { noise: 1 } : { wave: wf.wave, wkey: wf.name },
+        ...vs.length ? { vs } : {},
+        ...ps.length ? { ps } : {}
+      };
+    }
+    /**
+     * OPNA のリズム音源で鳴らす音符を、常駐の処理器へ渡す形にする。
+     *
+     * 録音は終わりまで鳴りきるので、渡すのは鳴らしはじめの音量と速さだけ。
+     * 音量は打楽器ごとの 5 ビット(0〜31)で 1 段 0.75dB。v15 が 31 になるよう比で直し、
+     * 重ねる音で下げた比は 0.75dB の段で引く。
+     * 速さは OPLL の打楽器と同じく、書いた高さ ÷ o4c(`DRUM_FREQ`)。o4c なら渡さない
+     */
+    _opnaRhythmEvent(ev, wf, freq, amp, t0, t1) {
+      const steps = ev.vsteps ?? wf.vsteps;
+      const top = ampFor(ev);
+      const down = top > 0 && amp < top * 0.999 ? Math.round(-20 * Math.log10(Math.max(1e-6, amp / top)) / 0.75) : 0;
+      const il = Math.round(snapVol(volAt(ev, 0), steps) * 31 / 15);
+      const v = il > 0 ? Math.max(0, Math.min(31, il - down)) : 0;
+      return {
+        t: t0,
+        dur: Math.max(0.01, t1 - t0),
+        key: wf.key,
+        v,
+        ...Math.abs(freq / DRUM_FREQ - 1) > 1e-6 ? { rp: freq / DRUM_FREQ } : {}
+      };
+    }
+    /**
+     * チップ(SCC)で鳴らす音符を、常駐の処理器へ渡す形にする。
+     *
+     * 音量は 4 ビットで値がそのまま振幅。重ねる音で下げた比は、値を比のとおりに引く。
+     * 波形は音色の名前で見分ける。同じ波形なら処理器は書き直さない。
+     */
+    _sccEvent(ev, wf, freq, amp, t0, t1) {
+      const tone = wf.tone || { loop: {} };
+      const steps = ev.vsteps ?? wf.vsteps;
+      const { n, shapeAt } = this._chipShape(ev, tone, t0, t1);
+      const top = ampFor(ev);
+      const ratio = top > 0 ? Math.min(1, amp / top) : 1;
+      const volOf = (age) => Math.max(0, Math.min(
+        15,
+        Math.round(snapVol(volAt(ev, age) * shapeAt(age), steps) * ratio)
+      ));
+      const { fr } = this._dutyFrames(tone, ev, freq, n * TONE_FRAME, false);
+      const per = (i) => sccPeriod(fr[Math.min(i, fr.length - 1)]);
+      const v0 = volOf(0), p0 = per(0);
+      const vs = [], ps = [];
+      let lv = v0, lp = p0;
+      for (let i = 1; i < n; i++) {
+        const t = t0 + i * TONE_FRAME;
+        if (t >= t1) break;
+        const v = volOf(i * TONE_FRAME), p = per(i);
+        if (v !== lv) {
+          vs.push([t, v]);
+          lv = v;
+        }
+        if (p !== lp) {
+          ps.push([t, p]);
+          lp = p;
+        }
+      }
+      return {
+        t: t0,
+        dur: Math.max(0.01, t1 - t0),
+        v: v0,
+        p: p0,
+        wave: wf.wave,
+        wkey: wf.name,
+        ...vs.length ? { vs } : {},
+        ...ps.length ? { ps } : {}
+      };
+    }
+    /**
+     * チップ(ディスクシステム)で鳴らす音符を、常駐の処理器へ渡す形にする。
+     *
+     * 音量は 0〜32(値がそのまま振幅)。v15 が 32 になるよう比で直す。
+     * 変調の速さは周期に付いてくるので、ここでは比と深さだけ渡す
+     * (処理器が周期を書くたびに、比を掛けて変調の周期も書く)。
+     */
+    _fdsEvent(ev, wf, freq, amp, t0, t1) {
+      const tone = wf.tone || { loop: {} };
+      const steps = ev.vsteps ?? wf.vsteps;
+      const { n, shapeAt } = this._chipShape(ev, tone, t0, t1);
+      const top = ampFor(ev);
+      const ratio = top > 0 ? Math.min(1, amp / top) : 1;
+      const volOf = (age) => Math.max(0, Math.min(
+        32,
+        Math.round(snapVol(volAt(ev, age) * shapeAt(age), steps) * ratio * 32 / 15)
+      ));
+      const { fr } = this._dutyFrames(tone, ev, freq, n * TONE_FRAME, false);
+      const per = (i) => fdsPitch(fr[Math.min(i, fr.length - 1)]);
+      const v0 = volOf(0), p0 = per(0);
+      const vs = [], ps = [];
+      let lv = v0, lp = p0;
+      for (let i = 1; i < n; i++) {
+        const t = t0 + i * TONE_FRAME;
+        if (t >= t1) break;
+        const v = volOf(i * TONE_FRAME), p = per(i);
+        if (v !== lv) {
+          vs.push([t, v]);
+          lv = v;
+        }
+        if (p !== lp) {
+          ps.push([t, p]);
+          lp = p;
+        }
+      }
+      const m = wf.mod;
+      return {
+        t: t0,
+        dur: Math.max(0.01, t1 - t0),
+        v: v0,
+        p: p0,
+        // 波形は音色の名前で見分ける。同じなら処理器は書き直さない
+        wave: wf.wave,
+        wkey: wf.name,
+        ...m ? { mod: {
+          ratio: m.ratio,
+          gain: fdsModGain(m.depth),
+          table: FDS_MOD_TABLES[m.table] || FDS_MOD_TABLES.tri
+        } } : {},
+        ...vs.length ? { vs } : {},
+        ...ps.length ? { ps } : {}
+      };
+    }
+    /**
+     * チップ(AY)で鳴らす音符を、常駐の処理器へ渡す形にする。
+     *
+     * 高さと音量はフレームごとにレジスタの値まで直して渡す。処理器の側は
+     * 時刻が来たら書くだけ。高さの表・ポルタメント・ビブラートは幅の表と
+     * 同じもの(`_dutyFrames`)、音量の形は段で下ろす音と同じもの(`_stepShape`)を読む。
+     *
+     * 重ねる音(エコーやオクターブ重ね)は `amp` を下げて渡ってくる。
+     * 外から音量を掛けられないので、下げた比を音量レジスタの段で引く。
+     *
+     * ブザー(`env`)は、高さをエンベロープの周期にして、音量レジスタは
+     * エンベロープに従わせる(16)。`@g` で掛けた矩形波は区切り(`gates`)ごとに
+     * トーンを開け閉めする。ブザーが休んでいる拍の矩形波(`toneOnly`)は、
+     * 同じチャンネルのふつうのトーンとして鳴らす。
+     */
+    _ayEvent(ev, wf, freq, amp, t0, t1) {
+      const tone = wf.tone || { loop: {} };
+      const noise = wf.mode === "noise";
+      const env = wf.mode === "env" && !ev.toneOnly;
+      const lane = wf.mode === "env" && ev.toneOnly;
+      const steps = lane ? 16 : ev.vsteps ?? wf.vsteps;
+      const { n, shapeAt } = this._chipShape(ev, tone, t0, t1);
+      const top = ampFor(ev);
+      const down = top > 0 && amp < top * 0.999 ? Math.round(-20 * Math.log10(Math.max(1e-6, amp / top)) / 3) : 0;
+      const LANE_VOL = 13;
+      const volOf = (age) => {
+        if (lane) return Math.max(0, Math.min(15, Math.round(LANE_VOL * shapeAt(age)) - down));
+        const v = Math.round(snapVol(volAt(ev, age) * shapeAt(age), steps));
+        if (env) return v > 0 ? 16 : 0;
+        return Math.max(0, Math.min(15, v - down));
+      };
+      const { fr } = this._dutyFrames(tone, ev, freq, n * TONE_FRAME, false);
+      const div = env ? (AY_ENV_SHAPES[wf.shape] || AY_ENV_SHAPES.saw).div : 0;
+      const per = (i) => {
+        const f = fr[Math.min(i, fr.length - 1)];
+        return env ? ayEnvPeriod(f, div) : noise ? ayNoisePeriod(f) : ayTonePeriod(f);
+      };
+      const v0 = volOf(0), p0 = per(0);
+      const vs = [], ps = [];
+      let lv = v0, lp = p0;
+      for (let i = 1; i < n; i++) {
+        const at = t0 + i * TONE_FRAME;
+        if (at >= t1) break;
+        const v = volOf(i * TONE_FRAME), p = per(i);
+        if (v !== lv) {
+          vs.push([at, v]);
+          lv = v;
+        }
+        if (p !== lp) {
+          ps.push([at, p]);
+          lp = p;
+        }
+      }
+      let g0 = 0;
+      const gs = [];
+      if (env && ev.gates) {
+        for (const g of ev.gates) {
+          const tp = g.hz > 0 ? ayTonePeriod(g.hz) : 0;
+          if (g.at <= 1e-9) g0 = tp;
+          else if (t0 + g.at < t1) gs.push([t0 + g.at, tp]);
+        }
+      }
+      return {
+        t: t0,
+        dur: Math.max(0.01, t1 - t0),
+        v: v0,
+        ...noise ? { noise: 1, np: p0 } : env ? { env: { shape: (AY_ENV_SHAPES[wf.shape] || AY_ENV_SHAPES.saw).r13, ep: p0 }, g0 } : { tp: p0 },
+        ...wf.ay ? { ay: 1 } : {},
+        ...vs.length ? { vs } : {},
+        ...ps.length ? { ps } : {},
+        ...gs.length ? { gs } : {}
+      };
+    }
+    /**
+     * チップ(ファミコン)で鳴らす音符を、常駐の処理器へ渡す形にする。
+     *
+     * AY と同じく、フレームごとのタイマーと音量をレジスタの値まで直す
+     * (高さと音量の形の読み方は `_ayEvent` と同じ)。矩形波は幅の表も読んで、
+     * いちばん近い幅(4 通り)に寄せる。三角波は鳴らすか止めるかだけ。
+     * 重ねる音で下げた比は、音量の値を比のとおりに引く(値がそのまま振幅なので)。
+     */
+    _nesEvent(ev, wf, freq, amp, t0, t1) {
+      const tone = wf.tone || { loop: {} };
+      const mode = wf.mode;
+      const steps = ev.vsteps ?? wf.vsteps;
+      const { n, shapeAt } = this._chipShape(ev, tone, t0, t1);
+      const top = ampFor(ev);
+      const ratio = top > 0 ? Math.min(1, amp / top) : 1;
+      const volOf = (age) => {
+        const v = Math.round(snapVol(volAt(ev, age) * shapeAt(age), steps) * ratio);
+        if (mode === "triangle") return v > 0 ? 1 : 0;
+        return Math.max(0, Math.min(15, v));
+      };
+      const { fr, du } = this._dutyFrames(tone, ev, freq, n * TONE_FRAME, false);
+      const at = (i) => fr[Math.min(i, fr.length - 1)];
+      const per = (i) => mode === "noise" ? nesNoisePeriod(at(i), !!wf.short) : mode === "triangle" ? nesTriangleTimer(at(i)) : nesPulseTimer(at(i));
+      const dutyOf = (i) => nesDutyIndex(tone.duty ? du[Math.min(i, du.length - 1)] : wf.duty ?? 0.5);
+      const v0 = volOf(0), p0 = per(0), d0 = dutyOf(0);
+      const vs = [], ps = [], ds = [];
+      let lv = v0, lp = p0, ld = d0;
+      for (let i = 1; i < n; i++) {
+        const t = t0 + i * TONE_FRAME;
+        if (t >= t1) break;
+        const v = volOf(i * TONE_FRAME), p = per(i), d = dutyOf(i);
+        if (v !== lv) {
+          vs.push([t, v]);
+          lv = v;
+        }
+        if (p !== lp) {
+          ps.push([t, p]);
+          lp = p;
+        }
+        if (mode === "pulse" && d !== ld) {
+          ds.push([t, d]);
+          ld = d;
+        }
+      }
+      return {
+        t: t0,
+        dur: Math.max(0.01, t1 - t0),
+        ch: mode,
+        v: v0,
+        p: p0,
+        ...mode === "pulse" ? { duty: d0 } : {},
+        ...mode === "noise" && wf.short ? { short: 1 } : {},
+        ...vs.length ? { vs } : {},
+        ...ps.length ? { ps } : {},
+        ...ds.length ? { ds } : {}
+      };
+    }
     _applyEnvelope(gain, ev, amp, t0, t1) {
       const e = envOf(ev);
       const tail = Math.max(0, Math.min(ev.relTail || 0, t1 - t0 - 0.01));
@@ -13291,17 +18227,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       const { a, d, rel } = envShape(e, span);
       const w = WAVEFORMS[ev.wave];
       if ((ev.vsteps ?? (w ? w.vsteps : 0)) > 0) {
-        const room2 = tail > 0 ? 0 : ev.open ? 2e-3 : rel;
-        const hold = Math.max(a + d, span - room2);
-        const end = len + r2;
-        const n = Math.max(1, Math.ceil(end / TONE_FRAME));
-        const shapeAt = (age) => {
-          const at = since + age;
-          if (at < a) return a > 0 ? at / a : 1;
-          if (at < a + d) return 1 - (1 - e.s) * ((at - a) / Math.max(1e-6, d));
-          if (at < hold) return e.s;
-          return Math.max(0, e.s * (1 - (at - hold) / Math.max(1e-6, span + r2 - hold)));
-        };
+        const { n, end, shapeAt } = this._stepShape(ev, t0, t1);
         gain.gain.setValueAtTime(ev.legato ? ampAt(ev, shapeAt(0)) : 0, t0);
         for (let i = 0; i < n; i++) {
           const age = i * TONE_FRAME;
@@ -13436,77 +18362,45 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       const ctx = this.ctx;
       if (ev.fade) {
         const w = WAVEFORMS[ev.wave] || {};
-        const pass = w.kind === "layer" || w.kind === "opll" || w.kind === "opm" || w.kind === "baked" && !w.baked || w.tone && w.tone.duty || (ev.vsteps ?? w.vsteps) > 0 && !envOf(ev).table && !(w.tone && w.tone.vol);
+        const pass = w.kind === "layer" || w.kind === "opll" || w.kind === "opm" || w.kind === "ay" || w.kind === "nes" || w.kind === "fds" || w.kind === "scc" || w.kind === "pce" || w.kind === "opnaRhythm" || w.kind === "baked" && !w.baked || w.tone && w.tone.duty || (ev.vsteps ?? w.vsteps) > 0 && !envOf(ev).table && !(w.tone && w.tone.vol);
         if (!pass) ({ dest, ev } = this._fadeDest(ev, t0, t1, dest));
       }
-      if (ev.toneOnly) {
-        const b = (WAVEFORMS[ev.wave] || {}).dcBias || 0;
-        if (!(b > 0)) return;
-        const box = ctx.createGain();
-        this._applyEnvelope(box, ev, amp, t0, t1);
-        box.connect(dest);
-        const osc = ctx.createOscillator();
-        osc.type = "square";
-        const lvl = ctx.createGain();
-        lvl.gain.value = 0.5 * b;
-        osc.frequency.setValueAtTime(toneSnap(freq), t0);
-        osc.connect(lvl).connect(box);
-        osc.start(t0);
-        osc.stop(t1 + 0.02);
-        osc.__endTime = t1 + 0.02;
-        if (nodes) nodes.push(osc);
+      const wfa = WAVEFORMS[ev.wave];
+      if (wfa && (wfa.kind === "modal" || wfa.kind === "brass")) {
+        if (ev.legato) return;
+        const to = WORKLETS[wfa.kind].buses === 2 ? this._panPair(dest) : dest;
+        this._wkPush(wfa.kind, to, {
+          t: t0,
+          p: wfa.patch,
+          f: freq,
+          v: Math.max(0, Math.min(1, (ev.vol ?? 0) / 15)),
+          d: Math.max(1e-3, ev.tieSpan ?? t1 - t0)
+        });
         return;
       }
-      if (ev.gates && ev.gates.some((g2) => g2.hz > 0)) {
-        const gate = ctx.createGain();
-        gate.connect(dest);
-        gate.gain.setValueAtTime(1, t0);
-        const sq = ctx.createOscillator();
-        sq.type = "square";
-        const sqAmp = ctx.createGain();
-        sqAmp.gain.setValueAtTime(0, t0);
-        sq.connect(sqAmp).connect(gate.gain);
-        const bias = (WAVEFORMS[ev.wave] || {}).dcBias || 0;
-        let car = null, carAmp = null;
-        if (bias > 0) {
-          const box = ctx.createGain();
-          this._applyEnvelope(box, ev, amp, t0, t1);
-          box.connect(dest);
-          car = ctx.createOscillator();
-          car.type = "square";
-          carAmp = ctx.createGain();
-          carAmp.gain.setValueAtTime(0, t0);
-          car.connect(carAmp).connect(box);
-        }
-        for (const g2 of ev.gates) {
-          const at = t0 + g2.at;
-          if (at >= t1) break;
-          if (g2.hz > 0) {
-            const hz = toneSnap(g2.hz);
-            sq.frequency.setValueAtTime(hz, at);
-            sqAmp.gain.setValueAtTime(0.5, at);
-            gate.gain.setValueAtTime(0.5, at);
-            if (car) {
-              car.frequency.setValueAtTime(hz, at);
-              carAmp.gain.setValueAtTime(0.5 * bias, at);
-            }
-          } else {
-            sqAmp.gain.setValueAtTime(0, at);
-            gate.gain.setValueAtTime(1, at);
-            if (car) carAmp.gain.setValueAtTime(0, at);
-          }
-        }
-        sq.start(t0);
-        sq.stop(t1 + 0.02);
-        sq.__endTime = t1 + 0.02;
-        if (nodes) nodes.push(sq);
-        if (car) {
-          car.start(t0);
-          car.stop(t1 + 0.02);
-          car.__endTime = t1 + 0.02;
-          if (nodes) nodes.push(car);
-        }
-        return this._playVoice({ ...ev, gates: null }, freq, amp, t0, t1, gate, nodes, tune);
+      if (wfa && wfa.kind === "ay") {
+        this._wkPush("ay", dest, this._ayEvent(ev, wfa, freq, amp, t0, t1));
+        return;
+      }
+      if (wfa && wfa.kind === "nes") {
+        this._wkPush("nes", dest, this._nesEvent(ev, wfa, freq, amp, t0, t1));
+        return;
+      }
+      if (wfa && wfa.kind === "fds") {
+        this._wkPush("fds", dest, this._fdsEvent(ev, wfa, freq, amp, t0, t1));
+        return;
+      }
+      if (wfa && wfa.kind === "scc") {
+        this._wkPush("scc", dest, this._sccEvent(ev, wfa, freq, amp, t0, t1));
+        return;
+      }
+      if (wfa && wfa.kind === "pce") {
+        this._wkPush("pce", dest, this._pceEvent(ev, wfa, freq, amp, t0, t1));
+        return;
+      }
+      if (wfa && wfa.kind === "opnaRhythm") {
+        this._wkPush("opnaRhythm", dest, this._opnaRhythmEvent(ev, wfa, freq, amp, t0, t1));
+        return;
       }
       const wfl = WAVEFORMS[ev.wave];
       if (wfl && wfl.kind === "layer") {
@@ -13543,6 +18437,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       }
       const wfo = WAVEFORMS[ev.wave];
       if (wfo && wfo.kind === "opll") {
+        if (wfo.semi) freq *= Math.pow(2, wfo.semi / 12);
         this._wkPush("opll", dest, {
           // 余韻はチップが持つ。延ばす前の長さでキーオフする
           t: t0,
@@ -13567,12 +18462,19 @@ registerProcessor('mmsxx-tap', MmsxxTap);
             (a) => freqAt(ev, a),
             (x) => x
           ) } : {},
-          ...wfo.drum ? { drum: wfo.drum } : {},
+          // 打楽器。書いた高さを比で渡す。o4c(`DRUM_FREQ`)のままなら
+          // 何も渡さないので、実機のドライバが決めた高さのまま鳴る。
+          // ずらすのは `#bundle` の `@o` `@d` か、ふつうの音符として鳴らしたとき
+          // (→ `sound/opll.js` の `drumBend`、2026-10-04)
+          ...wfo.drum ? {
+            drum: wfo.drum,
+            ...Math.abs(freq / DRUM_FREQ - 1) > 1e-6 ? { rp: freq / DRUM_FREQ } : {}
+          } : {},
           ...wfo.set ? { set: wfo.set } : {},
-          // タイでつながった音。**同じ声で続けて、キーオンを立て直さない。**
+          // タイでつながった音。同じ声で続けて、キーオンを立て直さない。
           // 立て直すとエンベロープが頭から始まるので、滑ったあとにアタックが
           // やり直される(実測で 40ms かけて上がっていた。2026-09-30)
-          // `left` はつながりの残りの長さ。**キーオフをここまで延ばすために要る。**
+          // `left` はつながりの残りの長さ。キーオフをここまで延ばすために要る。
           // 処理器は「終わる音符」を先に見るので、この音の長さでキーオフを
           // 書くと、同じ時刻に来る続く音がキーオンを立て直すことになる
           ...ev.tieId ? {
@@ -13857,7 +18759,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       return true;
     }
     /**
-     * 出口に入れる数。**掛け算を 1 か所にまとめてある。**
+     * 出口に入れる数。掛け算を 1 か所にまとめてある。
      *
      * 聴く人のつまみ(`volume`)と、曲が名乗る大きさ(`#gain`)は別のもので、
      * 出口ではどちらも掛かる。3 か所(出口を作る・消す・つまみを回す)で
@@ -13930,10 +18832,10 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out;
   }
 
-  // mmsxx-mml-studio/tool/ui/version.js
+  // engine/tool/ui/version.js
   var PLAYER_VERSION = "1.0.0";
 
-  // mmsxx-mml-studio/tool/core/tomml.js
+  // engine/tool/core/tomml.js
   var NAMES = ["c", "c+", "d", "d+", "e", "f", "f+", "g", "g+", "a", "a+", "b"];
   var LENS = [
     [16, "1"],
@@ -14013,7 +18915,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out.join("\n\n");
   }
 
-  // mmsxx-mml-studio/tool/core/wav.js
+  // engine/tool/core/wav.js
   function writeWAV(samples, rate = 44100) {
     const n = samples.length;
     const out = new Uint8Array(44 + n * 2);
@@ -14041,7 +18943,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out;
   }
 
-  // mmsxx-mml-studio/tool/ui/player.js
+  // engine/tool/ui/player.js
   var COPYRIGHT = "2026 harayoki";
   var PLAYER_CSS = `
 .mmsxx-player{ font-family:var(--mono); font-size:13px; line-height:1.55; color:var(--ink); }
@@ -14246,6 +19148,30 @@ registerProcessor('mmsxx-tap', MmsxxTap);
    \u30DC\u30BF\u30F3\u306E\u5F62\u306B\u3057\u306A\u3044\u3002\u70B9\u304F\u306E\u3082\u6D88\u3048\u308B\u306E\u3082\u4E00\u77AC\u306B\u3059\u308B\u3002\u3058\u308F\u3063\u3068\u6D88\u3059\u3068\u3001
    \u3044\u3064\u5C4A\u3044\u305F\u306E\u304B\u304C\u8AAD\u3081\u306A\u3044(2026-09-18) */
 .mmsxx-player .leds{ display:flex; flex-wrap:wrap; gap:9px; align-items:center; }
+/* \u66F2\u306B\u7F6E\u3044\u305F\u5B57\u3002\u30C1\u30E3\u30F3\u30CD\u30EB\u3054\u3068\u306B 1 \u3064\u51FA\u3057\u3066\u3001\u6765\u305F\u9806\u306B\u4E26\u3079\u308B\u3002
+
+   **\u9AD8\u3055\u306F\u5B57\u304C\u51FA\u3066\u3044\u306A\u304F\u3066\u3082\u53D6\u3063\u3066\u304A\u304F\u3002**\u51FA\u5165\u308A\u306E\u305F\u3073\u306B\u4E0B\u306E\u884C\u304C\u52D5\u304F\u3068\u3001
+   \u62BC\u3057\u306B\u884C\u3063\u305F\u3082\u306E\u304C\u305A\u308C\u308B\u3002\u67A0 1 \u3064\u3076\u3093(24px)\u3092\u5148\u306B\u78BA\u4FDD\u3057\u3066\u3001
+   \u5B57\u306E\u6709\u7121\u3067\u884C\u306E\u9AD8\u3055\u304C\u5909\u308F\u3089\u306A\u3044\u3088\u3046\u306B\u3059\u308B(2026-10-05)\u3002
+
+   **\u6A2A\u306B\u3082\u52D5\u304B\u3055\u306A\u3044\u3002**\u884C\u3092 1 \u5217\u306B\u8A70\u3081\u308B\u30DA\u30FC\u30B8(.row \u3092 display:contents \u306B
+   \u3059\u308B\u3082\u306E)\u3067\u306F\u884C\u306E\u7BB1\u304C\u6D88\u3048\u308B\u306E\u3067\u3001\u5B57\u304C\u62BC\u3057\u3069\u3053\u308D\u3068\u540C\u3058\u5217\u306B\u5165\u308A\u3001
+   \u5E45\u304C\u5909\u308F\u308B\u305F\u3073\u306B\u300C\u2026\u300D\u304C\u5DE6\u53F3\u306B\u52D5\u3044\u3066\u3044\u305F\u30021 \u3064\u306E\u7BB1(.saidwrap)\u306B\u307E\u3068\u3081\u3066\u3001
+   flex-basis:100% \u3067\u5FC5\u305A\u81EA\u5206\u306E\u884C\u3092\u53D6\u3089\u305B\u308B\u3002\u7BB1\u304C 1 \u3064\u306A\u3089\u3001
+   \u884C\u3092\u7573\u307E\u308C\u3066\u3082\u5217\u306E\u4E2D\u3067\u6298\u308A\u8FD4\u3059(2026-10-05) */
+.mmsxx-player .saidwrap{
+  display:flex; align-items:center; gap:10px; flex:0 0 100%; min-width:0;
+}
+.mmsxx-player .said{
+  display:flex; flex-wrap:wrap; gap:7px; align-items:center; min-height:24px;
+}
+.mmsxx-player .said span{
+  padding:2px 7px; border:1px solid var(--line); border-radius:3px;
+  line-height:18px; background:var(--panel); color:var(--ink); white-space:pre;
+}
+.mmsxx-player .said span b{
+  font-weight:400; font-size:10.5px; color:var(--dim); margin-right:5px;
+}
 .mmsxx-player .led{
   display:inline-flex; align-items:center; gap:5px;
   font-size:10.5px; color:var(--dim); white-space:nowrap;
@@ -14446,6 +19372,12 @@ registerProcessor('mmsxx-tap', MmsxxTap);
           <span class="about-ver" role="status" data-p="ver" hidden></span>
         </span>
       </div>
+      <div class="row" data-p="textrow" hidden>
+        <span class="saidwrap">
+          <span class="lbl">Text</span>
+          <span class="said" data-p="said"></span>
+        </span>
+      </div>
       <p class="note bad wavnote" data-p="wavnote" hidden></p>
       <div class="got" data-p="got" hidden>
         <audio controls data-p="audio"></audio>
@@ -14550,6 +19482,8 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       looserow: $("looserow"),
       leds: $("leds"),
       cuerow: $("cuerow"),
+      said: $("said"),
+      textrow: $("textrow"),
       logsw: $("logsw"),
       logrow: $("logrow"),
       cuelog: $("cuelog"),
@@ -14648,7 +19582,11 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     let marks = [];
     let cuts = { grid: [], bars: [] };
     let loopAt = null, outroAt = null;
+    const TEXT_HOLD = 4;
+    let played = 0;
     let cues = [];
+    let texts = [];
+    const said = /* @__PURE__ */ new Map();
     const leds = /* @__PURE__ */ new Map();
     let lastPos = 0;
     let takes = [];
@@ -14688,6 +19626,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       drawTakes();
       drawFx();
       drawLeds();
+      clearTexts();
       drawCuts();
       draw();
       srcButtons();
@@ -14716,6 +19655,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       loopAt = got.loop ? got.loop.from : null;
       outroAt = got.outro ?? null;
       cues = got.cues ?? [];
+      texts = got.texts ?? [];
       takes = got.takes ?? [];
       total = got.total;
       if (!got.active) {
@@ -14730,7 +19670,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       el.abouttext.textContent = meta.about || "";
       el.abouttext.hidden = !meta.about;
       el.about.hidden = !showAbout || !(meta.title || meta.about || meta.version || machineText());
-      const old = voices.reduce((n, v) => n + countOldStyle(v), 0);
+      const old = Array.isArray(mml) ? mml.reduce((n, v) => n + countOldStyle(v), 0) : countOldStyle(mml);
       if (old) {
         console.warn(`[ChpTnSnd] MML: \u6307\u793A\u884C\u306E "// #" \u304C ${old} \u884C\u3042\u308A\u307E\u3059\u3002"#" \u3060\u3051\u3067\u66F8\u3051\u307E\u3059("// #" \u306F\u3044\u305A\u308C\u8AAD\u307E\u306A\u304F\u306A\u308A\u307E\u3059)`);
       }
@@ -15030,6 +19970,55 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       }
       lastPos = at;
     }
+    function showText(x) {
+      if (x.text === "") {
+        said.delete(x.ch);
+        drawTexts();
+        return;
+      }
+      said.set(x.ch, { text: x.text, until: played + TEXT_HOLD });
+      drawTexts();
+    }
+    function sweepTexts() {
+      let went = false;
+      for (const [ch, v] of said) {
+        if (played >= v.until) {
+          said.delete(ch);
+          went = true;
+        }
+      }
+      if (went) drawTexts();
+    }
+    function drawTexts() {
+      el.textrow.hidden = texts.length === 0;
+      el.said.textContent = "";
+      for (const ch of [...said.keys()].sort((a, b) => a - b)) {
+        const span = document.createElement("span");
+        const who = document.createElement("b");
+        who.textContent = `ch${ch + 1}`;
+        span.appendChild(who);
+        span.appendChild(document.createTextNode(said.get(ch).text));
+        el.said.appendChild(span);
+      }
+    }
+    function clearTexts() {
+      said.clear();
+      drawTexts();
+    }
+    function passedTexts(from2, to, len) {
+      if (!texts.length) return;
+      const hit = (a, b) => {
+        for (const x of texts) if (x.t > a && x.t <= b) showText(x);
+      };
+      if (to >= from2) hit(from2 <= 0 ? -1 : from2, to);
+      else if (wrapped(from2, to, len)) {
+        hit(from2, len);
+        hit(-1, to);
+      }
+    }
+    function wrapped(from2, to, len) {
+      return len > 0 && from2 - to > len / 2;
+    }
     function drawMarks() {
       el.marks.textContent = "";
       el.markrow.hidden = marks.length === 0;
@@ -15125,8 +20114,13 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       el.len.textContent = clock(len);
       if (!dragging) {
         const at = on ? audio.bgmPosition() : from;
-        if (on && !s.paused) passedCues(at);
-        else lastPos = at;
+        if (on && !s.paused) {
+          played += at >= lastPos ? at - lastPos : wrapped(lastPos, at, len) ? Math.max(0, len - lastPos) + at : 0;
+          passedTexts(lastPos, at, len);
+          sweepTexts();
+          passedCues(at);
+          lastPos = at;
+        } else lastPos = at;
         el.now.textContent = clock(at);
         el.seek.value = String(len > 0 ? Math.round(at / len * 1e3) : 0);
         const here = marks.reduce(
@@ -15256,6 +20250,8 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       from = Math.max(0, Math.min(sec, len));
       const s = audio.bgmState;
       if (s && s.name === NAME) audio.seekBGM(from);
+      clearTexts();
+      lastPos = from;
       draw();
     }
     el.play.addEventListener("click", () => {
@@ -15270,6 +20266,8 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     el.stop.addEventListener("click", () => {
       audio.stopBGM();
       from = 0;
+      clearTexts();
+      lastPos = 0;
       draw();
     });
     const secOf = (text) => {
@@ -15553,6 +20551,7 @@ ChipTuneSound ${SOUND_VERSION}
     fold();
     drawFx();
     drawLeds();
+    clearTexts();
     drawCuts();
     draw();
     const onSize = () => drawCuts();
@@ -15676,7 +20675,7 @@ ChipTuneSound ${SOUND_VERSION}
     };
   }
 
-  // mmsxx-mml-studio/samples-entry.js
+  // engine/samples-entry.js
   var sound = { ...audio_exports, ...mml_exports, ...tones_exports, mountPlayer, PLAYER_CSS, PLAYER_VERSION, player: { mount: mountPlayer, CSS: PLAYER_CSS, version: PLAYER_VERSION } };
   window.MMSXX = window.MMSXX || {};
   window.MMSXX.sound = sound;
