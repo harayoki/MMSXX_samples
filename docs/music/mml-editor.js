@@ -15,6 +15,8 @@ import { tags } from 'https://esm.sh/@lezer/highlight@1.2.3';
 
 // 行頭（空白可）の # はシステム行。// と /* ... */ は通常コメント。
 const mmlComments = StreamLanguage.define({
+  // Use the same tag instances as HighlightStyle, including across CDN modules.
+  tokenTable: { comment: tags.comment, meta: tags.meta },
   startState() {
     return { blockComment: false };
   },
