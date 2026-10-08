@@ -1,0 +1,126 @@
+// シアワセノアシオト。ユーザー提供の音符・音色・フェード指定を維持。
+// 本編3周（主役：メロディ→対旋律→ベース）、4周目は後奏。
+#title シアワセノアシオト
+#about ゲームのエンディング向けのやさしい曲です。ジャズのルールをPOPSでなぞっています。
+#looptimes 2
+
+#ch メロディ
+t108 l8 @{sine} @e{soft} q7 v13 o5 @fade{15,0}
+#label LOOP
+r4 d10. f10 a4 g10. f10 | e2. r10. c10 | a4&a10. g10 a4 >c4< | a2 r4 f10. g10 |
+b-4&b-10. a10 g4 f10. d10 | e4 g10. b-10 >d4 c4< | >c4< a4 f+4 a4 | g2 e4 r4 |
+f4&f10. d10 f4 a4 | g2 f4 e-4 | e4&e10. c10 e4 g4 | f+2 a4 >c4< |
+@fade{8,16,g2} b-4 a10. g10 f4 d4 | e4 g4 b-4 g4 | f1 | r2 r4 c10. e10 |
+r4 d10. f10 a4 g10. f10 | e2. r10. c10 | a4&a10. g10 a4 >c4< | a2 r4 f10. g10 |
+b-4&b-10. a10 g4 f10. d10 | e4 g10. b-10 >d4 c4< | >c4< a4 f+4 a4 | g2 e4 r4 |
+f4&f10. d10 f4 a4 | g2 f4 e-4 | e4&e10. c10 e4 g4 | f+2 a4 >c4< |
+b-4 a10. g10 f4 d4 | e4 g4 b-4 g4 | f1 | r2 r4 c10. e10 |
+r4 d10. f10 a4 g10. f10 | e2. r10. c10 | a4&a10. g10 a4 >c4< | a2 r4 f10. g10 |
+b-4&b-10. a10 g4 f10. d10 | e4 g10. b-10 >d4 c4< | >c4< a4 f+4 a4 | g2 e4 r4 |
+f4&f10. d10 f4 a4 | g2 f4 e-4 | e4&e10. c10 e4 g4 | f+2 a4 >c4< |
+@fade{15,16,g0.5} b-4 a10. g10 f4 d4 | e4 g4 b-4 g4 | f1 | r2 r4 c10. e10 |
+#label OUTRO
+@fade{0,64} r4 d10. f10 a4 g10. f10 | e2. r10. c10 | a4&a10. g10 a4 >c4< | a2 r4 f10. g10 |
+b-4&b-10. a10 g4 f10. d10 | e4 g10. b-10 >d4 c4< | >c4< a4 f+4 a4 | g2 e4 r4 |
+f4&f10. d10 f4 a4 | g2 f4 e-4 | e4&e10. c10 e4 g4 | f+2 a4 >c4< |
+b-4 a10. g10 f4 d4 | e4 g4 b-4 g4 | f1 | r2 r4 c10. e10 |
+#ch 対旋律
+t108 @{sine} @e{pad} q8 v13 @fade{9,0}
+#label LOOP
+o4 f2. g4 | o4 e1 | o4 e2 c2 | o4 d2 e2 |
+o4 f2. d4 | o4 e2 g2 | o4 g2 f+2 | o4 f2 e2 |
+o4 d1 | o4 d-1 | o4 c1 | o4 c1 |
+@fade{13,16,g0.5} o3 b-1 | o3 b-1 | o3 a1 | o3 b-2 o4 e2 |
+@e{soft} o4 f2 g10. a10 b-4 | o4 >c4< b-4 g10. f10 e4 | o4 e2. f10. g10 | o4 a4 f4 c4 e4 |
+o4 f2 d10. f10 a4 | o4 b-2 a10. g10 e4 | o4 g4 e4 f+4 a4 | o4 f4 d4 e4 g4 |
+o4 a2 f10. d10 f4 | o4 g4 b-4 >d-2< | o4 >c2< a10. g10 e4 | o4 f+4 a4 >c4< a4 |
+@fade{7,16,g2} o4 b-2 a10. g10 f4 | o4 e4 g4 b-2 | o4 a2. r4 | o4 r2 g10. b-10 >c4< @e{pad} |
+o4 f2. g4 | o4 e1 | o4 e2 c2 | o4 d2 e2 |
+o4 f2. d4 | o4 e2 g2 | o4 g2 f+2 | o4 f2 e2 |
+o4 d1 | o4 d-1 | o4 c1 | o4 c1 |
+@fade{9,16,g0.5} o3 b-1 | o3 b-1 | o3 a1 | o3 b-2 o4 e2 |
+#label OUTRO
+@fade{0,64} o4 f2. g4 | o4 e1 | o4 e2 c2 | o4 d2 e2 |
+o4 f2. d4 | o4 e2 g2 | o4 g2 f+2 | o4 f2 e2 |
+o4 d1 | o4 d-1 | o4 c1 | o4 c1 |
+o3 b-1 | o3 b-1 | o3 a1 | o3 b-2 o4 e2 |
+#ch アルペジオ
+t108 l8 @{sine} @e{pluck} q6 v13 @fade{6,0}
+#label LOOP
+o4 g10. b-10 >d10. f10 g10. f10 d10.< b-10 | o4 c10. e10 g10. b-10 >c10.< b-10 g10. e10 | o4 f10. a10 >c10. e10 f10. e10 c10.< a10 | o4 d10. f10 a10. >c10 d10. c10< a10. f10 |
+o4 g10. b-10 >d10. f10 g10. f10 d10.< b-10 | o4 c10. e10 g10. b-10 >c10.< b-10 g10. e10 | o4 a10. >c10 e10. g10< o4 d10. f+10 a10. >c10< | o4 g10. b-10 >d10. f10< o4 c10. e10 g10. b-10 |
+o3 b-10. >d10 f10. a10 b-10. a10 f10. d10< | o4 e-10. g10 b-10. >d-10 e-10. d-10< b-10. g10 | o4 a10. >c10 e10. g10 a10. g10 e10. c10< | o4 d10. f+10 a10. >c10 d10. c10< a10. f+10 |
+o4 g10. b-10 >d10. f10 g10. f10 d10.< b-10 | o4 c10. e10 g10. b-10 >c10.< b-10 g10. e10 | o4 f10. a10 >c10. d10 f10. d10 c10.< a10 | o4 c10. e10 g10. b-10 >c10.< b-10 g10. e10 |
+o4 g10. b-10 >d10. f10 g10. f10 d10.< b-10 | o4 c10. e10 g10. b-10 >c10.< b-10 g10. e10 | o4 f10. a10 >c10. e10 f10. e10 c10.< a10 | o4 d10. f10 a10. >c10 d10. c10< a10. f10 |
+o4 g10. b-10 >d10. f10 g10. f10 d10.< b-10 | o4 c10. e10 g10. b-10 >c10.< b-10 g10. e10 | o4 a10. >c10 e10. g10< o4 d10. f+10 a10. >c10< | o4 g10. b-10 >d10. f10< o4 c10. e10 g10. b-10 |
+o3 b-10. >d10 f10. a10 b-10. a10 f10. d10< | o4 e-10. g10 b-10. >d-10 e-10. d-10< b-10. g10 | o4 a10. >c10 e10. g10 a10. g10 e10. c10< | o4 d10. f+10 a10. >c10 d10. c10< a10. f+10 |
+@fade{5,16,g2} o4 g10. b-10 >d10. f10 g10. f10 d10.< b-10 | o4 c10. e10 g10. b-10 >c10.< b-10 g10. e10 | o4 f10. a10 >c10. d10 f10. d10 c10.< a10 | o4 c10. e10 g10. b-10 >c10.< b-10 g10. e10 |
+o3 g10. b-10 >d10. f10 g10. f10 d10.< b-10 | o3 c10. e10 g10. b-10 >c10.< b-10 g10. e10 | o3 f10. a10 >c10. e10 f10. e10 c10.< a10 | o3 d10. f10 a10. >c10 d10. c10< a10. f10 |
+o3 g10. b-10 >d10. f10 g10. f10 d10.< b-10 | o3 c10. e10 g10. b-10 >c10.< b-10 g10. e10 | o3 a10. >c10 e10. g10< o3 d10. f+10 a10. >c10< | o3 g10. b-10 >d10. f10< o3 c10. e10 g10. b-10 |
+o2 b-10. >d10 f10. a10 b-10. a10 f10. d10< | o3 e-10. g10 b-10. >d-10 e-10. d-10< b-10. g10 | o3 a10. >c10 e10. g10 a10. g10 e10. c10< | o3 d10. f+10 a10. >c10 d10. c10< a10. f+10 |
+@fade{6,16,g0.5} o3 g10. b-10 >d10. f10 g10. f10 d10.< b-10 | o3 c10. e10 g10. b-10 >c10.< b-10 g10. e10 | o3 f10. a10 >c10. d10 f10. d10 c10.< a10 | o3 c10. e10 g10. b-10 >c10.< b-10 g10. e10 |
+#label OUTRO
+@fade{0,64} o4 g10. b-10 >d10. f10 g10. f10 d10.< b-10 | o4 c10. e10 g10. b-10 >c10.< b-10 g10. e10 | o4 f10. a10 >c10. e10 f10. e10 c10.< a10 | o4 d10. f10 a10. >c10 d10. c10< a10. f10 |
+o4 g10. b-10 >d10. f10 g10. f10 d10.< b-10 | o4 c10. e10 g10. b-10 >c10.< b-10 g10. e10 | o4 a10. >c10 e10. g10< o4 d10. f+10 a10. >c10< | o4 g10. b-10 >d10. f10< o4 c10. e10 g10. b-10 |
+o3 b-10. >d10 f10. a10 b-10. a10 f10. d10< | o4 e-10. g10 b-10. >d-10 e-10. d-10< b-10. g10 | o4 a10. >c10 e10. g10 a10. g10 e10. c10< | o4 d10. f+10 a10. >c10 d10. c10< a10. f+10 |
+o4 g10. b-10 >d10. f10 g10. f10 d10.< b-10 | o4 c10. e10 g10. b-10 >c10.< b-10 g10. e10 | o4 f10. a10 >c10. d10 f10. d10 c10.< a10 | o4 c10. e10 g10. b-10 >c10.< b-10 g10. e10 |
+#ch ベース
+t108 l4 @{sine} @e{piano} q7 v14 @fade{13,0}
+#label LOOP
+o2 g a b- b | o3 c e g e | o3 f e d c | o3 d f a a- |
+o3 g f d o2 b- | o3 c d e o2 b- | o2 a o3 e d o2 a | o2 g o3 d c o2 b |
+o2 b- o3 d f d | o2 e- g b- a- | o2 a o3 c e c | o3 d o2 a f+ a |
+o2 g b- o3 d o2 b- | o3 c o2 b- g e | o2 f a o3 c d | o3 c o2 b- a a- |
+o2 g a b- b | o3 c e g e | o3 f e d c | o3 d f a a- |
+o3 g f d o2 b- | o3 c d e o2 b- | o2 a o3 e d o2 a | o2 g o3 d c o2 b |
+o2 b- o3 d f d | o2 e- g b- a- | o2 a o3 c e c | o3 d o2 a f+ a |
+@fade{14,16,g0.5} o2 g b- o3 d o2 b- | o3 c o2 b- g e | o2 f a o3 c d | o3 c o2 b- a a- |
+o3 g4 b-4 o4 d4 o3 b-10. b10 | o4 c4 o3 g4 e4 g10. e10 | o3 f4 a4 o4 c4 o3 a10. c+10 | o3 d4 f4 a4 g10. a-10 |
+o3 g4 f4 d4 o2 b-10. b10 | o3 c4 d4 e4 g10. b-10 | o3 a4 o4 c4 o3 d4 f+4 | o3 g4 b-4 c4 e10. a10 |
+o3 b-4 o4 d4 f4 e10. e-10 | o4 e-4 o3 b-4 g4 g10. a-10 | o3 a4 o4 c4 e4 c10. c+10 | o4 d4 o3 a4 f+4 a10. a-10 |
+@fade{13,16,g2} o3 g4 b-4 o4 d4 o3 b-10. b10 | o4 c4 o3 b-4 g4 g10. e10 | o3 f4 a4 o4 c4 d4 | o3 c4 o2 b-4 a4 a-4 |
+#label OUTRO
+@fade{0,64} o2 g a b- b | o3 c e g e | o3 f e d c | o3 d f a a- |
+o3 g f d o2 b- | o3 c d e o2 b- | o2 a o3 e d o2 a | o2 g o3 d c o2 b |
+o2 b- o3 d f d | o2 e- g b- a- | o2 a o3 c e c | o3 d o2 a f+ a |
+o2 g b- o3 d o2 b- | o3 c o2 b- g e | o2 f a o3 c d | o3 c o2 b- a a- |
+#ch スネア
+t108 @{noise(white)} @e{snap} q8 v9 o5 @fade{0,0}
+#label LOOP
+r1 | r1 | r1 | r1 |
+r1 | r1 | r1 | r1 |
+@fade{10,96} r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c10. v6 c10 v9 |
+r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c10. v6 c10 v9 |
+r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c10. v6 c10 v9 |
+r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c10. v6 c10 v9 |
+r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c10. v6 c10 v9 |
+r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c10. v6 c10 v9 |
+r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c10. v6 c10 v9 |
+r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c10. v6 c10 v9 |
+r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c10. v6 c10 v9 |
+r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c10. v6 c10 v9 |
+#label OUTRO
+@fade{0,64} r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c10. v6 c10 v9 |
+r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c10. v6 c10 v9 |
+r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c10. v6 c10 v9 |
+r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c10. v6 c10 v9 |
+#ch ぴろろろ
+t108 @{sine} @e{pluck} q6 v6
+#label LOOP
+r1 | r1 | r1 | r1 |
+r1 | r1 | r1 | r1 |
+r1 | r1 | r1 | r1 |
+r1 | r1 | r1 | r1 |
+r1 | r1 | r1 | r1 |
+r1 | r1 | r1 | r1 |
+r1 | r1 | r1 | r1 |
+r1 | r1 | r1 | r1 |
+r1 | r1 | r1 | r2. o6 f24 d24 c24 o5 a24 f24 d24 |
+r1 | r1 | r1 | r2. o6 e24 c24 o5 b-24 g24 e24 c24 |
+r1 | r1 | r1 | r2. o6 f+24 d24 c24 o5 a24 f+24 d24 |
+r1 | r1 | r1 | r2. o6 e24 c24 o5 b-24 g24 e24 c24 |
+#label OUTRO
+r1 | r1 | r1 | r1 |
+r1 | r1 | r1 | r1 |
+r1 | r1 | r1 | r1 |
+r1 | r1 | r1 | r1 |
