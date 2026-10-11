@@ -24,6 +24,26 @@
   <!-- social-card:end -->
   <meta name="description" content="OPLLとSCCを中心にしたハウスミュージック。Rhodes系FMエレピと、打楽器のブレイクを使用。">
   <link rel="stylesheet" href="../music-page.css">
+  <style>
+    /* Keep the channel-volume controls on the heading line, not stranded below the last channel. */
+    #marble-house .music-player [data-p="chsrow"] {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas: "label tools" "channels channels";
+      align-items: center;
+      gap: 6px 10px;
+    }
+    #marble-house .music-player [data-p="chslbl"] { grid-area: label; }
+    #marble-house .music-player [data-p="chs"] {
+      grid-area: channels;
+      min-width: 0;
+    }
+    #marble-house .music-player .chmode {
+      grid-area: tools;
+      margin-left: 0;
+      justify-self: end;
+    }
+  </style>
 </head>
 <body>
 <main class="music-page" id="marble-house">
