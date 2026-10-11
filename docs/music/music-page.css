@@ -32,6 +32,7 @@ body {
 #grassland-trinity { --blue: #068911; }
 #beat2,
 #beat_v2 { --blue: #7135b7; }
+#marble-house { --blue: #b138af; }
 .music-page p { margin: 2px; }
 .music-credits { display: grid; gap: 0; }
 .music-credits p { margin: 0; }
