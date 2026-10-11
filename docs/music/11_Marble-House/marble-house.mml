@@ -1,0 +1,724 @@
+#wave sccms89newsccMarbleEP = @bits{8} @role{chord} 0/127 43/127 72/127 104/127 123/127 124/127 127/127 119/127 100/127 92/127 76/127 58/127 52/127 37/127 21/127 16/127 0/127 -16/127 -21/127 -37/127 -52/127 -58/127 -76/127 -92/127 -100/127 -119/127 -127/127 -124/127 -123/127 -104/127 -72/127 -43/127
+#title MARBLE HOUSE（OPLL&SCC）
+#version 75.0
+#about Rhodes寄りFMエレピへ修正。ブレイクはFM4音・SCC打楽器2音・PSGノイズ1音。
+#tempo 128
+#meter 4/4
+#copyright 2026 harayoki
+#license CC BY 4.0
+#gain 2
+#looptimes 1
+#voice ms89newmarbleHat = @adsr{0.001,0.040,0,0.010}
+#voice ms89newmarbleOpenHat = @adsr{0.001,0.18,0,0.025}
+#voice ms89newbassBite = @adsr{0.001,0.028,0.45,0.002}
+#voice sccms89newsccBassBodyEnv = @adsr{0.002,0.130,0.30,0.025}
+#bundle ms89newdanceBass = @{sccTriangle} @e{sccms89newsccBassBodyEnv}
+#voice ms89newchordShort = @adsr{0.003,0.260,0.35,0.055}
+#voice ms89chordPSG = @{ayTone} @e{ms89newchordShort}
+#voice ms89newchordD = @{sccms89newsccMarbleEP} @e{ms89newchordShort} @d0, @{sccms89newsccMarbleEP} @e{ms89newchordShort} @d500, @{sccms89newsccMarbleEP} @e{ms89newchordShort} @d900
+#voice ms89newchordB = @{sccms89newsccMarbleEP} @e{ms89newchordShort} @d200, @{sccms89newsccMarbleEP} @e{ms89newchordShort} @d500, @{sccms89newsccMarbleEP} @e{ms89newchordShort} @d900
+#voice ms89newchordF = @{sccms89newsccMarbleEP} @e{ms89newchordShort} @d0, @{sccms89newsccMarbleEP} @e{ms89newchordShort} @d300, @{sccms89newsccMarbleEP} @e{ms89newchordShort} @d800
+#voice ms89newchordX = @{sccms89newsccMarbleEP} @e{ms89newchordShort} @d0, @{sccms89newsccMarbleEP} @e{ms89newchordShort} @d500, @{sccms89newsccMarbleEP} @e{ms89newchordShort} @d800
+#bundle ms89newdanceArp = @{sccSine} @e{tap}
+#bundle ms89newdanceHat = @{noise(hiss)} @e{snap} q0
+#bundle ms89newdanceOpenHat = @{ayNoise} @e{ms89newmarbleOpenHat} q0 @o5
+#voice ms89newmarbleKickLoud = @{opllKick(low)}, @{opllKick(low)} @gain{0.4}
+#drum B = @{ms89newmarbleKickLoud} v15 !kick キック
+#drum S = @{opllSnare} v11 !snare スネア
+#drum H = @{ms89newdanceHat} v5 クローズハット
+#drum O = @{noise(hiss)} v6 オープンハット
+#drum C = @{opllCymbal} v6 シンバル
+
+#voice ms89dropEnv = @adsr{0.001,0.045,0,0.003}
+#voice ms89kickDrop = @{ayTone} @e{ms89dropEnv} @pitch{0,-600,-1200,-1800}
+#voice ms89snareDrop = @{ayTone} @e{ms89dropEnv} @pitch{600,0,-600,-1200}
+
+
+
+
+
+#wave breakSccEP = @bits{8} @role{chord} 0/127 31/127 60/127 82/127 97/127 105/127 108/127 106/127 101/127 96/127 89/127 81/127 71/127 58/127 41/127 21/127 0/127 -21/127 -41/127 -58/127 -71/127 -81/127 -89/127 -96/127 -101/127 -106/127 -108/127 -105/127 -97/127 -82/127 -60/127 -31/127
+#voice breakRhodesFM = @opll{bytes{134,129,28,0,248,242,38,37}}
+#voice breakMelEnv = @adsr{0.002,0.13,0.10,0.025}
+#voice breakEpDm = @{breakRhodesFM} @d-5, @{breakRhodesFM} @d300, @{breakRhodesFM} @d805
+#voice breakEpBb = @{breakRhodesFM} @d-5, @{breakRhodesFM} @d500, @{breakRhodesFM} @d805
+#voice breakEpMelody = @{breakRhodesFM}
+#voice breakCongaEnv = @adsr{0.001,0.105,0,0.014}
+#voice breakConga = @{sccSine} @e{breakCongaEnv} @pitch{150,0,-30}
+#voice breakBongoEnv = @adsr{0.001,0.055,0,0.008}
+#voice breakBongo = @{sccTriangle} @e{breakBongoEnv} @pitch{100,0}
+#voice breakShakeEnv = @adsr{0.008,0.035,0,0.012}
+#bundle breakShake = @{ayNoise} @e{breakShakeEnv}
+#drum I = @{ms89newmarbleKickLoud} v15 !kick イントロキック
+#drum J = @{opllSnare} v15 !snare イントロスネア
+#drum K = @{ms89newdanceHat} v10 イントロハット
+#drum L = @{ms89newdanceHat} v8 イントロハット弱
+#drum M = @{ms89newdanceHat} v9 イントロハット中
+
+#voice introDim = @{sccms89newsccMarbleEP} @e{ms89newchordShort} @d0, @{sccms89newsccMarbleEP} @e{ms89newchordShort} @d1500, @{sccms89newsccMarbleEP} @e{ms89newchordShort} @d1900, @{sccms89newsccMarbleEP} @e{ms89newchordShort} @d2600
+#ch Drums (FM＋NOISE)
+t128 q8 v13
+$beat = { B! . O . B!S! . O . B! . O . B!S! H O H }
+$drop = { B!C . O . B!S! . O . B! . O . B!S! H O H }
+$turn = { B! . O . B!S! H O . B! . O H B!S! . S! . }
+#label Intro hat
+@{drums 16}{ I!K . M L . M L . I!K . M L . M . L }
+v13
+#label LOOP
+#label Main
+@{drums 16}{
+$drop |
+$beat |
+$beat |
+$turn |
+$beat |
+$beat |
+$beat |
+B! . O . S! . O . . . S! S! . . . . |
+$drop |
+$beat |
+$beat |
+$turn |
+$beat |
+$beat |
+$turn |
+B! . O . B!S! . O . B! . O . B!C . . . |
+}
+#label ブレイク
+@{drums 16}{
+. . O . . . O . . . O . . . O . |
+. . O . . . O . . . O . . . O . |
+. . O . . . O . . . O . . . O . |
+. . O . . . O . . . O . . . O . |
+B! . O . . . O . B! . O . . . O . |
+B! . O . . . O . B! . O . . . O . |
+B! . O . . . O . B! . O . . . O . |
+B! . O . B! . O . B! . O . B! . O . |
+}
+#label 主題復帰
+t128 q8 v13
+@{drums 16}{
+$drop |
+$beat |
+$beat |
+$turn |
+$beat |
+$beat |
+$beat |
+B! . O . S! . O . . . S! S! . . . . |
+$drop |
+$beat |
+$beat |
+$turn |
+$beat |
+$beat |
+$turn |
+B! . O . B!S! . O . B! . O . B!C . . . |
+}
+
+
+#label OUTRO
+t128 q8 v13
+@{drums 16}{
+B! . O . B!S! . O . B! . O . B!S! . O . |
+B! . O . B!S! . O . B! . O . B!S! . O . |
+B! . O . B!S! . O . B! . O . B!S! . O . |
+B! . O . B!S! . O . B! . O . B!S! . O . |
+B! . H . B! . H . B! . H . B! . H . |
+B! . H . B! . H . B! . H . B! . H . |
+B! . . . B! . . . B! . . . B! . . . |
+B! . . . . . . . . . . . . . . . |
+}
+#ch Bass (SCC)
+t128 @{ms89newdanceBass} v8 q5 o2 l16
+$d = { r d d8 r8 d8 r d r8 a8 r8 }
+$b = { r b- b-8 r8 b-8 r b- r8 f8 r8 }
+$f = { r f f8 r8 f8 r f r8 c8 r8 }
+$x = { r c+ c+8 r8 c+8 r c+ r8 g+8 r8 }
+r1 |
+#label LOOP
+$d |
+$d |
+$b |
+$b |
+$d |
+$d |
+$b |
+r b- b-8 r8 b-8 r2 |
+$f |
+$f |
+$x |
+$x |
+$f |
+$f |
+$x |
+r f f8 r8 f8 f4 r4 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+t128 @{ms89newdanceBass} v8 q5 o2 l16
+$d |
+$d |
+$b |
+$b |
+$d |
+$d |
+$b |
+r b- b-8 r8 b-8 r2 |
+$f |
+$f |
+$x |
+$x |
+$f |
+$f |
+$x |
+r f f8 r8 f8 f4 r4 |
+
+
+#label OUTRO
+t128 @{ms89newdanceBass} v8 q5 o2 l16
+$f |
+$f |
+$x |
+$x |
+$f |
+$f |
+r1 |
+r1 |
+#ch Chord-stabs (SCC×3)
+t128 @{ms89newchordD} v6 q7 o4 l8
+$d = { @{ms89newchordD} r c r16 c8. r4 c r }
+$b = { @{ms89newchordB} r c r16 c8. r4 c r }
+$f = { @{ms89newchordF} r c r16 c8. r4 c r }
+$x = { @{ms89newchordX} r c r16 c8. r4 c r }
+r1 |
+#label LOOP
+$d |
+$d |
+$b |
+$b |
+$d |
+$d |
+$b |
+@{ms89newchordB} r c r16 c8. r2 |
+$f |
+$f |
+$x |
+$x |
+$f |
+$f |
+$x |
+@{ms89newchordF} r c r16 c8. c4 r4 |
+t128 v9 q8 o4 @{breakEpDm} c1 |
+t128 v9 q8 o4 @{breakEpDm} c1 |
+t128 v9 q8 o4 @{breakEpBb} c1 |
+t128 v9 q8 o4 @{breakEpBb} c1 |
+t128 v9 q8 o4 @{breakEpDm} c1 |
+t128 v9 q8 o4 @{breakEpDm} c1 |
+t128 v9 q8 o4 @{breakEpBb} c1 |
+t128 v9 q8 o4 @{breakEpDm} c1 |
+t128 @{ms89newchordD} v6 q7 o4 l8
+$d |
+$d |
+$b |
+$b |
+$d |
+$d |
+$b |
+@{ms89newchordB} r c r16 c8. r2 |
+$f |
+$f |
+$x |
+$x |
+$f |
+$f |
+$x |
+@{ms89newchordF} r c r16 c8. c4 r4 |
+
+
+#label OUTRO
+t128 @{ms89newchordD} v6 q7 o4 l8
+$f |
+$f |
+$x |
+$x |
+r1 |
+r1 |
+r1 |
+r1 |
+#ch Arpeggio (SCC)
+t128 @{ms89newdanceArp} v6 q4 o4 l16
+$d = { d r a r >c< r >e< r r4 a8 r8 }
+$b = { b- r >f< r >a< r >c< r r4 >f8< r8 }
+$f = { f r >c< r >e-< r >g< r r4 >c8< r8 }
+$x = { c+ r g+ r >c< r >e-< r r4 g+8 r8 }
+r1 |
+#label LOOP
+$d |
+$d |
+$b |
+$b |
+v7 $d |
+$d |
+$b |
+r1 |
+v8 $f |
+$f |
+$x |
+$x |
+$f |
+$f |
+$x |
+f r >c< r >e-< r >g< r f4 r4 |
+t128 @{breakEpMelody} v9 q4 o4 l16 f r >c< r >e-< r >g< r r4 >c8< r8 |
+t128 @{breakEpMelody} v9 q4 o4 l16 f r >c< r >e-< r >g< r r4 >c8< r8 |
+t128 @{breakEpMelody} v9 q4 o4 l16 c+ r g+ r >c< r >e-< r r4 g+8 r8 |
+t128 @{breakEpMelody} v9 q4 o4 l16 c+ r g+ r >c< r >e-< r r4 g+8 r8 |
+t128 @{breakEpMelody} v9 q4 o4 l16 f r >c< r >e-< r >g< r r4 >c8< r8 |
+t128 @{breakEpMelody} v9 q4 o4 l16 f r >c< r >e-< r >g< r r4 >c8< r8 |
+t128 @{breakEpMelody} v9 q4 o4 l16 c+ r g+ r >c< r >e-< r r4 g+8 r8 |
+t128 @{breakEpMelody} v9 q4 o4 l16 f r >c< r >e-< r >g< r f4 r4 |
+t128 @{ms89newdanceArp} v6 q4 o4 l16
+$d |
+$d |
+$b |
+$b |
+v7 $d |
+$d |
+$b |
+r1 |
+v8 $f |
+$f |
+$x |
+$x |
+$f |
+$f |
+$x |
+f r >c< r >e-< r >g< r f4 r4 |
+
+
+#label OUTRO
+t128
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+#ch Hook (FM)
+t128 @{opllChopBass} v8 q4 o3 l8
+$dm = { g*a32&a8&a32 r16 >c< r a4 r4 }
+$fm = { >b-*c32&c8&c32 r16 e- r c4< r4 }
+r1 |
+#label LOOP
+r1 |
+$dm |
+r1 |
+$dm |
+$dm |
+r1 |
+$dm |
+r1 |
+v8 $fm |
+r1 |
+$fm |
+r1 |
+$fm |
+r1 |
+>b-*c32&c8&c32 r16 e- r c r e- r< |
+>c4< r4 r2 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+t128 @{opllChopBass} v8 q4 o3 l8
+r1 |
+$dm |
+r1 |
+$dm |
+$dm |
+r1 |
+$dm |
+r1 |
+v8 $fm |
+r1 |
+$fm |
+r1 |
+$fm |
+r1 |
+>b-*c32&c8&c32 r16 e- r c r e- r< |
+>c4< r4 r2 |
+
+
+#label OUTRO
+t128
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+#ch Hook-attack (FM)
+t128 @{opllChopBass} @d7 v11 q1 o3 l8
+$dm = { q2 g*a32 q1 r8 r32 r16 >c16< r16 r a16 r16 r8 r4 }
+$fm = { q2 >b-*c32 q1 r8 r32 r16 e-16 r16 r c16< r16 r8 r4 }
+r1 |
+#label LOOP
+r1 |
+$dm |
+r1 |
+$dm |
+$dm |
+r1 |
+$dm |
+r1 |
+v12 $fm |
+r1 |
+$fm |
+r1 |
+$fm |
+r1 |
+q2 >b-*c32 q1 r8 r32 r16 e-16 r16 r c16 r16 r e-16 r16 r< |
+>c16< r16 r8 r4 r2 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+t128 @{opllChopBass} @d7 v11 q1 o3 l8
+r1 |
+$dm |
+r1 |
+$dm |
+$dm |
+r1 |
+$dm |
+r1 |
+v12 $fm |
+r1 |
+$fm |
+r1 |
+$fm |
+r1 |
+q2 >b-*c32 q1 r8 r32 r16 e-16 r16 r c16 r16 r e-16 r16 r< |
+>c16< r16 r8 r4 r2 |
+
+
+#label OUTRO
+t128
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+#ch Chord-support (PSG)
+t128 @{ms89chordPSG} v6 q7 o4 l8
+$d = { r e r16 e8. r4 e r }
+$b = { r c r16 c8. r4 c r }
+$f = { r g r16 g8. r4 g r }
+$x = { r e- r16 e-8. r4 e- r }
+r1 |
+#label LOOP
+$d |
+$d |
+$b |
+$b |
+$d |
+$d |
+$b |
+@{ms89chordPSG} r c r16 c8. r2 |
+$f |
+$f |
+$x |
+$x |
+$f |
+$f |
+$x |
+@{ms89chordPSG} r g r16 g8. g4 r4 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+t128 @{ms89chordPSG} v6 q7 o4 l8
+$d |
+$d |
+$b |
+$b |
+$d |
+$d |
+$b |
+@{ms89chordPSG} r c r16 c8. r2 |
+$f |
+$f |
+$x |
+$x |
+$f |
+$f |
+$x |
+@{ms89chordPSG} r g r16 g8. g4 r4 |
+
+
+#label OUTRO
+t128 @{ms89chordPSG} v6 q7 o4 l8
+$f |
+$f |
+$x |
+$x |
+r1 |
+r1 |
+r1 |
+r1 |
+#ch Bass-support (FM)
+t128 @{opllAcousticBass} @e{sccms89newsccBassBodyEnv} v9 q5 o2 l16
+$d = { r d d8 r8 d8 r d r8 a8 r8 }
+$b = { r b- b-8 r8 b-8 r b- r8 f8 r8 }
+$f = { r f f8 r8 f8 r f r8 c8 r8 }
+$x = { r c+ c+8 r8 c+8 r c+ r8 g+8 r8 }
+r1 |
+#label LOOP
+$d |
+$d |
+$b |
+$b |
+$d |
+$d |
+$b |
+r b- b-8 r8 b-8 r2 |
+$f |
+$f |
+$x |
+$x |
+$f |
+$f |
+$x |
+r f f8 r8 f8 f4 r4 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+t128 @{opllAcousticBass} @e{sccms89newsccBassBodyEnv} v9 q5 o2 l16
+$d |
+$d |
+$b |
+$b |
+$d |
+$d |
+$b |
+r b- b-8 r8 b-8 r2 |
+$f |
+$f |
+$x |
+$x |
+$f |
+$f |
+$x |
+r f f8 r8 f8 f4 r4 |
+
+
+#label OUTRO
+t128 @{opllAcousticBass} @e{sccms89newsccBassBodyEnv} v9 q5 o2 l16
+$f |
+$f |
+$x |
+$x |
+$f |
+$f |
+r1 |
+r1 |
+#ch Drum-support (PSG)
+t128 v8 q4 l16
+$beat = { @{ms89kickDrop} o3 c r r r @{ms89kickDrop} o3 c r r r @{ms89kickDrop} o3 c r r r @{ms89kickDrop} o3 c r r r }
+$drop = { @{ms89kickDrop} o3 c r r r @{ms89kickDrop} o3 c r r r @{ms89kickDrop} o3 c r r r @{ms89kickDrop} o3 c r r r }
+$turn = { @{ms89kickDrop} o3 c r r r @{ms89kickDrop} o3 c r r r @{ms89kickDrop} o3 c r r r @{ms89kickDrop} o3 c r @{ms89snareDrop} o4 c r }
+r1 |
+#label LOOP
+$drop |
+$beat |
+$beat |
+$turn |
+$beat |
+$beat |
+$beat |
+@{ms89kickDrop} o3 c r r r @{ms89snareDrop} o4 c r r r r r @{ms89snareDrop} o4 c @{ms89snareDrop} o4 c r r r r |
+$drop |
+$beat |
+$beat |
+$turn |
+$beat |
+$beat |
+$turn |
+@{ms89kickDrop} o3 c r r r @{ms89kickDrop} o3 c r r r @{ms89kickDrop} o3 c r r r @{ms89kickDrop} o3 c r r r |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+t128 v8 q4 l16
+$drop |
+$beat |
+$beat |
+$turn |
+$beat |
+$beat |
+$beat |
+@{ms89kickDrop} o3 c r r r @{ms89snareDrop} o4 c r r r r r @{ms89snareDrop} o4 c @{ms89snareDrop} o4 c r r r r |
+$drop |
+$beat |
+$beat |
+$turn |
+$beat |
+$beat |
+$turn |
+@{ms89kickDrop} o3 c r r r @{ms89kickDrop} o3 c r r r @{ms89kickDrop} o3 c r r r @{ms89kickDrop} o3 c r r r |
+
+
+#label OUTRO
+t128 v8 q4 l16
+$beat |
+$beat |
+$beat |
+$beat |
+$beat |
+$beat |
+$beat |
+@{ms89kickDrop} o3 c r r r r r r r r r r r r r r r |
+
+#ch EP echo melody (FM)
+t128 @{breakEpMelody} v7 q4 o4 l16
+r1 |
+#label LOOP
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r8
+t128 @{breakEpMelody} v7 q4 o4 l16 f r >c< r >e-< r >g< r r4 >c8< r8 |
+t128 @{breakEpMelody} v7 q4 o4 l16 f r >c< r >e-< r >g< r r4 >c8< r8 |
+t128 @{breakEpMelody} v7 q4 o4 l16 c+ r g+ r >c< r >e-< r r4 g+8 r8 |
+t128 @{breakEpMelody} v7 q4 o4 l16 c+ r g+ r >c< r >e-< r r4 g+8 r8 |
+t128 @{breakEpMelody} v7 q4 o4 l16 f r >c< r >e-< r >g< r r4 >c8< r8 |
+t128 @{breakEpMelody} v7 q4 o4 l16 f r >c< r >e-< r >g< r r4 >c8< r8 |
+t128 @{breakEpMelody} v7 q4 o4 l16 c+ r g+ r >c< r >e-< r r4 g+8 r8 |
+t128 @{breakEpMelody} v7 q4 o4 l16 f r >c< r >e-< r >g< r f4 r8 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+#label OUTRO
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+
+#ch EP echo upper chord (FM)
+t128 @{breakRhodesFM} @d805 v7 q8 o4
+r1 |
+#label LOOP
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r8
+c1 |
+c1 |
+c1 |
+c1 |
+c1 |
+c1 |
+c1 |
+c2&c4&c8 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+#label OUTRO
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |
+r1 |

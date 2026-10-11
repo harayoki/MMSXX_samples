@@ -1,4 +1,4 @@
-// MMS/XX player and audio engine, source commit df32dbb160cf08cd34ee53d5fbad4b885120c1a6
+// MMS/XX player and audio engine, source commit 32de3faf464ae6c68b3185795703ca1f6af5bac6
 (() => {
   var __defProp = Object.defineProperty;
   var __export = (target, all) => {
@@ -6,7 +6,7 @@
       __defProp(target, name, { get: all[name], enumerable: true });
   };
 
-  // engine/sound/audio.js
+  // .player-build/sound/audio.js
   var audio_exports = {};
   __export(audio_exports, {
     ChipTuneSound: () => ChipTuneSound,
@@ -17,7 +17,7 @@
     snapVol: () => snapVol
   });
 
-  // engine/sound/mml.js
+  // .player-build/sound/mml.js
   var mml_exports = {};
   __export(mml_exports, {
     AY_ENV_SHAPES: () => AY_ENV_SHAPES,
@@ -55,6 +55,7 @@
     readVoices: () => readVoices,
     readWaves: () => readWaves,
     registerAY: () => registerAY,
+    registerAnalog: () => registerAnalog,
     registerBaked: () => registerBaked,
     registerBeep: () => registerBeep,
     registerBrass: () => registerBrass,
@@ -91,7 +92,7 @@
     waveSteal: () => waveSteal
   });
 
-  // engine/sound/gm.js
+  // .player-build/sound/gm.js
   var GM_NAMES = [
     "Acoustic Grand Piano",
     "Bright Acoustic Piano",
@@ -237,7 +238,7 @@
     return GM_NAMES.filter((n) => key(n).startsWith(head)).slice(0, limit);
   }
 
-  // engine/sound/opllvoice.js
+  // .player-build/sound/opllvoice.js
   var OP_FIELDS = {
     mul: {
       at: "ml",
@@ -400,7 +401,7 @@
     return hold && opllAttackMs(ar) < STEAL_ATTACK_MS ? "ok" : "avoid";
   }
 
-  // engine/sound/opll.js
+  // .player-build/sound/opll.js
   var OPLL_INST = [
     0,
     0,
@@ -1764,7 +1765,7 @@ class OpllBank extends AudioWorkletProcessor {
 registerProcessor('mmsxx-opll', OpllBank);
 `;
 
-  // engine/sound/ym2151.js
+  // .player-build/sound/ym2151.js
   var OPM_CLOCK = 3579545;
   var OPM_RATE = OPM_CLOCK / 64;
   var OPM_CODE = `
@@ -2079,8 +2080,12 @@ class OPM {
     const r = this.reg;
     const nf = (r[0x0f] & 0x1f) ^ 0x1f;
     for (let rep = 0; rep < 2; rep++) {
-      this.noiseLfsr = ((this.noiseLfsr << 1) |
-        (((this.noiseLfsr >>> 17) ^ (this.noiseLfsr >>> 14) ^ 1) & 1)) >>> 0;
+      // **\u5148\u306B\u305A\u3089\u3057\u3066\u304B\u3089\u3001\u305A\u3089\u3057\u305F\u3082\u306E\u306E 17 \u3068 14 \u3092\u898B\u308B**(\u539F\u5178\u306E\u9806\u756A)\u3002
+      // \u305A\u3089\u3059\u524D\u306E\u5024\u304B\u3089\u53D6\u308B\u3068 189 \u56DE\u3067\u540C\u3058\u4E26\u3073\u306B\u623B\u308A\u3001296Hz \u306E\u30D6\u30B6\u30FC\u306B\u306A\u308B\u3002
+      // \u6B63\u3057\u3044\u9806\u756A\u306A\u3089 131071 \u56DE\u3067\u3001\u566A\u97F3\u3068\u3057\u3066\u805E\u3053\u3048\u308B(2026-10-05)
+      this.noiseLfsr = (this.noiseLfsr << 1) >>> 0;
+      this.noiseLfsr = (this.noiseLfsr
+        | (((this.noiseLfsr >>> 17) ^ (this.noiseLfsr >>> 14) ^ 1) & 1)) >>> 0;
       if (this.noiseCount++ >= nf) {
         this.noiseCount = 0;
         this.noiseState = (this.noiseLfsr >>> 17) & 1;
@@ -3269,7 +3274,7 @@ registerProcessor('mmsxx-opm', OpmBank);
     return hold && ms < attackMs ? "ok" : "avoid";
   }
 
-  // engine/sound/tones.js
+  // .player-build/sound/tones.js
   var tones_exports = {};
   __export(tones_exports, {
     TONE_FRAME: () => TONE_FRAME,
@@ -3840,7 +3845,7 @@ registerProcessor('mmsxx-opm', OpmBank);
     }
   }
 
-  // engine/sound/mml.js
+  // .player-build/sound/mml.js
   var SEMI = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 };
   var LETTER = { c: 0, d: 1, e: 2, f: 3, g: 4, a: 5, b: 6 };
   var LETTER_OF_SEMI = { 0: 0, 2: 1, 4: 2, 5: 3, 7: 4, 9: 5, 11: 6 };
@@ -4968,6 +4973,14 @@ registerProcessor('mmsxx-opm', OpmBank);
       ...opts.set > 0 ? { set: Math.floor(opts.set) } : {},
       // 自分で作った音色なら、レジスタ 0x00〜0x07 に書く 8 バイト
       ...opts.voice ? { voice: opts.voice } : {},
+      // 同じ `v` で鳴らしたときの大きさ。矩形波を 1 とした比。
+      //
+      // **鳴りには効かない。**OPLL の音量はチップの音量レジスタが持つので、
+      // 外から掛けると実機と違う鳴り方になる(下の `_playVoice` のところ)。
+      // 持たせるのは、音量を合わせる層が本当の大きさを知るため
+      // (`tool/core/volmap.js` の `ampOf`)。矩形波と並べたときに
+      // どれだけ離れるかは、そこから出る
+      ...opts.gain > 0 ? { gain: Math.max(0.1, Math.min(4, Number(opts.gain))) } : {},
       // 書いた高さからずらす半音。作り分けで高さ違いを並べるために持つ
       // (`opllKick(low)` など)。曲の側で `#bundle` に `@o` を書くのと同じこと
       ...opts.semi ? { semi: Math.round(opts.semi) } : {},
@@ -5090,6 +5103,22 @@ registerProcessor('mmsxx-opm', OpmBank);
       id: at >= 0 ? at : WAVEFORMS.length,
       name,
       kind: "modal",
+      patch: String(params.patch || ""),
+      role: roleOf(opts.role, name),
+      ...meta,
+      special: [...new Set(meta.special.concat("worklet"))]
+    };
+    if (at >= 0) WAVEFORMS[at] = entry;
+    else WAVEFORMS.push(entry);
+    return entry.id;
+  }
+  function registerAnalog(name, params = {}, opts = {}) {
+    const at = requireFreeName(name, opts.overwrite);
+    const meta = metaOf(opts);
+    const entry = {
+      id: at >= 0 ? at : WAVEFORMS.length,
+      name,
+      kind: "analog",
       patch: String(params.patch || ""),
       role: roleOf(opts.role, name),
       ...meta,
@@ -6533,8 +6562,8 @@ ${val}`;
       if (word === name) {
         bad(`[ChpTnSnd] MML: \u5408\u56F3 "!${name}" \u3092\u540C\u3058\u540D\u524D\u3078\u767B\u9332\u3057\u3066\u3044\u307E\u3059(\u77ED\u3044\u540D\u524D\u3092\u4ED8\u3051\u308B\u305F\u3081\u306E\u66F8\u304D\u65B9\u3067\u3059)`);
       }
-      const num = Number(rest[0]);
-      table.set(name, { name: word, arg: Number.isFinite(num) ? num : 0 });
+      const num2 = Number(rest[0]);
+      table.set(name, { name: word, arg: Number.isFinite(num2) ? num2 : 0 });
       i = k + 1;
     }
     return { body, table };
@@ -7421,14 +7450,16 @@ ${val}`;
                 notes[at].lane = voice.lane;
               });
             }
-            for (const n of notes) {
+            notes.forEach((n, at) => {
               wave = n.wave;
               bundle = n.bundle;
               vol = n.vol;
               env = n.env;
               lane = n.lane;
-              pushNote(dur, freqOf2(n.midi), n.mark ? { chord: id, mark: n.mark } : { chord: id });
-            }
+              const meta2 = { chord: id, sub: at };
+              if (n.mark) meta2.mark = n.mark;
+              pushNote(dur, freqOf2(n.midi), meta2);
+            });
             wave = keepWave;
             bundle = keepBundle;
             vol = keepVol;
@@ -7473,8 +7504,8 @@ ${val}`;
           const said = cueNames[Number(n)] ?? "";
           const [word, ...rest] = said.split(/\s+/);
           if (word) {
-            const num = Number(rest[0]);
-            cues.push({ name: word, arg: Number.isFinite(num) ? num : 0, t: time });
+            const num2 = Number(rest[0]);
+            cues.push({ name: word, arg: Number.isFinite(num2) ? num2 : 0, t: time });
           }
         } else if (ch === TEXT_AT) {
           let n = "";
@@ -8197,7 +8228,7 @@ ${val}`;
     return { ok: errors.length === 0, errors, warnings, channels, total };
   }
 
-  // engine/sound/chipset.js
+  // .player-build/sound/chipset.js
   var ROLE_RANK = {
     lead: 6,
     // 旋律。いちばん前に出るもの
@@ -8218,7 +8249,7 @@ ${val}`;
   };
   var ROLES_COVERED = ROLES.every((r) => ROLE_RANK[r] !== void 0);
 
-  // engine/sound/mask.js
+  // .player-build/sound/mask.js
   function groupsOf(tracks) {
     const out = [];
     for (const t of tracks ?? []) {
@@ -8254,7 +8285,7 @@ ${val}`;
     return { group: now ? now.name : null, sets, silent, machine };
   }
 
-  // engine/sound/wavetables.js
+  // .player-build/sound/wavetables.js
   var N = 32;
   var build = (f) => Array.from({ length: N }, (_, i) => f(i / N, i));
   var norm = (w) => {
@@ -8423,7 +8454,7 @@ ${val}`;
     );
   }
 
-  // engine/sound/fmpresets.js
+  // .player-build/sound/fmpresets.js
   var FM_PRESETS = {
     // 1 バイオリン。弓のこすれを出すため、比を少しずらして倍音を残す
     // 2 ギター。はじいた瞬間だけ硬く、あとは丸くなる
@@ -8506,7 +8537,7 @@ ${val}`;
     }
   }
 
-  // engine/sound/beeppresets.js
+  // .player-build/sound/beeppresets.js
   var BEEP_PRESETS = {
     // ---- 搬送波を刻む型。**音程を変える回路が無い機械** ----
     // 2.4kHz が鳴りっぱなしで、ソフトはそれを On/Off するだけ。
@@ -8698,7 +8729,7 @@ ${val}`;
     }
   }
 
-  // engine/sound/opmpresets.js
+  // .player-build/sound/opmpresets.js
   var OPM_PRESETS = {
     "opnBrass": {
       noteJa: "4 \u30AA\u30DA\u306E\u91D1\u7BA1\u3002\u30AA\u30DA\u30EC\u30FC\u30BF\u304C\u5897\u3048\u305F\u3076\u3093\u3001\u4F38\u3070\u3057\u3066\u3044\u308B\u3042\u3044\u3060\u306B\u500D\u97F3\u304C\u80B2\u3064\u3002\u672C\u7269\u306E\u91D1\u7BA1\u3068\u540C\u3058\u52D5\u304D\u3067\u30012 \u30AA\u30DA\u306B\u306F\u3067\u304D\u306A\u3044",
@@ -8796,6 +8827,40 @@ ${val}`;
         { ar: 27, d1r: 11, d2r: 0, rr: 10, d1l: 3, tl: 0, ks: 0, mul: 1, dt1: 5, dt2: 0 }
       ] })
     },
+    // ---- LFO を使うもの(2026-10-05)----
+    //
+    // どちらも `dev: wip`。LFO を入れたので、まず使える形を 2 つ置いた。
+    // 吟味はこれから。揺れの速さと深さは、聞いて決め直す。
+    //
+    // ノイズの打楽器(ハイハット・シンバル)も作ったが、置かないことにした。
+    // OPM のノイズは帯域が広く、短く切ると破裂音、伸ばすと波の音になる。
+    // 金物に寄せるには倍音のほうを主役にすることになり、それならノイズは要らない。
+    "opmLeadVib": {
+      noteJa: "\u30D3\u30D6\u30E9\u30FC\u30C8\u306E\u639B\u304B\u3063\u305F\u30EA\u30FC\u30C9\u3002LFO \u304C\u9AD8\u3055\u3092\u63FA\u3089\u3059",
+      role: "lead",
+      note: "Lead with vibrato: the LFO moves the pitch.",
+      of: "\u63FA\u308C\u308B\u30EA\u30FC\u30C9\u3002`opnLead` \u306B LFO \u3092\u8DB3\u3057\u305F\u3082\u306E",
+      dev: ["wip"],
+      patch: opmPatch({ alg: 4, fb: 4, pms: 4, lfo: { rate: 196, pmd: 36, wf: 2 }, ops: [
+        { ar: 25, d1r: 12, d2r: 0, rr: 10, d1l: 3, tl: 34, ks: 0, mul: 3, dt1: 2, dt2: 0 },
+        { ar: 23, d1r: 7, d2r: 0, rr: 9, d1l: 2, tl: 0, ks: 0, mul: 1, dt1: 6, dt2: 0 },
+        { ar: 25, d1r: 11, d2r: 0, rr: 10, d1l: 3, tl: 38, ks: 0, mul: 2, dt1: 1, dt2: 0 },
+        { ar: 23, d1r: 7, d2r: 0, rr: 9, d1l: 2, tl: 4, ks: 0, mul: 1, dt1: 5, dt2: 0 }
+      ] })
+    },
+    "opmBrassTrem": {
+      noteJa: "\u30C8\u30EC\u30E2\u30ED\u306E\u639B\u304B\u3063\u305F\u91D1\u7BA1\u3002LFO \u304C\u97F3\u91CF\u3092\u63FA\u3089\u3059",
+      role: "lead",
+      note: "Brass with tremolo: the LFO moves the level.",
+      of: "\u63FA\u308C\u308B\u91D1\u7BA1\u3002`opnBrass` \u306B LFO \u3092\u8DB3\u3057\u3001\u51FA\u53E3\u306E\u30AA\u30DA\u3060\u3051\u3067\u53D7\u3051\u308B\u3002\u6DF1\u304F\u639B\u3051\u308B\u3068\u9014\u5207\u308C\u3066\u805E\u3053\u3048\u308B",
+      dev: ["wip"],
+      patch: opmPatch({ alg: 2, fb: 5, ams: 1, lfo: { rate: 200, amd: 20, wf: 2 }, ops: [
+        { ar: 17, d1r: 8, d2r: 0, rr: 10, d1l: 1, tl: 29, ks: 0, mul: 1, dt1: 2, dt2: 0 },
+        { ar: 17, d1r: 8, d2r: 0, rr: 10, d1l: 1, tl: 33, ks: 0, mul: 1, dt1: 6, dt2: 0 },
+        { ar: 17, d1r: 8, d2r: 0, rr: 10, d1l: 1, tl: 31, ks: 0, mul: 1, dt1: 1, dt2: 0 },
+        { ar: 17, d1r: 7, d2r: 0, rr: 9, d1l: 1, tl: 0, ks: 0, mul: 1, dt1: 5, dt2: 0, ame: 1 }
+      ] })
+    },
     "opmTom": {
       noteJa: "\u97F3\u7A0B\u306E\u843D\u3061\u308B\u30BF\u30E0",
       role: "perc",
@@ -8809,9 +8874,19 @@ ${val}`;
       ] })
     }
   };
+  var PREFIX_TAGS = {
+    opn: ["opn", "pc88", "pc98"],
+    opm: ["opm", "x68000", "arcade"]
+  };
   function registerOPMPresets() {
     for (const [name, p] of Object.entries(OPM_PRESETS)) {
-      registerOPM(name, p.patch, { note: p.note, noteJa: p.noteJa, role: p.role });
+      registerOPM(name, p.patch, {
+        note: p.note,
+        noteJa: p.noteJa,
+        role: p.role,
+        tags: PREFIX_TAGS[name.slice(0, 3)],
+        dev: p.dev
+      });
     }
     registerBaked("bakedBrass", {
       from: "opnBrass",
@@ -8823,7 +8898,7 @@ ${val}`;
     });
   }
 
-  // engine/sound/extrawaves.js
+  // .player-build/sound/extrawaves.js
   var EXTRA_LEN = 32;
   var build2 = (fn) => Array.from({ length: EXTRA_LEN }, (_, i) => fn(i / EXTRA_LEN));
   var pulse = (n) => build2((p) => p < n / 16 ? 1 : -1);
@@ -8955,7 +9030,7 @@ ${val}`;
     }
   }
 
-  // engine/sound/pcmbake.js
+  // .player-build/sound/pcmbake.js
   var MIN_LOOP = 1024;
   function periodMultiple(ratios, maxM = 8) {
     for (let m = 1; m <= maxM; m++) {
@@ -9037,7 +9112,7 @@ ${val}`;
     };
   }
 
-  // engine/sound/opllpresets.js
+  // .player-build/sound/opllpresets.js
   var OPLL_PRESETS = [
     [
       1,
@@ -9348,10 +9423,33 @@ ${val}`;
     ["mid", 0, "The pitch the real driver used, 109.2Hz. Tight and light."],
     ["high", 12, "An octave up, 218.5Hz. Hard and small. Lay noise over it and it reads as a snare."]
   ];
+  var OPLL_PULSES = [
+    [
+      "12",
+      [33, 33, 14, 30, 240, 240, 7, 7],
+      0.279,
+      "Aimed at a 12.5% pulse: thin and nasal. Two operators matched against the first sixteen partials, not a real duty cycle. About 16.7dB quieter than pulse(12) at the same v, so raise it or lower the rest."
+    ],
+    [
+      "25",
+      [33, 33, 14, 29, 240, 240, 7, 7],
+      0.468,
+      "Aimed at a 25% pulse: reedy, the common all-round chip voice. Two operators matched against the first sixteen partials, not a real duty cycle. About 12.2dB quieter than pulse(25) at the same v."
+    ],
+    [
+      "50",
+      [34, 33, 32, 7, 240, 240, 7, 7],
+      0.817,
+      "Aimed at a square wave: hollow and even. Two operators matched against the first sixteen partials, not a real duty cycle. About 7.3dB quieter than pulse(50) at the same v."
+    ]
+  ];
+  var OPLL_VOL = { vcurve: "3db", vsteps: 16 };
+  var OPLL_CHOP_BASS = [5, 2, 19, 0, 176, 182, 3, 89];
   function registerOPLLPresets() {
     for (const [inst, name, role, noteJa, note] of OPLL_PRESETS) {
       try {
         registerOPLL(name, inst, {
+          ...OPLL_VOL,
           role,
           noteJa: `${noteJa}\u3002YM2413 \u306E ${inst} \u756A`,
           note,
@@ -9364,7 +9462,7 @@ ${val}`;
     for (const [set, list] of [[2, OPLLP_PRESETS], [1, VRC7_PRESETS]]) {
       for (const [inst, name, role, noteJa, note] of list) {
         try {
-          registerOPLL(name, inst, { role, set, noteJa, note });
+          registerOPLL(name, inst, { ...OPLL_VOL, role, set, noteJa, note });
         } catch (e) {
         }
       }
@@ -9386,6 +9484,7 @@ ${val}`;
         for (const [value, semi, vn] of OPLL_KICK_VARIANTS) {
           try {
             registerOPLL(`${name}(${value})`, 16, {
+              ...OPLL_VOL,
               role: "perc",
               drum,
               semi,
@@ -9399,6 +9498,7 @@ ${val}`;
       }
       try {
         registerOPLL(name, 16, {
+          ...OPLL_VOL,
           role: "perc",
           drum,
           noteJa: `${noteJa}\u3002\u4F7F\u3046\u3068\u97F3\u306E\u30C1\u30E3\u30F3\u30CD\u30EB\u304C 9 \u672C\u304B\u3089 6 \u672C\u306B\u6E1B\u308B`,
@@ -9407,15 +9507,45 @@ ${val}`;
       } catch (e) {
       }
     }
+    try {
+      registerFamily("opllPulse", {
+        note: "The OPLL standing in for a pulse wave, so a PSG channel can be freed for noise. Two operators matched against the first sixteen partials of a pulse; the duty cycle itself is not reproduced. Quieter than the real pulse at the same v \u2014 how much is in each width. The chip holds one user voice at a time, so these three cannot sound independently at once.",
+        params: [{
+          name: "width",
+          default: "50",
+          note: "Which pulse width it aims at, in percent. The same values pulse() takes.",
+          values: OPLL_PULSES.map(([value, , , vn]) => ({ value, note: vn }))
+        }]
+      });
+    } catch (e) {
+    }
+    for (const [width, bytes, gain, note] of OPLL_PULSES) {
+      try {
+        registerOPLLVoice(
+          `opllPulse(${width})`,
+          { bytes },
+          { ...OPLL_VOL, gain, role: "lead", note }
+        );
+      } catch (e) {
+      }
+    }
+    try {
+      registerOPLLVoice("opllChopBass", { bytes: OPLL_CHOP_BASS }, {
+        ...OPLL_VOL,
+        role: "bass",
+        note: "A chopper bass: a short biting pluck that keeps the same tone across octaves. Modulator ML 5 against carrier ML 2, a 2.5 ratio, so the written pitch sounds an octave higher. KSR is off on both operators, which is what keeps o2 and o5 the same as o3 and o4. Matched against a 2-operator OPN lead, sidebands read every 220Hz up to 18kHz. The chip holds one user voice at a time."
+      });
+    } catch (e) {
+    }
     for (const [name, spec, note] of OPLL_USER_DRUMS) {
       try {
-        registerOPLLVoice(name, spec, { role: "perc", note, dev: ["check"] });
+        registerOPLLVoice(name, spec, { ...OPLL_VOL, role: "perc", note, dev: ["check"] });
       } catch (e) {
       }
     }
   }
 
-  // engine/sound/ay.js
+  // .player-build/sound/ay.js
   var AY_CLOCK = 1789772;
   var AY_VOLTBL = [
     [
@@ -9955,7 +10085,7 @@ class AyBank extends AudioWorkletProcessor {
 registerProcessor('mmsxx-ay', AyBank);
 `;
 
-  // engine/sound/nes.js
+  // .player-build/sound/nes.js
   var NES_CLOCK = 1789773;
   var NES_NOISE_PERIODS = [4, 8, 16, 32, 64, 96, 128, 160, 202, 254, 380, 508, 762, 1016, 2034, 4068];
   var NES_DUTIES = [0.125, 0.25, 0.5, 0.75];
@@ -10468,7 +10598,7 @@ class NesBank extends AudioWorkletProcessor {
 registerProcessor('mmsxx-nes', NesBank);
 `;
 
-  // engine/sound/fds.js
+  // .player-build/sound/fds.js
   var FDS_CLOCK = 1789773;
   var FDS_LEN = 64;
   var FDS_OUT_PEAK = 2.4 * (95.88 / (8128 / 15 + 100)) * 1.876;
@@ -10835,7 +10965,7 @@ class FdsBank extends AudioWorkletProcessor {
 registerProcessor('mmsxx-fds', FdsBank);
 `;
 
-  // engine/sound/scc.js
+  // .player-build/sound/scc.js
   var SCC_CLOCK = 3579545;
   var SCC_OUT_GAIN = 0.1404;
   function sccPeriod(freq) {
@@ -11090,7 +11220,7 @@ class SccBank extends AudioWorkletProcessor {
 registerProcessor('mmsxx-scc', SccBank);
 `;
 
-  // engine/sound/pce.js
+  // .player-build/sound/pce.js
   var PCE_CLOCK = 3579545;
   var PCE_OUT_GAIN = 0.1393;
   function pcePeriod(freq) {
@@ -11415,7 +11545,7 @@ class PceBank extends AudioWorkletProcessor {
 registerProcessor('mmsxx-pce', PceBank);
 `;
 
-  // engine/sound/opnarhythm.js
+  // .player-build/sound/opnarhythm.js
   var OPNA_CLOCK = 7987200;
   var OPNA_RHYTHM_OUT_GAIN = 0.36;
   var OPNA_RHYTHM_KEYS = ["bd", "sd", "top", "hh", "tom", "rim"];
@@ -11431,7 +11561,12 @@ registerProcessor('mmsxx-pce', PceBank);
   function registerOPNARhythmPresets() {
     for (const [name, key2, note] of OPNA_RHYTHM_PRESETS) {
       try {
-        registerOPNARhythm(name, { key: key2 }, { role: "perc", note: note + REDRAWN });
+        registerOPNARhythm(
+          name,
+          { key: key2 },
+          // OPNA を積んだ機械(PC-88FA / MA と PC-98 の 86 ボード)でだけ鳴る
+          { role: "perc", note: note + REDRAWN, tags: ["opna", "pc88", "pc98", "drum"] }
+        );
       } catch (e) {
       }
     }
@@ -11622,7 +11757,7 @@ class OpnaRhythmBank extends AudioWorkletProcessor {
 registerProcessor('mmsxx-opna-rhythm', OpnaRhythmBank);
 `;
 
-  // engine/sound/duty.js
+  // .player-build/sound/duty.js
   var DUTY_CODE = `
 const FRAME = ${TONE_FRAME};
 
@@ -11776,7 +11911,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     return Math.min(0.98, Math.max(0.02, x));
   };
 
-  // engine/sound/modal.js
+  // .player-build/sound/modal.js
   var MODAL_NODE = "mmsxx-modal";
   var MODAL_VOICES = 24;
   var MODAL_MODES = 1024;
@@ -13129,7 +13264,7 @@ registerProcessor('${MODAL_NODE}', ModalBank);
     };
   }
 
-  // engine/sound/brass.js
+  // .player-build/sound/brass.js
   var BRASS_NODE = "mmsxx-brass";
   var BRASS_VOICES = 16;
   var BRASS_HOLD = 1;
@@ -13828,7 +13963,773 @@ registerProcessor('${BRASS_NODE}', BrassBank);
     return out;
   }
 
-  // engine/sound/demotunes.js
+  // .player-build/sound/filter.js
+  var FILTERS = {
+    lowpass: {
+      note: "Two-pole (12 dB/oct) low-pass. Cuts the harmonics above the cutoff. Raise the resonance to add a peak at the cutoff.",
+      params: {
+        cutoff: { unit: "Hz", min: 20, max: 2e4, default: 2e4, note: "Cutoff frequency in Hz. Above this the sound is cut. Kept below half the sample rate." },
+        resonance: { min: 0, max: 1, default: 0, note: "Peak at the cutoff. 0 is no peak. Near 1 the filter rings at the cutoff." },
+        drive: { min: 0, max: 1, default: 0, note: "Saturation inside the filter. 0 is clean. Higher values squash loud signals and the resonance peak, adding harmonics." }
+      }
+    },
+    highpass: {
+      note: "Two-pole (12 dB/oct) high-pass. Cuts the lows below the cutoff. Raise the resonance to add a peak at the cutoff.",
+      params: {
+        cutoff: { unit: "Hz", min: 20, max: 2e4, default: 20, note: "Cutoff frequency in Hz. Below this the sound is cut. Kept below half the sample rate." },
+        resonance: { min: 0, max: 1, default: 0, note: "Peak at the cutoff. 0 is no peak. Near 1 the filter rings at the cutoff." },
+        drive: { min: 0, max: 1, default: 0, note: "Saturation inside the filter. 0 is clean. Higher values squash loud signals and the resonance peak, adding harmonics." }
+      }
+    },
+    ladder: {
+      note: "Four-pole (24 dB/oct) low-pass in the style of the Moog ladder. Steeper than lowpass. The bass thins out as the resonance rises.",
+      params: {
+        cutoff: { unit: "Hz", min: 20, max: 2e4, default: 2e4, note: "Cutoff frequency in Hz. Above this the sound is cut. Kept below half the sample rate." },
+        resonance: { min: 0, max: 1, default: 0, note: "Feedback around the four stages. 0 is no peak. Near 1 the filter rings at the cutoff and the bass gets thinner." },
+        drive: { min: 0, max: 1, default: 0, note: "Saturation at the filter input after the feedback. 0 is clean. Higher values squash loud signals and the resonance peak, adding harmonics." }
+      }
+    }
+  };
+  var FILTER_CORE = `
+// \u30EC\u30BE\u30CA\u30F3\u30B9\u3092\u6E1B\u8870\u306E\u4FC2\u6570 k \u306B\u76F4\u3059\u30020 \u3067 k=2(Q=0.5\u3001\u5C71\u306A\u3057)\u30011 \u306B\u8FD1\u3065\u304F\u3068 k \u306F 0 \u3078\u3002
+// k=0 \u3061\u3087\u3046\u3069\u306F\u6E1B\u8870\u3057\u306A\u3044(\u7DDA\u5F62\u306E\u307E\u307E\u3067\u306F\u9CF4\u308A\u7D9A\u3051\u308B\u304B\u9ED9\u308B\u304B\u306B\u306A\u308B)\u306E\u3067\u3001\u624B\u524D\u3067\u6B62\u3081\u308B\u3002
+// k \u306B\u3064\u3044\u3066\u76F4\u7DDA\u306A\u306E\u3067\u30010.9 \u304B\u3089\u4E0A\u306F\u5C11\u3057\u52D5\u304B\u3059\u3060\u3051\u3067 Q \u304C\u5927\u304D\u304F\u5909\u308F\u308B\u3002
+// \u624B\u3067\u56DE\u3057\u3066\u56F0\u3063\u305F\u3089\u3001\u66F2\u7DDA\u3067\u5BFE\u5FDC\u3055\u305B\u308B\u30E2\u30FC\u30C9\u3092\u52A0\u3048\u308B\u3002\u65E2\u5B9A\u306F\u5909\u3048\u306A\u3044(2026-10-04)
+const K_MIN = 0.01;
+const damp = (r) => Math.max(K_MIN, 2 - 2 * Math.min(1, Math.max(0, r)));
+
+// drive \u3092\u98FD\u548C\u306E\u5F37\u3055 d \u306B\u76F4\u3059\u3002\u6F70\u3059\u5F62\u306F tanh(x * d) / d\u3002\u5C0F\u3055\u3044\u97F3\u306F\u50BE\u304D 1 \u3067
+// \u305D\u306E\u307E\u307E\u901A\u308B\u306E\u3067\u3001drive \u3092\u4E0A\u3052\u3066\u3082\u9759\u304B\u306A\u3068\u3053\u308D\u306E\u97F3\u91CF\u306F\u5909\u308F\u3089\u306A\u3044\u3002
+// d \u304C 0 \u306B\u8FD1\u3065\u304F\u3068 x \u306B\u8FD1\u3065\u304F\u306E\u3067\u30010 \u306E\u624B\u524D\u3068 0 \u3067\u97F3\u304C\u98DB\u3070\u306A\u3044
+const D_MAX = 4;
+const D_MIN = 1e-4;
+const sat = (x, d) => Math.tanh(x * d) / d;
+
+// \u30AB\u30C3\u30C8\u30AA\u30D5\u3092 tan \u306E\u5F15\u6570\u306B\u76F4\u3059\u3002\u30CA\u30A4\u30AD\u30B9\u30C8\u306E\u624B\u524D\u3067\u6B62\u3081\u308B(tan \u304C\u767A\u6563\u3059\u308B)
+const warp = (fc, sr) => Math.tan(Math.PI * Math.min(Math.max(fc, 1), sr * 0.49) / sr);
+
+/** 2 \u6975\u306E SVF\u3002low \u3068 high \u3092\u540C\u6642\u306B\u51FA\u3059\u3002\u3069\u3061\u3089\u3092\u4F7F\u3046\u304B\u306F\u7D99\u3044\u3060\u5074\u304C\u6C7A\u3081\u308B */
+class Svf {
+  constructor() { this.ic1 = 0; this.ic2 = 0; }
+  reset() { this.ic1 = 0; this.ic2 = 0; }
+  /** g = warp(\u30AB\u30C3\u30C8\u30AA\u30D5)\u3001k = damp(\u30EC\u30BE\u30CA\u30F3\u30B9)\u3001d = \u98FD\u548C\u306E\u5F37\u3055\u3002\u7D50\u679C\u306F this.low \u3068 this.high */
+  tick(x, g, k, d) {
+    const a1 = 1 / (1 + g * (g + k));
+    const a2 = g * a1;
+    const a3 = g * a2;
+    const v3 = x - this.ic2;
+    const v1 = a1 * this.ic1 + a2 * v3;
+    const v2 = this.ic2 + a2 * this.ic1 + a3 * v3;
+    this.ic1 = 2 * v1 - this.ic1;
+    this.ic2 = 2 * v2 - this.ic2;
+    if (d > D_MIN) { this.ic1 = sat(this.ic1, d); this.ic2 = sat(this.ic2, d); }
+    this.low = v2;
+    this.high = x - k * v1 - v2;
+  }
+}
+
+// \u7A2E\u985E\u3054\u3068\u306B\u3001\u30EC\u30BE\u30CA\u30F3\u30B9\u306E 0..1 \u3092\u81EA\u5206\u306E\u4FC2\u6570\u3078\u76F4\u3059\u53E3(res)\u3092\u6301\u3064\u3002
+// \u51E6\u7406\u5668\u306F\u52D5\u304B\u306A\u3044\u30D6\u30ED\u30C3\u30AF\u3067\u306F 1 \u56DE\u3060\u3051\u547C\u3076
+class LowPass extends Svf {
+  static res(r) { return damp(r); }
+  step(x, g, k, d = 0) { this.tick(x, g, k, d); return this.low; }
+}
+
+class HighPass extends Svf {
+  static res(r) { return damp(r); }
+  step(x, g, k, d = 0) { this.tick(x, g, k, d); return this.high; }
+}
+
+// \u30E9\u30C0\u30FC\u306E\u5E30\u9084\u30024 \u3067\u767A\u632F\u306E\u5883\u76EE\u3002\u7DDA\u5F62\u306E\u307E\u307E\u3067\u306F\u5883\u76EE\u3067\u632F\u5E45\u304C\u4FDD\u3066\u306A\u3044\u306E\u3067\u624B\u524D\u3067\u6B62\u3081\u308B
+const K_LADDER = 3.96;
+
+/** 4 \u6975\u30E9\u30C0\u30FC\u30021 \u6975\u306E\u30ED\u30FC\u30D1\u30B9 4 \u3064\u3068\u3001\u51FA\u53E3\u304B\u3089\u5165\u53E3\u3078\u306E\u5E30\u9084 */
+class Ladder {
+  constructor() { this.s1 = 0; this.s2 = 0; this.s3 = 0; this.s4 = 0; }
+  reset() { this.s1 = 0; this.s2 = 0; this.s3 = 0; this.s4 = 0; }
+  static res(r) { return K_LADDER * Math.min(1, Math.max(0, r)); }
+  /** g = warp(\u30AB\u30C3\u30C8\u30AA\u30D5)\u3001k = \u5E30\u9084\u306E\u5F37\u3055(0..K_LADDER)\u3001d = \u98FD\u548C\u306E\u5F37\u3055 */
+  step(x, g, k, d = 0) {
+    const G = g / (1 + g);
+    const h = 1 / (1 + g);
+    // \u5E30\u9084\u3092\u5148\u306B\u89E3\u304F\u3002\u51FA\u53E3 y4 \u306F G^4 u + S \u3068\u66F8\u3051\u3001u = x - k y4 \u306A\u306E\u3067 y4 \u304C\u5F0F\u3067\u51FA\u308B
+    const S = G * (G * (G * this.s1 + this.s2) + this.s3) * h + this.s4 * h;
+    const G4 = G * G * G * G;
+    const y4 = (G4 * x + S) / (1 + k * G4);
+    let u = x - k * y4;
+    if (d > D_MIN) u = sat(u, d);
+    // 1 \u6975\u305A\u3064\u9032\u3081\u308B\u3002v = (\u5165\u53E3 - \u72B6\u614B) G\u3001\u51FA\u53E3 = v + \u72B6\u614B\u3001\u6B21\u306E\u72B6\u614B = \u51FA\u53E3 + v
+    let v = (u - this.s1) * G; const y1 = v + this.s1; this.s1 = y1 + v;
+    v = (y1 - this.s2) * G; const y2 = v + this.s2; this.s2 = y2 + v;
+    v = (y2 - this.s3) * G; const y3 = v + this.s3; this.s3 = y3 + v;
+    v = (y3 - this.s4) * G; const y = v + this.s4; this.s4 = y + v;
+    return y;
+  }
+}
+
+const KINDS = { lowpass: LowPass, highpass: HighPass, ladder: Ladder };
+`;
+  var FILTER_CODE = `${FILTER_CORE}
+const DEFS = ${JSON.stringify(FILTERS)};
+
+class FilterNode extends AudioWorkletProcessor {
+  static get parameterDescriptors() {
+    // \u7BC4\u56F2\u306F\u7A2E\u985E\u3067\u5909\u308F\u3089\u306A\u3044\u306E\u3067 lowpass \u304B\u3089\u53D6\u308B\u3002\u65E2\u5B9A\u5024\u306F kind \u3092\u898B\u3066\u4F5C\u308B\u3068\u304D\u306B\u5165\u308C\u308B
+    const p = DEFS.lowpass.params;
+    return [
+      { name: 'cutoff', defaultValue: p.cutoff.default, minValue: p.cutoff.min, maxValue: p.cutoff.max, automationRate: 'a-rate' },
+      { name: 'resonance', defaultValue: p.resonance.default, minValue: p.resonance.min, maxValue: p.resonance.max, automationRate: 'a-rate' },
+      { name: 'drive', defaultValue: p.drive.default, minValue: p.drive.min, maxValue: p.drive.max, automationRate: 'a-rate' },
+    ];
+  }
+  constructor(o) {
+    super();
+    const q = (o && o.processorOptions) || {};
+    this.kind = KINDS[q.kind] ? q.kind : 'lowpass';
+    this.Kind = KINDS[this.kind];
+    this.chans = [];
+    this.alive = true;
+    this.port.onmessage = (e) => { if (e.data && e.data.stop) this.alive = false; };
+  }
+  process(inputs, outputs, params) {
+    const input = inputs[0], output = outputs[0];
+    const cut = params.cutoff, res = params.resonance, drv = params.drive;
+    const sr = sampleRate;
+    // \u52D5\u3044\u3066\u3044\u306A\u3044\u30D6\u30ED\u30C3\u30AF\u306F\u4FC2\u6570\u3092 1 \u56DE\u3060\u3051\u4F5C\u308B\u3002tan \u306F\u305D\u3053\u305D\u3053\u91CD\u3044
+    const cFix = cut.length === 1, rFix = res.length === 1, dFix = drv.length === 1;
+    let g = cFix ? warp(cut[0], sr) : 0;
+    const Kind = this.Kind;
+    let k = rFix ? Kind.res(res[0]) : 0;
+    let d = dFix ? drv[0] * D_MAX : 0;
+    for (let c = 0; c < output.length; c++) {
+      const out = output[c];
+      const inp = input && input[c];
+      const f = this.chans[c] || (this.chans[c] = new this.Kind());
+      for (let i = 0; i < out.length; i++) {
+        if (!cFix) g = warp(cut[i], sr);
+        if (!rFix) k = Kind.res(res[i]);
+        if (!dFix) d = drv[i] * D_MAX;
+        out[i] = f.step(inp ? inp[i] : 0, g, k, d);
+      }
+    }
+    return this.alive;
+  }
+}
+
+registerProcessor('mmsxx-filter', FilterNode);
+`;
+
+  // .player-build/sound/analog.js
+  var ANALOG_NODE = "mmsxx-analog";
+  var ANALOG_VOICES = 16;
+  var CHORUS_BASE = 0.012;
+  var ANALOG_CODE = `${FILTER_CORE}
+// \u7573\u3080\u3068\u3053\u308D\u306F\u5916\u3068\u540C\u3058\u3082\u306E\u3092\u57CB\u3081\u308B\u3002\u7E2E\u3081\u305F JS \u3067\u306F\u95A2\u6570\u306E\u540D\u524D\u304C\u5909\u308F\u308B\u306E\u3067\u3001
+// \u540D\u524D\u3092\u66F8\u3044\u3066\u53D7\u3051\u53D6\u308B(sound/modal.js \u3068\u540C\u3058)
+const compileAnalog = ${compileAnalog};
+
+const V = ${ANALOG_VOICES};
+const B = 128;
+const CHORUS_BASE = ${CHORUS_BASE};
+// \u30B3\u30FC\u30E9\u30B9\u306E\u9045\u308C\u306E\u4E0A\u9650\u3002\u4E2D\u5FC3 + \u63FA\u308C\u5E45\u304C\u3053\u3053\u3092\u8D8A\u3048\u306A\u3044
+const CH_MAX = 0.064;
+
+// \u6BB5\u5DEE\u3092\u4E38\u3081\u308B(PolyBLEP)\u3002\u4E38\u3081\u306A\u3044\u3068\u9AD8\u3044\u97F3\u3067\u6298\u308A\u8FD4\u3057\u96D1\u97F3\u304C\u51FA\u308B
+const poly = (t, dt) => {
+  if (t < dt) { const x = t / dt; return x + x - x * x - 1; }
+  if (t > 1 - dt) { const x = (t - 1) / dt; return x * x + x + x + 1; }
+  return 0;
+};
+
+/** \u306E\u3053\u304E\u308A\u6CE2\u3002\u4F4D\u76F8 t(0\u301C1)\u3068 1 \u30B5\u30F3\u30D7\u30EB\u3076\u3093\u306E\u9032\u307F dt */
+const sawAt = (t, dt) => 2 * t - 1 - poly(t, dt);
+
+/**
+ * \u5E45 w \u306E\u30D1\u30EB\u30B9\u3002\u5E45\u304C 0.5 \u304B\u3089\u5916\u308C\u308B\u3068\u6CE2\u304C\u7247\u5074\u3078\u5BC4\u308B(\u5E73\u5747\u304C 2w - 1)\u306E\u3067\u3001
+ * \u305D\u306E\u3076\u3093\u3092\u5F15\u304F\u3002PWM \u3067\u5E45\u3092\u63FA\u3089\u3057\u305F\u3068\u304D\u306B\u3001\u805E\u3053\u3048\u306A\u3044\u4F4E\u3044\u63FA\u308C\u304C\u4E57\u3089\u306A\u3044\u3088\u3046\u306B
+ */
+const pulseAt = (t, dt, w) =>
+  0.5 * ((t < w ? 1 : -1) + poly(t, dt) - poly((t + 1 - w) % 1, dt) - (2 * w - 1));
+
+/**
+ * \u30B5\u30D6\u30C1\u30E3\u30F3\u30CD\u30EB 1 \u672C\u3076\u3093\u3002\u30D5\u30A3\u30EB\u30BF\u3068\u30B3\u30FC\u30E9\u30B9\u3068\u3001\u30AB\u30C3\u30C8\u30AA\u30D5\u306E\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u3092\u6301\u3064\u3002
+ *
+ * \u6C7A\u3081\u3054\u3068\u306F\u300C\u30D5\u30A3\u30EB\u30BF\u306F\u30B5\u30D6\u30C1\u30E3\u30F3\u30CD\u30EB 1 \u672C\u306B\u3064\u304D 1 \u53F0\u300D(docs/FILTER.md)\u3002
+ * \u540C\u3058\u30B5\u30D6\u30C1\u30E3\u30F3\u30CD\u30EB\u306E\u6B21\u306E\u97F3\u306F\u3001\u524D\u306E\u97F3\u306E\u30D5\u30A3\u30EB\u30BF\u306E\u72B6\u614B\u3092\u5F15\u304D\u7D99\u3050\u3002\u30E2\u30CE\u30B7\u30F3\u30BB\u306E\u7C98\u308A\u304C
+ * \u3053\u308C\u3067\u51FA\u308B\u3002\u548C\u97F3('ceg')\u306F\u30B5\u30D6\u30C1\u30E3\u30F3\u30CD\u30EB\u304C 3 \u672C\u306A\u306E\u3067\u30013 \u53F0\u306B\u5206\u304B\u308C\u308B
+ */
+class Part {
+  constructor(sr) {
+    this.use = 0;
+    this.lp = new LowPass();
+    this.hp = new HighPass();
+    this.ld = new Ladder();
+    // \u30B3\u30FC\u30E9\u30B9\u306E\u9045\u308C\u7DDA\u3002\u5DE6\u53F3\u3067 1 \u672C\u305A\u3064
+    this.dl = new Float32Array(Math.ceil(CH_MAX * sr) + 4);
+    this.dr = new Float32Array(this.dl.length);
+    this.di = 0;
+    this.bus = new Float64Array(B);
+  }
+
+  /** \u4F7F\u3044\u306F\u3058\u3081\u3002\u4E2D\u306E\u72B6\u614B\u306F\u5168\u90E8\u307E\u3063\u3055\u3089\u306B\u3059\u308B */
+  open(key, def) {
+    this.use = 1;
+    this.key = key;
+    this.def = def;
+    this.co = 0;
+    this.n = 0;
+    this.rel = 0;
+    this.off = null;
+    this.idle = 0;
+    this.f0 = def.kind === 1 ? this.hp : (def.kind === 2 ? this.ld : this.lp);
+    this.f0.reset();
+    this.dl.fill(0);
+    this.dr.fill(0);
+    this.di = 0;
+  }
+
+  /** \u97F3\u7B26\u304C\u6765\u305F\u3002\u30AB\u30C3\u30C8\u30AA\u30D5\u306E\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u3092\u982D\u304B\u3089\u639B\u3051\u76F4\u3059(\u30D5\u30A3\u30EB\u30BF\u306E\u72B6\u614B\u306F\u6B8B\u3059) */
+  hit(def, off) {
+    this.def = def;
+    this.n = 0;
+    this.rel = 0;
+    this.off = off;
+    this.idle = 0;
+  }
+
+  /** LFO \u306E\u5024(-1\u301C1)\u3002\u8868\u306F 1 \u5468\u3076\u3093\u3067\u30011 \u79D2\u306B rate \u5468\u8AAD\u3080 */
+  lfoAt(def, t) {
+    const tbl = def.lfoTbl;
+    if (!tbl) return 0;
+    const x = (t * def.lfoRate / def.lfoCycles) % 1;
+    const i = (x < 0 ? x + 1 : x) * tbl.length;
+    return tbl[Math.min(tbl.length - 1, i | 0)];
+  }
+
+  /** \u6E9C\u3081\u305F\u58F0\u3092 1 \u53F0\u306E\u30D5\u30A3\u30EB\u30BF\u3078\u901A\u3057\u3001\u30B3\u30FC\u30E9\u30B9\u3092\u639B\u3051\u3066 2 \u672C\u306E\u51FA\u53E3\u3078\u8DB3\u3059 */
+  render(a, b, t0, sr, live) {
+    const d = this.def;
+    const dt = 1 / sr;
+    const bus = this.bus;
+    const dln = this.dl.length;
+    const relAt = this.off == null ? B + 1 : Math.round((this.off - t0) * sr);
+    for (let i = 0; i < B; i++) {
+      if (!this.rel && i >= relAt) this.rel = 1;
+      const age = this.n * dt;
+      const now = t0 + i * dt;
+
+      // ---- \u30AB\u30C3\u30C8\u30AA\u30D5\u306E\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7(\u30AA\u30AF\u30BF\u30FC\u30D6\u3067\u6301\u3064) ----
+      if (this.rel) {
+        this.co += (0 - this.co) * d.kfr;
+      } else if (age < d.fat) {
+        this.co = d.fa * (age / d.fat);
+      } else {
+        this.co += (d.fa * d.fsu - this.co) * d.kfd;
+      }
+
+      const cut = d.cutoff * Math.pow(2, this.co + d.lfoDepth * this.lfoAt(d, now));
+      let y = this.f0.step(bus[i], warp(cut, sr), d.k, d.drive);
+
+      // ---- \u30B3\u30FC\u30E9\u30B9\u3002\u5DE6\u53F3\u3078\u9006\u306B\u63FA\u308C\u308B\u77ED\u3044\u9045\u308C ----
+      if (d.chMix > 0) {
+        const half = d.chDepth / 2000;
+        const sw = Math.sin(2 * Math.PI * d.chRate * now) * half;
+        const read = (buf, sec) => {
+          const at = this.di - sec * sr;
+          const j = Math.floor(at);
+          const fr = at - j;
+          const p0 = ((j % dln) + dln) % dln;
+          return buf[p0] * (1 - fr) + buf[(p0 + 1) % dln] * fr;
+        };
+        const wl = read(this.dl, CHORUS_BASE + half + sw);
+        const wr = read(this.dr, CHORUS_BASE + half - sw);
+        this.dl[this.di] = y;
+        this.dr[this.di] = y;
+        this.di = (this.di + 1) % dln;
+        const dry = y * (1 - d.chMix / 2) * 0.5;
+        a[i] += dry + wl * d.chMix / 2;
+        b[i] += dry + wr * d.chMix / 2;
+      } else {
+        a[i] += y * 0.5;
+        b[i] += y * 0.5;
+      }
+      this.n++;
+    }
+    // \u58F0\u304C\u3044\u306A\u304F\u306A\u3063\u305F\u3089\u3001\u97FF\u304D\u304C\u6D88\u3048\u308B\u306E\u3092\u5F85\u3063\u3066\u7A7A\u3051\u308B\u3002
+    // \u3059\u3050\u7A7A\u3051\u308B\u3068\u3001\u30EC\u30BE\u30CA\u30F3\u30B9\u306E\u9CF4\u304D\u304C\u5207\u308C\u308B
+    if (live) this.idle = 0;
+    else if ((this.idle += B) > sr * 0.2) this.use = 0;
+  }
+}
+
+/**
+ * 1 \u58F0\u3076\u3093(\u97F3\u7B26 1 \u3064)\u3002\u767A\u632F\u5668\u3068\u97F3\u91CF\u306E\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u3060\u3051\u3092\u6301\u3064\u3002
+ * \u30D5\u30A3\u30EB\u30BF\u306F\u6301\u305F\u306A\u3044 \u2014 \u305D\u3053\u306F\u30B5\u30D6\u30C1\u30E3\u30F3\u30CD\u30EB(Part)\u306E\u3082\u306E
+ */
+class Voice {
+  constructor() {
+    this.on = 0;
+  }
+
+  /** \u97F3\u7B26 1 \u3064\u3067\u9CF4\u308A\u306F\u3058\u3081\u308B\u3002\u524D\u306E\u97F3\u304B\u3089\u5F15\u304D\u7D99\u3050\u306E\u306F\u6ED1\u308B\u5143\u306E\u9AD8\u3055\u3060\u3051 */
+  begin(def, part, t, f, vel, off, from) {
+    this.on = 1;
+    this.def = def;
+    this.part = part;
+    this.t0 = t;
+    this.off = off;
+    this.rel = 0;
+    this.f = f;
+    this.from = from;
+    this.vel = vel;
+    this.n = 0;
+    this.pm = 0; this.ps = 0; this.pr = 0;
+    this.d1 = 0.33; this.d2 = 0.66;
+    this.amp = 0;
+    this.se = 1;
+    this.seed = ((Math.imul(def.seed || 1, 0x9e3779b1) ^ (f * 1000 | 0)) >>> 0) || 1;
+  }
+
+  /** \u7A2E\u3092\u56FA\u5B9A\u3057\u305F\u767D\u8272\u96D1\u97F3 */
+  noise() {
+    let a = this.seed;
+    a ^= a << 13; a ^= a >>> 17; a ^= a << 5;
+    this.seed = a >>> 0;
+    return (this.seed % 1000000) / 500000 - 1;
+  }
+
+  /** \u767A\u632F\u5668\u3068\u97F3\u91CF\u306E\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u3092\u3001\u30B5\u30D6\u30C1\u30E3\u30F3\u30CD\u30EB\u306E\u6E9C\u3081\u5834\u3078\u8DB3\u3059 */
+  render(bus, t0, sr) {
+    const d = this.def;
+    const dt = 1 / sr;
+    const start = Math.max(0, Math.min(B - 1, Math.round((this.t0 - t0) * sr)));
+    const relAt = this.off == null ? B + 1 : Math.round((this.off - t0) * sr);
+    const peak = this.vel * d.level;
+    for (let i = start; i < B; i++) {
+      if (!this.rel && i >= relAt) this.rel = 1;
+      const age = this.n * dt;
+      const now = t0 + i * dt;
+
+      // ---- \u97F3\u91CF\u306E\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7 ----
+      if (this.rel) {
+        this.amp += (0 - this.amp) * d.kar;
+      } else if (age < d.aat) {
+        this.amp = peak * (age / d.aat);
+      } else {
+        this.amp += (peak * d.asu - this.amp) * d.kad;
+      }
+
+      // ---- \u9AD8\u3055\u3002\u6ED1\u308A\u3068\u30D3\u30D6\u30E9\u30FC\u30C8 ----
+      let hz = this.f;
+      if (this.from > 0 && age < d.glide) {
+        hz = this.from * Math.pow(this.f / this.from, age / d.glide);
+      }
+      if (d.vib > 0 && age > d.vibDelay) {
+        const grow = Math.min(1, (age - d.vibDelay) / 0.3);
+        hz *= Math.pow(2, d.vib * grow * Math.sin(2 * Math.PI * d.vibRate * age) / 1200);
+      }
+
+      // ---- \u767A\u632F\u5668 ----
+      const dtm = hz / sr;
+      let y = 0;
+      if (d.wave === 4) {
+        y = this.noise();
+      } else if (d.wave === 3) {
+        // \u306E\u3053\u304E\u308A\u6CE2 3 \u672C\u3002\u771F\u3093\u4E2D\u3068\u3001\u4E0A\u4E0B\u306B 12 \u30BB\u30F3\u30C8\u305A\u3064\u30023 \u672C\u3076\u3093\u5927\u304D\u304F\u306A\u308B\u306E\u3067\u4E0B\u3052\u308B
+        const u = Math.pow(2, 12 / 1200);
+        this.pm += dtm; this.pm -= Math.floor(this.pm);
+        this.d1 += dtm / u; this.d1 -= Math.floor(this.d1);
+        this.d2 += dtm * u; this.d2 -= Math.floor(this.d2);
+        y = 0.5 * (sawAt(this.pm, dtm) + sawAt(this.d1, dtm) + sawAt(this.d2, dtm));
+      } else {
+        // \u89AA\u306E\u4F4D\u76F8\u30021 \u5468\u3057\u305F\u3089\u5B50\u306E\u4F4D\u76F8\u3092\u623B\u3059(\u30B7\u30F3\u30AF)
+        this.pm += dtm;
+        let wrapped = false;
+        if (this.pm >= 1) { this.pm -= 1; wrapped = true; }
+        let ratio = 1;
+        if (d.wave === 6) {
+          // \u97F3\u306E\u982D\u3067 syncEnv \u30AA\u30AF\u30BF\u30FC\u30D6\u4E0A\u3078\u98DB\u3073\u3001\u30D5\u30A3\u30EB\u30BF\u306E\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u306E Decay \u3067\u623B\u308B
+          this.se += (0 - this.se) * d.kfd;
+          ratio = Math.max(1, d.sync) * Math.pow(2, d.syncEnv * this.se);
+        }
+        const dts = dtm * ratio;
+        if (ratio > 1.0001) {
+          if (wrapped) this.ps = this.pm * ratio - Math.floor(this.pm * ratio);
+          else { this.ps += dts; this.ps -= Math.floor(this.ps); }
+        } else this.ps = this.pm;
+        const w = d.wave === 5
+          ? Math.min(0.95, Math.max(0.05, d.width + d.pwmDepth * Math.sin(2 * Math.PI * d.pwmRate * now)))
+          : (d.wave === 2 ? 0.25 : 0.5);
+        y = (d.wave === 1 || d.wave === 2 || d.wave === 5)
+          ? pulseAt(this.ps, Math.min(0.5, dts), w)
+          : sawAt(this.ps, Math.min(0.5, dts));
+        // \u30EA\u30F3\u30B0\u3002\u9AD8\u3055\u306E\u4F55\u500D\u304B\u306E\u30B5\u30A4\u30F3\u6CE2\u3092\u639B\u3051\u308B
+        if (d.wave === 7 && d.ring > 0) {
+          this.pr += dtm * d.ringRatio;
+          this.pr -= Math.floor(this.pr);
+          y = y * (1 - d.ring) + y * Math.sin(2 * Math.PI * this.pr) * d.ring;
+        }
+      }
+      bus[i] += y * this.amp;
+      this.n++;
+    }
+    // \u96E2\u3057\u305F\u3042\u3068\u3001\u805E\u3053\u3048\u306A\u3044\u3068\u3053\u308D\u307E\u3067\u843D\u3061\u305F\u3089\u7A7A\u3051\u308B
+    if (this.rel && this.amp < 1e-5) this.on = 0;
+  }
+}
+
+class AnalogBank extends AudioWorkletProcessor {
+  constructor(o) {
+    super();
+    const p = (o && o.processorOptions) || {};
+    this.patch = {};
+    for (const [k, d] of Object.entries(p.patches || {})) this.patch[k] = compileAnalog(d, sampleRate);
+    this.voices = [];
+    this.parts = [];
+    for (let i = 0; i < V; i++) {
+      this.voices.push(new Voice());
+      this.parts.push(new Part(sampleRate));
+    }
+    this.events = [];
+    this.at = 0;
+    this.cutAt = -1;
+    this.ob = new Float32Array(B);
+    // \u6ED1\u308B\u5143\u306B\u3059\u308B\u3001\u30D1\u30C3\u30C1\u3054\u3068\u306E\u524D\u306E\u97F3\u306E\u9AD8\u3055
+    this.lastF = {};
+    this.add(p.events || []);
+    this.port.onmessage = (e) => {
+      const q = e.data || {};
+      if (q.patch) this.patch[q.patch] = compileAnalog(q.def, sampleRate);
+      if (q.add) this.add(q.add);
+      if (q.cut) {
+        this.events = [];
+        this.at = 0;
+        this.cutAt = 0;
+      }
+    };
+  }
+
+  /** \u97F3\u7B26\u3092\u8DB3\u3059\u3002\u6642\u523B\u9806\u306B\u4E26\u3079\u76F4\u3057\u3066\u3001\u6E08\u3093\u3060\u3076\u3093\u306F\u6368\u3066\u308B */
+  add(list) {
+    if (!list.length) return;
+    const rest = this.events.slice(this.at).concat(list);
+    rest.sort((a, b) => a.t - b.t);
+    this.events = rest;
+    this.at = 0;
+  }
+
+  /** \u7A7A\u3044\u3066\u3044\u308B\u58F0\u3002\u7121\u3051\u308C\u3070\u3044\u3061\u3070\u3093\u53E4\u3044\u3082\u306E\u3092\u53D6\u308B */
+  pickVoice() {
+    let old = 0, at = -1;
+    for (let i = 0; i < V; i++) {
+      const v = this.voices[i];
+      if (!v.on) return v;
+      if (at < 0 || v.t0 < old) { old = v.t0; at = i; }
+    }
+    return this.voices[at];
+  }
+
+  /**
+   * \u305D\u306E\u30B5\u30D6\u30C1\u30E3\u30F3\u30CD\u30EB\u306E\u30D5\u30A3\u30EB\u30BF\u3002\u9375\u306F\u30D1\u30C3\u30C1\u306E\u540D\u524D\u3068\u30B5\u30D6\u30C1\u30E3\u30F3\u30CD\u30EB\u306E\u756A\u53F7\u3002
+   * \u540C\u3058\u9375\u306A\u3089\u524D\u306E\u97F3\u306E\u3082\u306E\u3092\u305D\u306E\u307E\u307E\u4F7F\u3046(\u72B6\u614B\u3092\u5F15\u304D\u7D99\u3050)
+   */
+  pickPart(key, def, off) {
+    for (let i = 0; i < V; i++) {
+      const p = this.parts[i];
+      if (p.use && p.key === key) { p.hit(def, off); return p; }
+    }
+    for (let i = 0; i < V; i++) {
+      const p = this.parts[i];
+      if (!p.use) { p.open(key, def); p.hit(def, off); return p; }
+    }
+    // \u7A7A\u304D\u304C\u7121\u3051\u308C\u3070\u3001\u3044\u3061\u3070\u3093\u9577\u304F\u97F3\u7B26\u306E\u6765\u3066\u3044\u306A\u3044\u3082\u306E\u3092\u53D6\u308A\u4E0A\u3052\u308B
+    let at = 0;
+    for (let i = 1; i < V; i++) if (this.parts[i].idle > this.parts[at].idle) at = i;
+    this.parts[at].open(key, def);
+    this.parts[at].hit(def, off);
+    return this.parts[at];
+  }
+
+  start(ev) {
+    const def = this.patch[ev.p];
+    if (!def) return;
+    const f = (ev.f || 440) * Math.pow(2, def.oct);
+    const from = def.glide > 0 ? (this.lastF[ev.p] || 0) : 0;
+    this.lastF[ev.p] = f;
+    const vel = Math.max(0, Math.min(1, ev.v == null ? 0.8 : ev.v));
+    const off = ev.d == null ? null : ev.t + ev.d;
+    const part = this.pickPart(ev.p + '/' + (ev.sc | 0), def, off);
+    this.pickVoice().begin(def, part, ev.t, f, vel, off, from);
+  }
+
+  process(inputs, outputs) {
+    const chs = outputs[0];
+    const out = chs[0], rb = chs.length > 1 ? chs[1] : this.ob;
+    out.fill(0);
+    rb.fill(0);
+    const sr = sampleRate;
+    const t0 = currentTime;
+    const tEnd = t0 + B / sr;
+    while (this.at < this.events.length && this.events[this.at].t < tEnd) {
+      this.start(this.events[this.at++]);
+    }
+    // \u30B5\u30D6\u30C1\u30E3\u30F3\u30CD\u30EB\u3054\u3068\u306B\u3001\u58F0\u3092\u6E9C\u3081\u3066\u304B\u3089 1 \u53F0\u306E\u30D5\u30A3\u30EB\u30BF\u3078\u901A\u3059
+    for (let i = 0; i < V; i++) {
+      const part = this.parts[i];
+      if (!part.use) continue;
+      part.bus.fill(0);
+      let live = 0;
+      for (let j = 0; j < V; j++) {
+        const v = this.voices[j];
+        if (v.on && v.part === part) { v.render(part.bus, t0, sr); live += v.on; }
+      }
+      part.render(out, rb, t0, sr, live);
+    }
+    // \u6B62\u3081\u3066\u3044\u308B\u6700\u4E2D\u306A\u3089\u3001\u3077\u3064\u3063\u3068\u9CF4\u3089\u306A\u3044\u3088\u3046 10 \u30DF\u30EA\u79D2\u3067\u843D\u3068\u3059
+    if (this.cutAt >= 0) {
+      const len = Math.max(1, Math.round(sr * 0.01));
+      for (let i = 0; i < out.length; i++) {
+        const k = Math.max(0, 1 - this.cutAt / len);
+        out[i] *= k;
+        rb[i] *= k;
+        this.cutAt++;
+      }
+      if (this.cutAt >= len) {
+        for (let i = 0; i < V; i++) { this.voices[i].on = 0; this.parts[i].use = 0; }
+        this.cutAt = -1;
+      }
+    }
+    if (chs.length === 1) for (let i = 0; i < out.length; i++) out[i] += rb[i];
+    for (let c = 2; c < chs.length; c++) chs[c].fill(0);
+    return true;
+  }
+}
+registerProcessor('${ANALOG_NODE}', AnalogBank);
+`;
+  var ANALOG_PATCHES = {
+    seqBass: {
+      note: "Sequenced bass. Each sixteenth note opens the ladder filter and snaps shut, with the resonance singing on top.",
+      wave: "sawtooth",
+      octave: 0,
+      filter: { kind: "ladder", cutoff: 150, resonance: 0.8, drive: 0.3 },
+      fenv: { amount: 3.5, attack: 1e-3, decay: 0.25, sustain: 0 },
+      amp: { attack: 2e-3, decay: 0.2, sustain: 0.6, release: 0.05 },
+      level: 1.358
+    },
+    synthBrass: {
+      note: "Synth brass. Three detuned sawtooths, the filter swelling open a little after the note starts.",
+      wave: "detuned",
+      octave: 0,
+      filter: { kind: "ladder", cutoff: 400, resonance: 0.2, drive: 0.1 },
+      fenv: { amount: 2.5, attack: 0.08, decay: 0.6, sustain: 0.4 },
+      amp: { attack: 0.03, decay: 0.3, sustain: 0.8, release: 0.2 },
+      level: 0.566,
+      chorus: { mix: 0.5, rate: 0.5, depth: 3 }
+    },
+    strings: {
+      note: "Strings. A slow swell through a gentle low-pass, thickened by the chorus.",
+      wave: "detuned",
+      octave: 0,
+      filter: { kind: "lowpass", cutoff: 700, resonance: 0.1, drive: 0 },
+      fenv: { amount: 1.5, attack: 0.5, decay: 1.5, sustain: 0.6 },
+      amp: { attack: 0.4, decay: 1, sustain: 0.9, release: 0.6 },
+      level: 0.215,
+      chorus: { mix: 1, rate: 0.4, depth: 4 }
+    },
+    pulseLead: {
+      note: "Pulse lead. A narrow pulse with a late vibrato, bright enough to cut through.",
+      wave: "pulse",
+      octave: 0,
+      filter: { kind: "lowpass", cutoff: 1800, resonance: 0.35, drive: 0.2 },
+      fenv: { amount: 1.2, attack: 0.01, decay: 0.3, sustain: 0.5 },
+      amp: { attack: 0.01, decay: 0.2, sustain: 0.85, release: 0.12 },
+      level: 0.51,
+      chorus: { mix: 0.3, rate: 0.6, depth: 2 },
+      pitch: { vibrato: 15, rate: 5.5, delay: 0.3, glide: 0 }
+    },
+    noiseSnare: {
+      note: "Snare. White noise through a resonant low-pass that snaps shut.",
+      wave: "noise",
+      octave: 0,
+      filter: { kind: "lowpass", cutoff: 300, resonance: 0.5, drive: 0.2 },
+      fenv: { amount: 4, attack: 1e-3, decay: 0.12, sustain: 0 },
+      amp: { attack: 1e-3, decay: 0.12, sustain: 0, release: 0.05 },
+      level: 0.973
+    },
+    noiseHat: {
+      note: "Hi-hat. White noise with the lows taken away and a very short envelope.",
+      wave: "noise",
+      octave: 0,
+      filter: { kind: "highpass", cutoff: 6e3, resonance: 0.2, drive: 0 },
+      fenv: { amount: 0.5, attack: 1e-3, decay: 0.04, sustain: 0 },
+      amp: { attack: 1e-3, decay: 0.05, sustain: 0, release: 0.02 },
+      level: 0.528
+    },
+    slowPad: {
+      note: "Pad. A slow sine on the cutoff keeps it moving while the note is held.",
+      wave: "detuned",
+      octave: 0,
+      filter: { kind: "lowpass", cutoff: 500, resonance: 0.25, drive: 0 },
+      fenv: { amount: 2, attack: 1.2, decay: 2, sustain: 0.7 },
+      amp: { attack: 0.8, decay: 2, sustain: 0.9, release: 1.2 },
+      level: 0.311,
+      lfo: { depth: 0.3, rate: 0.25, shape: "sine" },
+      chorus: { mix: 0.8, rate: 0.3, depth: 5 }
+    },
+    glideLead: {
+      note: "Glide lead. Each note slides up from the one before it, with a wide vibrato.",
+      wave: "sawtooth",
+      octave: 0,
+      filter: { kind: "ladder", cutoff: 1200, resonance: 0.45, drive: 0.25 },
+      fenv: { amount: 1.5, attack: 0.02, decay: 0.4, sustain: 0.5 },
+      amp: { attack: 0.02, decay: 0.3, sustain: 0.9, release: 0.15 },
+      level: 0.818,
+      chorus: { mix: 0.3, rate: 0.5, depth: 2 },
+      pitch: { vibrato: 20, rate: 5, delay: 0.2, glide: 0.08 }
+    },
+    pwmStrings: {
+      note: "PWM strings. The pulse width keeps moving, so one oscillator sounds like two.",
+      wave: "pwm",
+      octave: 0,
+      filter: { kind: "lowpass", cutoff: 1400, resonance: 0.15, drive: 0 },
+      fenv: { amount: 1, attack: 0.3, decay: 1, sustain: 0.6 },
+      amp: { attack: 0.25, decay: 1, sustain: 0.9, release: 0.5 },
+      level: 0.271,
+      chorus: { mix: 0.3, rate: 0.4, depth: 3 },
+      osc: { width: 0.5, pwmDepth: 0.35, pwmRate: 0.8 }
+    },
+    syncLead: {
+      note: "Sync lead. A sawtooth hard-synced to the note, the ratio jumping up at each attack.",
+      wave: "sync",
+      octave: 0,
+      filter: { kind: "lowpass", cutoff: 2500, resonance: 0.3, drive: 0.3 },
+      fenv: { amount: 1, attack: 0.01, decay: 0.35, sustain: 0.4 },
+      amp: { attack: 0.01, decay: 0.3, sustain: 0.85, release: 0.1 },
+      level: 0.349,
+      chorus: { mix: 0.2, rate: 0.6, depth: 2 },
+      pitch: { vibrato: 12, rate: 5.5, delay: 0.25, glide: 0 },
+      osc: { sync: 3, syncEnv: 1 }
+    },
+    ringBell: {
+      note: "Ring bell. A sawtooth multiplied by a sine at a non-whole multiple, so it rings like metal.",
+      wave: "ring",
+      octave: 0,
+      filter: { kind: "lowpass", cutoff: 3e3, resonance: 0.2, drive: 0 },
+      fenv: { amount: 2, attack: 1e-3, decay: 0.5, sustain: 0.2 },
+      amp: { attack: 2e-3, decay: 0.8, sustain: 0.3, release: 0.4 },
+      level: 0.658,
+      chorus: { mix: 0.3, rate: 0.5, depth: 3 },
+      osc: { ring: 0.8, ringRatio: 1.5 }
+    },
+    polyBrass: {
+      note: "Poly brass. Like synthBrass, written for chords: every note swells on its own.",
+      wave: "detuned",
+      octave: 0,
+      filter: { kind: "ladder", cutoff: 350, resonance: 0.25, drive: 0.1 },
+      fenv: { amount: 2.2, attack: 0.06, decay: 0.5, sustain: 0.45 },
+      amp: { attack: 0.04, decay: 0.4, sustain: 0.8, release: 0.25 },
+      level: 0.6,
+      chorus: { mix: 0.5, rate: 0.5, depth: 3 }
+    }
+  };
+  function compileAnalog(def, sr = 48e3) {
+    const num2 = (v, lo, hi, dflt) => {
+      const x = Number(v);
+      if (!Number.isFinite(x)) return dflt;
+      return Math.min(hi, Math.max(lo, x));
+    };
+    const rng2 = (seed2) => {
+      let a = seed2 | 0 || 1;
+      return () => {
+        a ^= a << 13;
+        a ^= a >>> 17;
+        a ^= a << 5;
+        return (a >>> 0) % 1e6 / 1e6;
+      };
+    };
+    const WAVES = ["sawtooth", "square", "pulse", "detuned", "noise", "pwm", "sync", "ring"];
+    const KINDS = ["lowpass", "highpass", "ladder"];
+    const N2 = 1024;
+    const SHAPES = {
+      sine: { make: (x) => Math.sin(2 * Math.PI * x) },
+      triangle: { make: (x) => 1 - 4 * Math.abs((x + 0.25) % 1 - 0.5) },
+      square: { make: (x) => x < 0.5 ? 1 : -1 },
+      sawtooth: { make: (x) => 1 - 2 * x },
+      sampleHold: { cycles: 8 }
+    };
+    const lfoTable = (shape, seed2) => {
+      if (Array.isArray(shape) && shape.length) {
+        const per = Math.max(1, Math.round(N2 / shape.length));
+        const data3 = new Float32Array(shape.length * per);
+        shape.forEach((v, i) => data3.fill(num2(v, -1, 1, 0), i * per, (i + 1) * per));
+        return { data: data3, cycles: 1 };
+      }
+      const sh = SHAPES[shape] || SHAPES.sine;
+      if (sh.cycles) {
+        const r = rng2(seed2);
+        const per = N2 / 8;
+        const data3 = new Float32Array(sh.cycles * per);
+        for (let c = 0; c < sh.cycles; c++) data3.fill(r() * 2 - 1, c * per, (c + 1) * per);
+        return { data: data3, cycles: sh.cycles };
+      }
+      const data2 = new Float32Array(N2);
+      for (let i = 0; i < N2; i++) data2[i] = sh.make(i / N2);
+      return { data: data2, cycles: 1 };
+    };
+    const f = def.filter || {};
+    const fe = def.fenv || {};
+    const am = def.amp || {};
+    const lf = def.lfo || {};
+    const ch = def.chorus || {};
+    const pi = def.pitch || {};
+    const os = def.osc || {};
+    const seed = num2(def.seed, 1, 9999, 1);
+    const { data, cycles } = lfoTable(lf.shape, seed);
+    const depth = num2(lf.depth, 0, 4, 0);
+    const coef = (sec) => 1 - Math.exp(-1 / (sr * Math.max(1e-3, sec) / 3));
+    const kind = Math.max(0, KINDS.indexOf(String(f.kind || "lowpass")));
+    const res = num2(f.resonance, 0, 1, 0);
+    const k = kind === 2 ? 3.96 * res : Math.max(0.01, 2 - 2 * res);
+    return {
+      wave: Math.max(0, WAVES.indexOf(String(def.wave || "sawtooth"))),
+      oct: num2(def.octave, -2, 2, 0),
+      kind,
+      cutoff: num2(f.cutoff, 20, 2e4, 2e4),
+      k,
+      drive: num2(f.drive, 0, 1, 0) * 4,
+      fa: num2(fe.amount, 0, 6, 0),
+      fat: num2(fe.attack, 1e-3, 4, 1e-3),
+      fsu: num2(fe.sustain, 0, 1, 0),
+      kfd: coef(num2(fe.decay, 1e-3, 8, 0.2)),
+      kfr: coef(num2(am.release, 1e-3, 4, 0.05)),
+      aat: num2(am.attack, 1e-3, 4, 2e-3),
+      asu: num2(am.sustain, 0, 1, 0.8),
+      kad: coef(num2(am.decay, 1e-3, 8, 0.2)),
+      kar: coef(num2(am.release, 1e-3, 4, 0.05)),
+      lfoDepth: depth,
+      lfoRate: num2(lf.rate, 0.01, 20, 2),
+      lfoTbl: depth > 0 ? data : null,
+      lfoCycles: cycles,
+      chMix: num2(ch.mix, 0, 1, 0),
+      chRate: num2(ch.rate, 0.05, 8, 0.5),
+      chDepth: num2(ch.depth, 0.5, 20, 3),
+      vib: num2(pi.vibrato, 0, 100, 0),
+      vibRate: num2(pi.rate, 0.1, 12, 5.5),
+      vibDelay: num2(pi.delay, 0, 2, 0.3),
+      glide: num2(pi.glide, 0, 1, 0),
+      width: num2(os.width, 0.05, 0.95, 0.5),
+      pwmDepth: num2(os.pwmDepth, 0, 0.45, 0.35),
+      pwmRate: num2(os.pwmRate, 0.05, 8, 0.8),
+      sync: num2(os.sync, 1, 32, 1),
+      syncEnv: num2(os.syncEnv, 0, 4, 0),
+      ring: num2(os.ring, 0, 1, 0),
+      ringRatio: num2(os.ringRatio, 0.01, 32, 1.5),
+      level: num2(def.level, 0, 4, 0.25),
+      seed
+    };
+  }
+
+  // .player-build/sound/demotunes.js
   var SE_SYS_PAUSE = "sys.pause";
   var SYSTEM_SE = {
     [SE_SYS_PAUSE]: [
@@ -13919,7 +14820,7 @@ registerProcessor('${BRASS_NODE}', BrassBank);
     BEAT_TOM_FILL
   ]);
 
-  // engine/sound/se.js
+  // .player-build/sound/se.js
   var SE_FRAME = 1 / 60;
   var SE_WHOLE = 64;
   var SE_TEMPO = Math.round(240 / (SE_WHOLE * SE_FRAME));
@@ -14068,7 +14969,7 @@ registerProcessor('${BRASS_NODE}', BrassBank);
     }
   };
 
-  // engine/sound/layerpresets.js
+  // .player-build/sound/layerpresets.js
   var DETUNE_STEPS = [
     { key: "", value: "none", c: 0, en: "no detune" },
     {
@@ -14229,10 +15130,10 @@ registerProcessor('${BRASS_NODE}', BrassBank);
     }
   }
 
-  // engine/sound/version.js
-  var SOUND_VERSION = "0.30.1";
+  // .player-build/sound/version.js
+  var SOUND_VERSION = "0.31.0";
 
-  // engine/sound/audio.js
+  // .player-build/sound/audio.js
   registerDefaultWaves();
   registerDefaultFM();
   registerDefaultBeeps();
@@ -14247,6 +15148,7 @@ registerProcessor('${BRASS_NODE}', BrassBank);
   registerExtraWaves();
   registerNoiseVariants();
   registerModalVoices();
+  registerAnalogVoices();
   registerDefaultTones();
   registerDefaultLayers();
   sealPresets();
@@ -14276,6 +15178,34 @@ registerProcessor('${BRASS_NODE}', BrassBank);
     }
     for (const [name, def] of Object.entries(BRASS_PATCHES)) {
       registerBrass(`model(${name})`, { patch: name }, { role: ROLE[name], note: def.note });
+    }
+  }
+  function registerAnalogVoices() {
+    registerFamily("analog", {
+      note: "Subtractive synth voices. One oscillator through one filter, with an envelope on the cutoff and one on the volume. The sound of an 80s analog synth, which no real chip of the era could make.",
+      params: [{
+        name: "patch",
+        default: "seqBass",
+        note: "Which synth patch to use.",
+        values: Object.entries(ANALOG_PATCHES).map(([value, d]) => ({ value, note: d.note }))
+      }]
+    });
+    const ROLE = {
+      seqBass: "bass",
+      synthBrass: "chord",
+      strings: "chord",
+      pulseLead: "lead",
+      noiseSnare: "perc",
+      noiseHat: "perc",
+      slowPad: "chord",
+      glideLead: "lead",
+      pwmStrings: "chord",
+      syncLead: "lead",
+      ringBell: "lead",
+      polyBrass: "chord"
+    };
+    for (const [name, def] of Object.entries(ANALOG_PATCHES)) {
+      registerAnalog(`analog(${name})`, { patch: name }, { role: ROLE[name], note: def.note });
     }
   }
   var MASTER_VOL = 0.14;
@@ -14389,6 +15319,20 @@ registerProcessor('${BRASS_NODE}', BrassBank);
         outputChannelCount: [1],
         processorOptions: { events: list, patches: patchesOf(BRASS_PATCHES, compileBrass) }
       })
+    },
+    // 減算方式のシンセ。コーラスが左右へ広がるので、modal と同じ 2 本で出す
+    analog: {
+      node: ANALOG_NODE,
+      code: ANALOG_CODE,
+      voices: ANALOG_VOICES,
+      buses: 2,
+      options: (list) => ({
+        numberOfInputs: 0,
+        outputChannelCount: [2],
+        // 畳むのは処理器の中。刻みの係数が文脈の sampleRate で変わるので、
+        // そこで畳まないとエンベロープの時間がずれる
+        processorOptions: { events: list, patches: ANALOG_PATCHES }
+      })
     }
   };
   function patchesOf(table, compile) {
@@ -14406,6 +15350,7 @@ registerProcessor('${BRASS_NODE}', BrassBank);
     if (wf.kind === "scc") return "scc";
     if (wf.kind === "pce") return "pce";
     if (wf.kind === "opnaRhythm") return "opnaRhythm";
+    if (wf.kind === "analog") return "analog";
     if (wf.kind === "modal") return "modal";
     if (wf.kind === "brass") return "brass";
     if (wf.tone && wf.tone.duty) return "duty";
@@ -18366,7 +19311,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         if (!pass) ({ dest, ev } = this._fadeDest(ev, t0, t1, dest));
       }
       const wfa = WAVEFORMS[ev.wave];
-      if (wfa && (wfa.kind === "modal" || wfa.kind === "brass")) {
+      if (wfa && (wfa.kind === "modal" || wfa.kind === "brass" || wfa.kind === "analog")) {
         if (ev.legato) return;
         const to = WORKLETS[wfa.kind].buses === 2 ? this._panPair(dest) : dest;
         this._wkPush(wfa.kind, to, {
@@ -18374,7 +19319,12 @@ registerProcessor('mmsxx-tap', MmsxxTap);
           p: wfa.patch,
           f: freq,
           v: Math.max(0, Math.min(1, (ev.vol ?? 0) / 15)),
-          d: Math.max(1e-3, ev.tieSpan ?? t1 - t0)
+          d: Math.max(1e-3, ev.tieSpan ?? t1 - t0),
+          // サブチャンネルの番号。和音の中の何番目か(書いた順)。
+          // フィルタをサブチャンネル 1 本につき 1 台持たせるのに使う。
+          // 重ねたもの(オクターブ重ね・デチューン・エコーの写し)は元の音と
+          // 同じ番号になる — 厚くするためのものなので、親と同じフィルタを通る
+          sc: ev.sub | 0
         });
         return;
       }
@@ -18832,10 +19782,10 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out;
   }
 
-  // engine/tool/ui/version.js
+  // .player-build/tool/ui/version.js
   var PLAYER_VERSION = "1.0.0";
 
-  // engine/tool/core/tomml.js
+  // .player-build/tool/core/tomml.js
   var NAMES = ["c", "c+", "d", "d+", "e", "f", "f+", "g", "g+", "a", "a+", "b"];
   var LENS = [
     [16, "1"],
@@ -18915,7 +19865,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out.join("\n\n");
   }
 
-  // engine/tool/core/wav.js
+  // .player-build/tool/core/wav.js
   function writeWAV(samples, rate = 44100) {
     const n = samples.length;
     const out = new Uint8Array(44 + n * 2);
@@ -18943,7 +19893,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out;
   }
 
-  // engine/tool/ui/player.js
+  // .player-build/tool/ui/player.js
   var COPYRIGHT = "2026 harayoki";
   var PLAYER_CSS = `
 .mmsxx-player{ font-family:var(--mono); font-size:13px; line-height:1.55; color:var(--ink); }
@@ -20675,8 +21625,16 @@ ChipTuneSound ${SOUND_VERSION}
     };
   }
 
-  // engine/samples-entry.js
-  var sound = { ...audio_exports, ...mml_exports, ...tones_exports, mountPlayer, PLAYER_CSS, PLAYER_VERSION, player: { mount: mountPlayer, CSS: PLAYER_CSS, version: PLAYER_VERSION } };
+  // .player-build/entry.js
+  var sound = {
+    ...audio_exports,
+    ...mml_exports,
+    ...tones_exports,
+    mountPlayer,
+    PLAYER_CSS,
+    PLAYER_VERSION,
+    player: { mount: mountPlayer, CSS: PLAYER_CSS, version: PLAYER_VERSION }
+  };
   window.MMSXX = window.MMSXX || {};
   window.MMSXX.sound = sound;
 })();
