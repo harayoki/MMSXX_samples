@@ -1,4 +1,4 @@
-// MMS/XX player and audio engine, source commit 32de3faf464ae6c68b3185795703ca1f6af5bac6
+// MMS/XX player and audio engine, source commit c6899429606a38088a7b64b96bbc2321ad4a1a6c
 (() => {
   var __defProp = Object.defineProperty;
   var __export = (target, all) => {
@@ -6,7 +6,7 @@
       __defProp(target, name, { get: all[name], enumerable: true });
   };
 
-  // .player-build/sound/audio.js
+  // player-latest/sound/audio.js
   var audio_exports = {};
   __export(audio_exports, {
     ChipTuneSound: () => ChipTuneSound,
@@ -17,7 +17,7 @@
     snapVol: () => snapVol
   });
 
-  // .player-build/sound/mml.js
+  // player-latest/sound/mml.js
   var mml_exports = {};
   __export(mml_exports, {
     AY_ENV_SHAPES: () => AY_ENV_SHAPES,
@@ -92,7 +92,7 @@
     waveSteal: () => waveSteal
   });
 
-  // .player-build/sound/gm.js
+  // player-latest/sound/gm.js
   var GM_NAMES = [
     "Acoustic Grand Piano",
     "Bright Acoustic Piano",
@@ -238,7 +238,7 @@
     return GM_NAMES.filter((n) => key(n).startsWith(head)).slice(0, limit);
   }
 
-  // .player-build/sound/opllvoice.js
+  // player-latest/sound/opllvoice.js
   var OP_FIELDS = {
     mul: {
       at: "ml",
@@ -401,7 +401,7 @@
     return hold && opllAttackMs(ar) < STEAL_ATTACK_MS ? "ok" : "avoid";
   }
 
-  // .player-build/sound/opll.js
+  // player-latest/sound/opll.js
   var OPLL_INST = [
     0,
     0,
@@ -1765,7 +1765,7 @@ class OpllBank extends AudioWorkletProcessor {
 registerProcessor('mmsxx-opll', OpllBank);
 `;
 
-  // .player-build/sound/ym2151.js
+  // player-latest/sound/ym2151.js
   var OPM_CLOCK = 3579545;
   var OPM_RATE = OPM_CLOCK / 64;
   var OPM_CODE = `
@@ -3274,7 +3274,7 @@ registerProcessor('mmsxx-opm', OpmBank);
     return hold && ms < attackMs ? "ok" : "avoid";
   }
 
-  // .player-build/sound/tones.js
+  // player-latest/sound/tones.js
   var tones_exports = {};
   __export(tones_exports, {
     TONE_FRAME: () => TONE_FRAME,
@@ -3845,7 +3845,170 @@ registerProcessor('mmsxx-opm', OpmBank);
     }
   }
 
-  // .player-build/sound/mml.js
+  // player-latest/sound/filter.js
+  var FILTERS = {
+    lowpass: {
+      note: "Two-pole (12 dB/oct) low-pass. Cuts the harmonics above the cutoff. Raise the resonance to add a peak at the cutoff.",
+      params: {
+        cutoff: { unit: "Hz", min: 20, max: 2e4, default: 2e4, note: "Cutoff frequency in Hz. Above this the sound is cut. Kept below half the sample rate." },
+        resonance: { min: 0, max: 1, default: 0, note: "Peak at the cutoff. 0 is no peak. Near 1 the filter rings at the cutoff." },
+        drive: { min: 0, max: 1, default: 0, note: "Saturation inside the filter. 0 is clean. Higher values squash loud signals and the resonance peak, adding harmonics." }
+      }
+    },
+    highpass: {
+      note: "Two-pole (12 dB/oct) high-pass. Cuts the lows below the cutoff. Raise the resonance to add a peak at the cutoff.",
+      params: {
+        cutoff: { unit: "Hz", min: 20, max: 2e4, default: 20, note: "Cutoff frequency in Hz. Below this the sound is cut. Kept below half the sample rate." },
+        resonance: { min: 0, max: 1, default: 0, note: "Peak at the cutoff. 0 is no peak. Near 1 the filter rings at the cutoff." },
+        drive: { min: 0, max: 1, default: 0, note: "Saturation inside the filter. 0 is clean. Higher values squash loud signals and the resonance peak, adding harmonics." }
+      }
+    },
+    ladder: {
+      note: "Four-pole (24 dB/oct) low-pass in the style of the Moog ladder. Steeper than lowpass. The bass thins out as the resonance rises.",
+      params: {
+        cutoff: { unit: "Hz", min: 20, max: 2e4, default: 2e4, note: "Cutoff frequency in Hz. Above this the sound is cut. Kept below half the sample rate." },
+        resonance: { min: 0, max: 1, default: 0, note: "Feedback around the four stages. 0 is no peak. Near 1 the filter rings at the cutoff and the bass gets thinner." },
+        drive: { min: 0, max: 1, default: 0, note: "Saturation at the filter input after the feedback. 0 is clean. Higher values squash loud signals and the resonance peak, adding harmonics." }
+      }
+    }
+  };
+  function filterOptions(kind, values = {}) {
+    const def = FILTERS[kind];
+    if (!def) throw new Error(`unknown filter: ${kind}`);
+    const parameterData = {};
+    for (const [name, p] of Object.entries(def.params)) parameterData[name] = values[name] ?? p.default;
+    return { processorOptions: { kind }, parameterData };
+  }
+  var FILTER_CORE = `
+// \u30EC\u30BE\u30CA\u30F3\u30B9\u3092\u6E1B\u8870\u306E\u4FC2\u6570 k \u306B\u76F4\u3059\u30020 \u3067 k=2(Q=0.5\u3001\u5C71\u306A\u3057)\u30011 \u306B\u8FD1\u3065\u304F\u3068 k \u306F 0 \u3078\u3002
+// k=0 \u3061\u3087\u3046\u3069\u306F\u6E1B\u8870\u3057\u306A\u3044(\u7DDA\u5F62\u306E\u307E\u307E\u3067\u306F\u9CF4\u308A\u7D9A\u3051\u308B\u304B\u9ED9\u308B\u304B\u306B\u306A\u308B)\u306E\u3067\u3001\u624B\u524D\u3067\u6B62\u3081\u308B\u3002
+// k \u306B\u3064\u3044\u3066\u76F4\u7DDA\u306A\u306E\u3067\u30010.9 \u304B\u3089\u4E0A\u306F\u5C11\u3057\u52D5\u304B\u3059\u3060\u3051\u3067 Q \u304C\u5927\u304D\u304F\u5909\u308F\u308B\u3002
+// \u624B\u3067\u56DE\u3057\u3066\u56F0\u3063\u305F\u3089\u3001\u66F2\u7DDA\u3067\u5BFE\u5FDC\u3055\u305B\u308B\u30E2\u30FC\u30C9\u3092\u52A0\u3048\u308B\u3002\u65E2\u5B9A\u306F\u5909\u3048\u306A\u3044(2026-10-04)
+const K_MIN = 0.01;
+const damp = (r) => Math.max(K_MIN, 2 - 2 * Math.min(1, Math.max(0, r)));
+
+// drive \u3092\u98FD\u548C\u306E\u5F37\u3055 d \u306B\u76F4\u3059\u3002\u6F70\u3059\u5F62\u306F tanh(x * d) / d\u3002\u5C0F\u3055\u3044\u97F3\u306F\u50BE\u304D 1 \u3067
+// \u305D\u306E\u307E\u307E\u901A\u308B\u306E\u3067\u3001drive \u3092\u4E0A\u3052\u3066\u3082\u9759\u304B\u306A\u3068\u3053\u308D\u306E\u97F3\u91CF\u306F\u5909\u308F\u3089\u306A\u3044\u3002
+// d \u304C 0 \u306B\u8FD1\u3065\u304F\u3068 x \u306B\u8FD1\u3065\u304F\u306E\u3067\u30010 \u306E\u624B\u524D\u3068 0 \u3067\u97F3\u304C\u98DB\u3070\u306A\u3044
+const D_MAX = 4;
+const D_MIN = 1e-4;
+const sat = (x, d) => Math.tanh(x * d) / d;
+
+// \u30AB\u30C3\u30C8\u30AA\u30D5\u3092 tan \u306E\u5F15\u6570\u306B\u76F4\u3059\u3002\u30CA\u30A4\u30AD\u30B9\u30C8\u306E\u624B\u524D\u3067\u6B62\u3081\u308B(tan \u304C\u767A\u6563\u3059\u308B)
+const warp = (fc, sr) => Math.tan(Math.PI * Math.min(Math.max(fc, 1), sr * 0.49) / sr);
+
+/** 2 \u6975\u306E SVF\u3002low \u3068 high \u3092\u540C\u6642\u306B\u51FA\u3059\u3002\u3069\u3061\u3089\u3092\u4F7F\u3046\u304B\u306F\u7D99\u3044\u3060\u5074\u304C\u6C7A\u3081\u308B */
+class Svf {
+  constructor() { this.ic1 = 0; this.ic2 = 0; }
+  reset() { this.ic1 = 0; this.ic2 = 0; }
+  /** g = warp(\u30AB\u30C3\u30C8\u30AA\u30D5)\u3001k = damp(\u30EC\u30BE\u30CA\u30F3\u30B9)\u3001d = \u98FD\u548C\u306E\u5F37\u3055\u3002\u7D50\u679C\u306F this.low \u3068 this.high */
+  tick(x, g, k, d) {
+    const a1 = 1 / (1 + g * (g + k));
+    const a2 = g * a1;
+    const a3 = g * a2;
+    const v3 = x - this.ic2;
+    const v1 = a1 * this.ic1 + a2 * v3;
+    const v2 = this.ic2 + a2 * this.ic1 + a3 * v3;
+    this.ic1 = 2 * v1 - this.ic1;
+    this.ic2 = 2 * v2 - this.ic2;
+    if (d > D_MIN) { this.ic1 = sat(this.ic1, d); this.ic2 = sat(this.ic2, d); }
+    this.low = v2;
+    this.high = x - k * v1 - v2;
+  }
+}
+
+// \u7A2E\u985E\u3054\u3068\u306B\u3001\u30EC\u30BE\u30CA\u30F3\u30B9\u306E 0..1 \u3092\u81EA\u5206\u306E\u4FC2\u6570\u3078\u76F4\u3059\u53E3(res)\u3092\u6301\u3064\u3002
+// \u51E6\u7406\u5668\u306F\u52D5\u304B\u306A\u3044\u30D6\u30ED\u30C3\u30AF\u3067\u306F 1 \u56DE\u3060\u3051\u547C\u3076
+class LowPass extends Svf {
+  static res(r) { return damp(r); }
+  step(x, g, k, d = 0) { this.tick(x, g, k, d); return this.low; }
+}
+
+class HighPass extends Svf {
+  static res(r) { return damp(r); }
+  step(x, g, k, d = 0) { this.tick(x, g, k, d); return this.high; }
+}
+
+// \u30E9\u30C0\u30FC\u306E\u5E30\u9084\u30024 \u3067\u767A\u632F\u306E\u5883\u76EE\u3002\u7DDA\u5F62\u306E\u307E\u307E\u3067\u306F\u5883\u76EE\u3067\u632F\u5E45\u304C\u4FDD\u3066\u306A\u3044\u306E\u3067\u624B\u524D\u3067\u6B62\u3081\u308B
+const K_LADDER = 3.96;
+
+/** 4 \u6975\u30E9\u30C0\u30FC\u30021 \u6975\u306E\u30ED\u30FC\u30D1\u30B9 4 \u3064\u3068\u3001\u51FA\u53E3\u304B\u3089\u5165\u53E3\u3078\u306E\u5E30\u9084 */
+class Ladder {
+  constructor() { this.s1 = 0; this.s2 = 0; this.s3 = 0; this.s4 = 0; }
+  reset() { this.s1 = 0; this.s2 = 0; this.s3 = 0; this.s4 = 0; }
+  static res(r) { return K_LADDER * Math.min(1, Math.max(0, r)); }
+  /** g = warp(\u30AB\u30C3\u30C8\u30AA\u30D5)\u3001k = \u5E30\u9084\u306E\u5F37\u3055(0..K_LADDER)\u3001d = \u98FD\u548C\u306E\u5F37\u3055 */
+  step(x, g, k, d = 0) {
+    const G = g / (1 + g);
+    const h = 1 / (1 + g);
+    // \u5E30\u9084\u3092\u5148\u306B\u89E3\u304F\u3002\u51FA\u53E3 y4 \u306F G^4 u + S \u3068\u66F8\u3051\u3001u = x - k y4 \u306A\u306E\u3067 y4 \u304C\u5F0F\u3067\u51FA\u308B
+    const S = G * (G * (G * this.s1 + this.s2) + this.s3) * h + this.s4 * h;
+    const G4 = G * G * G * G;
+    const y4 = (G4 * x + S) / (1 + k * G4);
+    let u = x - k * y4;
+    if (d > D_MIN) u = sat(u, d);
+    // 1 \u6975\u305A\u3064\u9032\u3081\u308B\u3002v = (\u5165\u53E3 - \u72B6\u614B) G\u3001\u51FA\u53E3 = v + \u72B6\u614B\u3001\u6B21\u306E\u72B6\u614B = \u51FA\u53E3 + v
+    let v = (u - this.s1) * G; const y1 = v + this.s1; this.s1 = y1 + v;
+    v = (y1 - this.s2) * G; const y2 = v + this.s2; this.s2 = y2 + v;
+    v = (y2 - this.s3) * G; const y3 = v + this.s3; this.s3 = y3 + v;
+    v = (y3 - this.s4) * G; const y = v + this.s4; this.s4 = y + v;
+    return y;
+  }
+}
+
+const KINDS = { lowpass: LowPass, highpass: HighPass, ladder: Ladder };
+`;
+  var FILTER_CODE = `${FILTER_CORE}
+const DEFS = ${JSON.stringify(FILTERS)};
+
+class FilterNode extends AudioWorkletProcessor {
+  static get parameterDescriptors() {
+    // \u7BC4\u56F2\u306F\u7A2E\u985E\u3067\u5909\u308F\u3089\u306A\u3044\u306E\u3067 lowpass \u304B\u3089\u53D6\u308B\u3002\u65E2\u5B9A\u5024\u306F kind \u3092\u898B\u3066\u4F5C\u308B\u3068\u304D\u306B\u5165\u308C\u308B
+    const p = DEFS.lowpass.params;
+    return [
+      { name: 'cutoff', defaultValue: p.cutoff.default, minValue: p.cutoff.min, maxValue: p.cutoff.max, automationRate: 'a-rate' },
+      { name: 'resonance', defaultValue: p.resonance.default, minValue: p.resonance.min, maxValue: p.resonance.max, automationRate: 'a-rate' },
+      { name: 'drive', defaultValue: p.drive.default, minValue: p.drive.min, maxValue: p.drive.max, automationRate: 'a-rate' },
+    ];
+  }
+  constructor(o) {
+    super();
+    const q = (o && o.processorOptions) || {};
+    this.kind = KINDS[q.kind] ? q.kind : 'lowpass';
+    this.Kind = KINDS[this.kind];
+    this.chans = [];
+    this.alive = true;
+    this.port.onmessage = (e) => { if (e.data && e.data.stop) this.alive = false; };
+  }
+  process(inputs, outputs, params) {
+    const input = inputs[0], output = outputs[0];
+    const cut = params.cutoff, res = params.resonance, drv = params.drive;
+    const sr = sampleRate;
+    // \u52D5\u3044\u3066\u3044\u306A\u3044\u30D6\u30ED\u30C3\u30AF\u306F\u4FC2\u6570\u3092 1 \u56DE\u3060\u3051\u4F5C\u308B\u3002tan \u306F\u305D\u3053\u305D\u3053\u91CD\u3044
+    const cFix = cut.length === 1, rFix = res.length === 1, dFix = drv.length === 1;
+    let g = cFix ? warp(cut[0], sr) : 0;
+    const Kind = this.Kind;
+    let k = rFix ? Kind.res(res[0]) : 0;
+    let d = dFix ? drv[0] * D_MAX : 0;
+    for (let c = 0; c < output.length; c++) {
+      const out = output[c];
+      const inp = input && input[c];
+      const f = this.chans[c] || (this.chans[c] = new this.Kind());
+      for (let i = 0; i < out.length; i++) {
+        if (!cFix) g = warp(cut[i], sr);
+        if (!rFix) k = Kind.res(res[i]);
+        if (!dFix) d = drv[i] * D_MAX;
+        out[i] = f.step(inp ? inp[i] : 0, g, k, d);
+      }
+    }
+    return this.alive;
+  }
+}
+
+registerProcessor('mmsxx-filter', FilterNode);
+`;
+
+  // player-latest/sound/mml.js
   var SEMI = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 };
   var LETTER = { c: 0, d: 1, e: 2, f: 3, g: 4, a: 5, b: 6 };
   var LETTER_OF_SEMI = { 0: 0, 2: 1, 4: 2, 5: 3, 7: 4, 9: 5, 11: 6 };
@@ -6571,7 +6734,7 @@ ${val}`;
   var AT_WORDS = ["key", "tuning", "fade"];
   var AT_BRACED = [...AT_WORDS, "p"];
   var AT_BUNDLE_ONLY = ["vsteps", "vcurve"];
-  var AT_LIST = "@{\u97F3\u8272} @e{\u5F62} @key{\u2026} @tuning{\u2026} @fade{\u2026} @p{\u2026} @d @o @v @m @s";
+  var AT_LIST = "@{\u97F3\u8272} @e{\u5F62} @key{\u2026} @tuning{\u2026} @fade{\u2026} @p{\u2026} @f{\u2026} @d @o @v @m @s";
   function compileOne(mml, again = null) {
     const meta = readDirectives(mml);
     readWaves(mml);
@@ -6660,6 +6823,7 @@ ${val}`;
     const bars = [];
     const cues = [];
     const texts = [];
+    const filters = [];
     const pushNote = (dur, freq, extra) => {
       if (!bundle) {
         const ev = oneNote(dur, freq, null, extra);
@@ -6979,6 +7143,50 @@ ${val}`;
       px = n[0] ?? 0;
       py = n[1] ?? 0;
       pz = n[2] ?? 0;
+    };
+    const readFilter = () => {
+      let body = "";
+      while (pos < src.length && src[pos] !== "}") body += src[pos++];
+      pos++;
+      const words2 = body.trim().split(/[\s,]+/).filter(Boolean);
+      const kinds = Object.keys(FILTERS);
+      const kind = words2.shift();
+      if (!FILTERS[kind]) {
+        bad(`[ChpTnSnd] MML: "@f{${kind ?? ""}\u2026}" \u2014 "${kind ?? ""}" \u3068\u3044\u3046\u30D5\u30A3\u30EB\u30BF\u306F\u3042\u308A\u307E\u305B\u3093(\u66F8\u3051\u308B\u306E\u306F ${kinds.join(" / ")})`);
+      }
+      const def = FILTERS[kind].params;
+      const got = {};
+      if (words2.length && !words2[0].startsWith("@")) {
+        const f = parseFloat(words2.shift());
+        if (!Number.isFinite(f)) {
+          bad(`[ChpTnSnd] MML: "@f{${kind} \u2026}" \u306E 1 \u3064\u76EE\u306F cutoff \u306E\u6570\u3067\u3059`);
+        }
+        got.cutoff = f;
+      }
+      while (words2.length) {
+        const key2 = words2.shift();
+        if (!key2.startsWith("@")) {
+          bad(`[ChpTnSnd] MML: "@f{${kind} \u2026}" \u2014 "${key2}" \u306F\u540D\u524D\u3067\u66F8\u3044\u3066\u304F\u3060\u3055\u3044(\u4F8B @resonance 0.8)\u3002\u4F4D\u7F6E\u3067\u66F8\u3051\u308B\u306E\u306F 1 \u3064\u76EE\u306E cutoff \u3060\u3051\u3067\u3059`);
+        }
+        const name = key2.slice(1);
+        if (!def[name]) {
+          bad(`[ChpTnSnd] MML: "@f{${kind} \u2026}" \u306B "@${name}" \u306F\u3042\u308A\u307E\u305B\u3093(\u66F8\u3051\u308B\u306E\u306F ${Object.keys(def).map((k) => "@" + k).join(" ")})`);
+        }
+        const f = parseFloat(words2.shift());
+        if (!Number.isFinite(f)) {
+          bad(`[ChpTnSnd] MML: "@f{${kind} \u2026}" \u306E "@${name}" \u306B\u6570\u304C\u3042\u308A\u307E\u305B\u3093`);
+        }
+        got[name] = f;
+      }
+      const first = filters.find((f) => f.kind);
+      if (first && first.kind !== kind) {
+        warn(`[ChpTnSnd] MML: "@f{${kind} \u2026}" \u2014 \u30D5\u30A3\u30EB\u30BF\u306E\u7A2E\u985E\u306F 1 \u672C\u306E\u30C1\u30E3\u30F3\u30CD\u30EB\u306B 1 \u3064\u3067\u3059(\u5148\u306B\u66F8\u3044\u305F "${first.kind}" \u3067\u9CF4\u3089\u3057\u307E\u3059)\u3002\u30AB\u30C3\u30C8\u30AA\u30D5\u30FB\u30EC\u30BE\u30CA\u30F3\u30B9\u30FB\u98FD\u548C\u306F\u9014\u4E2D\u3067\u52D5\u304B\u305B\u307E\u3059`);
+      }
+      const spec = { kind: first ? first.kind : kind };
+      for (const [name, d] of Object.entries(def)) {
+        spec[name] = clamp(got[name] ?? d.default, d.min, d.max);
+      }
+      filters.push({ t: time, ...spec });
     };
     const readPitchArg = () => {
       const back2 = pos;
@@ -7819,6 +8027,14 @@ ${val}`;
           } else if (kind === "p" && src[pos + 1] === "{") {
             pos += 2;
             readPlace();
+          } else if (kind === "f" && src[pos + 1] === "{") {
+            pos += 2;
+            readFilter();
+          } else if (kind === "f" && src[pos + 1] === "0") {
+            pos += 2;
+            filters.push({ t: time, off: true });
+          } else if (kind === "f") {
+            bad('[ChpTnSnd] MML: "@f" \u306F "@f{lowpass 800}" \u3068\u56F2\u3093\u3067\u66F8\u304D\u307E\u3059(\u5916\u3059\u3068\u304D\u306F @f0)');
           } else if (kind === "n") {
             pos++;
             wave = findWave("noise");
@@ -7914,6 +8130,7 @@ ${val}`;
       bars,
       cues,
       texts,
+      filters,
       // 層の呼び名。`lane` は控えめな字なので、画面に出すものは別に持つ
       laneLabels
     };
@@ -8030,7 +8247,7 @@ ${val}`;
     if (!segs.some((x) => x.kind === "takes")) {
       return { ...compileOne(mml), takes: [], problems: here() };
     }
-    const events = [], marks = [], takes = [], bars = [], cues = [], texts = [];
+    const events = [], marks = [], takes = [], bars = [], cues = [], texts = [], filters = [];
     const laneLabels = /* @__PURE__ */ new Map();
     let prefix = "";
     let at = 0;
@@ -8045,6 +8262,7 @@ ${val}`;
         for (const b of p.bars) bars.push(b + at);
         for (const c of p.cues) cues.push({ ...c, t: c.t + at });
         for (const x of p.texts || []) texts.push({ ...x, t: x.t + at });
+        for (const f of p.filters || []) filters.push({ ...f, t: f.t + at });
         for (const [k, v] of p.laneLabels ?? []) laneLabels.set(k, v);
         at += p.total;
         prefix += s.text;
@@ -8064,6 +8282,7 @@ ${val}`;
       for (const b of opts[0].bars) bars.push(b + at);
       for (const c of opts[0].cues) cues.push({ ...c, t: c.t + at });
       for (const x of opts[0].texts || []) texts.push({ ...x, t: x.t + at });
+      for (const f of opts[0].filters || []) filters.push({ ...f, t: f.t + at });
       for (const o of opts) for (const [k, v] of o.laneLabels ?? []) laneLabels.set(k, v);
       takes.push({
         group: s.group,
@@ -8100,6 +8319,7 @@ ${val}`;
       bars,
       cues,
       texts,
+      filters,
       laneLabels,
       problems: here()
     };
@@ -8228,7 +8448,7 @@ ${val}`;
     return { ok: errors.length === 0, errors, warnings, channels, total };
   }
 
-  // .player-build/sound/chipset.js
+  // player-latest/sound/chipset.js
   var ROLE_RANK = {
     lead: 6,
     // 旋律。いちばん前に出るもの
@@ -8249,7 +8469,7 @@ ${val}`;
   };
   var ROLES_COVERED = ROLES.every((r) => ROLE_RANK[r] !== void 0);
 
-  // .player-build/sound/mask.js
+  // player-latest/sound/mask.js
   function groupsOf(tracks) {
     const out = [];
     for (const t of tracks ?? []) {
@@ -8285,7 +8505,7 @@ ${val}`;
     return { group: now ? now.name : null, sets, silent, machine };
   }
 
-  // .player-build/sound/wavetables.js
+  // player-latest/sound/wavetables.js
   var N = 32;
   var build = (f) => Array.from({ length: N }, (_, i) => f(i / N, i));
   var norm = (w) => {
@@ -8454,7 +8674,7 @@ ${val}`;
     );
   }
 
-  // .player-build/sound/fmpresets.js
+  // player-latest/sound/fmpresets.js
   var FM_PRESETS = {
     // 1 バイオリン。弓のこすれを出すため、比を少しずらして倍音を残す
     // 2 ギター。はじいた瞬間だけ硬く、あとは丸くなる
@@ -8537,7 +8757,7 @@ ${val}`;
     }
   }
 
-  // .player-build/sound/beeppresets.js
+  // player-latest/sound/beeppresets.js
   var BEEP_PRESETS = {
     // ---- 搬送波を刻む型。**音程を変える回路が無い機械** ----
     // 2.4kHz が鳴りっぱなしで、ソフトはそれを On/Off するだけ。
@@ -8729,7 +8949,7 @@ ${val}`;
     }
   }
 
-  // .player-build/sound/opmpresets.js
+  // player-latest/sound/opmpresets.js
   var OPM_PRESETS = {
     "opnBrass": {
       noteJa: "4 \u30AA\u30DA\u306E\u91D1\u7BA1\u3002\u30AA\u30DA\u30EC\u30FC\u30BF\u304C\u5897\u3048\u305F\u3076\u3093\u3001\u4F38\u3070\u3057\u3066\u3044\u308B\u3042\u3044\u3060\u306B\u500D\u97F3\u304C\u80B2\u3064\u3002\u672C\u7269\u306E\u91D1\u7BA1\u3068\u540C\u3058\u52D5\u304D\u3067\u30012 \u30AA\u30DA\u306B\u306F\u3067\u304D\u306A\u3044",
@@ -8898,7 +9118,7 @@ ${val}`;
     });
   }
 
-  // .player-build/sound/extrawaves.js
+  // player-latest/sound/extrawaves.js
   var EXTRA_LEN = 32;
   var build2 = (fn) => Array.from({ length: EXTRA_LEN }, (_, i) => fn(i / EXTRA_LEN));
   var pulse = (n) => build2((p) => p < n / 16 ? 1 : -1);
@@ -9030,7 +9250,7 @@ ${val}`;
     }
   }
 
-  // .player-build/sound/pcmbake.js
+  // player-latest/sound/pcmbake.js
   var MIN_LOOP = 1024;
   function periodMultiple(ratios, maxM = 8) {
     for (let m = 1; m <= maxM; m++) {
@@ -9112,7 +9332,7 @@ ${val}`;
     };
   }
 
-  // .player-build/sound/opllpresets.js
+  // player-latest/sound/opllpresets.js
   var OPLL_PRESETS = [
     [
       1,
@@ -9545,7 +9765,7 @@ ${val}`;
     }
   }
 
-  // .player-build/sound/ay.js
+  // player-latest/sound/ay.js
   var AY_CLOCK = 1789772;
   var AY_VOLTBL = [
     [
@@ -10085,7 +10305,7 @@ class AyBank extends AudioWorkletProcessor {
 registerProcessor('mmsxx-ay', AyBank);
 `;
 
-  // .player-build/sound/nes.js
+  // player-latest/sound/nes.js
   var NES_CLOCK = 1789773;
   var NES_NOISE_PERIODS = [4, 8, 16, 32, 64, 96, 128, 160, 202, 254, 380, 508, 762, 1016, 2034, 4068];
   var NES_DUTIES = [0.125, 0.25, 0.5, 0.75];
@@ -10396,6 +10616,12 @@ class NesBank extends AudioWorkletProcessor {
     this.logNow = 0;
     this.dcX = 0;
     this.dcY = 0;
+    // **\u76F4\u6D41\u3092\u629C\u304F\u4ED5\u639B\u3051\u306E\u51FA\u767A\u70B9\u3092\u3001\u6700\u521D\u306E 1 \u6A19\u672C\u3067\u5408\u308F\u305B\u308B\u3002**
+    // \u30C1\u30C3\u30D7\u306E\u51FA\u53E3\u306F 0 \u3092\u4E2D\u5FC3\u306B\u3057\u3066\u3044\u306A\u3044(\u5B9F\u6A5F\u306E DAC \u304C\u7247\u5074\u3060\u3051)\u306E\u3067\u3001
+    // dcX \u304C 0 \u306E\u307E\u307E 1 \u6A19\u672C\u76EE\u3092\u901A\u3059\u3068\u3001\u305D\u306E\u6BB5\u5DEE\u304C\u305D\u306E\u307E\u307E\u51FA\u53E3\u3078\u51FA\u308B\u3002
+    // 20Hz \u3067\u629C\u304F\u306E\u3067 8ms \u307B\u3069\u6B8B\u308A\u3001\u30D7\u30C1\u30C3\u3068\u3044\u3046\u4F4E\u3044\u97F3\u306B\u306A\u308B\u3002
+    // \u66F2\u306E\u982D\u3067\u4E09\u89D2\u6CE2\u304C\u51FA\u305F\u3068\u304D\u306B 1 \u56DE\u9CF4\u3063\u3066\u3044\u305F(2026-10-12 \u306B\u8A00\u308F\u308C\u305F)
+    this.dcInit = false;
     this.dcR = 1 - 2 * Math.PI * 20 / sampleRate;   // 20Hz
     this.cutAt = -1;
     this.cutLen = Math.max(1, Math.round(sampleRate * 0.01));
@@ -10425,6 +10651,11 @@ class NesBank extends AudioWorkletProcessor {
     c.writeReg(0x04, 0x30);
     c.writeReg(0x08, 0x80);
     c.writeReg(0x0c, 0x30);
+    // \u9ED9\u3063\u3066\u3044\u308B\u30C1\u30C3\u30D7\u304C\u51FA\u3059\u76F4\u6D41\u3092\u3001\u629C\u304F\u4ED5\u639B\u3051\u306E\u51FA\u767A\u70B9\u3078\u7E54\u308A\u8FBC\u3080\u3002
+    // \u7E54\u308A\u8FBC\u307E\u306A\u3044\u3068\u3001\u30C1\u30C3\u30D7\u304C\u5897\u3048\u305F\u77AC\u9593\u306B\u305D\u306E\u76F4\u6D41\u304C\u307E\u308B\u3054\u3068\u6BB5\u5DEE\u306B\u306A\u3063\u3066
+    // \u30D7\u30C1\u30C3\u3068\u9CF4\u308B\u30021 \u53F0\u76EE\u306F\u6700\u521D\u306E\u97F3\u7B26\u3088\u308A\u5C11\u3057\u9045\u308C\u3066\u3067\u304D\u308B\u306E\u3067\u3001
+    // 1 \u5EA6\u76EE\u306E\u518D\u751F\u306E\u3068\u304D\u3060\u3051\u3001\u97F3\u306E\u51FA\u306F\u3058\u3081\u3067\u9CF4\u3063\u3066\u3044\u305F(2026-10-12 \u306B\u8A00\u308F\u308C\u305F)
+    this.dcX += c.calc() * OUT_GAIN;
     this.pool.push(chip);
     return chip;
   }
@@ -10573,6 +10804,8 @@ class NesBank extends AudioWorkletProcessor {
       let raw = 0;
       for (const chip of this.pool) raw += chip.c.calc();
       const x = raw * OUT_GAIN;
+      // 1 \u6A19\u672C\u76EE\u306F\u3001\u305D\u3053\u3092\u51FA\u767A\u70B9\u306B\u3057\u3066 0 \u3092\u51FA\u3059(\u4E0A\u306E dcInit)
+      if (!this.dcInit) { this.dcInit = true; this.dcX = x; }
       const y = x - this.dcX + this.dcR * this.dcY;
       this.dcX = x;
       this.dcY = y;
@@ -10598,7 +10831,7 @@ class NesBank extends AudioWorkletProcessor {
 registerProcessor('mmsxx-nes', NesBank);
 `;
 
-  // .player-build/sound/fds.js
+  // player-latest/sound/fds.js
   var FDS_CLOCK = 1789773;
   var FDS_LEN = 64;
   var FDS_OUT_PEAK = 2.4 * (95.88 / (8128 / 15 + 100)) * 1.876;
@@ -10965,7 +11198,7 @@ class FdsBank extends AudioWorkletProcessor {
 registerProcessor('mmsxx-fds', FdsBank);
 `;
 
-  // .player-build/sound/scc.js
+  // player-latest/sound/scc.js
   var SCC_CLOCK = 3579545;
   var SCC_OUT_GAIN = 0.1404;
   function sccPeriod(freq) {
@@ -11220,7 +11453,7 @@ class SccBank extends AudioWorkletProcessor {
 registerProcessor('mmsxx-scc', SccBank);
 `;
 
-  // .player-build/sound/pce.js
+  // player-latest/sound/pce.js
   var PCE_CLOCK = 3579545;
   var PCE_OUT_GAIN = 0.1393;
   function pcePeriod(freq) {
@@ -11545,7 +11778,7 @@ class PceBank extends AudioWorkletProcessor {
 registerProcessor('mmsxx-pce', PceBank);
 `;
 
-  // .player-build/sound/opnarhythm.js
+  // player-latest/sound/opnarhythm.js
   var OPNA_CLOCK = 7987200;
   var OPNA_RHYTHM_OUT_GAIN = 0.36;
   var OPNA_RHYTHM_KEYS = ["bd", "sd", "top", "hh", "tom", "rim"];
@@ -11757,7 +11990,7 @@ class OpnaRhythmBank extends AudioWorkletProcessor {
 registerProcessor('mmsxx-opna-rhythm', OpnaRhythmBank);
 `;
 
-  // .player-build/sound/duty.js
+  // player-latest/sound/duty.js
   var DUTY_CODE = `
 const FRAME = ${TONE_FRAME};
 
@@ -11911,7 +12144,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     return Math.min(0.98, Math.max(0.02, x));
   };
 
-  // .player-build/sound/modal.js
+  // player-latest/sound/modal.js
   var MODAL_NODE = "mmsxx-modal";
   var MODAL_VOICES = 24;
   var MODAL_MODES = 1024;
@@ -13264,7 +13497,7 @@ registerProcessor('${MODAL_NODE}', ModalBank);
     };
   }
 
-  // .player-build/sound/brass.js
+  // player-latest/sound/brass.js
   var BRASS_NODE = "mmsxx-brass";
   var BRASS_VOICES = 16;
   var BRASS_HOLD = 1;
@@ -13963,163 +14196,7 @@ registerProcessor('${BRASS_NODE}', BrassBank);
     return out;
   }
 
-  // .player-build/sound/filter.js
-  var FILTERS = {
-    lowpass: {
-      note: "Two-pole (12 dB/oct) low-pass. Cuts the harmonics above the cutoff. Raise the resonance to add a peak at the cutoff.",
-      params: {
-        cutoff: { unit: "Hz", min: 20, max: 2e4, default: 2e4, note: "Cutoff frequency in Hz. Above this the sound is cut. Kept below half the sample rate." },
-        resonance: { min: 0, max: 1, default: 0, note: "Peak at the cutoff. 0 is no peak. Near 1 the filter rings at the cutoff." },
-        drive: { min: 0, max: 1, default: 0, note: "Saturation inside the filter. 0 is clean. Higher values squash loud signals and the resonance peak, adding harmonics." }
-      }
-    },
-    highpass: {
-      note: "Two-pole (12 dB/oct) high-pass. Cuts the lows below the cutoff. Raise the resonance to add a peak at the cutoff.",
-      params: {
-        cutoff: { unit: "Hz", min: 20, max: 2e4, default: 20, note: "Cutoff frequency in Hz. Below this the sound is cut. Kept below half the sample rate." },
-        resonance: { min: 0, max: 1, default: 0, note: "Peak at the cutoff. 0 is no peak. Near 1 the filter rings at the cutoff." },
-        drive: { min: 0, max: 1, default: 0, note: "Saturation inside the filter. 0 is clean. Higher values squash loud signals and the resonance peak, adding harmonics." }
-      }
-    },
-    ladder: {
-      note: "Four-pole (24 dB/oct) low-pass in the style of the Moog ladder. Steeper than lowpass. The bass thins out as the resonance rises.",
-      params: {
-        cutoff: { unit: "Hz", min: 20, max: 2e4, default: 2e4, note: "Cutoff frequency in Hz. Above this the sound is cut. Kept below half the sample rate." },
-        resonance: { min: 0, max: 1, default: 0, note: "Feedback around the four stages. 0 is no peak. Near 1 the filter rings at the cutoff and the bass gets thinner." },
-        drive: { min: 0, max: 1, default: 0, note: "Saturation at the filter input after the feedback. 0 is clean. Higher values squash loud signals and the resonance peak, adding harmonics." }
-      }
-    }
-  };
-  var FILTER_CORE = `
-// \u30EC\u30BE\u30CA\u30F3\u30B9\u3092\u6E1B\u8870\u306E\u4FC2\u6570 k \u306B\u76F4\u3059\u30020 \u3067 k=2(Q=0.5\u3001\u5C71\u306A\u3057)\u30011 \u306B\u8FD1\u3065\u304F\u3068 k \u306F 0 \u3078\u3002
-// k=0 \u3061\u3087\u3046\u3069\u306F\u6E1B\u8870\u3057\u306A\u3044(\u7DDA\u5F62\u306E\u307E\u307E\u3067\u306F\u9CF4\u308A\u7D9A\u3051\u308B\u304B\u9ED9\u308B\u304B\u306B\u306A\u308B)\u306E\u3067\u3001\u624B\u524D\u3067\u6B62\u3081\u308B\u3002
-// k \u306B\u3064\u3044\u3066\u76F4\u7DDA\u306A\u306E\u3067\u30010.9 \u304B\u3089\u4E0A\u306F\u5C11\u3057\u52D5\u304B\u3059\u3060\u3051\u3067 Q \u304C\u5927\u304D\u304F\u5909\u308F\u308B\u3002
-// \u624B\u3067\u56DE\u3057\u3066\u56F0\u3063\u305F\u3089\u3001\u66F2\u7DDA\u3067\u5BFE\u5FDC\u3055\u305B\u308B\u30E2\u30FC\u30C9\u3092\u52A0\u3048\u308B\u3002\u65E2\u5B9A\u306F\u5909\u3048\u306A\u3044(2026-10-04)
-const K_MIN = 0.01;
-const damp = (r) => Math.max(K_MIN, 2 - 2 * Math.min(1, Math.max(0, r)));
-
-// drive \u3092\u98FD\u548C\u306E\u5F37\u3055 d \u306B\u76F4\u3059\u3002\u6F70\u3059\u5F62\u306F tanh(x * d) / d\u3002\u5C0F\u3055\u3044\u97F3\u306F\u50BE\u304D 1 \u3067
-// \u305D\u306E\u307E\u307E\u901A\u308B\u306E\u3067\u3001drive \u3092\u4E0A\u3052\u3066\u3082\u9759\u304B\u306A\u3068\u3053\u308D\u306E\u97F3\u91CF\u306F\u5909\u308F\u3089\u306A\u3044\u3002
-// d \u304C 0 \u306B\u8FD1\u3065\u304F\u3068 x \u306B\u8FD1\u3065\u304F\u306E\u3067\u30010 \u306E\u624B\u524D\u3068 0 \u3067\u97F3\u304C\u98DB\u3070\u306A\u3044
-const D_MAX = 4;
-const D_MIN = 1e-4;
-const sat = (x, d) => Math.tanh(x * d) / d;
-
-// \u30AB\u30C3\u30C8\u30AA\u30D5\u3092 tan \u306E\u5F15\u6570\u306B\u76F4\u3059\u3002\u30CA\u30A4\u30AD\u30B9\u30C8\u306E\u624B\u524D\u3067\u6B62\u3081\u308B(tan \u304C\u767A\u6563\u3059\u308B)
-const warp = (fc, sr) => Math.tan(Math.PI * Math.min(Math.max(fc, 1), sr * 0.49) / sr);
-
-/** 2 \u6975\u306E SVF\u3002low \u3068 high \u3092\u540C\u6642\u306B\u51FA\u3059\u3002\u3069\u3061\u3089\u3092\u4F7F\u3046\u304B\u306F\u7D99\u3044\u3060\u5074\u304C\u6C7A\u3081\u308B */
-class Svf {
-  constructor() { this.ic1 = 0; this.ic2 = 0; }
-  reset() { this.ic1 = 0; this.ic2 = 0; }
-  /** g = warp(\u30AB\u30C3\u30C8\u30AA\u30D5)\u3001k = damp(\u30EC\u30BE\u30CA\u30F3\u30B9)\u3001d = \u98FD\u548C\u306E\u5F37\u3055\u3002\u7D50\u679C\u306F this.low \u3068 this.high */
-  tick(x, g, k, d) {
-    const a1 = 1 / (1 + g * (g + k));
-    const a2 = g * a1;
-    const a3 = g * a2;
-    const v3 = x - this.ic2;
-    const v1 = a1 * this.ic1 + a2 * v3;
-    const v2 = this.ic2 + a2 * this.ic1 + a3 * v3;
-    this.ic1 = 2 * v1 - this.ic1;
-    this.ic2 = 2 * v2 - this.ic2;
-    if (d > D_MIN) { this.ic1 = sat(this.ic1, d); this.ic2 = sat(this.ic2, d); }
-    this.low = v2;
-    this.high = x - k * v1 - v2;
-  }
-}
-
-// \u7A2E\u985E\u3054\u3068\u306B\u3001\u30EC\u30BE\u30CA\u30F3\u30B9\u306E 0..1 \u3092\u81EA\u5206\u306E\u4FC2\u6570\u3078\u76F4\u3059\u53E3(res)\u3092\u6301\u3064\u3002
-// \u51E6\u7406\u5668\u306F\u52D5\u304B\u306A\u3044\u30D6\u30ED\u30C3\u30AF\u3067\u306F 1 \u56DE\u3060\u3051\u547C\u3076
-class LowPass extends Svf {
-  static res(r) { return damp(r); }
-  step(x, g, k, d = 0) { this.tick(x, g, k, d); return this.low; }
-}
-
-class HighPass extends Svf {
-  static res(r) { return damp(r); }
-  step(x, g, k, d = 0) { this.tick(x, g, k, d); return this.high; }
-}
-
-// \u30E9\u30C0\u30FC\u306E\u5E30\u9084\u30024 \u3067\u767A\u632F\u306E\u5883\u76EE\u3002\u7DDA\u5F62\u306E\u307E\u307E\u3067\u306F\u5883\u76EE\u3067\u632F\u5E45\u304C\u4FDD\u3066\u306A\u3044\u306E\u3067\u624B\u524D\u3067\u6B62\u3081\u308B
-const K_LADDER = 3.96;
-
-/** 4 \u6975\u30E9\u30C0\u30FC\u30021 \u6975\u306E\u30ED\u30FC\u30D1\u30B9 4 \u3064\u3068\u3001\u51FA\u53E3\u304B\u3089\u5165\u53E3\u3078\u306E\u5E30\u9084 */
-class Ladder {
-  constructor() { this.s1 = 0; this.s2 = 0; this.s3 = 0; this.s4 = 0; }
-  reset() { this.s1 = 0; this.s2 = 0; this.s3 = 0; this.s4 = 0; }
-  static res(r) { return K_LADDER * Math.min(1, Math.max(0, r)); }
-  /** g = warp(\u30AB\u30C3\u30C8\u30AA\u30D5)\u3001k = \u5E30\u9084\u306E\u5F37\u3055(0..K_LADDER)\u3001d = \u98FD\u548C\u306E\u5F37\u3055 */
-  step(x, g, k, d = 0) {
-    const G = g / (1 + g);
-    const h = 1 / (1 + g);
-    // \u5E30\u9084\u3092\u5148\u306B\u89E3\u304F\u3002\u51FA\u53E3 y4 \u306F G^4 u + S \u3068\u66F8\u3051\u3001u = x - k y4 \u306A\u306E\u3067 y4 \u304C\u5F0F\u3067\u51FA\u308B
-    const S = G * (G * (G * this.s1 + this.s2) + this.s3) * h + this.s4 * h;
-    const G4 = G * G * G * G;
-    const y4 = (G4 * x + S) / (1 + k * G4);
-    let u = x - k * y4;
-    if (d > D_MIN) u = sat(u, d);
-    // 1 \u6975\u305A\u3064\u9032\u3081\u308B\u3002v = (\u5165\u53E3 - \u72B6\u614B) G\u3001\u51FA\u53E3 = v + \u72B6\u614B\u3001\u6B21\u306E\u72B6\u614B = \u51FA\u53E3 + v
-    let v = (u - this.s1) * G; const y1 = v + this.s1; this.s1 = y1 + v;
-    v = (y1 - this.s2) * G; const y2 = v + this.s2; this.s2 = y2 + v;
-    v = (y2 - this.s3) * G; const y3 = v + this.s3; this.s3 = y3 + v;
-    v = (y3 - this.s4) * G; const y = v + this.s4; this.s4 = y + v;
-    return y;
-  }
-}
-
-const KINDS = { lowpass: LowPass, highpass: HighPass, ladder: Ladder };
-`;
-  var FILTER_CODE = `${FILTER_CORE}
-const DEFS = ${JSON.stringify(FILTERS)};
-
-class FilterNode extends AudioWorkletProcessor {
-  static get parameterDescriptors() {
-    // \u7BC4\u56F2\u306F\u7A2E\u985E\u3067\u5909\u308F\u3089\u306A\u3044\u306E\u3067 lowpass \u304B\u3089\u53D6\u308B\u3002\u65E2\u5B9A\u5024\u306F kind \u3092\u898B\u3066\u4F5C\u308B\u3068\u304D\u306B\u5165\u308C\u308B
-    const p = DEFS.lowpass.params;
-    return [
-      { name: 'cutoff', defaultValue: p.cutoff.default, minValue: p.cutoff.min, maxValue: p.cutoff.max, automationRate: 'a-rate' },
-      { name: 'resonance', defaultValue: p.resonance.default, minValue: p.resonance.min, maxValue: p.resonance.max, automationRate: 'a-rate' },
-      { name: 'drive', defaultValue: p.drive.default, minValue: p.drive.min, maxValue: p.drive.max, automationRate: 'a-rate' },
-    ];
-  }
-  constructor(o) {
-    super();
-    const q = (o && o.processorOptions) || {};
-    this.kind = KINDS[q.kind] ? q.kind : 'lowpass';
-    this.Kind = KINDS[this.kind];
-    this.chans = [];
-    this.alive = true;
-    this.port.onmessage = (e) => { if (e.data && e.data.stop) this.alive = false; };
-  }
-  process(inputs, outputs, params) {
-    const input = inputs[0], output = outputs[0];
-    const cut = params.cutoff, res = params.resonance, drv = params.drive;
-    const sr = sampleRate;
-    // \u52D5\u3044\u3066\u3044\u306A\u3044\u30D6\u30ED\u30C3\u30AF\u306F\u4FC2\u6570\u3092 1 \u56DE\u3060\u3051\u4F5C\u308B\u3002tan \u306F\u305D\u3053\u305D\u3053\u91CD\u3044
-    const cFix = cut.length === 1, rFix = res.length === 1, dFix = drv.length === 1;
-    let g = cFix ? warp(cut[0], sr) : 0;
-    const Kind = this.Kind;
-    let k = rFix ? Kind.res(res[0]) : 0;
-    let d = dFix ? drv[0] * D_MAX : 0;
-    for (let c = 0; c < output.length; c++) {
-      const out = output[c];
-      const inp = input && input[c];
-      const f = this.chans[c] || (this.chans[c] = new this.Kind());
-      for (let i = 0; i < out.length; i++) {
-        if (!cFix) g = warp(cut[i], sr);
-        if (!rFix) k = Kind.res(res[i]);
-        if (!dFix) d = drv[i] * D_MAX;
-        out[i] = f.step(inp ? inp[i] : 0, g, k, d);
-      }
-    }
-    return this.alive;
-  }
-}
-
-registerProcessor('mmsxx-filter', FilterNode);
-`;
-
-  // .player-build/sound/analog.js
+  // player-latest/sound/analog.js
   var ANALOG_NODE = "mmsxx-analog";
   var ANALOG_VOICES = 16;
   var CHORUS_BASE = 0.012;
@@ -14729,7 +14806,7 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
     };
   }
 
-  // .player-build/sound/demotunes.js
+  // player-latest/sound/demotunes.js
   var SE_SYS_PAUSE = "sys.pause";
   var SYSTEM_SE = {
     [SE_SYS_PAUSE]: [
@@ -14820,7 +14897,7 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
     BEAT_TOM_FILL
   ]);
 
-  // .player-build/sound/se.js
+  // player-latest/sound/se.js
   var SE_FRAME = 1 / 60;
   var SE_WHOLE = 64;
   var SE_TEMPO = Math.round(240 / (SE_WHOLE * SE_FRAME));
@@ -14969,7 +15046,7 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
     }
   };
 
-  // .player-build/sound/layerpresets.js
+  // player-latest/sound/layerpresets.js
   var DETUNE_STEPS = [
     { key: "", value: "none", c: 0, en: "no detune" },
     {
@@ -15130,10 +15207,10 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
     }
   }
 
-  // .player-build/sound/version.js
+  // player-latest/sound/version.js
   var SOUND_VERSION = "0.31.0";
 
-  // .player-build/sound/audio.js
+  // player-latest/sound/audio.js
   registerDefaultWaves();
   registerDefaultFM();
   registerDefaultBeeps();
@@ -15320,6 +15397,9 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
         processorOptions: { events: list, patches: patchesOf(BRASS_PATCHES, compileBrass) }
       })
     },
+    // チャンネルの出口のフィルタ(`@f`)。音符は取らず、入口と出口を持つ。
+    // 作るときに種類を渡すので、`options` ではなく `_chFilter` が自分で組む
+    filter: { node: "mmsxx-filter", code: FILTER_CODE },
     // 減算方式のシンセ。コーラスが左右へ広がるので、modal と同じ 2 本で出す
     analog: {
       node: ANALOG_NODE,
@@ -15506,6 +15586,7 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
       cues,
       texts,
       problems,
+      filters,
       laneLabels
     } = data;
     const noise = events.some((e) => (WAVEFORMS[e.wave] || {}).kind === "noise");
@@ -15530,6 +15611,8 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
       meta,
       takes,
       bars,
+      // チャンネルの出口のフィルタ(`@f`)。音符に着せずに時刻つきの並びで持つ
+      filters: filters ?? [],
       // 読めなかったところ。読み方(mode)にかかわらず控えてある
       problems: problems ?? [],
       // 合図と切れ目も選択肢で入れ替わるので、素の並びを取っておく
@@ -16367,6 +16450,48 @@ registerProcessor('mmsxx-tap', MmsxxTap);
      * @param {number} from 積む範囲の始まり(曲の中の秒)
      * @param {number} to 積む範囲の終わり
      */
+    /**
+     * そのチャンネルの出口へ置くフィルタの節。`@f` を書いていなければ null。
+     *
+     * 種類は 1 本に 1 つ(先に書いたもの)。途中で差し替えると音が切れるので、
+     * コンパイルのところで知らせを出して 1 つに寄せている。
+     * カットオフ・レゾナンス・飽和は `_scheduleFilters` が時刻つきで動かす
+     */
+    _chFilter(track) {
+      const list = track && track.filters;
+      if (!list || !list.length || !this.ctx) return null;
+      const first = list.find((f) => f.kind);
+      if (!first) return null;
+      if (!this._wkReady || this._wkReady.get("filter") !== this.ctx) return null;
+      return new AudioWorkletNode(this.ctx, "mmsxx-filter", filterOptions(first.kind, first));
+    }
+    /**
+     * フィルタの書き替えを積む。合図(`_scheduleCues`)と同じ範囲の切り方。
+     *
+     * `@f0` は節を外さずに、素通しの端へ寄せる。外すと繋ぎ直しのところで
+     * 音が切れる。ローパスとラダーは上の端、ハイパスは下の端が素通し
+     */
+    _scheduleFilters(track, ch, state, from, to) {
+      const list = track.filters;
+      if (!list || !list.length) return;
+      const node = state.chFilters && state.chFilters[ch];
+      if (!node) return;
+      const P = (name) => node.parameters.get(name);
+      const def = FILTERS[(list.find((f) => f.kind) || {}).kind] || FILTERS.lowpass;
+      for (const f of list) {
+        if (f.t < from || f.t >= to) continue;
+        const at = state.base + f.t;
+        if (f.off) {
+          P("cutoff").setValueAtTime(def === FILTERS.highpass ? def.params.cutoff.min : def.params.cutoff.max, at);
+          P("resonance").setValueAtTime(0, at);
+          P("drive").setValueAtTime(0, at);
+        } else {
+          P("cutoff").setValueAtTime(f.cutoff, at);
+          P("resonance").setValueAtTime(f.resonance, at);
+          P("drive").setValueAtTime(f.drive, at);
+        }
+      }
+    }
     _scheduleCues(track, ch, state, from, to) {
       const list = track.cues;
       if (!list || !list.length) return;
@@ -16859,10 +16984,18 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         this._master.gain.linearRampToValueAtTime(this._outGain(), t0 + 0.05);
       }
       const wants = loop || !!mark;
+      state.chFilters = [];
       state.chGains = tracks.map((t, i) => {
         const g = this.ctx.createGain();
         g.gain.value = this._chVol(state, i);
-        g.connect(gain);
+        const f = this._chFilter(t);
+        state.chFilters[i] = f;
+        if (f) {
+          g.connect(f);
+          f.connect(gain);
+        } else {
+          g.connect(gain);
+        }
         return g;
       });
       state.muted = tracks.map((t, i) => this._chMute.has(i));
@@ -16904,6 +17037,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
               state.laps > 0 && !state.inEnding
             );
             this._scheduleCues(tracks[i], i, state, state.cursor, to);
+            this._scheduleFilters(tracks[i], i, state, state.cursor, to);
             this._scheduleTexts(tracks[i], i, state, state.cursor, to);
           }
           this._wkFlushAll(state.nodes);
@@ -17219,12 +17353,20 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         const dest = this._out();
         const nodes = [];
         let at = 0;
+        const filts = [];
         const outs = def.map((t, i) => {
           const v = this.trackVolume(i);
-          if (v === 1) return dest;
+          const f = this._chFilter(t);
+          if (f) filts[i] = f;
+          if (v === 1 && !f) return dest;
           const g = ctx.createGain();
           g.gain.value = v;
-          g.connect(dest);
+          if (f) {
+            g.connect(f);
+            f.connect(dest);
+          } else {
+            g.connect(dest);
+          }
           return g;
         });
         parts.forEach(([a, b], k) => {
@@ -17232,6 +17374,9 @@ registerProcessor('mmsxx-tap', MmsxxTap);
           def.forEach((t, i) => {
             if (off.has(i)) return;
             this._scheduleTrack(t, at - a, outs[i], nodes, a, b, again);
+            if (filts[i]) {
+              this._scheduleFilters(t, i, { base: at - a, chFilters: filts }, a, b);
+            }
           });
           at += b - a;
         });
@@ -17804,6 +17949,14 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         }
       }
       this._wkCut();
+      for (const f of s.chFilters || []) {
+        if (!f) continue;
+        try {
+          f.disconnect();
+          f.port.postMessage({ stop: true });
+        } catch (e) {
+        }
+      }
       try {
         s.gain.disconnect();
       } catch (e) {
@@ -18580,6 +18733,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       const need = /* @__PURE__ */ new Set();
       for (const t of tracks) {
         for (const e of t.events) this._wkKindsOf(e.wave, need);
+        if (t.filters && t.filters.length) need.add("filter");
       }
       return need;
     }
@@ -19782,10 +19936,10 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out;
   }
 
-  // .player-build/tool/ui/version.js
+  // player-latest/tool/ui/version.js
   var PLAYER_VERSION = "1.0.0";
 
-  // .player-build/tool/core/tomml.js
+  // player-latest/tool/core/tomml.js
   var NAMES = ["c", "c+", "d", "d+", "e", "f", "f+", "g", "g+", "a", "a+", "b"];
   var LENS = [
     [16, "1"],
@@ -19865,7 +20019,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out.join("\n\n");
   }
 
-  // .player-build/tool/core/wav.js
+  // player-latest/tool/core/wav.js
   function writeWAV(samples, rate = 44100) {
     const n = samples.length;
     const out = new Uint8Array(44 + n * 2);
@@ -19893,7 +20047,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out;
   }
 
-  // .player-build/tool/ui/player.js
+  // player-latest/tool/ui/player.js
   var COPYRIGHT = "2026 harayoki";
   var PLAYER_CSS = `
 .mmsxx-player{ font-family:var(--mono); font-size:13px; line-height:1.55; color:var(--ink); }
@@ -20383,11 +20537,13 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       </div>
       <div class="row" data-p="abrow">
         <label class="sw"><input type="checkbox" data-p="abOn"> A &ndash; B</label>
+        <button type="button" data-p="setA" title="Set A to the current position">Set A</button>
         <input type="number" data-p="abFrom" aria-label="Repeat from"
                min="0" step="0.1" placeholder="0">
         <span class="lbl">&ndash;</span>
         <input type="number" data-p="abTo" aria-label="Repeat to"
                min="0" step="0.1" placeholder="0">
+        <button type="button" data-p="setB" title="Set B to the current position">Set B</button>
         <span class="lbl">sec</span>
         <button type="button" data-p="copy">Copy selection as MML</button>
       </div>
@@ -20445,6 +20601,8 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       abOn: $("abOn"),
       abFrom: $("abFrom"),
       abTo: $("abTo"),
+      setA: $("setA"),
+      setB: $("setB"),
       copy: $("copy"),
       out: $("out"),
       wav: $("wav"),
@@ -21242,6 +21400,33 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       if (toA) audio.seekBGM(abFrom);
       draw();
     }
+    function markAB(which) {
+      const span = audio.bgmLength() || total;
+      if (!(span > 0)) return;
+      const st = audio.bgmState;
+      const at = st && st.name === NAME ? audio.bgmPosition() : span * (Number(el.seek.value) / 1e3);
+      const sec = Math.max(0, Math.min(span, Math.round(at * 10) / 10));
+      if (!(abTo > abFrom)) {
+        abFrom = 0;
+        abTo = span;
+      }
+      if (which === "A") abFrom = sec;
+      else abTo = sec;
+      if (abFrom > abTo) {
+        const t = abFrom;
+        abFrom = abTo;
+        abTo = t;
+      }
+      if (abFrom === abTo) {
+        if (abTo < span) abTo = Math.min(span, abTo + 0.1);
+        else abFrom = Math.max(0, abFrom - 0.1);
+      }
+      el.abOn.checked = true;
+      applyRange(true, which === "A");
+      say(`A ${abFrom.toFixed(1)}s \u2013 B ${abTo.toFixed(1)}s`);
+    }
+    el.setA.addEventListener("click", () => markAB("A"));
+    el.setB.addEventListener("click", () => markAB("B"));
     function fixHead() {
       const ab = audio.bgmRange();
       if (!ab) return;
@@ -21625,16 +21810,9 @@ ChipTuneSound ${SOUND_VERSION}
     };
   }
 
-  // .player-build/entry.js
-  var sound = {
-    ...audio_exports,
-    ...mml_exports,
-    ...tones_exports,
-    mountPlayer,
-    PLAYER_CSS,
-    PLAYER_VERSION,
-    player: { mount: mountPlayer, CSS: PLAYER_CSS, version: PLAYER_VERSION }
-  };
+  // player-latest/entry.js
+  registerExtraWaves();
+  registerDefaultTones();
   window.MMSXX = window.MMSXX || {};
-  window.MMSXX.sound = sound;
+  window.MMSXX.sound = { ...audio_exports, ...mml_exports, ...tones_exports, mountPlayer, PLAYER_CSS, PLAYER_VERSION, player: { mount: mountPlayer, CSS: PLAYER_CSS, version: PLAYER_VERSION } };
 })();

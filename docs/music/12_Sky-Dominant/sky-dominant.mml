@@ -1,0 +1,478 @@
+#title 天空のドミナント
+#version 2.1
+#tempo 108
+#meter 3/4
+#about アクションRPGで天空城へ登る階段をイメージした曲。NES音源を想定。
+
+#voice mellow1 = @{nesPulse(12)} @e{soft}
+#voice mellow2 = @{nesPulse(25)} @e{soft}
+
+#ch Bass
+t108 q8 v12 @{nesTriangle} @e{flat}
+#label intro
+o2g8. r16 o3d16. r32 o2b16. r32 o2f8. r16
+o2g8. r16 o3d16. r32 o2b16. r32 o2f8. r16
+#label LOOP
+#label 02-c
+o2e8. r16 o2g16. r32 o3c16. r32 o2e8. r16
+#label 03-c7
+o2e8. r16 o2g16. r32 o3c16. r32 o2a+8. r16
+#label 04-fm
+o2g+8. r16 o3c16. r32 o2f16. r32 o2g+8. r16
+#label 05-fm7
+o2g+8. r16 o3c16. r32 o2f16. r32 o3d+8. r16
+#label 06-bb
+o3d8. r16 o3c16. r32 o2a+16. r32 o3d8. r16
+#label 07-bb7
+o3d8. r16 o2a+16. r32 
+#label 07b-ddim
+o2f16. r32 o2g+8. r16
+#label 08-eb
+o2g8. r16 o2a+16. r32 o3d+16. r32 o2g8. r16
+#label 09-eb7
+o2g8. r16 o2a+16. r32 o3d+16. r32 o3c+8. r16
+#label 10-abm
+o2b8. r16 o2a+16. r32 o2g+16. r32 o2b8. r16
+#label 11-abm7
+o2b8. r16 o2g+16. r32 o2d+16. r32 o2f+8. r16
+#label 12-db
+o2f8. r16 o2g+16. r32 o3c+16. r32 o2f8. r16
+#label 13-db7
+o2f8. r16 o2g+16. r32 
+#label 13b-fdim
+o2b16. r32 o2b8. r16
+#label 14-gb
+o2a+8. r16 o3c+16. r32 o2f+16. r32 o2a+8. r16
+#label 15-f#7sus4
+o2b8. r16 o2f+16. r32 
+#label 15b-f#7
+o2c+16. r32 o2e8. r16
+#label 16-bm
+o2d8. r16 o2f+16. r32 o2b16. r32 o2d8. r16
+#label 17-bm7
+o2d8. r16 o2f+16. r32 o2b16. r32 o2a8. r16
+#label 18-e
+o2g+8. r16 o2b16. r32 o2e16. r32 o2g+8. r16
+#label 19-e7
+o2g+8. r16 o2b16. r32 o2e16. r32 o3d8. r16
+#label 20-am
+o3c8. r16 o2b16. r32 o2a16. r32 o3c8. r16
+#label 21-am7
+o3c8. r16 o2a16. r32 o2e16. r32 o2g8. r16
+#label 22-d
+o2f+8. r16 o2a16. r32 o3d16. r32 o2f+8. r16
+#label 23-d7sus4
+o2g8. r16 o2a16. r32 
+#label 23b-d7
+o3d16. r32 o3c8. r16
+#label 24-g
+o2b8. r16 o2a16. r32 
+#label 24b-bdim
+o2f16. r32 o2b8. r16
+
+
+#ch Melody A
+t108 q7 @{mellow1} @m{3,5.2,12}
+// Intro (2 bars)
+r2.
+q7
+v0.1 o6g8 v0.2 o6b8 v0.35 o6d8 v0.5 o6b8 v0.65 o6g8 v0.8 o6d8
+// C
+q6
+v0.64 o6c8
+v0.79 o6e8
+v0.94 o6g8
+v1.1 o6e8
+@{nesPulse(50)} @e{piano} @m0 q7
+r16
+v5.6 o5e16 & o5g16 & o5c16
+@{mellow1} @e{soft} @m{3,5.2,12}
+// C7
+q6
+v1.61 o5e8
+v1.79 o5g8
+v1.97 o6c8
+v2.16 o6e8
+@{nesPulse(50)} @e{piano} @m0 q7
+r16
+v5.6 o5g16 & o5e16 & o6c16
+@{mellow1} @e{soft} @m{3,5.2,12}
+// Fm / suspension
+q6
+v2.73 o5g+8
+v2.93 o6c8
+v3.13 o6f8
+v3.32 o6c8
+@{nesPulse(50)} @e{piano} @m0 q7
+r16
+v5.6 o5f16 & o5g+16 & o5c16
+@{mellow1} @e{soft} @m{3,5.2,12}
+// Fm7
+q7
+v3.92 o5f8
+v4.12 o5g+8
+v4.32 o6c4
+@{nesPulse(50)} @e{piano} @m0 q7
+r16
+v5.6 o5f16 & o6c16 & o5g+16
+@{mellow1} @e{soft} @m{3,5.2,12}
+// Bb
+q6
+v5.12 o5f8
+v5.31 o5a+8
+v5.51 o6d8
+v5.7 o5a+8
+v5.89 o5f8
+v6.08 o5d8
+// Bb7 → Ddim
+q6
+v6.26 o4a+8
+v6.45 o5d8
+v6.63 o5f8
+v6.8 o5g+8
+v6.98 o5f8
+v7.15 o5f8
+// Eb / suspension
+q8
+& o5f8. & o5d+16
+q6
+v7.64 o5a+8
+v7.79 o5g8
+v7.95 o5d+8
+v8.09 o4a+8
+// Eb7
+q6
+v8.24 o4a+8
+v8.37 o5d+8
+v8.51 o5g8
+v8.63 o5d+8
+v8.76 o4a+8
+v8.87 o4g8
+// Abm
+q6
+v8.99 o4b8
+v9.09 o5d+8
+v9.19 o5g+8
+v9.29 o5d+8
+v9.38 o4b8
+v9.46 o4g+8
+// Abm7
+q7
+v9.54 o4d+8
+v9.62 o4g+8
+v9.68 o5d+2
+// Db / suspension
+q8
+& o5d+8. & o5c+16
+q6
+v9.95 o5f8
+v9.97 o5c+8
+v9.99 o4g+8
+q4 v10.0 o4f8
+q6
+// Db7 → Fdim
+q6
+v10.0 o4f8
+v10.0 o4g+8
+v9.99 o5c+8
+v9.97 o4g+8
+v9.95 o4f8
+v9.92 o3b8
+// Gb
+q6
+v9.88 o4f+8
+v9.84 o4a+8
+v9.8 o5c+8
+v9.74 o4a+8
+v9.68 o4f+8
+v9.62 o4c+8
+// F#7sus4 → F#7
+q6
+v9.54 o3b8
+v9.46 o4c+8
+v9.38 o4f+8
+v9.29 o4a+8
+v9.19 o4f+8
+v9.09 o4c+8
+// Bm / suspension
+q8
+& o4c+8. & o3b16
+q6
+v8.76 o4b8
+v8.63 o4f+8
+v8.51 o4d8
+v8.37 o3b8
+// Bm7
+q7
+v8.24 o3b8
+v8.09 o4d8
+v7.95 o4f+2
+// E
+q6
+v7.32 o3b8
+v7.15 o4e8
+v6.98 o4g+8
+v6.8 o4e8
+v6.63 o3b8
+v6.45 o3g+8
+// E7
+q6
+v6.26 o3e8
+v6.08 o3g+8
+v5.89 o3b8
+v5.7 o4e8
+v5.51 o3b8
+v5.31 o3b8
+// Am / suspension
+q8
+& o3b8. & o3a16
+q6
+v4.72 o4e8
+v4.52 o4c8
+v4.32 o3a8
+v4.12 o3e8
+// Am7
+q6
+v3.92 o3e8
+v3.72 o3a8
+v3.52 o4c8
+v3.32 o3a8
+@{nesPulse(50)} @e{piano} @m0 q7
+r16
+v5.6 o5a16 & o6e16 & o6c16
+@{mellow1} @e{soft} @m{3,5.2,12}
+// D
+q6
+v2.73 o3f+8
+v2.54 o3a8
+v2.35 o4d8
+v2.16 o3a8
+@{nesPulse(50)} @e{piano} @m0 q7
+r16
+v5.6 o5d16 & o5f+16 & o5d16
+@{mellow1} @e{soft} @m{3,5.2,12}
+// D7sus4 → D7
+q7
+v1.61 o2a8
+v1.44 o3d8
+v1.27 o3g4
+@{nesPulse(50)} @e{piano} @m0 q7
+r16
+v5.6 o5f+16 & o5d16 & o5a16
+@{mellow1} @e{soft} @m{3,5.2,12}
+// G → Bdim / suspension
+q6
+v0.64 o3d8
+v0.5 o3g8
+v0.37 o3b8
+v0.25 o3f8
+@{nesPulse(50)} @e{piano} @m0 q7
+r16
+v5.6 o5d16 & o4b16 & o5d16
+@{mellow1} @e{soft} @m{3,5.2,12}
+
+
+#ch Melody B
+t108 q7 @{mellow2} @m{3,4.6,12}
+// Intro (2 bars)
+r2.
+q7
+v0.5 o4d8 v1.5 o3b8 v3 o3g8 v5 o3b8 v7 o4d8 v9.5 o4g8
+// C
+q7
+v9.88 o4e8
+v9.84 o4c8
+v9.8 o3g2
+// C7
+q6
+v9.54 o4g8
+v9.46 o4e8
+v9.38 o4c8
+v9.29 o3g8
+v9.19 o4c8
+v9.09 o4g8
+// Fm / suspension
+q8
+& o4g8. & o4f16
+q6
+v8.76 o3f8
+v8.63 o3g+8
+v8.51 o4c8
+v8.37 o4f8
+// Fm7
+q6
+v8.24 o4c8
+v8.09 o3g+8
+v7.95 o3f8
+v7.79 o3g+8
+v7.64 o4c8
+v7.48 o4f8
+// Bb
+q6
+v7.32 o3a+8
+v7.15 o3f8
+v6.98 o3d8
+v6.8 o3f8
+v6.63 o3a+8
+v6.45 o4d8
+// Bb7 → Ddim
+q6
+v6.26 o4d8
+v6.08 o3a+8
+v5.89 o3f8
+v5.7 o3d8
+v5.51 o3f8
+v5.31 o3g+8
+// Eb / suspension
+q7
+v5.12 o3g8
+v4.92 o3d+8
+v4.72 o2a+2
+// Eb7
+q6
+v3.92 o3g8
+v3.72 o3d+8
+v3.52 o2a+8
+v3.32 o3d+8
+@{nesPulse(50)} @e{piano} @m0 q7
+r16
+v5.6 o5g16 & o5d+16 & o5a+16
+@{mellow2} @e{soft} @m{3,4.6,12}
+// Abm
+q6
+v2.73 o3d+8
+v2.54 o2b8
+v2.35 o2g+8
+v2.16 o2b8
+@{nesPulse(50)} @e{piano} @m0 q7
+r16
+v5.6 o5d+16 & o4g+16 & o4b16
+@{mellow2} @e{soft} @m{3,4.6,12}
+// Abm7
+q6
+v1.61 o3g+8
+v1.44 o3d+8
+v1.27 o2b8
+v1.1 o2g+8
+@{nesPulse(50)} @e{piano} @m0 q7
+r16
+v5.6 o5g+16 & o6d+16 & o5b16
+@{mellow2} @e{soft} @m{3,4.6,12}
+// Db / suspension
+q6
+v0.64 o3c+8
+v0.5 o2g+8
+v0.37 o2f8
+v0.25 o2g+8
+@{nesPulse(50)} @e{piano} @m0 q4
+r16
+v5.6 o5f16 & o5g+16 & o5c+16
+@{mellow2} @e{soft} @m{3,4.6,12}
+// Db7 → Fdim
+q6
+v0.0 o6c+8
+v0.06 o5g+8
+v0.15 o5f8
+v0.25 o5g+8
+@{nesPulse(50)} @e{piano} @m0 q7
+r16
+v5.6 o5g+16 & o5f16 & o5b16
+@{mellow2} @e{soft} @m{3,4.6,12}
+// Gb
+q7
+v0.64 o5a+8
+v0.79 o5f+8
+v0.94 o5c+4
+@{nesPulse(50)} @e{piano} @m0 q7
+r16
+v5.6 o5f+16 & o4a+16 & o5c+16
+@{mellow2} @e{soft} @m{3,4.6,12}
+// F#7sus4 → F#7
+q6
+v1.61 o6c+8
+v1.79 o5b8
+v1.97 o5f+8
+v2.16 o5c+8
+@{nesPulse(50)} @e{piano} @m0 q7
+r16
+v5.6 o5f+16 & o6c+16 & o5a+16
+@{mellow2} @e{soft} @m{3,4.6,12}
+// Bm / suspension
+q6
+v2.73 o5f+8
+v2.93 o5d8
+v3.13 o4b8
+v3.32 o5d8
+@{nesPulse(50)} @e{piano} @m0 q7
+r16
+v5.6 o5d16 & o4b16 & o5d16
+@{mellow2} @e{soft} @m{3,4.6,12}
+// Bm7
+q6
+v3.92 o5f+8
+v4.12 o5d8
+v4.32 o4b8
+v4.52 o5d8
+@{nesPulse(50)} @e{piano} @m0 q7
+r16
+v5.6 o5f+16 & o6d16 & o5b16
+@{mellow2} @e{soft} @m{3,4.6,12}
+// E
+q6
+v5.12 o5e8
+v5.31 o4b8
+v5.51 o4g+8
+v5.7 o4b8
+v5.89 o5e8
+v6.08 o5g+8
+// E7
+q6
+v6.26 o5g+8
+v6.45 o5e8
+v6.63 o4b8
+v6.8 o4g+8
+v6.98 o4b8
+v7.15 o5e8
+// Am / suspension
+q7
+v7.32 o5c8
+v7.48 o4a8
+v7.64 o4e2
+// Am7
+q6
+v8.24 o5c8
+v8.37 o4a8
+v8.51 o4e8
+v8.63 o4a8
+v8.76 o5c8
+v8.87 o5e8
+// D
+q6
+v8.99 o4a8
+v9.09 o4f+8
+v9.19 o4d8
+v9.29 o4f+8
+v9.38 o4a8
+v9.46 o5d8
+// D7sus4 → D7
+q6
+v9.54 o5d8
+v9.62 o4a8
+v9.68 o4g8
+v9.74 o4d8
+v9.8 o4f+8
+v9.84 o4a8
+// G → Bdim / suspension
+q8
+& o4a8. & o4g16
+q6
+v9.95 o3b8
+v9.97 o4d8
+v9.99 o4f8
+v10.0 o4b8
+
+#ch Hi-hat
+t108 @{nesNoise(long)} @e{snap} q2 o7 l8
+// 3/4 × 25 bars (intro 2 + main 23)
+[ v3 c v1 c v2 c v1 c v2 c v1 c ]25
+
