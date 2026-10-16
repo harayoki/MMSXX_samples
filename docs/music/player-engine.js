@@ -1,4 +1,4 @@
-// MMS/XX player and audio engine, source commit c6899429606a38088a7b64b96bbc2321ad4a1a6c
+// MMS/XX player and audio engine, source commit e6591d0f35cbfdff7bf6ec5054d3d141140c18b4
 (() => {
   var __defProp = Object.defineProperty;
   var __export = (target, all) => {
@@ -6,7 +6,7 @@
       __defProp(target, name, { get: all[name], enumerable: true });
   };
 
-  // player-latest/sound/audio.js
+  // sound/audio.js
   var audio_exports = {};
   __export(audio_exports, {
     ChipTuneSound: () => ChipTuneSound,
@@ -14,10 +14,11 @@
     SOUND_VERSION: () => SOUND_VERSION,
     encodeWAV: () => encodeWAV,
     psgDiv: () => psgDiv,
+    registerChipKind: () => registerChipKind,
     snapVol: () => snapVol
   });
 
-  // player-latest/sound/mml.js
+  // sound/mml.js
   var mml_exports = {};
   __export(mml_exports, {
     AY_ENV_SHAPES: () => AY_ENV_SHAPES,
@@ -48,6 +49,7 @@
     listVoiceFamilies: () => listVoiceFamilies,
     listVoices: () => listVoices,
     metaOf: () => metaOf,
+    noOldDescName: () => noOldDescName,
     readBundles: () => readBundles,
     readChordSets: () => readChordSets,
     readDirectives: () => readDirectives,
@@ -74,6 +76,9 @@
     registerOPNARhythm: () => registerOPNARhythm,
     registerPCE: () => registerPCE,
     registerSCC: () => registerSCC,
+    registerVoice: () => registerVoice,
+    registerVoiceDetail: () => registerVoiceDetail,
+    registerVoiceSyntax: () => registerVoiceSyntax,
     registerWave: () => registerWave,
     roleOf: () => roleOf,
     sealPresets: () => sealPresets,
@@ -87,12 +92,13 @@
     voiceNameProblem: () => voiceNameProblem,
     volFromGain: () => volFromGain,
     volGainOf: () => volGainOf,
+    warn: () => warn,
     waveMeta: () => waveMeta,
     waveRole: () => waveRole,
     waveSteal: () => waveSteal
   });
 
-  // player-latest/sound/gm.js
+  // sound/gm.js
   var GM_NAMES = [
     "Acoustic Grand Piano",
     "Bright Acoustic Piano",
@@ -238,74 +244,74 @@
     return GM_NAMES.filter((n) => key(n).startsWith(head)).slice(0, limit);
   }
 
-  // player-latest/sound/opllvoice.js
+  // sound/opllvoice.js
   var OP_FIELDS = {
     mul: {
       at: "ml",
       max: 15,
-      note: "Frequency multiple, 0 to 15. 0 means half. 1 is the written pitch, 2 is an octave up. On the modulator this sets which harmonic it adds."
+      desc: "Frequency multiple, 0 to 15. 0 means half. 1 is the written pitch, 2 is an octave up. On the modulator this sets which harmonic it adds."
     },
     ksr: {
       at: "kr",
       max: 1,
-      note: "Key scale rate, 0 or 1. With 1 the envelope runs faster for higher notes, the way a real instrument decays faster up top."
+      desc: "Key scale rate, 0 or 1. With 1 the envelope runs faster for higher notes, the way a real instrument decays faster up top."
     },
     hold: {
       at: "eg",
       max: 1,
-      note: "Sustaining, 0 or 1. With 1 the note holds while the key is down. With 0 it keeps falling away, like a plucked or struck instrument."
+      desc: "Sustaining, 0 or 1. With 1 the note holds while the key is down. With 0 it keeps falling away, like a plucked or struck instrument."
     },
     vibrato: {
       at: "pm",
       max: 1,
-      note: "Pitch wobble, 0 or 1. The chip has one fixed depth and speed."
+      desc: "Pitch wobble, 0 or 1. The chip has one fixed depth and speed."
     },
     tremolo: {
       at: "am",
       max: 1,
-      note: "Volume wobble, 0 or 1. The chip has one fixed depth and speed."
+      desc: "Volume wobble, 0 or 1. The chip has one fixed depth and speed."
     },
     ksl: {
       at: "kl",
       max: 3,
-      note: "Key scale level, 0 to 3. How much quieter the higher notes get. 0 keeps every octave at the same level."
+      desc: "Key scale level, 0 to 3. How much quieter the higher notes get. 0 keeps every octave at the same level."
     },
     tl: {
       at: "tl",
       max: 63,
       modOnly: true,
-      note: "Total level of the modulator, 0 to 63, in steps of 0.75dB. 0 is the strongest. Larger numbers mean fewer harmonics, a rounder sound. The carrier has no total level: its loudness is the volume register (v in MML)."
+      desc: "Total level of the modulator, 0 to 63, in steps of 0.75dB. 0 is the strongest. Larger numbers mean fewer harmonics, a rounder sound. The carrier has no total level: its loudness is the volume register (v in MML)."
     },
     wave: {
       at: "ws",
       max: 1,
-      note: "Waveform, 0 or 1. 0 is a sine. 1 is a half sine, with the lower half cut off, which is thinner and has more harmonics."
+      desc: "Waveform, 0 or 1. 0 is a sine. 1 is a half sine, with the lower half cut off, which is thinner and has more harmonics."
     },
     fb: {
       at: "fb",
       max: 7,
       modOnly: true,
-      note: "Feedback of the modulator into itself, 0 to 7. 0 is none. Larger numbers add harmonics and, at the top, break into noise. Only the modulator has it."
+      desc: "Feedback of the modulator into itself, 0 to 7. 0 is none. Larger numbers add harmonics and, at the top, break into noise. Only the modulator has it."
     },
     ar: {
       at: "ar",
       max: 15,
-      note: "Attack rate, 0 to 15. How fast it rises. 15 is instant, 0 never starts."
+      desc: "Attack rate, 0 to 15. How fast it rises. 15 is instant, 0 never starts."
     },
     dr: {
       at: "dr",
       max: 15,
-      note: "Decay rate, 0 to 15. How fast it falls to the sustain level after the attack."
+      desc: "Decay rate, 0 to 15. How fast it falls to the sustain level after the attack."
     },
     sl: {
       at: "sl",
       max: 15,
-      note: "Sustain level, 0 to 15, in steps of 3dB. 0 is full, 15 is nearly silent. Where the decay stops."
+      desc: "Sustain level, 0 to 15, in steps of 3dB. 0 is full, 15 is nearly silent. Where the decay stops."
     },
     rr: {
       at: "rr",
       max: 15,
-      note: "Release rate, 0 to 15. How fast it falls once the key is let go."
+      desc: "Release rate, 0 to 15. How fast it falls once the key is let go."
     }
   };
   var ALIASES = {
@@ -401,7 +407,51 @@
     return hold && opllAttackMs(ar) < STEAL_ATTACK_MS ? "ok" : "avoid";
   }
 
-  // player-latest/sound/opll.js
+  // sound/fmtables.js
+  var FM_TABLES_CODE = `
+// ---- \u8868\u3002\u6570\u5024\u3067\u306F\u6301\u305F\u306A\u3044\u3002\u5F0F\u3067\u4F5C\u308B ----
+
+// \u5BFE\u6570\u30B5\u30A4\u30F3\u8868\u30024 \u5206\u306E 1 \u5468\u3076\u3093\u3092\u5F0F\u3067\u4F5C\u3063\u3066\u3001\u6B8B\u308A\u306F\u6298\u308A\u8FD4\u3057\u3067\u57CB\u3081\u308B
+const SIN = new Uint16Array(1024);
+for (let x = 0; x < 256; x++) SIN[x] = Math.round(-Math.log2(Math.sin((x + 0.5) * Math.PI / 512)) * 256);
+for (let x = 0; x < 256; x++) SIN[256 + x] = SIN[255 - x];
+for (let x = 0; x < 512; x++) SIN[512 + x] = 0x8000 | SIN[x];
+
+const EXP = new Uint16Array(256);
+for (let x = 0; x < 256; x++) EXP[x] = Math.round((Math.pow(2, x / 256) - 1) * 1024);
+
+/** \u5BFE\u6570\u306E\u5024\u3092\u632F\u5E45\u3078\u623B\u3059\u3002\u4E0A\u4F4D\u30D3\u30C3\u30C8\u304C\u7B26\u53F7 */
+function expLookup(i) {
+  const t = EXP[(i & 0xff) ^ 0xff] + 1024;
+  const res = t >> ((i & 0x7f00) >> 8);
+  return ((i & 0x8000) ? ~res : res) << 1;
+}
+
+// \u97F3\u91CF LFO\u30028 \u500B\u305A\u3064 0\u301C13 \u3092\u4E0A\u3063\u3066\u4E0B\u308B\u3002\u3066\u3063\u307A\u3093\u3060\u3051 3 \u500B
+const AM = [];
+for (let v = 0; v <= 12; v++) for (let i = 0; i < 8; i++) AM.push(v);
+AM.push(13, 13, 13);
+for (let v = 12; v >= 0; v--) for (let i = 0; i < 8; i++) AM.push(v);
+AM.length = 210;
+
+// \u9AD8\u3055 LFO
+const PM = [
+  [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 1, 0, 0, 0, -1, 0],
+  [0, 1, 2, 1, 0, -1, -2, -1], [0, 1, 3, 1, 0, -1, -3, -1],
+  [0, 2, 4, 2, 0, -2, -4, -2], [0, 2, 5, 2, 0, -2, -5, -2],
+  [0, 3, 6, 3, 0, -3, -6, -3], [0, 3, 7, 3, 0, -3, -7, -3],
+];
+
+const EG_STEP = [
+  [0, 1, 0, 1, 0, 1, 0, 1], [0, 1, 0, 1, 1, 1, 0, 1],
+  [0, 1, 1, 1, 0, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1],
+];
+const ML = [1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 20, 24, 24, 30, 30];
+// \u30AD\u30FC\u30B9\u30B1\u30FC\u30EB\u3067\u843D\u3068\u3059\u91CF(dB \u306E 2 \u500D)\u3002fnum \u306E\u4E0A 4 \u30D3\u30C3\u30C8\u3067\u5F15\u304F
+const KL = [0, 18, 24, 27.75, 30, 32.25, 33.75, 35.25, 36, 37.5, 38.25, 39, 39.75, 40.5, 41.25, 42];
+`;
+
+  // sound/opll.js
   var OPLL_INST = [
     0,
     0,
@@ -938,43 +988,12 @@ const DRUM = ${JSON.stringify(OPLL_DRUM_TABLE)};
 const CLK = ${OPLL_CLOCK};
 const RATE = CLK / 72;
 
-// ---- \u8868\u3002**\u6570\u5024\u3067\u306F\u6301\u305F\u306A\u3044\u3002\u5F0F\u3067\u4F5C\u308B** ----
-
-// \u5BFE\u6570\u30B5\u30A4\u30F3\u8868\u30024 \u5206\u306E 1 \u5468\u3076\u3093\u3092\u5F0F\u3067\u4F5C\u3063\u3066\u3001\u6B8B\u308A\u306F\u6298\u308A\u8FD4\u3057\u3067\u57CB\u3081\u308B
-const SIN = new Uint16Array(1024);
-for (let x = 0; x < 256; x++) SIN[x] = Math.round(-Math.log2(Math.sin((x + 0.5) * Math.PI / 512)) * 256);
-for (let x = 0; x < 256; x++) SIN[256 + x] = SIN[255 - x];
-for (let x = 0; x < 512; x++) SIN[512 + x] = 0x8000 | SIN[x];
-// \u534A\u6CE2\u6574\u6D41(WS=1)\u3002\u5F8C\u308D\u534A\u5206\u306F\u6700\u5C0F\u306B\u5F35\u308A\u4ED8\u304F
+${FM_TABLES_CODE}
+// \u534A\u6CE2\u6574\u6D41(WS=1)\u3002\u5F8C\u308D\u534A\u5206\u306F\u6700\u5C0F\u306B\u5F35\u308A\u4ED8\u304F\u3002OPLL \u306B\u3057\u304B\u7121\u3044
 const HALF = new Uint16Array(1024);
 for (let x = 0; x < 512; x++) HALF[x] = SIN[x];
 for (let x = 512; x < 1024; x++) HALF[x] = 0xfff;
 const WAVE = [SIN, HALF];
-
-const EXP = new Uint16Array(256);
-for (let x = 0; x < 256; x++) EXP[x] = Math.round((Math.pow(2, x / 256) - 1) * 1024);
-
-// \u97F3\u91CF LFO\u30028 \u500B\u305A\u3064 0\u301C13 \u3092\u4E0A\u3063\u3066\u4E0B\u308B\u3002\u3066\u3063\u307A\u3093\u3060\u3051 3 \u500B
-const AM = [];
-for (let v = 0; v <= 12; v++) for (let i = 0; i < 8; i++) AM.push(v);
-AM.push(13, 13, 13);
-for (let v = 12; v >= 0; v--) for (let i = 0; i < 8; i++) AM.push(v);
-AM.length = 210;
-
-// \u9AD8\u3055 LFO\u300214 \u30BB\u30F3\u30C8\u307B\u3069\u306E\u6DF1\u3055
-const PM = [
-  [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 1, 0, 0, 0, -1, 0],
-  [0, 1, 2, 1, 0, -1, -2, -1], [0, 1, 3, 1, 0, -1, -3, -1],
-  [0, 2, 4, 2, 0, -2, -4, -2], [0, 2, 5, 2, 0, -2, -5, -2],
-  [0, 3, 6, 3, 0, -3, -6, -3], [0, 3, 7, 3, 0, -3, -7, -3],
-];
-
-const EG_STEP = [
-  [0, 1, 0, 1, 0, 1, 0, 1], [0, 1, 0, 1, 1, 1, 0, 1],
-  [0, 1, 1, 1, 0, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1],
-];
-const ML = [1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 20, 24, 24, 30, 30];
-const KL = [0, 18, 24, 27.75, 30, 32.25, 33.75, 35.25, 36, 37.5, 38.25, 39, 39.75, 40.5, 41.25, 42];
 
 // \u30AD\u30FC\u30B9\u30B1\u30FC\u30EB\u3067\u97F3\u91CF\u304C\u843D\u3061\u308B\u3076\u3093\u3002block \u3068 fnum \u306E\u4E0A 4 \u30D3\u30C3\u30C8\u3067\u5F15\u304F
 const TLL = new Uint16Array(128 * 64 * 4);
@@ -1295,10 +1314,7 @@ class OPLL {
   toLinear(h, s, am) {
     if (s.egOut > EG_MAX) return 0;
     const att = Math.min(EG_MUTE, s.egOut + s.tll + am) << 4;
-    const i = h + att;
-    const t = EXP[(i & 0xff) ^ 0xff] + 1024;
-    const res = t >> ((i & 0x7f00) >> 8);
-    return ((i & 0x8000) ? ~res : res) << 1;
+    return expLookup(h + att);
   }
   calcMod(ch) {
     const s = this.mod(ch);
@@ -1353,34 +1369,78 @@ class OPLL {
   /**
    * 1 \u30B5\u30F3\u30D7\u30EB(49716Hz)\u3076\u3093\u9032\u3081\u3066\u3001\u548C\u3092\u8FD4\u3059\u3002
    *
-   * **\u30CE\u30A4\u30BA\u3092\u9032\u3081\u308B\u4F4D\u7F6E\u304C\u6C7A\u307E\u3063\u3066\u3044\u308B\u3002**\u30C1\u30E3\u30F3\u30CD\u30EB 7 \u3092\u51FA\u3057\u305F\u3042\u3068 14 \u56DE\u3001
+   * \u30CE\u30A4\u30BA\u3092\u9032\u3081\u308B\u4F4D\u7F6E\u304C\u6C7A\u307E\u3063\u3066\u3044\u308B\u3002\u30C1\u30E3\u30F3\u30CD\u30EB 7 \u3092\u51FA\u3057\u305F\u3042\u3068 14 \u56DE\u3001
    * 8 \u3068 9 \u306E\u3042\u3068\u306B 2 \u56DE\u305A\u3064\u3002\u5B9F\u6A5F\u306E 1 \u30B5\u30F3\u30D7\u30EB\u304C 18 \u30B9\u30ED\u30C3\u30C8\u3076\u3093\u306E\u6642\u9593\u3092
    * \u304B\u3051\u3066\u56DE\u308B\u306E\u3067\u3001\u305D\u306E\u3042\u3044\u3060\u30CE\u30A4\u30BA\u3082\u9032\u3080\u3002\u3053\u3053\u3092 1 \u304B\u6240\u306B\u307E\u3068\u3081\u308B\u3068\u3001
    * \u30B9\u30CD\u30A2\u3068\u30CF\u30A4\u30CF\u30C3\u30C8\u306E\u7C92\u7ACB\u3061\u304C\u5909\u308F\u308B
    */
+  /**
+   * \u305D\u306E\u30B9\u30ED\u30C3\u30C8\u306F\u9ED9\u308A\u304D\u3063\u3066\u3044\u3066\u3001\u3053\u308C\u4EE5\u4E0A\u52D5\u304B\u306A\u3044\u304B\u3002
+   *
+   * \u97F3\u91CF\u304C\u4E0B\u9650\u307E\u3067\u843D\u3061\u3066\u3044\u3066(egOut \u304C EG_MUTE \u307E\u3067\u884C\u3063\u3066\u3044\u3066)\u3001\u30AD\u30FC\u30AA\u30F3\u3082
+   * \u66F8\u304D\u8FBC\u307F\u306E\u4E88\u7D04\u3082\u7121\u3044\u72B6\u614B\u3002\u3053\u3053\u304B\u3089\u5148\u306F\u3001\u30EC\u30B8\u30B9\u30BF\u3092\u66F8\u304B\u306A\u3044\u304B\u304E\u308A
+   * \u51FA\u53E3\u3082\u4E2D\u8EAB\u3082\u5909\u308F\u3089\u306A\u3044
+   */
+  quiet(s) {
+    return s.req === 0 && s.keyFlag === 0 && s.egOut >= EG_MUTE && s.egState !== DAMP;
+  }
+
+  /** 9 \u30C1\u30E3\u30F3\u30CD\u30EB\u3068\u3082\u9ED9\u308A\u304D\u3063\u3066\u3044\u308B\u304B\u3002\u533A\u5207\u308A\u3092\u307E\u308B\u3054\u3068\u98DB\u3070\u3059\u5224\u65AD\u306B\u4F7F\u3046 */
+  allQuiet() {
+    if (this.rhythm) return false;
+    for (let i = 0; i < 18; i++) if (!this.quiet(this.slot[i])) return false;
+    return true;
+  }
+
   tick() {
     this.pmPhase++;
     this.amPhase++;
     this.lfoAm = AM[(this.amPhase >> 6) % 210];
     this.updateShortNoise();
     this.egCounter++;
-    for (let i = 0; i < 18; i++) {
-      const s = this.slot[i];
-      const buddy = s.type === 0 ? this.slot[i + 1] : this.slot[i - 1];
-      if (s.req) this.commit(s);
-      this.calcEnv(s, buddy, this.egCounter);
-      this.calcPhase(s, this.pmPhase);
+    // **\u4F11\u3093\u3067\u3044\u308B\u30C1\u30E3\u30F3\u30CD\u30EB\u306F\u56DE\u3055\u306A\u3044\u3002**\u30C1\u30C3\u30D7\u306F 9 \u30C1\u30E3\u30F3\u30CD\u30EB\u3076\u3093\u306E
+    // 18 \u30B9\u30ED\u30C3\u30C8\u3092\u6BCE\u30B5\u30F3\u30D7\u30EB\u56DE\u3059\u306E\u3067\u30011 \u58F0\u3057\u304B\u9CF4\u3063\u3066\u3044\u306A\u304F\u3066\u3082 9 \u58F0\u3076\u3093\u306E
+    // \u304B\u304B\u308A\u306B\u306A\u308B\u3002\u30C1\u30E3\u30F3\u30CD\u30EB\u3092 1 \u672C\u305A\u3064\u5225\u306E\u51E6\u7406\u5668\u3078\u6E21\u3059\u4F5C\u308A\u3060\u3068\u3001
+    // 45 \u672C\u306E\u66F2\u3067 45 \u53F0\u3076\u3093\u304C\u56DE\u308A\u3001\u5B9F\u6642\u9593\u306B\u9593\u306B\u5408\u308F\u306A\u304F\u306A\u308B(2026-10-12)\u3002
+    // \u9ED9\u308A\u304D\u3063\u305F\u30C1\u30E3\u30F3\u30CD\u30EB\u306F\u3001\u30EC\u30B8\u30B9\u30BF\u3092\u66F8\u304F\u307E\u3067\u51FA\u53E3\u3082\u4E2D\u8EAB\u3082\u5909\u308F\u3089\u306A\u3044\u306E\u3067\u3001
+    // \u98DB\u3070\u3057\u3066\u3082\u9CF4\u308A\u306F\u540C\u3058\u3002\u30AD\u30FC\u30AA\u30F3\u306E\u3068\u304D\u306B\u4F4D\u76F8\u306F 0 \u3078\u623B\u308B(calcEnv \u306E DAMP)
+    let idle = 0;
+    for (let ch = 0; ch < 9; ch++) {
+      const m = this.slot[ch << 1], c = this.slot[(ch << 1) | 1];
+      if (!(this.rhythm && ch >= 6) && this.quiet(m) && this.quiet(c)) {
+        idle |= 1 << ch;
+        // \u5909\u8ABF\u306E\u30D5\u30A3\u30FC\u30C9\u30D0\u30C3\u30AF\u306F\u524D 2 \u30B5\u30F3\u30D7\u30EB\u3092\u898B\u308B\u3002\u98DB\u3070\u3057\u3066\u3044\u308B\u3042\u3044\u3060\u306B
+        // \u53E4\u3044\u5024\u304C\u6B8B\u308B\u3068\u3001\u9CF4\u3089\u3057\u76F4\u3057\u305F\u3068\u304D\u306E 1 \u30B5\u30F3\u30D7\u30EB\u76EE\u306B\u52B9\u3044\u3066\u3057\u307E\u3046
+        m.out0 = 0; m.out1 = 0; c.out0 = 0; c.out1 = 0;
+        // \u91D1\u7269\u306E\u77ED\u3044\u30CE\u30A4\u30BA\u306F\u30B9\u30ED\u30C3\u30C8 14(7 \u306E\u5909\u8ABF)\u3068 17(8 \u306E\u642C\u9001)\u306E\u4F4D\u76F8\u304B\u3089
+        // \u4F5C\u308B\u306E\u3067\u3001\u305D\u3053\u3060\u3051\u306F\u9032\u3081\u308B\u3002\u98DB\u3070\u3059\u3068\u6253\u697D\u5668\u306E\u7C92\u7ACB\u3061\u304C\u5909\u308F\u308B
+        if (ch === 7) this.calcPhase(m, this.pmPhase);
+        else if (ch === 8) this.calcPhase(c, this.pmPhase);
+        continue;
+      }
+      if (m.req) this.commit(m);
+      this.calcEnv(m, c, this.egCounter);
+      this.calcPhase(m, this.pmPhase);
+      if (c.req) this.commit(c);
+      this.calcEnv(c, m, this.egCounter);
+      this.calcPhase(c, this.pmPhase);
     }
     let sum = 0;
-    for (let ch = 0; ch < 6; ch++) sum += -(this.calcCar(ch, this.calcMod(ch)) >> 1);
-    if (!this.rhythm) sum += -(this.calcCar(6, this.calcMod(6)) >> 1);
-    else sum += this.calcCar(6, this.calcMod(6));          // \u30D0\u30B9\u30C9\u30E9
+    for (let ch = 0; ch < 6; ch++) {
+      if (idle & (1 << ch)) continue;
+      sum += -(this.calcCar(ch, this.calcMod(ch)) >> 1);
+    }
+    if (!this.rhythm) {
+      if (!(idle & (1 << 6))) sum += -(this.calcCar(6, this.calcMod(6)) >> 1);
+    } else sum += this.calcCar(6, this.calcMod(6));        // \u30D0\u30B9\u30C9\u30E9
     this.stepNoise(14);
-    if (!this.rhythm) sum += -(this.calcCar(7, this.calcMod(7)) >> 1);
-    else { sum += this.calcHat(); sum += this.calcSnare(); }
+    if (!this.rhythm) {
+      if (!(idle & (1 << 7))) sum += -(this.calcCar(7, this.calcMod(7)) >> 1);
+    } else { sum += this.calcHat(); sum += this.calcSnare(); }
     this.stepNoise(2);
-    if (!this.rhythm) sum += -(this.calcCar(8, this.calcMod(8)) >> 1);
-    else { sum += this.calcTom(); sum += this.calcCym(); }
+    if (!this.rhythm) {
+      if (!(idle & (1 << 8))) sum += -(this.calcCar(8, this.calcMod(8)) >> 1);
+    } else { sum += this.calcTom(); sum += this.calcCym(); }
     this.stepNoise(2);
     return sum;
   }
@@ -1389,7 +1449,7 @@ class OPLL {
 // ---- \u97F3\u7B26\u3092\u53D7\u3051\u3066\u3001\u30EC\u30B8\u30B9\u30BF\u3078\u5909\u63DB\u3059\u308B ----
 //
 // engine \u306E\u5074\u306F\u97F3\u7B26\u3092\u6E21\u3059\u4F5C\u308A\u306A\u306E\u3067\u3001\u3053\u3053\u3067 9 \u58F0\u3078\u5272\u308A\u5F53\u3066\u3066\u3001
-// fnum \u3068 block \u3068\u30AD\u30FC\u30AA\u30F3\u306B\u76F4\u3059\u3002**\u30EC\u30B8\u30B9\u30BF\u3092\u76F4\u306B\u66F8\u304F\u9053\u306F\u307E\u3060\u7121\u3044\u3002**
+// fnum \u3068 block \u3068\u30AD\u30FC\u30AA\u30F3\u306B\u76F4\u3059\u3002\u30EC\u30B8\u30B9\u30BF\u3092\u76F4\u306B\u66F8\u304F\u9053\u306F\u307E\u3060\u7121\u3044\u3002
 
 /** \u9AD8\u3055\u304B\u3089 block \u3068 fnum \u3092\u51FA\u3059\u3002fnum \u306F 256 \u4EE5\u4E0A\u306B\u5BC4\u305B\u3066\u523B\u307F\u3092\u7A3C\u3050 */
 function pitchOf(freq) {
@@ -1506,10 +1566,10 @@ class OpllBank extends AudioWorkletProcessor {
   /**
    * \u6253\u697D\u5668\u306E\u9AD8\u3055\u3092\u66F8\u304F\u3002
    *
-   * **\u30AD\u30FC\u30AA\u30F3\u306E\u30D3\u30C3\u30C8\u306F\u7ACB\u3066\u306A\u3044\u3002**\u30EA\u30BA\u30E0\u97F3\u6E90\u306E\u53E9\u304D\u306F\u3058\u3081\u306F R14 \u304C\u6301\u3064\u306E\u3067\u3001
+   * \u30AD\u30FC\u30AA\u30F3\u306E\u30D3\u30C3\u30C8\u306F\u7ACB\u3066\u306A\u3044\u3002\u30EA\u30BA\u30E0\u97F3\u6E90\u306E\u53E9\u304D\u306F\u3058\u3081\u306F R14 \u304C\u6301\u3064\u306E\u3067\u3001
    * 0x20 \u53F0\u306E bit4 \u306F 0 \u306E\u307E\u307E\u7F6E\u304F\u3002
    *
-   * **\u540C\u3058\u5024\u306A\u3089\u66F8\u304B\u306A\u3044\u3002**\u53E9\u304F\u305F\u3073\u306B\u547C\u3070\u308C\u308B\u306E\u3067\u3001\u9AD8\u3055\u3092\u52D5\u304B\u3057\u3066\u3044\u306A\u3044\u66F2\u3067
+   * \u540C\u3058\u5024\u306A\u3089\u66F8\u304B\u306A\u3044\u3002\u53E9\u304F\u305F\u3073\u306B\u547C\u3070\u308C\u308B\u306E\u3067\u3001\u9AD8\u3055\u3092\u52D5\u304B\u3057\u3066\u3044\u306A\u3044\u66F2\u3067
    * \u66F8\u304D\u8FBC\u307F\u304C\u5897\u3048\u306A\u3044\u3088\u3046\u306B\u3057\u3066\u304A\u304F\u3002
    *
    * @param {object} d DRUM \u306E 1 \u3064
@@ -1525,7 +1585,7 @@ class OpllBank extends AudioWorkletProcessor {
   /**
    * \u66F8\u3044\u305F\u9AD8\u3055\u306E\u6BD4\u304B\u3089\u3001\u305D\u306E\u6253\u697D\u5668\u306E fnum \u3068 blk \u3092\u51FA\u3059\u3002
    *
-   * \u5B9F\u6A5F\u306E\u30C9\u30E9\u30A4\u30D0\u306E\u5024\u3092\u7269\u5DEE\u3057\u306B\u3057\u3066\u3001\u6BD4\u3067\u52D5\u304B\u3059\u3002**\u6BD4\u304C 1 \u306A\u3089\u547C\u3070\u308C\u306A\u3044**
+   * \u5B9F\u6A5F\u306E\u30C9\u30E9\u30A4\u30D0\u306E\u5024\u3092\u7269\u5DEE\u3057\u306B\u3057\u3066\u3001\u6BD4\u3067\u52D5\u304B\u3059\u3002\u6BD4\u304C 1 \u306A\u3089\u547C\u3070\u308C\u306A\u3044
    * (\u97F3\u7B26\u304C o4c \u306E\u307E\u307E\u306A\u3089\u3001startRhythm() \u304C\u66F8\u3044\u305F\u5024\u304C\u305D\u306E\u307E\u307E\u6B8B\u308B)\u306E\u3067\u3001
    * \u524D\u304B\u3089\u3042\u308B\u66F2\u306E\u97F3\u306F\u5909\u308F\u3089\u306A\u3044\u3002
    *
@@ -1551,7 +1611,7 @@ class OpllBank extends AudioWorkletProcessor {
   /**
    * \u6642\u523B\u304C\u6765\u305F\u97F3\u7A0B\u306E\u66F8\u304D\u76F4\u3057\u3092\u3001\u30C1\u30C3\u30D7\u3078\u66F8\u304F\u3002
    *
-   * **\u30AD\u30FC\u30AA\u30F3\u306E\u30D3\u30C3\u30C8\u306F\u89E6\u3089\u306A\u3044\u3002**\u97F3\u7A0B\u30EC\u30B8\u30B9\u30BF(0x20 \u53F0)\u306B\u306F\u9CF4\u3089\u3057\u59CB\u3081\u306E
+   * \u30AD\u30FC\u30AA\u30F3\u306E\u30D3\u30C3\u30C8\u306F\u89E6\u3089\u306A\u3044\u3002\u97F3\u7A0B\u30EC\u30B8\u30B9\u30BF(0x20 \u53F0)\u306B\u306F\u9CF4\u3089\u3057\u59CB\u3081\u306E
    * \u30D3\u30C3\u30C8\u304C\u540C\u5C45\u3057\u3066\u3044\u308B\u306E\u3067\u3001\u3044\u307E\u7ACB\u3063\u3066\u3044\u308B\u3082\u306E\u3092\u305D\u306E\u307E\u307E\u6301\u3061\u8D8A\u3059\u3002
    * \u66F8\u304D\u76F4\u3059\u305F\u3073\u306B\u7ACB\u3066\u76F4\u3059\u3068\u3001\u97F3\u7B26\u306E\u9014\u4E2D\u3067\u9CF4\u3089\u3057\u76F4\u3057\u306B\u306A\u308B
    */
@@ -1627,13 +1687,24 @@ class OpllBank extends AudioWorkletProcessor {
   process(inputs, outputs) {
     const out = outputs[0][0];
     const n = out.length;
-    // **\u6642\u523B\u306F currentTime \u3067\u898B\u308B\u3002**\u97F3\u7B26\u306B\u8F09\u3063\u3066\u3044\u308B\u306E\u306F context \u306E\u7D76\u5BFE\u6642\u523B\u3067\u3001
+    // \u6642\u523B\u306F currentTime \u3067\u898B\u308B\u3002\u97F3\u7B26\u306B\u8F09\u3063\u3066\u3044\u308B\u306E\u306F context \u306E\u7D76\u5BFE\u6642\u523B\u3067\u3001
     // \u81EA\u524D\u3067 0 \u304B\u3089\u6570\u3048\u308B\u3068\u3001\u9CF4\u308A\u306F\u3058\u3081\u304C context \u306E\u7D4C\u904E\u3076\u3093\u3060\u3051\u5148\u3078\u305A\u308C\u308B
     const base = currentTime;
+    // **\u4F55\u3082\u9CF4\u3063\u3066\u3044\u306A\u3044\u533A\u5207\u308A\u306F\u3001\u307E\u308B\u3054\u3068\u98DB\u3070\u3059\u3002**1 \u30C1\u30E3\u30F3\u30CD\u30EB\u3092 1 \u53F0\u3078
+    // \u6E21\u3059\u4F5C\u308A\u306A\u306E\u3067\u300145 \u672C\u306E\u66F2\u3067\u306F\u4F11\u3093\u3067\u3044\u308B\u53F0\u304C\u4E26\u3076\u30021 \u30B5\u30F3\u30D7\u30EB\u305A\u3064\u56DE\u3059
+    // \u3060\u3051\u3067 1 \u53F0 2% \u307B\u3069\u304B\u304B\u308A\u300145 \u53F0\u3067 1 \u30B3\u30A2\u3092\u4F7F\u3044\u5207\u3063\u3066\u3044\u305F(2026-10-12)\u3002
+    // \u98DB\u3070\u3059\u3068 LFO \u3068\u30CE\u30A4\u30BA\u306E\u4F4D\u76F8\u304C\u6B62\u307E\u308B\u304C\u3001\u3069\u3061\u3089\u3082\u6B21\u306E\u97F3\u306E\u982D\u306E\u63FA\u308C\u65B9\u304C
+    // \u5909\u308F\u308B\u3060\u3051\u3067\u3001sound/ay.js \u3068 sound/nes.js \u3082\u540C\u3058\u306B\u3057\u3066\u3042\u308B
+    const next = this.at < this.events.length ? this.events[this.at].t : Infinity;
+    if (this.cutAt < 0 && !this.rbits && !this.fading && !this.gliding
+      && next >= base + n / sampleRate && this.chip.allQuiet()) {
+      out.fill(0);
+      return true;
+    }
     for (let i = 0; i < n; i++) {
       const now = base + i / sampleRate;
       if (this.logBuf) this.logNow = now;
-      // **\u7D42\u308F\u308B\u97F3\u7B26\u3092\u3001\u59CB\u307E\u308B\u97F3\u7B26\u3088\u308A\u5148\u306B\u3002**\u540C\u3058\u6642\u523B\u306B\u524D\u306E\u97F3\u306E\u7D42\u308F\u308A\u3068
+      // \u7D42\u308F\u308B\u97F3\u7B26\u3092\u3001\u59CB\u307E\u308B\u97F3\u7B26\u3088\u308A\u5148\u306B\u3002\u540C\u3058\u6642\u523B\u306B\u524D\u306E\u97F3\u306E\u7D42\u308F\u308A\u3068
       // \u6B21\u306E\u97F3\u306E\u982D\u304C\u91CD\u306A\u308B\u3068(q8 \u3067\u7D9A\u3051\u3066\u9CF4\u3089\u3059\u3068\u304D)\u3001\u5148\u306B\u6B21\u306E\u97F3\u3092\u4E57\u305B\u305F
       // \u30C1\u30E3\u30F3\u30CD\u30EB\u306E off \u3092\u4E0A\u66F8\u304D\u3057\u3066\u3057\u307E\u3044\u3001\u30AD\u30FC\u30AA\u30D5\u304C\u4E00\u5EA6\u3082\u66F8\u304B\u308C\u306A\u304B\u3063\u305F\u3002
       // \u30AD\u30FC\u30AA\u30F3\u304C\u7ACB\u3063\u305F\u307E\u307E\u3060\u3068\u30C1\u30C3\u30D7\u306F\u7ACB\u3061\u4E0A\u3052\u76F4\u3055\u306A\u3044\u306E\u3067\u30012 \u97F3\u76EE\u304B\u3089\u306F
@@ -1665,7 +1736,7 @@ class OpllBank extends AudioWorkletProcessor {
         if (ev.drum) {
           const d = DRUM[ev.drum];
           this.startRhythm();
-          // **\u53E9\u304F\u305F\u3073\u306B\u3001\u305D\u306E\u6253\u697D\u5668\u306E\u9AD8\u3055\u3092\u66F8\u304D\u76F4\u3059\u3002**\u30B9\u30CD\u30A2\u3068\u30CF\u30A4\u30CF\u30C3\u30C8\u306F
+          // \u53E9\u304F\u305F\u3073\u306B\u3001\u305D\u306E\u6253\u697D\u5668\u306E\u9AD8\u3055\u3092\u66F8\u304D\u76F4\u3059\u3002\u30B9\u30CD\u30A2\u3068\u30CF\u30A4\u30CF\u30C3\u30C8\u306F
           // \u30C1\u30E3\u30F3\u30CD\u30EB 7 \u3092\u3001\u30BF\u30E0\u3068\u30B7\u30F3\u30D0\u30EB\u306F 8 \u3092\u5206\u3051\u5408\u3046\u306E\u3067\u3001\u66F8\u304D\u76F4\u3055\u306A\u3044\u3068
           // \u7247\u65B9\u304C\u7F6E\u3044\u3066\u3044\u3063\u305F\u9AD8\u3055\u3067\u9CF4\u308B\u3002\u5B9F\u6A5F\u306E\u30C9\u30E9\u30A4\u30D0\u3082\u53E9\u304F\u305F\u3073\u306B\u66F8\u3044\u3066\u3044\u305F\u3002
           // \u5024\u304C\u540C\u3058\u306A\u3089\u66F8\u304B\u306A\u3044\u306E\u3067\u3001\u9AD8\u3055\u3092\u52D5\u304B\u3057\u3066\u3044\u306A\u3044\u66F2\u3067\u306F\u66F8\u304D\u8FBC\u307F\u304C\u5897\u3048\u306A\u3044
@@ -1689,7 +1760,7 @@ class OpllBank extends AudioWorkletProcessor {
         }
         // ---- \u30BF\u30A4\u3067\u3064\u306A\u304C\u3063\u305F\u97F3\u306F\u3001\u540C\u3058\u58F0\u3067\u7D9A\u3051\u308B ----
         //
-        // **\u30AD\u30FC\u30AA\u30F3\u3092\u7ACB\u3066\u76F4\u3055\u306A\u3044\u3002**\u7ACB\u3066\u76F4\u3059\u3068\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u304C\u982D\u304B\u3089\u59CB\u307E\u308B\u306E\u3067\u3001
+        // \u30AD\u30FC\u30AA\u30F3\u3092\u7ACB\u3066\u76F4\u3055\u306A\u3044\u3002\u7ACB\u3066\u76F4\u3059\u3068\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u304C\u982D\u304B\u3089\u59CB\u307E\u308B\u306E\u3067\u3001
         // \u6ED1\u3063\u305F\u3042\u3068\u306B\u30A2\u30BF\u30C3\u30AF\u304C\u3084\u308A\u76F4\u3055\u308C\u308B\u3002\u5B9F\u6E2C\u3067\u306F 85ms \u3067 0.0004 \u307E\u3067\u843D\u3061\u3066\u3001
         // 125ms \u304B\u3051\u3066\u4E0A\u304C\u3063\u3066\u3044\u305F \u2014 \u300C\u6ED1\u308A\u5148\u304C\u9CF4\u308A\u76F4\u3057\u3066\u805E\u3053\u3048\u308B\u300D\u306E\u6B63\u4F53
         //(2026-09-30)\u3002
@@ -1743,7 +1814,7 @@ class OpllBank extends AudioWorkletProcessor {
         this.cur = this.chip.tick();
         this.frac -= 1;
       }
-      // **\u51FA\u53E3\u306E\u5272\u308A\u7B97\u3002**\u30C1\u30C3\u30D7\u306E\u751F\u306E\u5024\u306F int16 \u306E\u5E45\u3067\u51FA\u3066\u304F\u308B\u3002
+      // \u51FA\u53E3\u306E\u5272\u308A\u7B97\u3002\u30C1\u30C3\u30D7\u306E\u751F\u306E\u5024\u306F int16 \u306E\u5E45\u3067\u51FA\u3066\u304F\u308B\u3002
       // \u97F3 6 \u672C + \u6253\u697D\u5668 5 \u3064\u3092\u5168\u90E8\u3044\u3061\u3070\u3093\u5927\u304D\u3044\u97F3\u91CF\u3067\u9CF4\u3089\u3059\u3068 16401 \u307E\u3067
       // \u884C\u304F\u306E\u3067\u3001\u305D\u3053\u304C\u3061\u3087\u3046\u3069 1.0 \u306B\u306A\u308B\u6570\u3092\u9078\u3093\u3060\u3002\u305D\u308C\u4EE5\u4E0A\u306F\u51FA\u53E3\u3067\u6F70\u308C\u308B
       let v = (this.prev + (this.cur - this.prev) * this.frac) / 16384;
@@ -1765,7 +1836,7 @@ class OpllBank extends AudioWorkletProcessor {
 registerProcessor('mmsxx-opll', OpllBank);
 `;
 
-  // player-latest/sound/ym2151.js
+  // sound/ym2151.js
   var OPM_CLOCK = 3579545;
   var OPM_RATE = OPM_CLOCK / 64;
   var OPM_CODE = `
@@ -2459,8 +2530,8 @@ registerProcessor('mmsxx-opm', OpmBank);
       else hi = mid;
     }
     const a = TABLE[lo], b = TABLE[Math.max(0, lo - 1)];
-    const pick = Math.abs(a.f - freq) <= Math.abs(b.f - freq) ? a : b;
-    return { kc: pick.kc, kf: pick.kf };
+    const pick2 = Math.abs(a.f - freq) <= Math.abs(b.f - freq) ? a : b;
+    return { kc: pick2.kc, kf: pick2.kf };
   }
   var PHASE = Uint32Array.from([
     1299,
@@ -3274,7 +3345,7 @@ registerProcessor('mmsxx-opm', OpmBank);
     return hold && ms < attackMs ? "ok" : "avoid";
   }
 
-  // player-latest/sound/tones.js
+  // sound/tones.js
   var tones_exports = {};
   __export(tones_exports, {
     TONE_FRAME: () => TONE_FRAME,
@@ -3305,8 +3376,8 @@ registerProcessor('mmsxx-opm', OpmBank);
       tone: _tone,
       role: _role,
       preset: _preset,
-      note: _note,
-      noteJa: _noteJa,
+      desc: _desc,
+      descJa: _descJa,
       tags: _tags,
       genre: _genre,
       dev: _dev,
@@ -3352,20 +3423,20 @@ registerProcessor('mmsxx-opm', OpmBank);
     // 分散和音。長三和音を 1 フレームずつ回して、和音に聞かせる。
     // 矩形波が 2 本しか無い機械で和音を出す手
     "toneArp(major)": {
-      noteJa: "\u9577\u4E09\u548C\u97F3\u3092 1 \u30D5\u30EC\u30FC\u30E0\u305A\u3064\u56DE\u3059\u3002\u77E9\u5F62\u6CE2\u304C 2 \u672C\u3057\u304B\u7121\u3044\u6A5F\u68B0\u3067\u548C\u97F3\u3092\u51FA\u3059\u624B",
+      descJa: "\u9577\u4E09\u548C\u97F3\u3092 1 \u30D5\u30EC\u30FC\u30E0\u305A\u3064\u56DE\u3059\u3002\u77E9\u5F62\u6CE2\u304C 2 \u672C\u3057\u304B\u7121\u3044\u6A5F\u68B0\u3067\u548C\u97F3\u3092\u51FA\u3059\u624B",
       dev: ["done"],
       role: "arp",
-      note: "Major triad spun one frame per step. The classic way to fake a chord on a machine with only two pulse channels.",
+      desc: "Major triad spun one frame per step. The classic way to fake a chord on a machine with only two pulse channels.",
       wave: "pulse(25)",
       env: "flat",
       arp: [0, 4, 7],
       loop: { arp: 0 }
     },
     "toneArp(minor)": {
-      noteJa: "\u77ED\u4E09\u548C\u97F3\u3067\u540C\u3058\u3053\u3068\u3092\u3059\u308B\u3002toneArp(major) \u3068\u7D44\u306B\u3059\u308B\u3068\u9032\u884C\u304C\u56DE\u305B\u308B",
+      descJa: "\u77ED\u4E09\u548C\u97F3\u3067\u540C\u3058\u3053\u3068\u3092\u3059\u308B\u3002toneArp(major) \u3068\u7D44\u306B\u3059\u308B\u3068\u9032\u884C\u304C\u56DE\u305B\u308B",
       dev: ["done"],
       role: "arp",
-      note: "Minor triad, same spin. Pairs with toneArp(major) for a whole progression.",
+      desc: "Minor triad, same spin. Pairs with toneArp(major) for a whole progression.",
       wave: "pulse(25)",
       env: "flat",
       arp: [0, 3, 7],
@@ -3377,10 +3448,10 @@ registerProcessor('mmsxx-opm', OpmBank);
     //
     // 上の 2 つは「和音に聞かせる」寄り。ここから下は「震えて聞かせる」寄り
     "toneArp(hard)": {
-      noteJa: "\u540C\u3058\u9577\u4E09\u548C\u97F3\u3092\u7D30\u3044\u77E9\u5F62\u6CE2\u3067\u3002\u9F3B\u306B\u304B\u304B\u3063\u3066\u524D\u3078\u51FA\u308B\u306E\u3067\u3001\u548C\u97F3\u3068\u3044\u3046\u3088\u308A\u5538\u3063\u3066\u805E\u3053\u3048\u308B",
+      descJa: "\u540C\u3058\u9577\u4E09\u548C\u97F3\u3092\u7D30\u3044\u77E9\u5F62\u6CE2\u3067\u3002\u9F3B\u306B\u304B\u304B\u3063\u3066\u524D\u3078\u51FA\u308B\u306E\u3067\u3001\u548C\u97F3\u3068\u3044\u3046\u3088\u308A\u5538\u3063\u3066\u805E\u3053\u3048\u308B",
       dev: ["done"],
       role: "arp",
-      note: 'Same major triad on a narrow pulse. Reads as nasal and forward \u2014 closer to "buzzing" than "chord".',
+      desc: 'Same major triad on a narrow pulse. Reads as nasal and forward \u2014 closer to "buzzing" than "chord".',
       wave: "pulse(12)",
       env: "flat",
       arp: [0, 4, 7],
@@ -3388,20 +3459,20 @@ registerProcessor('mmsxx-opm', OpmBank);
     },
     // オクターブまで跳ぶ。幅が広いほど荒れる。あの手の曲でいちばん多い形
     "toneArp(wide)": {
-      noteJa: "\u4E3B\u97F3\u30FB5 \u5EA6\u30FB\u30AA\u30AF\u30BF\u30FC\u30D6\u3002\u8DF3\u3076\u5E45\u304C\u5E83\u3044\u306E\u3067\u3001\u548C\u97F3\u3067\u306F\u306A\u304F\u9707\u3048\u306B\u805E\u3053\u3048\u308B\u3002\u30D5\u30A1\u30DF\u30B3\u30F3\u306E\u30EA\u30FC\u30C9\u3067\u3044\u3061\u3070\u3093\u591A\u3044\u5F62",
+      descJa: "\u4E3B\u97F3\u30FB5 \u5EA6\u30FB\u30AA\u30AF\u30BF\u30FC\u30D6\u3002\u8DF3\u3076\u5E45\u304C\u5E83\u3044\u306E\u3067\u3001\u548C\u97F3\u3067\u306F\u306A\u304F\u9707\u3048\u306B\u805E\u3053\u3048\u308B\u3002\u30D5\u30A1\u30DF\u30B3\u30F3\u306E\u30EA\u30FC\u30C9\u3067\u3044\u3061\u3070\u3093\u591A\u3044\u5F62",
       dev: ["done"],
       role: "arp",
-      note: "Root, fifth, octave. The wide jump stops sounding like a chord and starts sounding like a warble. The most common shape in NES-era leads.",
+      desc: "Root, fifth, octave. The wide jump stops sounding like a chord and starts sounding like a warble. The most common shape in NES-era leads.",
       wave: "pulse(12)",
       env: "flat",
       arp: [0, 7, 12],
       loop: { arp: 0 }
     },
     "toneArp(wideM)": {
-      noteJa: "toneArp(wide) \u306E\u77ED\u8ABF\u7248",
+      descJa: "toneArp(wide) \u306E\u77ED\u8ABF\u7248",
       dev: ["done"],
       role: "arp",
-      note: "Minor version of toneArp(wide).",
+      desc: "Minor version of toneArp(wide).",
       wave: "pulse(12)",
       env: "flat",
       arp: [0, 3, 12],
@@ -3413,50 +3484,50 @@ registerProcessor('mmsxx-opm', OpmBank);
     // 1 つ 1 つの音に聞こえるので、同じ [0,4,7] でも別の音として使う。
     // 別のまとまりにしてあるのは、選ぶときにまず速さで選ぶから
     "toneArpSlow(major)": {
-      noteJa: "\u9577\u4E09\u548C\u97F3\u3092\u30011 \u6BB5 2 \u30D5\u30EC\u30FC\u30E0\u3067\u56DE\u3059\u3002\u9045\u3044\u3076\u3093\u548C\u97F3\u306E 1 \u3064 1 \u3064\u304C\u805E\u3053\u3048\u3066\u3001\u7C92\u304C\u7ACB\u3064",
+      descJa: "\u9577\u4E09\u548C\u97F3\u3092\u30011 \u6BB5 2 \u30D5\u30EC\u30FC\u30E0\u3067\u56DE\u3059\u3002\u9045\u3044\u3076\u3093\u548C\u97F3\u306E 1 \u3064 1 \u3064\u304C\u805E\u3053\u3048\u3066\u3001\u7C92\u304C\u7ACB\u3064",
       dev: ["done"],
       role: "arp",
-      note: "A major triad at two frames per step. Slow enough that you hear each note of it, so it comes out grainy rather than as a chord.",
+      desc: "A major triad at two frames per step. Slow enough that you hear each note of it, so it comes out grainy rather than as a chord.",
       wave: "pulse(12)",
       env: "flat",
       arp: [0, 0, 4, 4, 7, 7],
       loop: { arp: 0 }
     },
     "toneArpSlow(minor)": {
-      noteJa: "\u77ED\u4E09\u548C\u97F3\u3092\u30011 \u6BB5 2 \u30D5\u30EC\u30FC\u30E0\u3067\u56DE\u3059",
+      descJa: "\u77ED\u4E09\u548C\u97F3\u3092\u30011 \u6BB5 2 \u30D5\u30EC\u30FC\u30E0\u3067\u56DE\u3059",
       dev: ["done"],
       role: "arp",
-      note: "Minor triad at two frames per step.",
+      desc: "Minor triad at two frames per step.",
       wave: "pulse(12)",
       env: "flat",
       arp: [0, 0, 3, 3, 7, 7],
       loop: { arp: 0 }
     },
     "toneArpSlow(hard)": {
-      noteJa: "\u540C\u3058\u9577\u4E09\u548C\u97F3\u3092\u3001\u3044\u3061\u3070\u3093\u7D30\u3044\u77E9\u5F62\u6CE2\u3067\u3002\u9045\u3044\u306E\u3067\u5538\u308A\u306B\u306F\u306A\u3089\u305A\u3001\u7C92\u304C\u786C\u304F\u306A\u308B",
+      descJa: "\u540C\u3058\u9577\u4E09\u548C\u97F3\u3092\u3001\u3044\u3061\u3070\u3093\u7D30\u3044\u77E9\u5F62\u6CE2\u3067\u3002\u9045\u3044\u306E\u3067\u5538\u308A\u306B\u306F\u306A\u3089\u305A\u3001\u7C92\u304C\u786C\u304F\u306A\u308B",
       dev: ["done"],
       role: "arp",
-      note: "The same major triad on the narrowest pulse. Too slow to buzz, so it reads as hard-edged grain instead.",
+      desc: "The same major triad on the narrowest pulse. Too slow to buzz, so it reads as hard-edged grain instead.",
       wave: "wavePulse(6)",
       env: "flat",
       arp: [0, 0, 4, 4, 7, 7],
       loop: { arp: 0 }
     },
     "toneArpSlow(wide)": {
-      noteJa: "\u4E3B\u97F3\u30FB5 \u5EA6\u30FB\u30AA\u30AF\u30BF\u30FC\u30D6\u3092\u30011 \u6BB5 2 \u30D5\u30EC\u30FC\u30E0\u3067\u56DE\u3059\u3002\u8DF3\u3076\u5E45\u304C\u5E83\u3044\u306E\u3067\u3001\u65CB\u5F8B\u304C 3 \u672C\u8D70\u3063\u3066\u3044\u308B\u3088\u3046\u306B\u805E\u3053\u3048\u308B",
+      descJa: "\u4E3B\u97F3\u30FB5 \u5EA6\u30FB\u30AA\u30AF\u30BF\u30FC\u30D6\u3092\u30011 \u6BB5 2 \u30D5\u30EC\u30FC\u30E0\u3067\u56DE\u3059\u3002\u8DF3\u3076\u5E45\u304C\u5E83\u3044\u306E\u3067\u3001\u65CB\u5F8B\u304C 3 \u672C\u8D70\u3063\u3066\u3044\u308B\u3088\u3046\u306B\u805E\u3053\u3048\u308B",
       dev: ["done"],
       role: "arp",
-      note: "Root, fifth, octave at two frames per step. The jumps are wide enough and slow enough that it sounds like three lines running at once.",
+      desc: "Root, fifth, octave at two frames per step. The jumps are wide enough and slow enough that it sounds like three lines running at once.",
       wave: "pulse(12)",
       env: "flat",
       arp: [0, 0, 7, 7, 12, 12],
       loop: { arp: 0 }
     },
     "toneArpSlow(wideM)": {
-      noteJa: "toneArpSlow(wide) \u306E\u77ED\u8ABF\u7248",
+      descJa: "toneArpSlow(wide) \u306E\u77ED\u8ABF\u7248",
       dev: ["done"],
       role: "arp",
-      note: "Minor version of toneArpSlow(wide).",
+      desc: "Minor version of toneArpSlow(wide).",
       wave: "pulse(12)",
       env: "flat",
       arp: [0, 0, 3, 3, 12, 12],
@@ -3464,9 +3535,9 @@ registerProcessor('mmsxx-opm', OpmBank);
     },
     // 落ちる音。高さが下がりきって終わる。効果音にも使える
     seFall: {
-      noteJa: "\u9AD8\u3055\u304C 1 \u30AA\u30AF\u30BF\u30FC\u30D6\u4E0B\u304C\u308A\u304D\u3063\u3066\u7D42\u308F\u308B\u3002\u65CB\u5F8B\u3067\u306F\u306A\u304F\u3001\u5F53\u305F\u3063\u305F\u97F3\u3084\u52B9\u679C\u97F3\u306B\u4F7F\u3046",
+      descJa: "\u9AD8\u3055\u304C 1 \u30AA\u30AF\u30BF\u30FC\u30D6\u4E0B\u304C\u308A\u304D\u3063\u3066\u7D42\u308F\u308B\u3002\u65CB\u5F8B\u3067\u306F\u306A\u304F\u3001\u5F53\u305F\u3063\u305F\u97F3\u3084\u52B9\u679C\u97F3\u306B\u4F7F\u3046",
       role: "se",
-      note: "Pitch drops one octave and stops. Good for hits and sound effects, not for melody.",
+      desc: "Pitch drops one octave and stops. Good for hits and sound effects, not for melody.",
       wave: "pulse(50)",
       env: "flat",
       pitch: [0, -80, -180, -320, -520, -800, -1200]
@@ -3474,18 +3545,18 @@ registerProcessor('mmsxx-opm', OpmBank);
     // 遅れて出るビブラート。押した瞬間は真っ直ぐで、伸ばすと揺れ出す。
     // チップチューンのリードの顔
     toneLead: {
-      noteJa: "\u62BC\u3057\u3066\u304B\u3089 18 \u30D5\u30EC\u30FC\u30E0\u5F85\u3063\u3066\u63FA\u308C\u51FA\u3059\u30D3\u30D6\u30E9\u30FC\u30C8\u3002\u771F\u3063\u76F4\u3050\u5165\u3063\u3066\u9014\u4E2D\u304B\u3089\u63FA\u308C\u308B\u306E\u304C\u3001\u30C1\u30C3\u30D7\u30C1\u30E5\u30FC\u30F3\u306E\u30EA\u30FC\u30C9\u306E\u9854",
+      descJa: "\u62BC\u3057\u3066\u304B\u3089 18 \u30D5\u30EC\u30FC\u30E0\u5F85\u3063\u3066\u63FA\u308C\u51FA\u3059\u30D3\u30D6\u30E9\u30FC\u30C8\u3002\u771F\u3063\u76F4\u3050\u5165\u3063\u3066\u9014\u4E2D\u304B\u3089\u63FA\u308C\u308B\u306E\u304C\u3001\u30C1\u30C3\u30D7\u30C1\u30E5\u30FC\u30F3\u306E\u30EA\u30FC\u30C9\u306E\u9854",
       role: "lead",
-      note: "Vibrato that only starts after you hold the note (18 frames). The straight attack followed by a wobble is the signature chiptune lead.",
+      desc: "Vibrato that only starts after you hold the note (18 frames). The straight attack followed by a wobble is the signature chiptune lead.",
       wave: "pulse(25)",
       env: "flat",
       vib: { depth: 5, speed: 6, delay: 18 }
     },
     // 刻んで減る音量。割合ではなく表なので、短い音では途中までしか鳴らない
     tonePluck: {
-      noteJa: "\u97F3\u91CF\u3092 1 \u30D5\u30EC\u30FC\u30E0\u305A\u3064\u843D\u3068\u3059\u3002\u5272\u5408\u3067\u306F\u306A\u304F\u8868\u306A\u306E\u3067\u3001\u77ED\u3044\u97F3\u3067\u306F\u9014\u4E2D\u307E\u3067\u3057\u304B\u9CF4\u3089\u306A\u3044 \u2014 \u305D\u3053\u304C\u72D9\u3044",
+      descJa: "\u97F3\u91CF\u3092 1 \u30D5\u30EC\u30FC\u30E0\u305A\u3064\u843D\u3068\u3059\u3002\u5272\u5408\u3067\u306F\u306A\u304F\u8868\u306A\u306E\u3067\u3001\u77ED\u3044\u97F3\u3067\u306F\u9014\u4E2D\u307E\u3067\u3057\u304B\u9CF4\u3089\u306A\u3044 \u2014 \u305D\u3053\u304C\u72D9\u3044",
       role: "chord",
-      note: "Volume steps down a frame at a time. Because it is a table and not a ratio, short notes only get part of it \u2014 that is the point.",
+      desc: "Volume steps down a frame at a time. Because it is a table and not a ratio, short notes only get part of it \u2014 that is the point.",
       wave: "pulse(12)",
       env: "flat",
       vol: [15, 15, 13, 11, 9, 8, 7, 6, 5, 4, 3, 2, 1]
@@ -3496,18 +3567,18 @@ registerProcessor('mmsxx-opm', OpmBank);
     // 幅は 0〜1。0.5 が矩形波で、そこから離れるほど細く尖る。
     // 0.25 と 0.75 は同じ音(上下が逆なだけ)なので、下半分だけ使えば足りる
     toneDutyOpen: {
-      noteJa: "\u5E45\u304C\u7D30\u3044\u3068\u3053\u308D\u304B\u3089\u59CB\u307E\u3063\u3066\u30019 \u30D5\u30EC\u30FC\u30E0\u3067\u77E9\u5F62\u6CE2\u307E\u3067\u5E83\u304C\u3063\u3066\u6B62\u307E\u308B\u3002\u9AD8\u3055\u3082\u97F3\u91CF\u3082\u52D5\u304B\u3055\u305A\u306B\u3001\u982D\u3060\u3051\u53E3\u3092\u958B\u3051\u305F\u3088\u3046\u306B\u805E\u3053\u3048\u308B",
+      descJa: "\u5E45\u304C\u7D30\u3044\u3068\u3053\u308D\u304B\u3089\u59CB\u307E\u3063\u3066\u30019 \u30D5\u30EC\u30FC\u30E0\u3067\u77E9\u5F62\u6CE2\u307E\u3067\u5E83\u304C\u3063\u3066\u6B62\u307E\u308B\u3002\u9AD8\u3055\u3082\u97F3\u91CF\u3082\u52D5\u304B\u3055\u305A\u306B\u3001\u982D\u3060\u3051\u53E3\u3092\u958B\u3051\u305F\u3088\u3046\u306B\u805E\u3053\u3048\u308B",
       role: "lead",
-      note: "The pulse starts thin and widens to a square over nine frames, then stays. Gives the attack a vowel-like opening without touching pitch or volume.",
+      desc: "The pulse starts thin and widens to a square over nine frames, then stays. Gives the attack a vowel-like opening without touching pitch or volume.",
       wave: "pulse(25)",
       env: "flat",
       duty: [0.06, 0.09, 0.125, 0.18, 0.25, 0.31, 0.375, 0.44, 0.5]
     },
     // 行って戻る。ゆっくり回すと、声が 2 本あるように聞こえる(実機の PWM)
     toneDutyPWM: {
-      noteJa: "\u5E45\u304C 24 \u30D5\u30EC\u30FC\u30E0(\u7D04 2.5 Hz)\u304B\u3051\u3066\u884C\u3063\u3066\u623B\u308B\u3002\u9045\u3044\u306E\u3067\u97F3\u8272\u306E\u5909\u5316\u3068\u3044\u3046\u3088\u308A\u3001\u58F0\u304C 2 \u672C\u3042\u3063\u3066\u5538\u3063\u3066\u3044\u308B\u3088\u3046\u306B\u805E\u3053\u3048\u308B\u3002\u5B9F\u6A5F\u306E PWM \u306E\u97F3",
+      descJa: "\u5E45\u304C 24 \u30D5\u30EC\u30FC\u30E0(\u7D04 2.5 Hz)\u304B\u3051\u3066\u884C\u3063\u3066\u623B\u308B\u3002\u9045\u3044\u306E\u3067\u97F3\u8272\u306E\u5909\u5316\u3068\u3044\u3046\u3088\u308A\u3001\u58F0\u304C 2 \u672C\u3042\u3063\u3066\u5538\u3063\u3066\u3044\u308B\u3088\u3046\u306B\u805E\u3053\u3048\u308B\u3002\u5B9F\u6A5F\u306E PWM \u306E\u97F3",
       role: "chord",
-      note: "The width sweeps out and back over 24 frames (about 2.5 Hz). Slow enough to hear as two voices beating rather than as a timbre \u2014 the pulse-width modulation sound.",
+      desc: "The width sweeps out and back over 24 frames (about 2.5 Hz). Slow enough to hear as two voices beating rather than as a timbre \u2014 the pulse-width modulation sound.",
       wave: "pulse(25)",
       env: "flat",
       duty: [
@@ -3540,9 +3611,9 @@ registerProcessor('mmsxx-opm', OpmBank);
     },
     // 1 フレームで 1 段。速すぎて幅の変化としては聞こえず、荒れた音になる
     toneDutyBuzz: {
-      noteJa: "\u5E45\u3092 1 \u30D5\u30EC\u30FC\u30E0\u306B 1 \u6BB5\u305A\u3064 3 \u901A\u308A\u56DE\u3059(20 Hz)\u3002\u901F\u3059\u304E\u3066\u5E45\u306E\u5909\u5316\u3068\u3057\u3066\u306F\u805E\u3053\u3048\u305A\u3001\u97F3\u306E\u7E01\u304C\u8352\u308C\u3066\u805E\u3053\u3048\u308B",
+      descJa: "\u5E45\u3092 1 \u30D5\u30EC\u30FC\u30E0\u306B 1 \u6BB5\u305A\u3064 3 \u901A\u308A\u56DE\u3059(20 Hz)\u3002\u901F\u3059\u304E\u3066\u5E45\u306E\u5909\u5316\u3068\u3057\u3066\u306F\u805E\u3053\u3048\u305A\u3001\u97F3\u306E\u7E01\u304C\u8352\u308C\u3066\u805E\u3053\u3048\u308B",
       role: "lead",
-      note: "Three widths spun one frame per step (20 Hz). Too fast to hear as a sweep \u2014 it reads as a rough, reedy edge on the note instead.",
+      desc: "Three widths spun one frame per step (20 Hz). Too fast to hear as a sweep \u2014 it reads as a rough, reedy edge on the note instead.",
       wave: "pulse(12)",
       env: "flat",
       duty: [0.125, 0.25, 0.5],
@@ -3551,9 +3622,9 @@ registerProcessor('mmsxx-opm', OpmBank);
     // ゆっくり 2 つの幅を行き来する。実機の手癖はこちらで、
     // `toneDutyBuzz` の 20 Hz は速すぎた。8 フレームずつなら幅の変化として聞こえる
     toneDutyNes: {
-      noteJa: "\u5E45\u3092 2 \u3064\u3060\u3051\u30018 \u30D5\u30EC\u30FC\u30E0\u305A\u3064\u884C\u304D\u6765\u3059\u308B\u3002\u30D5\u30A1\u30DF\u30B3\u30F3\u306E\u99C6\u52D5\u7CFB\u304C\u3088\u304F\u4F7F\u3063\u305F\u624B\u3067\u3001\u901F\u304F\u56DE\u3059\u3088\u308A\u5E45\u304C\u52D5\u3044\u3066\u3044\u308B\u306E\u304C\u5206\u304B\u308B",
+      descJa: "\u5E45\u3092 2 \u3064\u3060\u3051\u30018 \u30D5\u30EC\u30FC\u30E0\u305A\u3064\u884C\u304D\u6765\u3059\u308B\u3002\u30D5\u30A1\u30DF\u30B3\u30F3\u306E\u99C6\u52D5\u7CFB\u304C\u3088\u304F\u4F7F\u3063\u305F\u624B\u3067\u3001\u901F\u304F\u56DE\u3059\u3088\u308A\u5E45\u304C\u52D5\u3044\u3066\u3044\u308B\u306E\u304C\u5206\u304B\u308B",
       role: "lead",
-      note: "Two widths, eight frames each. What NES drivers actually did \u2014 slow enough that you hear the width move, unlike a fast spin.",
+      desc: "Two widths, eight frames each. What NES drivers actually did \u2014 slow enough that you hear the width move, unlike a fast spin.",
       wave: "pulse(12)",
       env: "flat",
       duty: [
@@ -3582,17 +3653,17 @@ registerProcessor('mmsxx-opm', OpmBank);
     // 音量ではなく幅でやっている。音量を動かさずに「叩いた感じ」が出せるので、
     // 三角波に音量つまみが無い機械でも効く、というのが本来の値打ち
     toneDutyAtk: {
-      noteJa: "\u982D\u306E 2 \u30D5\u30EC\u30FC\u30E0\u3060\u3051\u5E45 50%\u3001\u305D\u306E\u3042\u3068\u306F 25%\u3002\u97F3\u91CF\u306F\u307E\u3063\u305F\u304F\u52D5\u304B\u3055\u305A\u306B\u3001\u982D\u304C\u786C\u304F\u306A\u308B\u3002\u901F\u3044\u8B5C\u9762\u307B\u3069\u52B9\u304F",
+      descJa: "\u982D\u306E 2 \u30D5\u30EC\u30FC\u30E0\u3060\u3051\u5E45 50%\u3001\u305D\u306E\u3042\u3068\u306F 25%\u3002\u97F3\u91CF\u306F\u307E\u3063\u305F\u304F\u52D5\u304B\u3055\u305A\u306B\u3001\u982D\u304C\u786C\u304F\u306A\u308B\u3002\u901F\u3044\u8B5C\u9762\u307B\u3069\u52B9\u304F",
       role: "lead",
-      note: "Fifty per cent for the first two frames, then twenty-five. The volume never moves, yet every note arrives with a hard edge. The faster the line, the more it does.",
+      desc: "Fifty per cent for the first two frames, then twenty-five. The volume never moves, yet every note arrives with a hard edge. The faster the line, the more it does.",
       wave: "pulse(25)",
       env: "flat",
       duty: [0.5, 0.5, 0.25]
     },
     toneDutyAtkAlt: {
-      noteJa: "\u982D\u3067 2 \u30D5\u30EC\u30FC\u30E0\u305A\u3064 50% \u3068 25% \u3092 2 \u5F80\u5FA9\u3057\u3066\u304B\u3089 25% \u306B\u843D\u3061\u7740\u304F\u3002\u786C\u3044\u3060\u3051\u3067\u306A\u304F\u300C\u30B8\u30E3\u30C3\u300D\u3068\u3044\u3046\u7C92\u304C\u4ED8\u304F",
+      descJa: "\u982D\u3067 2 \u30D5\u30EC\u30FC\u30E0\u305A\u3064 50% \u3068 25% \u3092 2 \u5F80\u5FA9\u3057\u3066\u304B\u3089 25% \u306B\u843D\u3061\u7740\u304F\u3002\u786C\u3044\u3060\u3051\u3067\u306A\u304F\u300C\u30B8\u30E3\u30C3\u300D\u3068\u3044\u3046\u7C92\u304C\u4ED8\u304F",
       role: "lead",
-      note: "Two frames of fifty, two of twenty-five, twice over, then it settles. Harder than a plain attack and grainier with it.",
+      desc: "Two frames of fifty, two of twenty-five, twice over, then it settles. Harder than a plain attack and grainier with it.",
       wave: "pulse(25)",
       env: "flat",
       duty: [0.5, 0.5, 0.25, 0.25, 0.5, 0.5, 0.25]
@@ -3600,9 +3671,9 @@ registerProcessor('mmsxx-opm', OpmBank);
     // 滑り込む入り。下から定位置へ 4 フレームで上がる。
     // 音符ごとに掛かるので、速い譜面ほど効く
     toneSlideIn: {
-      noteJa: "2 \u534A\u97F3\u4E0B\u304B\u3089 4 \u30D5\u30EC\u30FC\u30E0\u3067\u5B9A\u4F4D\u7F6E\u3078\u4E0A\u304C\u308B\u3002\u62BC\u3057\u305F\u97F3\u304C\u4E00\u6BB5\u4E0B\u304B\u3089\u6ED1\u308A\u8FBC\u3093\u3067\u304F\u308B\u306E\u3067\u3001\u901F\u3044\u8B5C\u9762\u307B\u3069\u751F\u304D\u308B",
+      descJa: "2 \u534A\u97F3\u4E0B\u304B\u3089 4 \u30D5\u30EC\u30FC\u30E0\u3067\u5B9A\u4F4D\u7F6E\u3078\u4E0A\u304C\u308B\u3002\u62BC\u3057\u305F\u97F3\u304C\u4E00\u6BB5\u4E0B\u304B\u3089\u6ED1\u308A\u8FBC\u3093\u3067\u304F\u308B\u306E\u3067\u3001\u901F\u3044\u8B5C\u9762\u307B\u3069\u751F\u304D\u308B",
       role: "lead",
-      note: "Every note slides up into place from two semitones below over four frames. The faster the line, the more it does.",
+      desc: "Every note slides up into place from two semitones below over four frames. The faster the line, the more it does.",
       wave: "pulse(25)",
       env: "flat",
       pitch: [-200, -140, -80, -30, 0]
@@ -3610,9 +3681,9 @@ registerProcessor('mmsxx-opm', OpmBank);
     // 3 つ重ね。滑り込んで、幅が開いて、遅れて揺れる。
     // どれも 1 つずつは地味だが、順に起きると 1 本の音として聞こえる
     tonePsgLead: {
-      noteJa: "\u6ED1\u308A\u8FBC\u307F\u3068\u5E45\u958B\u304D\u3068\u9045\u308C\u305F\u30D3\u30D6\u30E9\u30FC\u30C8\u3092\u91CD\u306D\u305F\u3082\u306E\u3002\u62BC\u3057\u305F\u77AC\u9593\u306F\u7D30\u304F\u3066\u4F4E\u304F\u3001\u4F38\u3070\u3059\u3046\u3061\u306B\u592A\u304F\u771F\u3063\u76F4\u3050\u306B\u306A\u308A\u3001\u6700\u5F8C\u306B\u63FA\u308C\u51FA\u3059\u3002PSG \u306E\u30EA\u30FC\u30C9\u3067\u3044\u3061\u3070\u3093\u6C17\u6301\u3061\u306E\u3088\u3044\u5F62",
+      descJa: "\u6ED1\u308A\u8FBC\u307F\u3068\u5E45\u958B\u304D\u3068\u9045\u308C\u305F\u30D3\u30D6\u30E9\u30FC\u30C8\u3092\u91CD\u306D\u305F\u3082\u306E\u3002\u62BC\u3057\u305F\u77AC\u9593\u306F\u7D30\u304F\u3066\u4F4E\u304F\u3001\u4F38\u3070\u3059\u3046\u3061\u306B\u592A\u304F\u771F\u3063\u76F4\u3050\u306B\u306A\u308A\u3001\u6700\u5F8C\u306B\u63FA\u308C\u51FA\u3059\u3002PSG \u306E\u30EA\u30FC\u30C9\u3067\u3044\u3061\u3070\u3093\u6C17\u6301\u3061\u306E\u3088\u3044\u5F62",
       role: "lead",
-      note: "A slide-in, a widening pulse and a delayed vibrato stacked. It arrives thin and flat, fills out as you hold it, then starts to wobble \u2014 the most satisfying shape a PSG lead takes.",
+      desc: "A slide-in, a widening pulse and a delayed vibrato stacked. It arrives thin and flat, fills out as you hold it, then starts to wobble \u2014 the most satisfying shape a PSG lead takes.",
       wave: "pulse(25)",
       env: "flat",
       pitch: [-150, -90, -40, 0],
@@ -3621,9 +3692,9 @@ registerProcessor('mmsxx-opm', OpmBank);
     },
     // 息づく和音。幅がゆっくり往復するので、伸ばすほど中で動く
     toneBreathPad: {
-      noteJa: "\u5E45\u304C 18 \u30D5\u30EC\u30FC\u30E0\u304B\u3051\u3066\u958B\u3044\u3066\u9589\u3058\u308B\u3002\u4F38\u3070\u3057\u305F\u548C\u97F3\u306E\u4E2D\u3067\u3086\u3063\u304F\u308A\u52D5\u304F\u306E\u3067\u3001\u540C\u3058\u97F3\u3092\u9577\u304F\u7F6E\u3044\u3066\u3082\u98FD\u304D\u306A\u3044",
+      descJa: "\u5E45\u304C 18 \u30D5\u30EC\u30FC\u30E0\u304B\u3051\u3066\u958B\u3044\u3066\u9589\u3058\u308B\u3002\u4F38\u3070\u3057\u305F\u548C\u97F3\u306E\u4E2D\u3067\u3086\u3063\u304F\u308A\u52D5\u304F\u306E\u3067\u3001\u540C\u3058\u97F3\u3092\u9577\u304F\u7F6E\u3044\u3066\u3082\u98FD\u304D\u306A\u3044",
       role: "chord",
-      note: "The width opens and closes over eighteen frames. A held chord keeps moving inside itself, so it does not go stale.",
+      desc: "The width opens and closes over eighteen frames. A held chord keeps moving inside itself, so it does not go stale.",
       wave: "pulse(25)",
       env: "soft",
       duty: [
@@ -3651,9 +3722,9 @@ registerProcessor('mmsxx-opm', OpmBank);
     },
     // タム。`seFall` の落ち幅を小さくして、落ちながら消す
     toneTom: {
-      noteJa: "\u9AD8\u3055\u304C\u5C11\u3057\u3060\u3051\u843D\u3061\u306A\u304C\u3089\u6D88\u3048\u308B\u3002\u843D\u3061\u5E45\u304C\u5C0F\u3055\u3044\u306E\u304C\u304D\u3082\u3067\u30011 \u30AA\u30AF\u30BF\u30FC\u30D6\u843D\u3068\u3059\u3068\u592A\u9F13\u3067\u306F\u306A\u304F\u52B9\u679C\u97F3\u306B\u306A\u308B",
+      descJa: "\u9AD8\u3055\u304C\u5C11\u3057\u3060\u3051\u843D\u3061\u306A\u304C\u3089\u6D88\u3048\u308B\u3002\u843D\u3061\u5E45\u304C\u5C0F\u3055\u3044\u306E\u304C\u304D\u3082\u3067\u30011 \u30AA\u30AF\u30BF\u30FC\u30D6\u843D\u3068\u3059\u3068\u592A\u9F13\u3067\u306F\u306A\u304F\u52B9\u679C\u97F3\u306B\u306A\u308B",
       role: "perc",
-      note: "The pitch drops a little and fades. The small drop is the whole point \u2014 take it down an octave and it stops being a drum.",
+      desc: "The pitch drops a little and fades. The small drop is the whole point \u2014 take it down an octave and it stops being a drum.",
       wave: "triangle",
       env: "percussive",
       pitch: [0, -60, -140, -220, -280, -320],
@@ -3661,9 +3732,9 @@ registerProcessor('mmsxx-opm', OpmBank);
     },
     // 金属。1 フレームで大きく跳ぶので、音程として聞こえなくなる
     toneClang: {
-      noteJa: "\u9AD8\u3055\u304C 1 \u30D5\u30EC\u30FC\u30E0\u3054\u3068\u306B\u5927\u304D\u304F\u8DF3\u3076\u3002\u8DF3\u3076\u5E45\u304C\u548C\u97F3\u3092\u8D8A\u3048\u3066\u3044\u308B\u306E\u3067\u3001\u97F3\u7A0B\u3067\u306F\u306A\u304F\u91D1\u5C5E\u3092\u53E9\u3044\u305F\u97F3\u306B\u805E\u3053\u3048\u308B",
+      descJa: "\u9AD8\u3055\u304C 1 \u30D5\u30EC\u30FC\u30E0\u3054\u3068\u306B\u5927\u304D\u304F\u8DF3\u3076\u3002\u8DF3\u3076\u5E45\u304C\u548C\u97F3\u3092\u8D8A\u3048\u3066\u3044\u308B\u306E\u3067\u3001\u97F3\u7A0B\u3067\u306F\u306A\u304F\u91D1\u5C5E\u3092\u53E9\u3044\u305F\u97F3\u306B\u805E\u3053\u3048\u308B",
       role: "perc",
-      note: "The pitch leaps by more than a chord every frame, so the ear stops hearing a note and starts hearing struck metal.",
+      desc: "The pitch leaps by more than a chord every frame, so the ear stops hearing a note and starts hearing struck metal.",
       wave: "pulse(25)",
       env: "percussive",
       arp: [0, 19, 7, 26, 12, 31],
@@ -3672,9 +3743,9 @@ registerProcessor('mmsxx-opm', OpmBank);
     },
     // サイレン。上って下りて回りつづける。曲の部品ではない
     seSiren: {
-      noteJa: "\u9AD8\u3055\u304C\u4E0A\u3063\u3066\u4E0B\u308A\u3066\u3001\u56DE\u308A\u3064\u3065\u3051\u308B\u3002\u6B62\u307E\u3089\u306A\u3044\u306E\u3067\u3001\u9CF4\u3089\u3059\u9577\u3055\u3067\u5207\u308B",
+      descJa: "\u9AD8\u3055\u304C\u4E0A\u3063\u3066\u4E0B\u308A\u3066\u3001\u56DE\u308A\u3064\u3065\u3051\u308B\u3002\u6B62\u307E\u3089\u306A\u3044\u306E\u3067\u3001\u9CF4\u3089\u3059\u9577\u3055\u3067\u5207\u308B",
       role: "se",
-      note: "The pitch runs up and back down and keeps going. It never settles, so the note length is what stops it.",
+      desc: "The pitch runs up and back down and keeps going. It never settles, so the note length is what stops it.",
       wave: "pulse(50)",
       env: "flat",
       pitch: [0, 200, 400, 600, 700, 600, 400, 200],
@@ -3682,9 +3753,9 @@ registerProcessor('mmsxx-opm', OpmBank);
     },
     // 電源が落ちる。幅と高さと音量が同時に落ちる
     sePowerDown: {
-      noteJa: "\u5E45\u304C\u7D30\u304F\u306A\u308A\u306A\u304C\u3089\u3001\u9AD8\u3055\u3082\u97F3\u91CF\u3082\u843D\u3061\u308B\u30023 \u3064\u540C\u6642\u306B\u843D\u3068\u3059\u3068\u300C\u5207\u308C\u305F\u300D\u3068\u805E\u3053\u3048\u308B \u2014 1 \u3064\u3060\u3051\u3067\u306F\u8DB3\u308A\u306A\u3044",
+      descJa: "\u5E45\u304C\u7D30\u304F\u306A\u308A\u306A\u304C\u3089\u3001\u9AD8\u3055\u3082\u97F3\u91CF\u3082\u843D\u3061\u308B\u30023 \u3064\u540C\u6642\u306B\u843D\u3068\u3059\u3068\u300C\u5207\u308C\u305F\u300D\u3068\u805E\u3053\u3048\u308B \u2014 1 \u3064\u3060\u3051\u3067\u306F\u8DB3\u308A\u306A\u3044",
       role: "se",
-      note: 'The width narrows while the pitch and the volume fall. All three together read as "cut off"; any one of them alone does not.',
+      desc: 'The width narrows while the pitch and the volume fall. All three together read as "cut off"; any one of them alone does not.',
       wave: "pulse(50)",
       env: "flat",
       duty: [0.5, 0.42, 0.34, 0.27, 0.21, 0.16, 0.12, 0.09, 0.06],
@@ -3696,18 +3767,18 @@ registerProcessor('mmsxx-opm', OpmBank);
     // 全音符くらい置く前提なら、ゆっくり入ってよい。
     // 短い音符で使うと立ち上がりきる前に終わるが、それは使いどころが違うだけ。
     tonePadSwell: {
-      noteJa: "24 \u30D5\u30EC\u30FC\u30E0(0.4 \u79D2)\u304B\u3051\u3066\u97F3\u91CF\u304C\u4E0A\u304C\u308A\u304D\u308B\u3002\u8868\u3067\u4E0A\u3052\u3066\u3044\u308B\u306E\u3067\u3001@e \u3092\u66F8\u3044\u3066\u3082\u5F62\u306F\u5909\u308F\u3089\u306A\u3044 \u2014 \u548C\u97F3\u3068\u3057\u3066\u7F6E\u3044\u305F\u3068\u304D\u306B\u3001\u65CB\u5F8B\u3088\u308A\u9045\u308C\u3066\u5165\u3063\u3066\u304F\u308B\u306E\u304C\u5024\u6253\u3061",
+      descJa: "24 \u30D5\u30EC\u30FC\u30E0(0.4 \u79D2)\u304B\u3051\u3066\u97F3\u91CF\u304C\u4E0A\u304C\u308A\u304D\u308B\u3002\u8868\u3067\u4E0A\u3052\u3066\u3044\u308B\u306E\u3067\u3001@e \u3092\u66F8\u3044\u3066\u3082\u5F62\u306F\u5909\u308F\u3089\u306A\u3044 \u2014 \u548C\u97F3\u3068\u3057\u3066\u7F6E\u3044\u305F\u3068\u304D\u306B\u3001\u65CB\u5F8B\u3088\u308A\u9045\u308C\u3066\u5165\u3063\u3066\u304F\u308B\u306E\u304C\u5024\u6253\u3061",
       role: "chord",
-      note: "The volume climbs over twenty-four frames (0.4s). It is the table doing it, so writing @e does not change the shape \u2014 the point is that it arrives behind the melody when you lay it under one.",
+      desc: "The volume climbs over twenty-four frames (0.4s). It is the table doing it, so writing @e does not change the shape \u2014 the point is that it arrives behind the melody when you lay it under one.",
       wave: "pulse(50)",
       env: "flat",
       vol: [0, 1, 1, 2, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 12, 13, 13, 14, 14, 15, 15, 15, 15],
       loop: { vol: 23 }
     },
     tonePadStrings: {
-      noteJa: "30 \u30D5\u30EC\u30FC\u30E0\u5F85\u3063\u3066\u304B\u3089\u3001\u6D45\u304F\u9577\u304F\u63FA\u308C\u306F\u3058\u3081\u308B\u3002\u5F26\u3092\u4F55\u672C\u3082\u91CD\u306D\u305F\u3068\u304D\u306E\u3046\u306D\u308A\u306B\u5BC4\u305B\u305F\u3082\u306E\u3067\u3001\u4F38\u3070\u3059\u307B\u3069\u52B9\u304F",
+      descJa: "30 \u30D5\u30EC\u30FC\u30E0\u5F85\u3063\u3066\u304B\u3089\u3001\u6D45\u304F\u9577\u304F\u63FA\u308C\u306F\u3058\u3081\u308B\u3002\u5F26\u3092\u4F55\u672C\u3082\u91CD\u306D\u305F\u3068\u304D\u306E\u3046\u306D\u308A\u306B\u5BC4\u305B\u305F\u3082\u306E\u3067\u3001\u4F38\u3070\u3059\u307B\u3069\u52B9\u304F",
       role: "chord",
-      note: "Waits thirty frames, then a shallow slow waver \u2014 the beating of several string players not quite together. The longer you hold it the more it does.",
+      desc: "Waits thirty frames, then a shallow slow waver \u2014 the beating of several string players not quite together. The longer you hold it the more it does.",
       wave: "pulse(25)",
       env: "strings",
       vib: { depth: 3, speed: 4.2, delay: 30 }
@@ -3728,18 +3799,18 @@ registerProcessor('mmsxx-opm', OpmBank);
     // 役は全部 `se`。曲の部品ではないので、声が足りないときは
     // まっさきに譲る側に回る(sound/chipset.js の ROLE_RANK)。
     seCoin: {
-      noteJa: "\u4F4E\u3044\u97F3\u304C 4 \u30D5\u30EC\u30FC\u30E0\u3060\u3051\u9CF4\u3063\u3066\u30015 \u5EA6\u4E0A\u3078\u8DF3\u306D\u3066\u6B8B\u308B\u3002\u53D6\u3063\u305F\u97F3\u306E\u5B9A\u756A\u3067\u3001\u8DF3\u306D\u308B\u524D\u306E\u77ED\u3044\u97F3\u304C\u3042\u308B\u3053\u3068\u304C\u52B9\u3044\u3066\u3044\u308B \u2014 \u4E0A\u306E\u97F3\u3060\u3051\u3067\u306F\u8EFD\u3044",
+      descJa: "\u4F4E\u3044\u97F3\u304C 4 \u30D5\u30EC\u30FC\u30E0\u3060\u3051\u9CF4\u3063\u3066\u30015 \u5EA6\u4E0A\u3078\u8DF3\u306D\u3066\u6B8B\u308B\u3002\u53D6\u3063\u305F\u97F3\u306E\u5B9A\u756A\u3067\u3001\u8DF3\u306D\u308B\u524D\u306E\u77ED\u3044\u97F3\u304C\u3042\u308B\u3053\u3068\u304C\u52B9\u3044\u3066\u3044\u308B \u2014 \u4E0A\u306E\u97F3\u3060\u3051\u3067\u306F\u8EFD\u3044",
       role: "se",
-      note: "Four frames low, then a jump up a fifth that holds. The classic pickup; the short note before the jump is what sells it \u2014 the upper note alone sounds thin.",
+      desc: "Four frames low, then a jump up a fifth that holds. The classic pickup; the short note before the jump is what sells it \u2014 the upper note alone sounds thin.",
       wave: "pulse(25)",
       env: "flat",
       arp: [0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7],
       vol: [15, 15, 15, 15, 15, 15, 14, 13, 11, 9, 6, 3]
     },
     seZap: {
-      noteJa: "6 \u30D5\u30EC\u30FC\u30E0\u3067 2 \u30AA\u30AF\u30BF\u30FC\u30D6\u843D\u3061\u306A\u304C\u3089\u3001\u5E45\u304C\u7D30\u304F\u306A\u308B\u3002\u6483\u3063\u305F\u97F3\u3002\u901F\u304F\u843D\u3061\u304D\u308B\u306E\u3067\u3001\u77ED\u3044\u97F3\u7B26\u3067\u7F6E\u3044\u3066\u3082\u6700\u5F8C\u307E\u3067\u9CF4\u308B",
+      descJa: "6 \u30D5\u30EC\u30FC\u30E0\u3067 2 \u30AA\u30AF\u30BF\u30FC\u30D6\u843D\u3061\u306A\u304C\u3089\u3001\u5E45\u304C\u7D30\u304F\u306A\u308B\u3002\u6483\u3063\u305F\u97F3\u3002\u901F\u304F\u843D\u3061\u304D\u308B\u306E\u3067\u3001\u77ED\u3044\u97F3\u7B26\u3067\u7F6E\u3044\u3066\u3082\u6700\u5F8C\u307E\u3067\u9CF4\u308B",
       role: "se",
-      note: "Two octaves down in six frames while the width narrows \u2014 a shot. It lands fast enough that a short note still hears all of it.",
+      desc: "Two octaves down in six frames while the width narrows \u2014 a shot. It lands fast enough that a short note still hears all of it.",
       wave: "pulse(50)",
       env: "flat",
       pitch: [0, -400, -900, -1500, -2e3, -2400],
@@ -3747,25 +3818,25 @@ registerProcessor('mmsxx-opm', OpmBank);
       vol: [15, 14, 12, 9, 6, 2]
     },
     seRise: {
-      noteJa: "10 \u30D5\u30EC\u30FC\u30E0\u304B\u3051\u3066 1 \u30AA\u30AF\u30BF\u30FC\u30D6\u4E0A\u304C\u308A\u304D\u308B\u3002\u4E0A\u304C\u3063\u305F\u3068\u3053\u308D\u3067\u6B62\u307E\u308B\u306E\u3067\u3001\u6249\u304C\u958B\u304F\u30FB\u529B\u304C\u6E80\u3061\u308B\u3001\u306E\u3088\u3046\u306A\u6E9C\u3081\u306E\u3042\u308B\u3068\u3053\u308D\u306B\u7F6E\u304F",
+      descJa: "10 \u30D5\u30EC\u30FC\u30E0\u304B\u3051\u3066 1 \u30AA\u30AF\u30BF\u30FC\u30D6\u4E0A\u304C\u308A\u304D\u308B\u3002\u4E0A\u304C\u3063\u305F\u3068\u3053\u308D\u3067\u6B62\u307E\u308B\u306E\u3067\u3001\u6249\u304C\u958B\u304F\u30FB\u529B\u304C\u6E80\u3061\u308B\u3001\u306E\u3088\u3046\u306A\u6E9C\u3081\u306E\u3042\u308B\u3068\u3053\u308D\u306B\u7F6E\u304F",
       role: "se",
-      note: "Climbs an octave over ten frames and stops at the top. For things that build \u2014 a door opening, a charge filling.",
+      desc: "Climbs an octave over ten frames and stops at the top. For things that build \u2014 a door opening, a charge filling.",
       wave: "pulse(25)",
       env: "flat",
       pitch: [0, 120, 260, 420, 600, 780, 940, 1080, 1160, 1200]
     },
     seHit: {
-      noteJa: "\u30CE\u30A4\u30BA\u304C 5 \u30D5\u30EC\u30FC\u30E0\u3067\u843D\u3061\u304D\u308B\u3002\u5F53\u305F\u3063\u305F\u97F3\u3002\u30CE\u30A4\u30BA\u306E\u97F3\u8272\u3092\u66FF\u3048\u308C\u3070\u8CEA\u304C\u5909\u308F\u308B \u2014 \u91D1\u5C5E\u306A\u3089 noise(metal) \u3092\u91CD\u306D\u308B",
+      descJa: "\u30CE\u30A4\u30BA\u304C 5 \u30D5\u30EC\u30FC\u30E0\u3067\u843D\u3061\u304D\u308B\u3002\u5F53\u305F\u3063\u305F\u97F3\u3002\u30CE\u30A4\u30BA\u306E\u97F3\u8272\u3092\u66FF\u3048\u308C\u3070\u8CEA\u304C\u5909\u308F\u308B \u2014 \u91D1\u5C5E\u306A\u3089 noise(metal) \u3092\u91CD\u306D\u308B",
       role: "se",
-      note: "Noise gone in five frames \u2014 a hit. Swap the noise underneath and the material changes; layer noise(metal) for something metallic.",
+      desc: "Noise gone in five frames \u2014 a hit. Swap the noise underneath and the material changes; layer noise(metal) for something metallic.",
       wave: "noise",
       env: "flat",
       vol: [15, 12, 8, 4, 1]
     },
     seExplode: {
-      noteJa: "\u30CE\u30A4\u30BA\u304C\u4F4E\u304F\u306A\u308A\u306A\u304C\u3089 20 \u30D5\u30EC\u30FC\u30E0\u304B\u3051\u3066\u6D88\u3048\u308B\u3002\u7206\u767A\u3002\u4E0B\u304C\u308A\u306A\u304C\u3089\u6D88\u3048\u308B\u306E\u304C\u8981\u3067\u3001\u97F3\u91CF\u3060\u3051\u843D\u3068\u3059\u3068\u300C\u5207\u308C\u305F\u300D\u306B\u805E\u3053\u3048\u308B",
+      descJa: "\u30CE\u30A4\u30BA\u304C\u4F4E\u304F\u306A\u308A\u306A\u304C\u3089 20 \u30D5\u30EC\u30FC\u30E0\u304B\u3051\u3066\u6D88\u3048\u308B\u3002\u7206\u767A\u3002\u4E0B\u304C\u308A\u306A\u304C\u3089\u6D88\u3048\u308B\u306E\u304C\u8981\u3067\u3001\u97F3\u91CF\u3060\u3051\u843D\u3068\u3059\u3068\u300C\u5207\u308C\u305F\u300D\u306B\u805E\u3053\u3048\u308B",
       role: "se",
-      note: "Noise falling in pitch as it fades over twenty frames. The fall is the point; fading the volume alone just sounds cut off.",
+      desc: "Noise falling in pitch as it fades over twenty frames. The fall is the point; fading the volume alone just sounds cut off.",
       wave: "noise",
       env: "flat",
       pitch: [
@@ -3793,17 +3864,17 @@ registerProcessor('mmsxx-opm', OpmBank);
       vol: [15, 15, 14, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 4, 3, 2, 2, 1, 1]
     },
     seBlip: {
-      noteJa: "3 \u30D5\u30EC\u30FC\u30E0\u3067\u7D42\u308F\u308B\u7D30\u3044\u97F3\u3002\u30AB\u30FC\u30BD\u30EB\u3092\u52D5\u304B\u3057\u305F\u97F3\u3002\u77ED\u3059\u304E\u308B\u304F\u3089\u3044\u3067\u3061\u3087\u3046\u3069\u3088\u3044 \u2014 \u62BC\u3059\u305F\u3073\u306B\u9CF4\u308B\u3082\u306E\u306A\u306E\u3067",
+      descJa: "3 \u30D5\u30EC\u30FC\u30E0\u3067\u7D42\u308F\u308B\u7D30\u3044\u97F3\u3002\u30AB\u30FC\u30BD\u30EB\u3092\u52D5\u304B\u3057\u305F\u97F3\u3002\u77ED\u3059\u304E\u308B\u304F\u3089\u3044\u3067\u3061\u3087\u3046\u3069\u3088\u3044 \u2014 \u62BC\u3059\u305F\u3073\u306B\u9CF4\u308B\u3082\u306E\u306A\u306E\u3067",
       role: "se",
-      note: "A thin click over in three frames \u2014 a cursor move. Almost too short is right for something that fires on every press.",
+      desc: "A thin click over in three frames \u2014 a cursor move. Almost too short is right for something that fires on every press.",
       wave: "pulse(12)",
       env: "flat",
       vol: [15, 9, 3]
     },
     seJump: {
-      noteJa: "7 \u30D5\u30EC\u30FC\u30E0\u3067 1 \u30AA\u30AF\u30BF\u30FC\u30D6\u4E0A\u304C\u3063\u3066\u3001\u305D\u3053\u3067\u6B62\u307E\u308B\u3002\u8DF3\u3093\u3060\u97F3\u3002\u4E0A\u304C\u308A\u304D\u3063\u3066\u304B\u3089\u4F38\u3070\u3059\u306E\u3067\u3001seRise \u3088\u308A\u901F\u304F\u3001\u77ED\u304F",
+      descJa: "7 \u30D5\u30EC\u30FC\u30E0\u3067 1 \u30AA\u30AF\u30BF\u30FC\u30D6\u4E0A\u304C\u3063\u3066\u3001\u305D\u3053\u3067\u6B62\u307E\u308B\u3002\u8DF3\u3093\u3060\u97F3\u3002\u4E0A\u304C\u308A\u304D\u3063\u3066\u304B\u3089\u4F38\u3070\u3059\u306E\u3067\u3001seRise \u3088\u308A\u901F\u304F\u3001\u77ED\u304F",
       role: "se",
-      note: "Up an octave in seven frames, then holds \u2014 a jump. Faster and shorter than seRise.",
+      desc: "Up an octave in seven frames, then holds \u2014 a jump. Faster and shorter than seRise.",
       wave: "pulse(50)",
       env: "flat",
       pitch: [0, 300, 600, 850, 1050, 1150, 1200],
@@ -3811,9 +3882,9 @@ registerProcessor('mmsxx-opm', OpmBank);
     },
     // 唸る低音。細かく上下させて、うねりを出す
     toneGrowlBass: {
-      noteJa: "\u4E09\u89D2\u6CE2\u306B\u7D30\u304B\u3044\u9AD8\u3055\u306E\u8868\u3092\u56DE\u3057\u3066\u3001\u4F4E\u3044\u3068\u3053\u308D\u3067\u5538\u3089\u305B\u308B",
+      descJa: "\u4E09\u89D2\u6CE2\u306B\u7D30\u304B\u3044\u9AD8\u3055\u306E\u8868\u3092\u56DE\u3057\u3066\u3001\u4F4E\u3044\u3068\u3053\u308D\u3067\u5538\u3089\u305B\u308B",
       role: "bass",
-      note: "Triangle with a small pitch table looping, so the low end beats against itself.",
+      desc: "Triangle with a small pitch table looping, so the low end beats against itself.",
       wave: "triangle",
       env: "flat",
       pitch: [0, 10, 0, -10],
@@ -3821,22 +3892,22 @@ registerProcessor('mmsxx-opm', OpmBank);
     }
   };
   function registerDefaultTones() {
-    const chords = (head) => Object.entries(TONE_PRESETS).filter(([name]) => name.startsWith(head + "(")).map(([name, p]) => ({ value: name.slice(head.length + 1, -1), note: p.note }));
+    const chords = (head) => Object.entries(TONE_PRESETS).filter(([name]) => name.startsWith(head + "(")).map(([name, p]) => ({ value: name.slice(head.length + 1, -1), desc: p.desc }));
     registerFamily("toneArp", {
-      note: "A chord spun one step per frame, the way a machine with few channels fakes harmony.",
+      desc: "A chord spun one step per frame, the way a machine with few channels fakes harmony.",
       params: [{
         name: "chord",
         default: "major",
-        note: "Which chord shape to spin, and on how narrow a pulse.",
+        desc: "Which chord shape to spin, and on how narrow a pulse.",
         values: chords("toneArp")
       }]
     });
     registerFamily("toneArpSlow", {
-      note: "The same chord spins as toneArp at two frames per step, so each note is heard as grain.",
+      desc: "The same chord spins as toneArp at two frames per step, so each note is heard as grain.",
       params: [{
         name: "chord",
         default: "major",
-        note: "Which chord shape to spin, and on how narrow a pulse.",
+        desc: "Which chord shape to spin, and on how narrow a pulse.",
         values: chords("toneArpSlow")
       }]
     });
@@ -3845,30 +3916,46 @@ registerProcessor('mmsxx-opm', OpmBank);
     }
   }
 
-  // player-latest/sound/filter.js
+  // sound/filter.js
   var FILTERS = {
     lowpass: {
-      note: "Two-pole (12 dB/oct) low-pass. Cuts the harmonics above the cutoff. Raise the resonance to add a peak at the cutoff.",
+      desc: "Two-pole (12 dB/oct) low-pass. Cuts the harmonics above the cutoff. Raise the resonance to add a peak at the cutoff.",
       params: {
-        cutoff: { unit: "Hz", min: 20, max: 2e4, default: 2e4, note: "Cutoff frequency in Hz. Above this the sound is cut. Kept below half the sample rate." },
-        resonance: { min: 0, max: 1, default: 0, note: "Peak at the cutoff. 0 is no peak. Near 1 the filter rings at the cutoff." },
-        drive: { min: 0, max: 1, default: 0, note: "Saturation inside the filter. 0 is clean. Higher values squash loud signals and the resonance peak, adding harmonics." }
+        cutoff: { unit: "Hz", min: 20, max: 2e4, default: 2e4, desc: "Cutoff frequency in Hz. Above this the sound is cut. Kept below half the sample rate." },
+        resonance: { min: 0, max: 1, default: 0, desc: "Peak at the cutoff. 0 is no peak. Near 1 the filter rings at the cutoff." },
+        drive: { min: 0, max: 1, default: 0, desc: "Saturation inside the filter. 0 is clean. Higher values squash loud signals and the resonance peak, adding harmonics." }
       }
     },
     highpass: {
-      note: "Two-pole (12 dB/oct) high-pass. Cuts the lows below the cutoff. Raise the resonance to add a peak at the cutoff.",
+      desc: "Two-pole (12 dB/oct) high-pass. Cuts the lows below the cutoff. Raise the resonance to add a peak at the cutoff.",
       params: {
-        cutoff: { unit: "Hz", min: 20, max: 2e4, default: 20, note: "Cutoff frequency in Hz. Below this the sound is cut. Kept below half the sample rate." },
-        resonance: { min: 0, max: 1, default: 0, note: "Peak at the cutoff. 0 is no peak. Near 1 the filter rings at the cutoff." },
-        drive: { min: 0, max: 1, default: 0, note: "Saturation inside the filter. 0 is clean. Higher values squash loud signals and the resonance peak, adding harmonics." }
+        cutoff: { unit: "Hz", min: 20, max: 2e4, default: 20, desc: "Cutoff frequency in Hz. Below this the sound is cut. Kept below half the sample rate." },
+        resonance: { min: 0, max: 1, default: 0, desc: "Peak at the cutoff. 0 is no peak. Near 1 the filter rings at the cutoff." },
+        drive: { min: 0, max: 1, default: 0, desc: "Saturation inside the filter. 0 is clean. Higher values squash loud signals and the resonance peak, adding harmonics." }
+      }
+    },
+    bandpass: {
+      desc: "Two-pole band-pass. Passes only a band around the cutoff. Raise the resonance to narrow the band; its peak stays at the same height.",
+      params: {
+        cutoff: { unit: "Hz", min: 20, max: 2e4, default: 1e3, desc: "Center of the band in Hz. Kept below half the sample rate." },
+        resonance: { min: 0, max: 1, default: 0, desc: "Narrows the band. 0 is wide. Near 1 only a thin slice around the cutoff passes." },
+        drive: { min: 0, max: 1, default: 0, desc: "Saturation inside the filter. 0 is clean. Higher values squash loud signals and add harmonics." }
+      }
+    },
+    notch: {
+      desc: "Two-pole notch. Removes a band around the cutoff and passes everything else.",
+      params: {
+        cutoff: { unit: "Hz", min: 20, max: 2e4, default: 1e3, desc: "Center of the removed band in Hz. Kept below half the sample rate." },
+        resonance: { min: 0, max: 1, default: 0, desc: "Narrows the removed band. 0 is wide. Near 1 only a thin slice is removed." },
+        drive: { min: 0, max: 1, default: 0, desc: "Saturation inside the filter. 0 is clean. Higher values squash loud signals and add harmonics." }
       }
     },
     ladder: {
-      note: "Four-pole (24 dB/oct) low-pass in the style of the Moog ladder. Steeper than lowpass. The bass thins out as the resonance rises.",
+      desc: "Four-pole (24 dB/oct) low-pass in the style of the Moog ladder. Steeper than lowpass. The bass thins out as the resonance rises.",
       params: {
-        cutoff: { unit: "Hz", min: 20, max: 2e4, default: 2e4, note: "Cutoff frequency in Hz. Above this the sound is cut. Kept below half the sample rate." },
-        resonance: { min: 0, max: 1, default: 0, note: "Feedback around the four stages. 0 is no peak. Near 1 the filter rings at the cutoff and the bass gets thinner." },
-        drive: { min: 0, max: 1, default: 0, note: "Saturation at the filter input after the feedback. 0 is clean. Higher values squash loud signals and the resonance peak, adding harmonics." }
+        cutoff: { unit: "Hz", min: 20, max: 2e4, default: 2e4, desc: "Cutoff frequency in Hz. Above this the sound is cut. Kept below half the sample rate." },
+        resonance: { min: 0, max: 1.2, default: 0, desc: "Feedback around the four stages. 0 is no peak. Near 1 the filter rings at the cutoff and the bass gets thinner. Above 1 it oscillates by itself at the cutoff, even with no input." },
+        drive: { min: 0, max: 1, default: 0, desc: "Saturation at the filter input after the feedback. 0 is clean. Higher values squash loud signals and the resonance peak, adding harmonics." }
       }
     }
   };
@@ -3913,6 +4000,7 @@ class Svf {
     this.ic2 = 2 * v2 - this.ic2;
     if (d > D_MIN) { this.ic1 = sat(this.ic1, d); this.ic2 = sat(this.ic2, d); }
     this.low = v2;
+    this.band = v1;
     this.high = x - k * v1 - v2;
   }
 }
@@ -3929,15 +4017,35 @@ class HighPass extends Svf {
   step(x, g, k, d = 0) { this.tick(x, g, k, d); return this.high; }
 }
 
-// \u30E9\u30C0\u30FC\u306E\u5E30\u9084\u30024 \u3067\u767A\u632F\u306E\u5883\u76EE\u3002\u7DDA\u5F62\u306E\u307E\u307E\u3067\u306F\u5883\u76EE\u3067\u632F\u5E45\u304C\u4FDD\u3066\u306A\u3044\u306E\u3067\u624B\u524D\u3067\u6B62\u3081\u308B
+// \u5C71\u306E\u9AD8\u3055\u3092 resonance \u306B\u3088\u3089\u305A 1 \u306B\u305D\u308D\u3048\u305F\u30D0\u30F3\u30C9\u30D1\u30B9\u3002\u5E2F\u306E\u771F\u3093\u4E2D\u3067 k \xD7 band \u304C 1 \u306B\u306A\u308B
+class BandPass extends Svf {
+  static res(r) { return damp(r); }
+  step(x, g, k, d = 0) { this.tick(x, g, k, d); return k * this.band; }
+}
+
+class Notch extends Svf {
+  static res(r) { return damp(r); }
+  step(x, g, k, d = 0) { this.tick(x, g, k, d); return x - k * this.band; }
+}
+
+// \u30E9\u30C0\u30FC\u306E\u5E30\u9084\u30024 \u3067\u767A\u632F\u306E\u5883\u76EE\u3002resonance 1 \u307E\u3067\u306F\u624B\u524D\u3067\u6B62\u3081\u308B(\u7DDA\u5F62\u306E\u307E\u307E)\u3002
+// 1 \u304B\u3089 1.2 \u306F\u767A\u632F\u57DF\u3067\u3001k \u306F K_LADDER \u304B\u3089 K_OSC \u307E\u3067\u4F38\u3073\u308B
 const K_LADDER = 3.96;
+const K_OSC = 4.6;
+const R_OSC = 1.2;
+// \u767A\u632F\u57DF\u3067\u5165\u308C\u308B\u98FD\u548C\u306E\u5F37\u3055\u3002drive \u304C\u3053\u308C\u3088\u308A\u5F31\u304F\u3066\u3082\u3001\u3053\u3053\u307E\u3067\u306F\u639B\u3051\u308B
+const D_OSC = 1;
 
 /** 4 \u6975\u30E9\u30C0\u30FC\u30021 \u6975\u306E\u30ED\u30FC\u30D1\u30B9 4 \u3064\u3068\u3001\u51FA\u53E3\u304B\u3089\u5165\u53E3\u3078\u306E\u5E30\u9084 */
 class Ladder {
-  constructor() { this.s1 = 0; this.s2 = 0; this.s3 = 0; this.s4 = 0; }
-  reset() { this.s1 = 0; this.s2 = 0; this.s3 = 0; this.s4 = 0; }
-  static res(r) { return K_LADDER * Math.min(1, Math.max(0, r)); }
-  /** g = warp(\u30AB\u30C3\u30C8\u30AA\u30D5)\u3001k = \u5E30\u9084\u306E\u5F37\u3055(0..K_LADDER)\u3001d = \u98FD\u548C\u306E\u5F37\u3055 */
+  // \u9CF4\u308A\u51FA\u3059\u304D\u3063\u304B\u3051\u30020 \u306E\u307E\u307E\u3060\u3068\u3001\u5165\u529B\u304C\u7121\u3044\u3068\u304D\u306B\u767A\u632F\u304C\u59CB\u307E\u3089\u306A\u3044
+  constructor() { this.s1 = 1e-5; this.s2 = 0; this.s3 = 0; this.s4 = 0; }
+  reset() { this.s1 = 1e-5; this.s2 = 0; this.s3 = 0; this.s4 = 0; }
+  static res(r) {
+    const x = Math.min(R_OSC, Math.max(0, r));
+    return x <= 1 ? K_LADDER * x : K_LADDER + (K_OSC - K_LADDER) * (x - 1) / (R_OSC - 1);
+  }
+  /** g = warp(\u30AB\u30C3\u30C8\u30AA\u30D5)\u3001k = \u5E30\u9084\u306E\u5F37\u3055(0..K_OSC)\u3001d = \u98FD\u548C\u306E\u5F37\u3055 */
   step(x, g, k, d = 0) {
     const G = g / (1 + g);
     const h = 1 / (1 + g);
@@ -3946,6 +4054,8 @@ class Ladder {
     const G4 = G * G * G * G;
     const y4 = (G4 * x + S) / (1 + k * G4);
     let u = x - k * y4;
+    // \u767A\u632F\u57DF\u3067\u306F\u3001\u632F\u5E45\u3092\u982D\u6253\u3061\u306B\u3059\u308B\u305F\u3081\u306B\u5FC5\u305A\u98FD\u548C\u3092\u5165\u308C\u308B
+    if (k > 4 && d < D_OSC) d = D_OSC;
     if (d > D_MIN) u = sat(u, d);
     // 1 \u6975\u305A\u3064\u9032\u3081\u308B\u3002v = (\u5165\u53E3 - \u72B6\u614B) G\u3001\u51FA\u53E3 = v + \u72B6\u614B\u3001\u6B21\u306E\u72B6\u614B = \u51FA\u53E3 + v
     let v = (u - this.s1) * G; const y1 = v + this.s1; this.s1 = y1 + v;
@@ -3956,18 +4066,20 @@ class Ladder {
   }
 }
 
-const KINDS = { lowpass: LowPass, highpass: HighPass, ladder: Ladder };
+const KINDS = { lowpass: LowPass, highpass: HighPass, ladder: Ladder, bandpass: BandPass, notch: Notch };
 `;
   var FILTER_CODE = `${FILTER_CORE}
 const DEFS = ${JSON.stringify(FILTERS)};
 
 class FilterNode extends AudioWorkletProcessor {
   static get parameterDescriptors() {
-    // \u7BC4\u56F2\u306F\u7A2E\u985E\u3067\u5909\u308F\u3089\u306A\u3044\u306E\u3067 lowpass \u304B\u3089\u53D6\u308B\u3002\u65E2\u5B9A\u5024\u306F kind \u3092\u898B\u3066\u4F5C\u308B\u3068\u304D\u306B\u5165\u308C\u308B
+    // \u7BC4\u56F2\u306F lowpass \u304B\u3089\u53D6\u308B\u3002resonance \u306E\u4E0A\u3060\u3051\u306F\u7A2E\u985E\u3067\u9055\u3046(ladder \u306F\u767A\u632F\u57DF\u307E\u3067\u3042\u308B)\u306E\u3067\u3001
+    // \u3044\u3061\u3070\u3093\u4E0A\u3092\u53D6\u308B\u3002\u65E2\u5B9A\u5024\u306F kind \u3092\u898B\u3066\u4F5C\u308B\u3068\u304D\u306B\u5165\u308C\u308B
     const p = DEFS.lowpass.params;
+    const resMax = Math.max(...Object.values(DEFS).map((f) => f.params.resonance.max));
     return [
       { name: 'cutoff', defaultValue: p.cutoff.default, minValue: p.cutoff.min, maxValue: p.cutoff.max, automationRate: 'a-rate' },
-      { name: 'resonance', defaultValue: p.resonance.default, minValue: p.resonance.min, maxValue: p.resonance.max, automationRate: 'a-rate' },
+      { name: 'resonance', defaultValue: p.resonance.default, minValue: p.resonance.min, maxValue: resMax, automationRate: 'a-rate' },
       { name: 'drive', defaultValue: p.drive.default, minValue: p.drive.min, maxValue: p.drive.max, automationRate: 'a-rate' },
     ];
   }
@@ -4008,15 +4120,193 @@ class FilterNode extends AudioWorkletProcessor {
 registerProcessor('mmsxx-filter', FilterNode);
 `;
 
-  // player-latest/sound/mml.js
+  // sound/fx.js
+  var ECHO_NODE = "mmsxx-echo";
+  var ECHO_MAX = 2;
+  var MASTER_FX = {
+    echo: {
+      desc: "Echo. The sound comes back again and again, a little darker each time, like a tape or analog delay.",
+      params: {
+        time: { unit: "s", min: 0.01, max: ECHO_MAX, default: 0.25, desc: "Seconds between repeats. It does not follow the tempo, so work it out from the tempo: an eighth note at 120 BPM is 0.25." },
+        feedback: { min: 0, max: 0.95, default: 0.4, desc: "How much of each repeat goes round again. 0 gives a single repeat. Near 0.95 the repeats last a long time." },
+        mix: { min: 0, max: 1, default: 0.3, desc: "How loud the repeats are against the dry sound. The dry sound stays at full level." },
+        tone: { unit: "Hz", min: 200, max: 2e4, default: 4e3, desc: "Cutoff of a gentle low-pass inside the loop. Every repeat passes it again, so the repeats grow darker one by one." },
+        cross: { min: 0, max: 1, default: 0, desc: "How much of each repeat moves to the other side. 0 keeps every repeat where the sound was. 1 is a ping-pong echo: the repeats bounce left, right, left. The repeats keep the same loudness heard in stereo; summed to mono they get up to 3 dB quieter at 1. A mono sound is spread to both sides first. When the output is mono, it does nothing." }
+      }
+    },
+    reverb: {
+      desc: "Reverb. The ring of a room after the sound, made from noise that fades away.",
+      params: {
+        time: { unit: "s", min: 0.1, max: 10, default: 1.5, desc: "Seconds for the ring to fade by 60 dB. Small rooms are under 1, halls are 2 or more." },
+        mix: { min: 0, max: 1, default: 0.2, desc: "How loud the ring is against the dry sound. The dry sound stays at full level." }
+      }
+    }
+  };
+  var FX_COST = {
+    lowpass: 0.029,
+    highpass: 0.045,
+    bandpass: 0.129,
+    notch: 0.192,
+    ladder: 0.12,
+    echo: 0.032,
+    reverb: { base: 0.46, perSec: 0.24 }
+  };
+  function fxCost(fx) {
+    const c = FX_COST[fx && fx.kind];
+    if (c === void 0) return 0;
+    if (typeof c === "number") return c;
+    return c.base + c.perSec * (Number(fx.time) || 0);
+  }
+  var REVERB_SEED = 24301;
+  function fill(def, fx) {
+    const out = { kind: fx.kind };
+    for (const [name, p] of Object.entries(def.params)) {
+      const x = Number(fx[name]);
+      out[name] = Number.isFinite(x) ? Math.min(p.max, Math.max(p.min, x)) : p.default;
+    }
+    return out;
+  }
+  function normalizeFx(list, filters) {
+    if (!Array.isArray(list)) throw new Error("master effects: pass an array");
+    return list.map((fx) => {
+      const kind = fx && fx.kind;
+      const def = MASTER_FX[kind] || filters[kind];
+      if (!def) throw new Error(`master effects: unknown kind "${kind}"`);
+      return fill(def, fx);
+    });
+  }
+  function fxTail(list) {
+    let sum = 0;
+    for (const fx of list) {
+      if (fx.kind === "echo") {
+        sum += fx.time * (1 + Math.ceil(Math.log(1e-3) / Math.log(Math.max(0.01, fx.feedback))));
+      } else if (fx.kind === "reverb") {
+        sum += fx.time;
+      }
+    }
+    return sum;
+  }
+  function reverbImpulse(ctx, time) {
+    const rate = ctx.sampleRate;
+    const len = Math.max(1, Math.round(time * rate));
+    const buf = ctx.createBuffer(2, len, rate);
+    let x = REVERB_SEED;
+    const rand = () => {
+      x ^= x << 13;
+      x >>>= 0;
+      x ^= x >>> 17;
+      x ^= x << 5;
+      x >>>= 0;
+      return x / 4294967296 * 2 - 1;
+    };
+    const k = -6.91 / len;
+    for (let c = 0; c < 2; c++) {
+      const d = buf.getChannelData(c);
+      let sq = 0;
+      for (let i = 0; i < len; i++) {
+        d[i] = rand() * Math.exp(k * i);
+        sq += d[i] * d[i];
+      }
+      const g = 1 / Math.sqrt(sq || 1);
+      for (let i = 0; i < len; i++) d[i] *= g;
+    }
+    return buf;
+  }
+  var ECHO_CODE = `
+const ECHO_MAX = ${ECHO_MAX};
+class Echo extends AudioWorkletProcessor {
+  constructor(o) {
+    super();
+    const p = (o && o.processorOptions) || {};
+    this.len = Math.max(1, Math.round((p.time || 0.25) * sampleRate));
+    this.fb = p.feedback || 0;
+    this.mix = p.mix || 0;
+    this.cross = p.cross || 0;
+    this.lift = this.cross * Math.SQRT1_2;
+    // \u30EB\u30FC\u30D7\u306E\u4E2D\u306E 1 \u6B21\u306E\u30ED\u30FC\u30D1\u30B9\u30021 \u30B5\u30F3\u30D7\u30EB\u3067\u5BC4\u308B\u91CF
+    this.g = 1 - Math.exp(-2 * Math.PI * (p.tone || 20000) / sampleRate);
+    this.n = Math.ceil(ECHO_MAX * sampleRate) + 4;
+    this.bufs = [];
+    this.zs = [];
+    this.w = 0;
+    this.alive = true;
+    this.port.onmessage = (e) => { if (e.data && e.data.stop) this.alive = false; };
+  }
+  process(inputs, outputs) {
+    if (!this.alive) return false;
+    const inp = inputs[0], out = outputs[0];
+    const n = this.n;
+    // \u53CD\u5BFE\u5074\u3078\u56DE\u3059\u306E\u306F\u5DE6\u53F3\u304C\u63C3\u3063\u3066\u3044\u308B\u3068\u304D\u3060\u3051\u3002\u30E2\u30CE\u30E9\u30EB\u3067\u306F\u56DE\u3059\u5148\u304C\u7121\u3044
+    if (this.cross > 0 && out.length === 2) return this.pingPong(inp, out);
+    let w = this.w;
+    for (let c = 0; c < out.length; c++) {
+      if (!this.bufs[c]) { this.bufs[c] = new Float32Array(n); this.zs[c] = 0; }
+      const buf = this.bufs[c];
+      const x = inp[c] || inp[0];
+      const y = out[c];
+      let z = this.zs[c];
+      w = this.w;
+      for (let i = 0; i < y.length; i++) {
+        const xi = x ? x[i] : 0;
+        const r = buf[(w - this.len + n) % n];
+        z += (r - z) * this.g;
+        buf[w] = xi + z * this.fb;
+        y[i] = xi + z * this.mix;
+        w = (w + 1) % n;
+      }
+      this.zs[c] = z;
+    }
+    this.w = w;
+    return true;
+  }
+  // \u5DE6\u53F3\u306E\u9045\u308C\u7DDA\u3092\u4EA4\u5DEE\u3055\u305B\u308B\u3002\u5165\u308B\u97F3\u306F cross \u306E\u3076\u3093\u5DE6\u306E\u7DDA\u3078\u5BC4\u305B\u3001
+  // \u8FD4\u308A\u306F cross \u306E\u3076\u3093\u53CD\u5BFE\u5074\u306E\u7DDA\u3078\u6E21\u3059\u3002cross \u304C 1 \u306A\u3089\u6700\u521D\u306E\u8FD4\u308A\u304C\u5DE6\u3001
+  // \u6B21\u304C\u53F3\u3001\u3068\u4EA4\u4E92\u306B\u306A\u308B\u3002
+  //
+  // \u5BC4\u305B\u308B\u3068\u304D\u306F\u5DE6\u53F3\u306E\u548C\u3092 \u221A2 \u3067\u5272\u308B\u3002\u4E2D\u592E\u306E\u97F3\u3092\u7247\u5074\u3078\u307E\u3068\u3081\u308B\u3068\u3001
+  // \u305D\u306E\u307E\u307E\u3067\u306F\u8FD4\u308A\u304C 3dB \u5927\u304D\u304F\u805E\u3053\u3048\u308B\u3002\u5DE6\u53F3\u306E\u548C(\u30E2\u30CE\u30E9\u30EB)\u3067\u63C3\u3048\u308B\u304B\u3001
+  // \u5DE6\u53F3\u3067\u805E\u3044\u305F\u3068\u304D\u306E\u5927\u304D\u3055\u3067\u63C3\u3048\u308B\u304B\u306E 2 \u629E\u3067\u3001\u30B9\u30C6\u30EC\u30AA\u3067\u805E\u304F\u305F\u3081\u306E\u3082\u306E\u306A\u306E\u3067\u5F8C\u8005\u306B\u3057\u305F\u3002
+  // \u305D\u306E\u3076\u3093\u30E2\u30CE\u30E9\u30EB\u306B\u7573\u3080\u3068\u3001cross 1 \u3067\u8FD4\u308A\u304C 3dB \u5C0F\u3055\u304F\u306A\u308B
+  pingPong(inp, out) {
+    const n = this.n, k = this.cross;
+    for (let c = 0; c < 2; c++) {
+      if (!this.bufs[c]) { this.bufs[c] = new Float32Array(n); this.zs[c] = 0; }
+    }
+    const bl = this.bufs[0], br = this.bufs[1];
+    const xl = inp[0], xr = inp[1] || inp[0];
+    const yl = out[0], yr = out[1];
+    let zl = this.zs[0], zr = this.zs[1];
+    let w = this.w;
+    for (let i = 0; i < yl.length; i++) {
+      const a = xl ? xl[i] : 0, b = xr ? xr[i] : 0;
+      const at = (w - this.len + n) % n;
+      zl += (bl[at] - zl) * this.g;
+      zr += (br[at] - zr) * this.g;
+      bl[w] = a * (1 - k) + (a + b) * this.lift + (zl * (1 - k) + zr * k) * this.fb;
+      br[w] = b * (1 - k) + (zr * (1 - k) + zl * k) * this.fb;
+      yl[i] = a + zl * this.mix;
+      yr[i] = b + zr * this.mix;
+      w = (w + 1) % n;
+    }
+    this.zs[0] = zl; this.zs[1] = zr;
+    this.w = w;
+    return true;
+  }
+}
+registerProcessor('${ECHO_NODE}', Echo);
+`;
+
+  // sound/mml.js
+  var FX_KINDS = { ...FILTERS, ...MASTER_FX };
+  var FX_WARN_COST = 10;
   var SEMI = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 };
   var LETTER = { c: 0, d: 1, e: 2, f: 3, g: 4, a: 5, b: 6 };
   var LETTER_OF_SEMI = { 0: 0, 2: 1, 4: 2, 5: 3, 7: 4, 9: 5, 11: 6 };
   var TUNINGS = {
     equal: {
       cents: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1e3, 1100],
-      note: "Twelve equal steps. The default, and what almost every chiptune uses.",
-      noteJa: "12 \u5E73\u5747\u5F8B\u3002\u65E2\u5B9A\u3002\u3075\u3064\u3046\u306E\u66F2\u306F\u3053\u308C\u3067\u3059\u3002"
+      desc: "Twelve equal steps. The default, and what almost every chiptune uses.",
+      descJa: "12 \u5E73\u5747\u5F8B\u3002\u65E2\u5B9A\u3002\u3075\u3064\u3046\u306E\u66F2\u306F\u3053\u308C\u3067\u3059\u3002"
     },
     pure: {
       // 5 限の純正律。1/1 16/15 9/8 6/5 5/4 4/3 45/32 3/2 8/5 5/3 9/5 15/8
@@ -4034,8 +4324,8 @@ registerProcessor('mmsxx-filter', FilterNode);
         1017.6,
         1088.27
       ],
-      note: "Five-limit just intonation. Thirds and fifths lock; distant keys do not.",
-      noteJa: "\u7D14\u6B63\u5F8B(5 \u9650)\u30023 \u5EA6\u3068 5 \u5EA6\u304C\u3074\u305F\u308A\u3068\u5408\u3044\u307E\u3059\u3002\u9060\u3044\u8ABF\u3078\u56DE\u3059\u3068\u6FC1\u308A\u307E\u3059\u3002"
+      desc: "Five-limit just intonation. Thirds and fifths lock; distant keys do not.",
+      descJa: "\u7D14\u6B63\u5F8B(5 \u9650)\u30023 \u5EA6\u3068 5 \u5EA6\u304C\u3074\u305F\u308A\u3068\u5408\u3044\u307E\u3059\u3002\u9060\u3044\u8ABF\u3078\u56DE\u3059\u3068\u6FC1\u308A\u307E\u3059\u3002"
     },
     pythagorean: {
       // 5 度(3/2)を積んで作る。3 度が広い
@@ -4053,8 +4343,8 @@ registerProcessor('mmsxx-filter', FilterNode);
         996.09,
         1109.78
       ],
-      note: "Built from stacked perfect fifths. Wide, bright thirds.",
-      noteJa: "\u30D4\u30BF\u30B4\u30E9\u30B9\u97F3\u5F8B\u30025 \u5EA6\u3092\u7A4D\u3093\u3067\u4F5C\u308A\u307E\u3059\u30023 \u5EA6\u304C\u5E83\u304F\u3001\u660E\u308B\u304F\u5F35\u308A\u307E\u3059\u3002"
+      desc: "Built from stacked perfect fifths. Wide, bright thirds.",
+      descJa: "\u30D4\u30BF\u30B4\u30E9\u30B9\u97F3\u5F8B\u30025 \u5EA6\u3092\u7A4D\u3093\u3067\u4F5C\u308A\u307E\u3059\u30023 \u5EA6\u304C\u5E83\u304F\u3001\u660E\u308B\u304F\u5F35\u308A\u307E\u3059\u3002"
     },
     "meantone:quarter": {
       // 1/4 コンマ中全音。5 度を狭めて 3 度を純正に寄せる
@@ -4072,8 +4362,8 @@ registerProcessor('mmsxx-filter', FilterNode);
         1006.84,
         1082.89
       ],
-      note: "Quarter-comma meantone. Pure thirds, narrow fifths, a wolf you must avoid.",
-      noteJa: "\u4E2D\u5168\u97F3(1/4 \u30B3\u30F3\u30DE)\u30023 \u5EA6\u304C\u7D14\u6B63\u3067\u30015 \u5EA6\u304C\u72ED\u304F\u306A\u308A\u307E\u3059\u3002\u4F7F\u3048\u306A\u3044\u8ABF\u304C\u51FA\u307E\u3059\u3002"
+      desc: "Quarter-comma meantone. Pure thirds, narrow fifths, a wolf you must avoid.",
+      descJa: "\u4E2D\u5168\u97F3(1/4 \u30B3\u30F3\u30DE)\u30023 \u5EA6\u304C\u7D14\u6B63\u3067\u30015 \u5EA6\u304C\u72ED\u304F\u306A\u308A\u307E\u3059\u3002\u4F7F\u3048\u306A\u3044\u8ABF\u304C\u51FA\u307E\u3059\u3002"
     },
     "meantone:sixth": {
       // 1/6 コンマ。1/4 より 5 度の狭めかたがゆるい
@@ -4091,32 +4381,32 @@ registerProcessor('mmsxx-filter', FilterNode);
         1003.26,
         1091.85
       ],
-      note: "Sixth-comma meantone. A gentler compromise than quarter-comma.",
-      noteJa: "\u4E2D\u5168\u97F3(1/6 \u30B3\u30F3\u30DE)\u30021/4 \u3088\u308A\u7A4F\u3084\u304B\u3067\u3001\u4F7F\u3048\u308B\u8ABF\u304C\u5E83\u304C\u308A\u307E\u3059\u3002"
+      desc: "Sixth-comma meantone. A gentler compromise than quarter-comma.",
+      descJa: "\u4E2D\u5168\u97F3(1/6 \u30B3\u30F3\u30DE)\u30021/4 \u3088\u308A\u7A4F\u3084\u304B\u3067\u3001\u4F7F\u3048\u308B\u8ABF\u304C\u5E83\u304C\u308A\u307E\u3059\u3002"
     },
     slendro: {
       // ジャワ・バリの 5 音。5 等分に近い。楽団ごとの差は小さい
       cents: [0, 240, 480, 720, 960],
-      note: "Javanese slendro, five nearly equal steps. Values are a representative set.",
-      noteJa: "\u30B9\u30EC\u30F3\u30C9\u30ED\u3002\u307B\u307C 5 \u7B49\u5206\u306E 5 \u97F3\u3067\u3059\u3002\u5024\u306F\u4EE3\u8868\u7684\u306A\u3082\u306E\u3067\u3059\u3002"
+      desc: "Javanese slendro, five nearly equal steps. Values are a representative set.",
+      descJa: "\u30B9\u30EC\u30F3\u30C9\u30ED\u3002\u307B\u307C 5 \u7B49\u5206\u306E 5 \u97F3\u3067\u3059\u3002\u5024\u306F\u4EE3\u8868\u7684\u306A\u3082\u306E\u3067\u3059\u3002"
     },
     pelog: {
       // ジャワの 7 音。段の幅がばらばらなのがこの音階の顔
       cents: [0, 120, 270, 540, 670, 785, 950],
-      note: "Javanese pelog, seven uneven steps. Values are a representative set.",
-      noteJa: "\u30DA\u30ED\u30C3\u30B0\u3002\u6BB5\u306E\u5E45\u304C\u4E0D\u63C3\u3044\u306A 7 \u97F3\u3067\u3059\u3002\u5024\u306F\u4EE3\u8868\u7684\u306A\u3082\u306E\u3067\u3059\u3002"
+      desc: "Javanese pelog, seven uneven steps. Values are a representative set.",
+      descJa: "\u30DA\u30ED\u30C3\u30B0\u3002\u6BB5\u306E\u5E45\u304C\u4E0D\u63C3\u3044\u306A 7 \u97F3\u3067\u3059\u3002\u5024\u306F\u4EE3\u8868\u7684\u306A\u3082\u306E\u3067\u3059\u3002"
     },
     "pelog:bem": {
       // 7 音のうち 1 2 3 5 6 を使う旋法
       cents: [0, 120, 270, 670, 785],
-      note: "Pelog bem: the five degrees a Javanese piece in bem actually uses.",
-      noteJa: "\u30DA\u30ED\u30C3\u30B0\u306E\u30D6\u30E0\u30027 \u97F3\u306E\u3046\u3061\u5B9F\u969B\u306B\u4F7F\u3046 5 \u3064\u3060\u3051\u3092\u4E26\u3079\u305F\u3082\u306E\u3067\u3059\u3002"
+      desc: "Pelog bem: the five degrees a Javanese piece in bem actually uses.",
+      descJa: "\u30DA\u30ED\u30C3\u30B0\u306E\u30D6\u30E0\u30027 \u97F3\u306E\u3046\u3061\u5B9F\u969B\u306B\u4F7F\u3046 5 \u3064\u3060\u3051\u3092\u4E26\u3079\u305F\u3082\u306E\u3067\u3059\u3002"
     },
     "pelog:barang": {
       // 2 3 5 6 7 を使う旋法。ブムと 2 音が入れ替わる
       cents: [0, 150, 550, 665, 830],
-      note: "Pelog barang: the other five-degree mode, two tones apart from bem.",
-      noteJa: "\u30DA\u30ED\u30C3\u30B0\u306E\u30D0\u30E9\u30F3\u3002\u30D6\u30E0\u3068\u306F 2 \u97F3\u304C\u5165\u308C\u66FF\u308F\u308A\u307E\u3059\u3002"
+      desc: "Pelog barang: the other five-degree mode, two tones apart from bem.",
+      descJa: "\u30DA\u30ED\u30C3\u30B0\u306E\u30D0\u30E9\u30F3\u3002\u30D6\u30E0\u3068\u306F 2 \u97F3\u304C\u5165\u308C\u66FF\u308F\u308A\u307E\u3059\u3002"
     }
   };
   function readTuning(text) {
@@ -4169,8 +4459,8 @@ registerProcessor('mmsxx-filter', FilterNode);
       duty: 0.125,
       role: "lead",
       dev: ["done"],
-      noteJa: "\u5E45 12.5% \u306E\u77E9\u5F62\u6CE2\u3002\u30D7\u30EA\u30BB\u30C3\u30C8\u306E\u77E9\u5F62\u6CE2 3 \u3064\u306E\u3046\u3061\u3044\u3061\u3070\u3093\u7D30\u304F\u3001\u9F3B\u306B\u304B\u304B\u3063\u3066\u524D\u3078\u51FA\u308B\u3002\u30D5\u30A1\u30DF\u30B3\u30F3\u306E\u30EA\u30FC\u30C9\u306E\u97F3",
-      note: "Pulse at 12.5% duty. The thinnest of the three built-ins \u2014 nasal and cutting, the classic NES lead."
+      descJa: "\u5E45 12.5% \u306E\u77E9\u5F62\u6CE2\u3002\u30D7\u30EA\u30BB\u30C3\u30C8\u306E\u77E9\u5F62\u6CE2 3 \u3064\u306E\u3046\u3061\u3044\u3061\u3070\u3093\u7D30\u304F\u3001\u9F3B\u306B\u304B\u304B\u3063\u3066\u524D\u3078\u51FA\u308B\u3002\u30D5\u30A1\u30DF\u30B3\u30F3\u306E\u30EA\u30FC\u30C9\u306E\u97F3",
+      desc: "Pulse at 12.5% duty. The thinnest of the three built-ins \u2014 nasal and cutting, the classic NES lead."
     },
     // ファミコン風 12.5%
     {
@@ -4180,8 +4470,8 @@ registerProcessor('mmsxx-filter', FilterNode);
       duty: 0.25,
       role: "lead",
       dev: ["done"],
-      noteJa: "\u5E45 25%\u300212.5% \u3088\u308A\u592A\u3044\u304C\u3001\u307E\u3060\u306F\u3063\u304D\u308A\u7D30\u3044\u3002\u3044\u3061\u3070\u3093\u4F7F\u3044\u51FA\u306E\u3042\u308B\u97F3",
-      note: "Pulse at 25% duty. Fuller than 12.5% but still clearly reedy. The most common all-round chip voice."
+      descJa: "\u5E45 25%\u300212.5% \u3088\u308A\u592A\u3044\u304C\u3001\u307E\u3060\u306F\u3063\u304D\u308A\u7D30\u3044\u3002\u3044\u3061\u3070\u3093\u4F7F\u3044\u51FA\u306E\u3042\u308B\u97F3",
+      desc: "Pulse at 25% duty. Fuller than 12.5% but still clearly reedy. The most common all-round chip voice."
     },
     // ファミコン風 25%
     {
@@ -4192,8 +4482,8 @@ registerProcessor('mmsxx-filter', FilterNode);
       role: "lead",
       // `pulse` だけで呼べば矩形波。幅を書かなければ 50%(仲間の既定)
       dev: ["done"],
-      noteJa: "\u305F\u3060\u306E\u77E9\u5F62\u6CE2(\u5E45 50%)\u3002\u4E2D\u304C\u7A7A\u3044\u305F\u3001\u4E0A\u3068\u4E0B\u306E\u540C\u3058\u97F3\u3002MSX \u306E PSG \u306F\u3053\u308C\u3057\u304B\u51FA\u305B\u306A\u3044\u306E\u3067\u3001\u3042\u306E\u6A5F\u68B0\u306E\u97F3\u305D\u306E\u3082\u306E",
-      note: "Square wave (50% duty). Hollow and even. The only pulse an AY-3-8910 can make, so this is the MSX/ZX sound."
+      descJa: "\u305F\u3060\u306E\u77E9\u5F62\u6CE2(\u5E45 50%)\u3002\u4E2D\u304C\u7A7A\u3044\u305F\u3001\u4E0A\u3068\u4E0B\u306E\u540C\u3058\u97F3\u3002MSX \u306E PSG \u306F\u3053\u308C\u3057\u304B\u51FA\u305B\u306A\u3044\u306E\u3067\u3001\u3042\u306E\u6A5F\u68B0\u306E\u97F3\u305D\u306E\u3082\u306E",
+      desc: "Square wave (50% duty). Hollow and even. The only pulse an AY-3-8910 can make, so this is the MSX/ZX sound."
     },
     // ファミコン/MSX 50%
     // 75% は 25% と上下が逆なだけで同じ音に聞こえるので置かない
@@ -4202,8 +4492,8 @@ registerProcessor('mmsxx-filter', FilterNode);
       name: "triangle",
       kind: "triangle",
       role: "bass",
-      noteJa: "\u4E09\u89D2\u6CE2\u3002\u4E38\u304F\u3066\u500D\u97F3\u304C\u5C11\u306A\u3044\u3002\u30D5\u30A1\u30DF\u30B3\u30F3\u306E\u5B9F\u6A5F\u3067\u306F\u3001\u3053\u306E\u58F0\u3060\u3051\u97F3\u91CF\u3064\u307E\u307F\u304C\u7121\u304B\u3063\u305F",
-      note: "Triangle. Rounded, few harmonics. On real NES hardware this channel has no volume control at all."
+      descJa: "\u4E09\u89D2\u6CE2\u3002\u4E38\u304F\u3066\u500D\u97F3\u304C\u5C11\u306A\u3044\u3002\u30D5\u30A1\u30DF\u30B3\u30F3\u306E\u5B9F\u6A5F\u3067\u306F\u3001\u3053\u306E\u58F0\u3060\u3051\u97F3\u91CF\u3064\u307E\u307F\u304C\u7121\u304B\u3063\u305F",
+      desc: "Triangle. Rounded, few harmonics. On real NES hardware this channel has no volume control at all."
     },
     // 三角波
     {
@@ -4211,8 +4501,8 @@ registerProcessor('mmsxx-filter', FilterNode);
       name: "saw",
       kind: "saw",
       role: "lead",
-      noteJa: "\u306E\u3053\u304E\u308A\u6CE2\u3002\u500D\u97F3\u304C\u5168\u90E8\u305D\u308D\u3063\u3066\u3044\u308B\u306E\u3067\u3001\u3056\u3089\u3064\u3044\u3066\u660E\u308B\u3044",
-      note: "Plain sawtooth ramp. Buzzy and bright; every harmonic is present."
+      descJa: "\u306E\u3053\u304E\u308A\u6CE2\u3002\u500D\u97F3\u304C\u5168\u90E8\u305D\u308D\u3063\u3066\u3044\u308B\u306E\u3067\u3001\u3056\u3089\u3064\u3044\u3066\u660E\u308B\u3044",
+      desc: "Plain sawtooth ramp. Buzzy and bright; every harmonic is present."
     },
     // ノコギリ波
     {
@@ -4220,8 +4510,8 @@ registerProcessor('mmsxx-filter', FilterNode);
       name: "sine",
       kind: "sine",
       role: "bass",
-      noteJa: "\u30B5\u30A4\u30F3\u6CE2\u3002\u500D\u97F3\u304C\u307E\u3063\u305F\u304F\u7121\u3044\u30021 \u672C\u3060\u3051\u3060\u3068\u7D20\u3063\u6C17\u306A\u3044\u304C\u3001\u4F4E\u3044\u3068\u3053\u308D\u3084\u4ED6\u306E\u97F3\u306E\u4E0B\u306B\u6577\u304F\u3068\u52B9\u304F",
-      note: "Sine. No harmonics at all \u2014 plain to the point of being characterless on its own, useful as a sub or under other voices."
+      descJa: "\u30B5\u30A4\u30F3\u6CE2\u3002\u500D\u97F3\u304C\u307E\u3063\u305F\u304F\u7121\u3044\u30021 \u672C\u3060\u3051\u3060\u3068\u7D20\u3063\u6C17\u306A\u3044\u304C\u3001\u4F4E\u3044\u3068\u3053\u308D\u3084\u4ED6\u306E\u97F3\u306E\u4E0B\u306B\u6577\u304F\u3068\u52B9\u304F",
+      desc: "Sine. No harmonics at all \u2014 plain to the point of being characterless on its own, useful as a sub or under other voices."
     },
     // サイン波
     {
@@ -4229,8 +4519,8 @@ registerProcessor('mmsxx-filter', FilterNode);
       name: "noise(white)",
       kind: "noise",
       role: "noise",
-      noteJa: "\u30CE\u30A4\u30BA\u3002\u97F3\u7A0B\u306F\u7121\u3044\u304C\u3001\u66F8\u3044\u305F\u9AD8\u3055\u3067\u7C97\u3055\u304C\u5909\u308F\u308B\u3002\u6253\u697D\u5668\u3068\u52B9\u679C\u97F3\u306B\u4F7F\u3046",
-      note: "White noise. No pitch as such, though the note still changes how coarse it sounds. Used for drums and effects."
+      descJa: "\u30CE\u30A4\u30BA\u3002\u97F3\u7A0B\u306F\u7121\u3044\u304C\u3001\u66F8\u3044\u305F\u9AD8\u3055\u3067\u7C97\u3055\u304C\u5909\u308F\u308B\u3002\u6253\u697D\u5668\u3068\u52B9\u679C\u97F3\u306B\u4F7F\u3046",
+      desc: "White noise. No pitch as such, though the note still changes how coarse it sounds. Used for drums and effects."
     }
     // ノイズ
   ];
@@ -4238,47 +4528,47 @@ registerProcessor('mmsxx-filter', FilterNode);
     "noise(metal)": {
       bits: 7,
       role: "noise",
-      noteJa: "\u77ED\u3044\u8F2A\u3092\u56DE\u3059\u30CE\u30A4\u30BA\u3002\u7E70\u308A\u8FD4\u3057\u304C\u97F3\u7A0B\u3068\u3057\u3066\u805E\u3053\u3048\u308B\u306E\u3067\u3001\u7802\u3067\u306F\u306A\u304F\u91D1\u5C5E\u8CEA\u306E\u30D6\u30B6\u30FC\u306B\u306A\u308B\u3002\u30D5\u30A1\u30DF\u30B3\u30F3\u306E\u77ED\u5468\u671F\u30FBSN76489 \u306E\u5468\u671F\u30CE\u30A4\u30BA\u30FB\u30B2\u30FC\u30E0\u30DC\u30FC\u30A4\u306E 7 \u6BB5\u304C\u3053\u308C",
-      note: "Noise on a short loop, so the repeat itself is audible as pitch \u2014 a metallic buzz rather than sand. The NES short mode, the SN76489 periodic noise and the Game Boy 7-bit mode are all this."
+      descJa: "\u77ED\u3044\u8F2A\u3092\u56DE\u3059\u30CE\u30A4\u30BA\u3002\u7E70\u308A\u8FD4\u3057\u304C\u97F3\u7A0B\u3068\u3057\u3066\u805E\u3053\u3048\u308B\u306E\u3067\u3001\u7802\u3067\u306F\u306A\u304F\u91D1\u5C5E\u8CEA\u306E\u30D6\u30B6\u30FC\u306B\u306A\u308B\u3002\u30D5\u30A1\u30DF\u30B3\u30F3\u306E\u77ED\u5468\u671F\u30FBSN76489 \u306E\u5468\u671F\u30CE\u30A4\u30BA\u30FB\u30B2\u30FC\u30E0\u30DC\u30FC\u30A4\u306E 7 \u6BB5\u304C\u3053\u308C",
+      desc: "Noise on a short loop, so the repeat itself is audible as pitch \u2014 a metallic buzz rather than sand. The NES short mode, the SN76489 periodic noise and the Game Boy 7-bit mode are all this."
     },
     "noise(hiss)": {
       rate: 2.5,
       role: "noise",
-      noteJa: "\u540C\u3058\u767D\u3044\u30CE\u30A4\u30BA\u3092\u901F\u304F\u56DE\u3057\u305F\u3082\u306E\u3002\u7D30\u304B\u304F\u3066\u660E\u308B\u3044\u3002\u30B7\u30F3\u30D0\u30EB\u3068\u98A8",
-      note: "The same white noise run faster: finer and brighter. Cymbals and wind."
+      descJa: "\u540C\u3058\u767D\u3044\u30CE\u30A4\u30BA\u3092\u901F\u304F\u56DE\u3057\u305F\u3082\u306E\u3002\u7D30\u304B\u304F\u3066\u660E\u308B\u3044\u3002\u30B7\u30F3\u30D0\u30EB\u3068\u98A8",
+      desc: "The same white noise run faster: finer and brighter. Cymbals and wind."
     },
     "noise(rumble)": {
       rate: 0.3,
       role: "noise",
-      noteJa: "\u540C\u3058\u767D\u3044\u30CE\u30A4\u30BA\u3092\u9045\u304F\u56DE\u3057\u305F\u3082\u306E\u3002\u7C92\u304C\u7C97\u304F\u3001\u4F4E\u3044\u3068\u3053\u308D\u304C\u539A\u3044\u3002\u7206\u767A\u3068\u5730\u97FF\u304D",
-      note: "The same white noise run slower: coarse grain with weight underneath. Explosions and rumble."
+      descJa: "\u540C\u3058\u767D\u3044\u30CE\u30A4\u30BA\u3092\u9045\u304F\u56DE\u3057\u305F\u3082\u306E\u3002\u7C92\u304C\u7C97\u304F\u3001\u4F4E\u3044\u3068\u3053\u308D\u304C\u539A\u3044\u3002\u7206\u767A\u3068\u5730\u97FF\u304D",
+      desc: "The same white noise run slower: coarse grain with weight underneath. Explosions and rumble."
     }
   };
   function registerCoreFamilies() {
     registerFamily("pulse", {
-      note: "Pulse wave with a fixed duty cycle. For a width that moves, use a tone with a duty table.",
+      desc: "Pulse wave with a fixed duty cycle. For a width that moves, use a tone with a duty table.",
       params: [{
         name: "width",
         default: "50",
-        note: "Share of each cycle spent high, in percent. 75% sounds the same as 25%, so it is not offered.",
+        desc: "Share of each cycle spent high, in percent. 75% sounds the same as 25%, so it is not offered.",
         values: [
-          { value: "12", note: "12.5%. The thinnest built-in pulse: nasal and cutting, the classic NES lead." },
-          { value: "25", note: "25%. Fuller than 12.5% but still reedy. The most common all-round chip voice." },
-          { value: "50", note: "50%, a square wave. Hollow and even; the only width an AY-3-8910 can make." }
+          { value: "12", desc: "12.5%. The thinnest built-in pulse: nasal and cutting, the classic NES lead." },
+          { value: "25", desc: "25%. Fuller than 12.5% but still reedy. The most common all-round chip voice." },
+          { value: "50", desc: "50%, a square wave. Hollow and even; the only width an AY-3-8910 can make." }
         ]
       }]
     });
     registerFamily("noise", {
-      note: "Noise from a feedback shift register. Chips differ only in the loop length and how fast it runs.",
+      desc: "Noise from a feedback shift register. Chips differ only in the loop length and how fast it runs.",
       params: [{
         name: "kind",
         default: "white",
-        note: "Which loop and speed to use.",
+        desc: "Which loop and speed to use.",
         values: [
-          { value: "white", note: "Long loop, plain white noise. Drums and effects." },
-          { value: "metal", note: "Short loop, so the repeat is heard as pitch: a metallic buzz (NES short mode, SN76489 periodic noise)." },
-          { value: "hiss", note: "White noise run faster: finer and brighter. Cymbals and wind." },
-          { value: "rumble", note: "White noise run slower: coarse, with weight underneath. Explosions and rumble." }
+          { value: "white", desc: "Long loop, plain white noise. Drums and effects." },
+          { value: "metal", desc: "Short loop, so the repeat is heard as pitch: a metallic buzz (NES short mode, SN76489 periodic noise)." },
+          { value: "hiss", desc: "White noise run faster: finer and brighter. Cymbals and wind." },
+          { value: "rumble", desc: "White noise run slower: coarse, with weight underneath. Explosions and rumble." }
         ]
       }]
     });
@@ -4308,8 +4598,8 @@ registerProcessor('mmsxx-filter', FilterNode);
       d: 0,
       s: 1,
       r: 0.01,
-      noteJa: "\u9CF4\u3063\u3066\u3044\u308B\u3042\u3044\u3060\u3001\u305A\u3063\u3068\u540C\u3058\u5927\u304D\u3055\u3002\u4E0A\u304C\u308A\u3082\u4E0B\u304C\u308A\u3082\u3057\u306A\u3044\u3002\u5B9F\u6A5F\u306E\u30C1\u30C3\u30D7\u306F\u3053\u3053\u304B\u3089\u59CB\u307E\u308B\u3002\u5927\u304D\u3055\u3092 v \u3060\u3051\u306B\u6C7A\u3081\u3055\u305B\u305F\u3044\u3068\u304D\u306F\u3053\u308C",
-      note: "Holds one level from start to finish \u2014 nothing rises, nothing falls. Where chip hardware starts, and what to pick when v alone should decide how loud a note is."
+      descJa: "\u9CF4\u3063\u3066\u3044\u308B\u3042\u3044\u3060\u3001\u305A\u3063\u3068\u540C\u3058\u5927\u304D\u3055\u3002\u4E0A\u304C\u308A\u3082\u4E0B\u304C\u308A\u3082\u3057\u306A\u3044\u3002\u5B9F\u6A5F\u306E\u30C1\u30C3\u30D7\u306F\u3053\u3053\u304B\u3089\u59CB\u307E\u308B\u3002\u5927\u304D\u3055\u3092 v \u3060\u3051\u306B\u6C7A\u3081\u3055\u305B\u305F\u3044\u3068\u304D\u306F\u3053\u308C",
+      desc: "Holds one level from start to finish \u2014 nothing rises, nothing falls. Where chip hardware starts, and what to pick when v alone should decide how loud a note is."
     },
     {
       id: 1,
@@ -4318,8 +4608,8 @@ registerProcessor('mmsxx-filter', FilterNode);
       d: 0.1,
       s: 0.8,
       r: 0.15,
-      noteJa: "\u3075\u308F\u3063\u3068\u5165\u3063\u3066\u3001\u4E0A\u304B\u3089\u5C11\u3057\u3060\u3051\u843D\u3061\u7740\u304F\u3002\u89D2\u304C\u53D6\u308C\u308B\u304C\u3001\u697D\u5668\u3089\u3057\u304F\u306F\u306A\u308A\u3059\u304E\u306A\u3044\u3002\u901F\u3044\u523B\u307F\u306E\u4F34\u594F\u304C\u8033\u306B\u523A\u3055\u308B\u3068\u304D\u306B",
-      note: "Eases in, then settles a little below the top. Takes the sting out without turning a part into an instrument \u2014 handy when a fast accompaniment starts to bite."
+      descJa: "\u3075\u308F\u3063\u3068\u5165\u3063\u3066\u3001\u4E0A\u304B\u3089\u5C11\u3057\u3060\u3051\u843D\u3061\u7740\u304F\u3002\u89D2\u304C\u53D6\u308C\u308B\u304C\u3001\u697D\u5668\u3089\u3057\u304F\u306F\u306A\u308A\u3059\u304E\u306A\u3044\u3002\u901F\u3044\u523B\u307F\u306E\u4F34\u594F\u304C\u8033\u306B\u523A\u3055\u308B\u3068\u304D\u306B",
+      desc: "Eases in, then settles a little below the top. Takes the sting out without turning a part into an instrument \u2014 handy when a fast accompaniment starts to bite."
     },
     {
       id: 2,
@@ -4328,8 +4618,8 @@ registerProcessor('mmsxx-filter', FilterNode);
       d: 0.25,
       s: 0,
       r: 0.05,
-      noteJa: "\u4E00\u6C17\u306B\u7ACB\u3061\u4E0A\u304C\u3063\u3066\u3001\u305D\u306E\u307E\u307E\u6D88\u3048\u308B\u3002\u4F38\u3070\u3059\u3068\u3053\u308D\u304C\u7121\u3044\u306E\u3067\u3001\u53E9\u3044\u305F\u97F3\u306B\u306A\u308B",
-      note: "Straight up and straight back down with nothing held in between. What is left reads as a hit."
+      descJa: "\u4E00\u6C17\u306B\u7ACB\u3061\u4E0A\u304C\u3063\u3066\u3001\u305D\u306E\u307E\u307E\u6D88\u3048\u308B\u3002\u4F38\u3070\u3059\u3068\u3053\u308D\u304C\u7121\u3044\u306E\u3067\u3001\u53E9\u3044\u305F\u97F3\u306B\u306A\u308B",
+      desc: "Straight up and straight back down with nothing held in between. What is left reads as a hit."
     },
     {
       id: 3,
@@ -4338,8 +4628,8 @@ registerProcessor('mmsxx-filter', FilterNode);
       d: 0.4,
       s: 0.35,
       r: 0.12,
-      noteJa: "\u901F\u304F\u7ACB\u3061\u4E0A\u304C\u3063\u3066\u9577\u304F\u6E1B\u308A\u30013 \u5206\u306E 1 \u3042\u305F\u308A\u3067\u843D\u3061\u7740\u3044\u3066\u3001\u305D\u306E\u307E\u307E\u6B8B\u308B\u3002\u53E9\u3044\u3066\u97FF\u304F\u3082\u306E\u306E\u5F62",
-      note: "A quick start, a long fall, then it settles about a third of the way up and rings on. The shape of something struck that keeps sounding."
+      descJa: "\u901F\u304F\u7ACB\u3061\u4E0A\u304C\u3063\u3066\u9577\u304F\u6E1B\u308A\u30013 \u5206\u306E 1 \u3042\u305F\u308A\u3067\u843D\u3061\u7740\u3044\u3066\u3001\u305D\u306E\u307E\u307E\u6B8B\u308B\u3002\u53E9\u3044\u3066\u97FF\u304F\u3082\u306E\u306E\u5F62",
+      desc: "A quick start, a long fall, then it settles about a third of the way up and rings on. The shape of something struck that keeps sounding."
     },
     {
       id: 4,
@@ -4348,8 +4638,8 @@ registerProcessor('mmsxx-filter', FilterNode);
       d: 0.2,
       s: 0.7,
       r: 0.2,
-      noteJa: "\u3086\u3063\u304F\u308A\u5165\u3063\u3066\u3001\u3086\u3063\u304F\u308A\u629C\u3051\u308B\u3002\u3042\u3044\u3060\u306F\u305A\u3063\u3068\u9AD8\u3044\u307E\u307E\u3002\u5F8C\u308D\u3067\u9CF4\u3089\u3057\u3066\u5834\u6240\u3092\u57CB\u3081\u308B\u305F\u3081\u306E\u5F62",
-      note: "Slow to arrive and slow to leave, high all the way between. Made for sitting behind everything else and filling the room."
+      descJa: "\u3086\u3063\u304F\u308A\u5165\u3063\u3066\u3001\u3086\u3063\u304F\u308A\u629C\u3051\u308B\u3002\u3042\u3044\u3060\u306F\u305A\u3063\u3068\u9AD8\u3044\u307E\u307E\u3002\u5F8C\u308D\u3067\u9CF4\u3089\u3057\u3066\u5834\u6240\u3092\u57CB\u3081\u308B\u305F\u3081\u306E\u5F62",
+      desc: "Slow to arrive and slow to leave, high all the way between. Made for sitting behind everything else and filling the room."
     },
     {
       id: 5,
@@ -4358,8 +4648,8 @@ registerProcessor('mmsxx-filter', FilterNode);
       d: 0.12,
       s: 0.15,
       r: 0.08,
-      noteJa: "\u306F\u3058\u3044\u305F\u77AC\u9593\u3060\u3051\u5927\u304D\u304F\u3001\u3059\u3050\u5C0F\u3055\u304F\u306A\u3063\u3066\u3001\u308F\u305A\u304B\u306B\u6B8B\u308B\u3002\u901F\u304F\u523B\u3093\u3067\u3082 1 \u7C92\u305A\u3064\u7ACB\u3064",
-      note: "Loud for an instant, gone almost as fast, with a trace left behind. Even at speed each note keeps its own edge."
+      descJa: "\u306F\u3058\u3044\u305F\u77AC\u9593\u3060\u3051\u5927\u304D\u304F\u3001\u3059\u3050\u5C0F\u3055\u304F\u306A\u3063\u3066\u3001\u308F\u305A\u304B\u306B\u6B8B\u308B\u3002\u901F\u304F\u523B\u3093\u3067\u3082 1 \u7C92\u305A\u3064\u7ACB\u3064",
+      desc: "Loud for an instant, gone almost as fast, with a trace left behind. Even at speed each note keeps its own edge."
     },
     // ---- ここから下は、上の 6 つのあとに足したもの ----
     {
@@ -4369,8 +4659,8 @@ registerProcessor('mmsxx-filter', FilterNode);
       d: 0.06,
       s: 0,
       r: 0.02,
-      noteJa: "percussive \u3092\u3055\u3089\u306B\u77ED\u304F\u3057\u305F\u3082\u306E\u3002\u307B\u3068\u3093\u3069\u70B9\u306B\u3057\u304B\u805E\u3053\u3048\u306A\u3044\u306E\u3067\u3001\u62CD\u3092\u523B\u3080\u3060\u3051\u306E\u58F0\u306B",
-      note: "Percussive cut shorter still \u2014 barely more than a dot. For a voice whose only job is to mark the beat."
+      descJa: "percussive \u3092\u3055\u3089\u306B\u77ED\u304F\u3057\u305F\u3082\u306E\u3002\u307B\u3068\u3093\u3069\u70B9\u306B\u3057\u304B\u805E\u3053\u3048\u306A\u3044\u306E\u3067\u3001\u62CD\u3092\u523B\u3080\u3060\u3051\u306E\u58F0\u306B",
+      desc: "Percussive cut shorter still \u2014 barely more than a dot. For a voice whose only job is to mark the beat."
     },
     {
       id: 7,
@@ -4379,8 +4669,8 @@ registerProcessor('mmsxx-filter', FilterNode);
       d: 1.2,
       s: 0,
       r: 0.1,
-      noteJa: "\u4E00\u6C17\u306B\u7ACB\u3061\u4E0A\u304C\u3063\u3066\u3001\u9577\u3044\u6642\u9593\u3092\u304B\u3051\u3066\u6D88\u3048\u3066\u3044\u304F\u3002\u4F38\u3070\u3059\u3068\u3053\u308D\u304C\u7121\u3044\u306E\u3067\u3001\u9577\u3044\u97F3\u7B26\u3092\u66F8\u3044\u3066\u3082\u9014\u4E2D\u3067\u6D88\u3048\u308B",
-      note: "Struck at once, then a long slow fade. There is nothing to hold, so even a long note dies away inside itself."
+      descJa: "\u4E00\u6C17\u306B\u7ACB\u3061\u4E0A\u304C\u3063\u3066\u3001\u9577\u3044\u6642\u9593\u3092\u304B\u3051\u3066\u6D88\u3048\u3066\u3044\u304F\u3002\u4F38\u3070\u3059\u3068\u3053\u308D\u304C\u7121\u3044\u306E\u3067\u3001\u9577\u3044\u97F3\u7B26\u3092\u66F8\u3044\u3066\u3082\u9014\u4E2D\u3067\u6D88\u3048\u308B",
+      desc: "Struck at once, then a long slow fade. There is nothing to hold, so even a long note dies away inside itself."
     },
     {
       id: 8,
@@ -4389,8 +4679,8 @@ registerProcessor('mmsxx-filter', FilterNode);
       d: 0.05,
       s: 0.9,
       r: 0.03,
-      noteJa: "\u7D20\u65E9\u304F\u7ACB\u3061\u4E0A\u304C\u3063\u3066\u3001\u307B\u3093\u306E\u5C11\u3057\u843D\u3061\u3066\u304B\u3089\u4F38\u3073\u308B\u3002flat \u307B\u3069\u786C\u304F\u306A\u304F\u3001\u62BC\u3057\u3066\u3044\u308B\u9593\u306F\u305A\u3063\u3068\u9CF4\u3063\u3066\u3044\u308B",
-      note: "Up fast, a small settle, then it stays. Softer than flat at the edges but just as steady while held."
+      descJa: "\u7D20\u65E9\u304F\u7ACB\u3061\u4E0A\u304C\u3063\u3066\u3001\u307B\u3093\u306E\u5C11\u3057\u843D\u3061\u3066\u304B\u3089\u4F38\u3073\u308B\u3002flat \u307B\u3069\u786C\u304F\u306A\u304F\u3001\u62BC\u3057\u3066\u3044\u308B\u9593\u306F\u305A\u3063\u3068\u9CF4\u3063\u3066\u3044\u308B",
+      desc: "Up fast, a small settle, then it stays. Softer than flat at the edges but just as steady while held."
     },
     {
       id: 9,
@@ -4399,8 +4689,8 @@ registerProcessor('mmsxx-filter', FilterNode);
       d: 0.1,
       s: 0.85,
       r: 0.175,
-      noteJa: "\u3086\u3063\u304F\u308A\u7ACB\u3061\u4E0A\u304C\u3063\u3066\u9AD8\u3044\u307E\u307E\u4F38\u3073\u3001\u96E2\u3057\u3066\u3082\u5C3E\u3092\u5F15\u304F\u3002pad \u3088\u308A\u5165\u308A\u304C\u901F\u304F\u3001\u5C3E\u304C\u9577\u3044",
-      note: "Arrives unhurried, holds high, and trails after the note ends. Quicker in than pad, longer out."
+      descJa: "\u3086\u3063\u304F\u308A\u7ACB\u3061\u4E0A\u304C\u3063\u3066\u9AD8\u3044\u307E\u307E\u4F38\u3073\u3001\u96E2\u3057\u3066\u3082\u5C3E\u3092\u5F15\u304F\u3002pad \u3088\u308A\u5165\u308A\u304C\u901F\u304F\u3001\u5C3E\u304C\u9577\u3044",
+      desc: "Arrives unhurried, holds high, and trails after the note ends. Quicker in than pad, longer out."
     },
     {
       id: 10,
@@ -4409,8 +4699,8 @@ registerProcessor('mmsxx-filter', FilterNode);
       d: 0,
       s: 1,
       r: 0.2,
-      noteJa: "\u5165\u308A\u3060\u3051\u304C\u9577\u3044\u3002\u97F3\u306E\u982D\u304C\u7121\u3044\u306E\u3067\u3001\u3069\u3053\u304B\u3089\u59CB\u307E\u3063\u305F\u304B\u5206\u304B\u3089\u306A\u3044\u307E\u307E\u5927\u304D\u304F\u306A\u308B\u3002\u4E0A\u307E\u3067\u6765\u308B\u306E\u306B 0.7 \u79D2\u304B\u304B\u308B\u306E\u3067\u3001\u77ED\u3044\u97F3\u7B26\u306B\u7740\u305B\u308B\u3068\u307B\u3068\u3093\u3069\u9CF4\u3089\u306A\u3044",
-      note: "All attack. With no front edge you cannot tell where it began, only that it grew \u2014 and it takes seven tenths of a second to get there, so a short note barely speaks at all."
+      descJa: "\u5165\u308A\u3060\u3051\u304C\u9577\u3044\u3002\u97F3\u306E\u982D\u304C\u7121\u3044\u306E\u3067\u3001\u3069\u3053\u304B\u3089\u59CB\u307E\u3063\u305F\u304B\u5206\u304B\u3089\u306A\u3044\u307E\u307E\u5927\u304D\u304F\u306A\u308B\u3002\u4E0A\u307E\u3067\u6765\u308B\u306E\u306B 0.7 \u79D2\u304B\u304B\u308B\u306E\u3067\u3001\u77ED\u3044\u97F3\u7B26\u306B\u7740\u305B\u308B\u3068\u307B\u3068\u3093\u3069\u9CF4\u3089\u306A\u3044",
+      desc: "All attack. With no front edge you cannot tell where it began, only that it grew \u2014 and it takes seven tenths of a second to get there, so a short note barely speaks at all."
     },
     // 叩いて消える。`snap` と `percussive` のあいだが空いていた
     // (s が 0 のものは 0.06 / 0.25 / 1.2 秒しか無く、その中間が無い)。
@@ -4423,8 +4713,8 @@ registerProcessor('mmsxx-filter', FilterNode);
       d: 0.12,
       s: 0,
       r: 0.03,
-      noteJa: "\u53E9\u3044\u3066\u3001\u3059\u3050\u6D88\u3048\u308B\u3002snap \u3088\u308A\u5C11\u3057\u6B8B\u308B\u304C\u30018 \u5206\u97F3\u7B26\u3088\u308A\u77ED\u304F\u843D\u3061\u308B\u306E\u3067\u3001\u97F3\u7B26\u304C\u7D42\u308F\u308B\u524D\u306B\u6D88\u3048\u3066\u3044\u308B",
-      note: "Struck and gone. It holds longer than snap but falls quicker than an eighth note, so it is already silent before the note ends."
+      descJa: "\u53E9\u3044\u3066\u3001\u3059\u3050\u6D88\u3048\u308B\u3002snap \u3088\u308A\u5C11\u3057\u6B8B\u308B\u304C\u30018 \u5206\u97F3\u7B26\u3088\u308A\u77ED\u304F\u843D\u3061\u308B\u306E\u3067\u3001\u97F3\u7B26\u304C\u7D42\u308F\u308B\u524D\u306B\u6D88\u3048\u3066\u3044\u308B",
+      desc: "Struck and gone. It holds longer than snap but falls quicker than an eighth note, so it is already silent before the note ends."
     },
     // ---- 配列式。1 フレーム(60 分の 1 秒)ずつ段で動く ----
     // なめらかな坂では作れない形(段で落ちる・持ち上がる・回りつづける)がこちら
@@ -4437,8 +4727,8 @@ registerProcessor('mmsxx-filter', FilterNode);
       r: 0,
       table: [1, 0.87, 0.75, 0.62, 0.5, 0.37, 0.25, 0.12, 0],
       loop: null,
-      noteJa: "\u6BB5\u3067\u843D\u3061\u308B\u3002\u306A\u3081\u3089\u304B\u306B\u6E1B\u308B\u306E\u3067\u306F\u306A\u304F\u30011 \u30D5\u30EC\u30FC\u30E0\u3054\u3068\u306B\u30AB\u30AF\u30C3\u3068\u4E0B\u304C\u308B\u3002\u5B9F\u6A5F\u306E\u99C6\u52D5\u7CFB\u304C\u97F3\u91CF\u3092\u66F8\u304D\u63DB\u3048\u3066\u3044\u305F\u52D5\u304D\u305D\u306E\u3082\u306E",
-      note: "Falls in steps rather than sliding \u2014 one notch per frame. The way a real driver rewrote the volume register."
+      descJa: "\u6BB5\u3067\u843D\u3061\u308B\u3002\u306A\u3081\u3089\u304B\u306B\u6E1B\u308B\u306E\u3067\u306F\u306A\u304F\u30011 \u30D5\u30EC\u30FC\u30E0\u3054\u3068\u306B\u30AB\u30AF\u30C3\u3068\u4E0B\u304C\u308B\u3002\u5B9F\u6A5F\u306E\u99C6\u52D5\u7CFB\u304C\u97F3\u91CF\u3092\u66F8\u304D\u63DB\u3048\u3066\u3044\u305F\u52D5\u304D\u305D\u306E\u3082\u306E",
+      desc: "Falls in steps rather than sliding \u2014 one notch per frame. The way a real driver rewrote the volume register."
     },
     {
       id: 13,
@@ -4449,8 +4739,8 @@ registerProcessor('mmsxx-filter', FilterNode);
       r: 0,
       table: [1, 1, 0.85, 0.7, 0.7, 0.85],
       loop: 0,
-      noteJa: "\u5927\u304D\u3055\u304C\u63FA\u308C\u3064\u3065\u3051\u308B\u3002\u623B\u308B\u5148\u304C\u5148\u982D\u306A\u306E\u3067\u3001\u97F3\u7B26\u304C\u9577\u3044\u307B\u3069\u4F55\u5EA6\u3082\u63FA\u308C\u308B",
-      note: "The level keeps rocking. It returns to the start, so the longer the note the more times it swings."
+      descJa: "\u5927\u304D\u3055\u304C\u63FA\u308C\u3064\u3065\u3051\u308B\u3002\u623B\u308B\u5148\u304C\u5148\u982D\u306A\u306E\u3067\u3001\u97F3\u7B26\u304C\u9577\u3044\u307B\u3069\u4F55\u5EA6\u3082\u63FA\u308C\u308B",
+      desc: "The level keeps rocking. It returns to the start, so the longer the note the more times it swings."
     },
     {
       id: 14,
@@ -4461,8 +4751,8 @@ registerProcessor('mmsxx-filter', FilterNode);
       r: 0,
       table: [1, 1, 0.5, 0.5],
       loop: 0,
-      noteJa: "\u9CF4\u308B\u30FB\u6B62\u307E\u308B\u3092\u901F\u304F\u7E70\u308A\u8FD4\u3059\u3002\u6B62\u307E\u308B\u5074\u306F\u5207\u308C\u305A\u306B\u534A\u5206\u306E\u5927\u304D\u3055\u3067\u6B8B\u308B\u306E\u3067\u3001\u9014\u5207\u308C\u305A\u306B\u523B\u3093\u3067\u805E\u3053\u3048\u308B\u3002\u5B9F\u6A5F\u3067\u58F0\u304C\u8DB3\u308A\u306A\u3044\u3068\u304D\u306B\u3084\u3063\u3066\u3044\u305F\u624B",
-      note: "On, off, on, off, and quickly \u2014 except the off side is not silence but half, so the note keeps sounding while it beats. What you did on hardware when you had run out of voices."
+      descJa: "\u9CF4\u308B\u30FB\u6B62\u307E\u308B\u3092\u901F\u304F\u7E70\u308A\u8FD4\u3059\u3002\u6B62\u307E\u308B\u5074\u306F\u5207\u308C\u305A\u306B\u534A\u5206\u306E\u5927\u304D\u3055\u3067\u6B8B\u308B\u306E\u3067\u3001\u9014\u5207\u308C\u305A\u306B\u523B\u3093\u3067\u805E\u3053\u3048\u308B\u3002\u5B9F\u6A5F\u3067\u58F0\u304C\u8DB3\u308A\u306A\u3044\u3068\u304D\u306B\u3084\u3063\u3066\u3044\u305F\u624B",
+      desc: "On, off, on, off, and quickly \u2014 except the off side is not silence but half, so the note keeps sounding while it beats. What you did on hardware when you had run out of voices."
     },
     {
       id: 15,
@@ -4489,8 +4779,8 @@ registerProcessor('mmsxx-filter', FilterNode);
         0.78
       ],
       loop: 9,
-      noteJa: "\u7ACB\u3061\u4E0A\u304C\u3063\u3066\u5C11\u3057\u843D\u3061\u7740\u304D\u3001\u305D\u3053\u304B\u3089\u63FA\u308C\u3064\u3065\u3051\u308B\u3002\u623B\u308B\u5148\u304C\u5148\u982D\u3067\u306F\u306A\u304F\u9014\u4E2D\u306A\u306E\u3067\u3001\u7ACB\u3061\u4E0A\u304C\u308A\u306F 1 \u56DE\u304D\u308A\u3067\u3001\u4F38\u3070\u3059\u3068\u3053\u308D\u3060\u3051\u304C\u56DE\u308B",
-      note: "Rises, settles a little, and sways from there on. The loop point sits partway in rather than at the start, so the attack happens once and only the held part goes round."
+      descJa: "\u7ACB\u3061\u4E0A\u304C\u3063\u3066\u5C11\u3057\u843D\u3061\u7740\u304D\u3001\u305D\u3053\u304B\u3089\u63FA\u308C\u3064\u3065\u3051\u308B\u3002\u623B\u308B\u5148\u304C\u5148\u982D\u3067\u306F\u306A\u304F\u9014\u4E2D\u306A\u306E\u3067\u3001\u7ACB\u3061\u4E0A\u304C\u308A\u306F 1 \u56DE\u304D\u308A\u3067\u3001\u4F38\u3070\u3059\u3068\u3053\u308D\u3060\u3051\u304C\u56DE\u308B",
+      desc: "Rises, settles a little, and sways from there on. The loop point sits partway in rather than at the start, so the attack happens once and only the held part goes round."
     },
     {
       id: 16,
@@ -4501,8 +4791,8 @@ registerProcessor('mmsxx-filter', FilterNode);
       r: 0,
       table: [1, 0.55, 0.25, 0.5, 0.2, 0.35, 0.14, 0.22, 0.09, 0.14, 0.07, 0.11],
       loop: 8,
-      noteJa: "\u843D\u3061\u3066\u306F\u5C11\u3057\u623B\u308B\u3001\u3092\u7E70\u308A\u8FD4\u3057\u3066\u5C0F\u3055\u304F\u306A\u308A\u3001\u305D\u306E\u3042\u3068\u306F\u5C0F\u3055\u3044\u307E\u307E\u8DF3\u306D\u3064\u3065\u3051\u308B\u3002\u623B\u308B\u5148\u304C\u9014\u4E2D\u306A\u306E\u3067\u3001\u5927\u304D\u304F\u8DF3\u306D\u308B\u306E\u306F\u982D\u306E\u4F55\u56DE\u304B\u3060\u3051",
-      note: "Falls, springs back a little, falls further \u2014 and once it is quiet it keeps bouncing at that size. The loop point sits partway in, so the big bounces only happen at the top."
+      descJa: "\u843D\u3061\u3066\u306F\u5C11\u3057\u623B\u308B\u3001\u3092\u7E70\u308A\u8FD4\u3057\u3066\u5C0F\u3055\u304F\u306A\u308A\u3001\u305D\u306E\u3042\u3068\u306F\u5C0F\u3055\u3044\u307E\u307E\u8DF3\u306D\u3064\u3065\u3051\u308B\u3002\u623B\u308B\u5148\u304C\u9014\u4E2D\u306A\u306E\u3067\u3001\u5927\u304D\u304F\u8DF3\u306D\u308B\u306E\u306F\u982D\u306E\u4F55\u56DE\u304B\u3060\u3051",
+      desc: "Falls, springs back a little, falls further \u2014 and once it is quiet it keeps bouncing at that size. The loop point sits partway in, so the big bounces only happen at the top."
     },
     // ADSR 型だが、番号は後ろに付ける。曲も部品も名前で持っている
     //(`@e{名前}`、`samples/songs/*.json` の `"env": "piano"`)ので、どこへ
@@ -4519,8 +4809,8 @@ registerProcessor('mmsxx-filter', FilterNode);
       d: 0.05,
       s: 0.65,
       r: 0.06,
-      noteJa: "\u7D20\u65E9\u304F\u7ACB\u3061\u4E0A\u304C\u308A\u3001\u3059\u3050\u5C11\u3057\u6C88\u3093\u3067\u3001\u305D\u3053\u3067\u4F38\u3073\u308B\u3002organ \u3088\u308A\u4F4E\u3044\u3068\u3053\u308D\u3067\u4F38\u3073\u308B\u306E\u3067\u524D\u306B\u51FA\u3059\u304E\u305A\u3001\u97F3\u306E\u7D42\u308F\u308A\u3082\u306A\u3081\u3089\u304B\u306B\u6D88\u3048\u308B",
-      note: "Up at once, a quick settle, then it holds \u2014 lower than organ, so it sits back in the mix rather than pushing forward, and it releases softly."
+      descJa: "\u7D20\u65E9\u304F\u7ACB\u3061\u4E0A\u304C\u308A\u3001\u3059\u3050\u5C11\u3057\u6C88\u3093\u3067\u3001\u305D\u3053\u3067\u4F38\u3073\u308B\u3002organ \u3088\u308A\u4F4E\u3044\u3068\u3053\u308D\u3067\u4F38\u3073\u308B\u306E\u3067\u524D\u306B\u51FA\u3059\u304E\u305A\u3001\u97F3\u306E\u7D42\u308F\u308A\u3082\u306A\u3081\u3089\u304B\u306B\u6D88\u3048\u308B",
+      desc: "Up at once, a quick settle, then it holds \u2014 lower than organ, so it sits back in the mix rather than pushing forward, and it releases softly."
     }
   ];
   function envSec(v, len) {
@@ -4531,6 +4821,7 @@ registerProcessor('mmsxx-filter', FilterNode);
     return Math.max(0, Number(v) || 0);
   }
   function registerEnvelope(name, spec = {}) {
+    noOldDescName(spec, "registerEnvelope");
     const at = ENVELOPES.findIndex((e) => e.name.toLowerCase() === String(name).toLowerCase());
     if (at >= 0 && !spec.overwrite) {
       throw new Error(`[ChpTnSnd] \u30A8\u30F3\u30D9\u30ED\u30FC\u30D7 "${name}" \u306F\u3082\u3046\u767B\u9332\u3055\u308C\u3066\u3044\u307E\u3059(\u5DEE\u3057\u66FF\u3048\u308B\u306A\u3089 overwrite: true \u3092\u6E21\u3057\u3066\u304F\u3060\u3055\u3044)`);
@@ -4538,8 +4829,8 @@ registerProcessor('mmsxx-filter', FilterNode);
     const entry = {
       id: at >= 0 ? at : ENVELOPES.length,
       name: String(name),
-      note: spec.note == null ? null : String(spec.note),
-      noteJa: spec.noteJa == null ? null : String(spec.noteJa)
+      desc: spec.desc == null ? null : String(spec.desc),
+      descJa: spec.descJa == null ? null : String(spec.descJa)
     };
     if (Array.isArray(spec.table) && spec.table.length) {
       const table = spec.table.map((v) => Math.max(0, Math.min(1, Number(v) || 0)));
@@ -4701,8 +4992,8 @@ registerProcessor('mmsxx-filter', FilterNode);
       // MIDI に出すならこの音色、という希望(GM の番号)。書いていなければ null
       gm: w.gm ?? null,
       alias: w.alias ?? [],
-      note: w.note ?? null,
-      noteJa: w.noteJa ?? null
+      desc: w.desc ?? null,
+      descJa: w.descJa ?? null
     };
   }
   function sealPresets() {
@@ -4730,8 +5021,8 @@ registerProcessor('mmsxx-filter', FilterNode);
   function listEnvelopes(q) {
     return ENVELOPES.map((e) => ({
       name: e.name,
-      note: e.note ?? null,
-      noteJa: e.noteJa ?? null,
+      desc: e.desc ?? null,
+      descJa: e.descJa ?? null,
       table: !!e.table,
       preset: !!e.preset
     })).filter((m) => hits(m, q));
@@ -4751,16 +5042,18 @@ registerProcessor('mmsxx-filter', FilterNode);
   var FAMILIES = /* @__PURE__ */ new Map();
   var KEYS = /* @__PURE__ */ new Map();
   function registerFamily(name, spec = {}) {
+    noOldDescName(spec, "registerFamily");
     const key2 = String(name).trim().toLowerCase();
     if (!/^[a-z][a-z0-9]*$/i.test(String(name).trim())) {
       throw new Error(`[ChpTnSnd] \u4EF2\u9593\u306E\u540D\u524D "${name}" \u306F\u82F1\u6570\u5B57\u3060\u3051\u3067\u66F8\u304D\u307E\u3059`);
     }
     if (FAMILIES.has(key2) && !spec.overwrite) return FAMILIES.get(key2);
     const params = (spec.params || []).map((p) => {
-      const values = (p.values || []).map((v) => ({
-        value: String(v.value),
-        note: v.note == null ? null : String(v.note)
-      }));
+      noOldDescName(p, `registerFamily \u306E\u8EF8 ${p && p.name}`);
+      const values = (p.values || []).map((v) => {
+        noOldDescName(v, `registerFamily \u306E\u5024 ${v && v.value}`);
+        return { value: String(v.value), desc: v.desc == null ? null : String(v.desc) };
+      });
       if (!p.name || !values.length) {
         throw new Error(`[ChpTnSnd] \u4EF2\u9593 "${name}": \u8EF8\u306B\u306F\u540D\u524D\u3068\u5024\u3092\u66F8\u304D\u307E\u3059`);
       }
@@ -4768,7 +5061,7 @@ registerProcessor('mmsxx-filter', FilterNode);
       if (!values.some((v) => v.value.toLowerCase() === def.toLowerCase())) {
         throw new Error(`[ChpTnSnd] \u4EF2\u9593 "${name}": \u8EF8 ${p.name} \u306E\u65E2\u5B9A "${def}" \u304C\u5024\u306E\u4E2D\u306B\u3042\u308A\u307E\u305B\u3093`);
       }
-      return { name: String(p.name), note: p.note == null ? null : String(p.note), default: def, values };
+      return { name: String(p.name), desc: p.desc == null ? null : String(p.desc), default: def, values };
     });
     if (!params.length) throw new Error(`[ChpTnSnd] \u4EF2\u9593 "${name}": \u8EF8\u304C 1 \u672C\u3082\u3042\u308A\u307E\u305B\u3093`);
     const axisOf = (n) => {
@@ -4780,7 +5073,7 @@ registerProcessor('mmsxx-filter', FilterNode);
     const forbid = (spec.forbid || []).map((c) => Object.fromEntries(Object.entries(c).map(([k, v]) => [axisOf(k), String(v)])));
     const fam = {
       name: String(name).trim(),
-      note: spec.note == null ? null : String(spec.note),
+      desc: spec.desc == null ? null : String(spec.desc),
       params,
       exclusive,
       forbid
@@ -4882,14 +5175,14 @@ registerProcessor('mmsxx-filter', FilterNode);
     if (r && !r.error) {
       const { fam, args } = r;
       const sp = splitVoiceName(name);
-      const out = {
+      const out2 = {
         name: fam.name,
-        note: fam.note,
+        desc: fam.desc,
         params: fam.params.map((p) => ({
           name: p.name,
-          note: p.note,
+          desc: p.desc,
           default: p.default,
-          values: p.values.map((v) => ({ value: v.value, note: v.note }))
+          values: p.values.map((v) => ({ value: v.value, desc: v.desc }))
         })),
         // 一緒に書けない軸の組と、組み合わせられない値
         exclusive: fam.exclusive.map((g) => [...g]),
@@ -4903,16 +5196,29 @@ registerProcessor('mmsxx-filter', FilterNode);
       if (sp.args !== null || findWave(name) >= 0) {
         const at2 = findWave(name);
         if (at2 >= 0) {
-          out.voice = WAVEFORMS[at2].name;
-          out.args = args;
+          out2.voice = WAVEFORMS[at2].name;
+          out2.args = args;
+          const more2 = detailOf(WAVEFORMS[at2]);
+          if (more2) out2.detail = more2;
         }
       }
-      return out;
+      return out2;
     }
     const at = findWave(name);
     if (at < 0) return null;
     const w = WAVEFORMS[at];
-    return { name: w.name, note: w.note ?? null, params: [], exclusive: [], forbid: [] };
+    const out = { name: w.name, desc: w.desc ?? null, params: [], exclusive: [], forbid: [] };
+    const more = detailOf(w);
+    if (more) out.detail = more;
+    return out;
+  }
+  var VOICE_DETAIL = /* @__PURE__ */ new Map();
+  function registerVoiceDetail(kind, fn) {
+    VOICE_DETAIL.set(String(kind), fn);
+  }
+  function detailOf(w) {
+    const fn = VOICE_DETAIL.get(w.kind);
+    return fn ? fn(w) : null;
   }
   function listVoiceFamilies() {
     return [...FAMILIES.values()].map((f) => f.name);
@@ -4943,6 +5249,11 @@ registerProcessor('mmsxx-filter', FilterNode);
     }
     return n;
   }
+  function noOldDescName(opts, where) {
+    if (opts && (opts.note != null || opts.noteJa != null)) {
+      throw new Error(`[ChpTnSnd] ${where}: \u8AAC\u660E\u306F note \u3067\u306F\u306A\u304F desc \u3067\u3059(\u65E5\u672C\u8A9E\u306F noteJa \u3067\u306F\u306A\u304F descJa)`);
+    }
+  }
   function vcurveOf(v) {
     if (v === void 0 || v === null) return "curve";
     const s = String(v).toLowerCase();
@@ -4951,8 +5262,12 @@ registerProcessor('mmsxx-filter', FilterNode);
     return "curve";
   }
   function metaOf(opts = {}) {
+    noOldDescName(opts, "metaOf");
     return {
       genre: words(opts.genre),
+      // 自由な語(英語)。決まった意味を持たせている語は 1 つだけ。
+      // approx — 実機と同じとは言えない音(録音を描き直した、耳で寄せた)。出どころの話なので、
+      // 仕上がっても外さない。まだ近づける作業を続けているなら dev の wip と重ねる(2026-10-11)
       tags: words(opts.tags),
       // 鳴らし方が特別なもの。道具はここを見て鳴らし方を変える。
       // ふつうに音符で鳴らすと別のものになってしまう音色だけが持つ
@@ -4997,9 +5312,9 @@ registerProcessor('mmsxx-filter', FilterNode);
       // 別名。同じ音を 2 通りの名前で呼べる(findWave)
       alias: Array.isArray(opts.alias) ? opts.alias.map(String) : [],
       // 説明は 2 か国語ぶん持てる。どちらか片方でよい(マニュアルの側で
-      // 足りないほうを補って印を付ける。scripts/notes.js)
-      note: opts.note == null ? null : String(opts.note),
-      noteJa: opts.noteJa == null ? null : String(opts.noteJa)
+      // 足りないほうを補って印を付ける。scripts/descs.js)
+      desc: opts.desc == null ? null : String(opts.desc),
+      descJa: opts.descJa == null ? null : String(opts.descJa)
     };
   }
   function requireFreeName(name, overwrite) {
@@ -5327,6 +5642,23 @@ registerProcessor('mmsxx-filter', FilterNode);
     else WAVEFORMS.push(entry);
     return entry.id;
   }
+  function registerVoice(name, kind, fields = {}, opts = {}) {
+    const at = requireFreeName(name, opts.overwrite);
+    const meta = metaOf(opts);
+    const entry = {
+      id: at >= 0 ? at : WAVEFORMS.length,
+      name,
+      kind,
+      ...fields,
+      role: roleOf(opts.role, name),
+      ...meta,
+      special: [...new Set(meta.special.concat("worklet"))]
+    };
+    if (opts.env !== void 0) entry.defaultEnv = envIndex(opts.env);
+    if (at >= 0) WAVEFORMS[at] = entry;
+    else WAVEFORMS.push(entry);
+    return entry.id;
+  }
   function registerPCE(name, params = {}, opts = {}) {
     const at = requireFreeName(name, opts.overwrite);
     const noise = !!params.noise;
@@ -5349,7 +5681,7 @@ registerProcessor('mmsxx-filter', FilterNode);
   }
   function registerBaked(name, opts = {}, flags = {}) {
     const at = requireFreeName(name, flags.overwrite);
-    if (!opts.from) throw new Error("[ChpTnSnd] " + name + ": \u713C\u304F\u5143\u306E\u97F3\u8272(from)\u304C\u3042\u308A\u307E\u305B\u3093");
+    if (!opts.from && !opts.phrase) throw new Error("[ChpTnSnd] " + name + ": \u713C\u304F\u5143\u306E\u97F3\u8272(from)\u304C\u3042\u308A\u307E\u305B\u3093");
     const entry = {
       role: roleOf(opts.role, name),
       ...metaOf(opts),
@@ -5361,6 +5693,11 @@ registerProcessor('mmsxx-filter', FilterNode);
       step: opts.step || 1,
       sampleRate: opts.sampleRate || 22050,
       minLoop: opts.minLoop,
+      loop: opts.loop,
+      length: opts.length,
+      post: typeof opts.post === "function" ? opts.post : null,
+      phrase: opts.phrase ? String(opts.phrase) : null,
+      tempo: opts.tempo > 0 ? Number(opts.tempo) : 120,
       baked: null,
       baking: false
     };
@@ -5371,8 +5708,9 @@ registerProcessor('mmsxx-filter', FilterNode);
   function registerLayer(name, opts = {}, flags = {}) {
     const at = requireFreeName(name, flags.overwrite);
     const list = Array.isArray(opts.layers) ? opts.layers : [];
-    if (list.length < 2) {
-      throw new Error(`[ChpTnSnd] ${name}: \u5408\u6210\u97F3\u8272\u306F 2 \u3064\u4EE5\u4E0A\u3092\u91CD\u306D\u307E\u3059(1 \u3064\u3060\u3051\u306A\u3089\u3001\u305D\u306E\u97F3\u8272\u3092\u305D\u306E\u307E\u307E\u4F7F\u3063\u3066\u304F\u3060\u3055\u3044)`);
+    const alone = list.length === 1 && list[0] && list[0].gain != null && Number(list[0].gain) !== 1 && !list[0].semi && !list[0].cents && !list[0].delay;
+    if (list.length < 2 && !alone) {
+      throw new Error(`[ChpTnSnd] ${name}: \u5408\u6210\u97F3\u8272\u306F 2 \u3064\u4EE5\u4E0A\u3092\u91CD\u306D\u307E\u3059(1 \u3064\u3060\u3051\u306A\u3089\u3001\u305D\u306E\u97F3\u8272\u3092\u305D\u306E\u307E\u307E\u4F7F\u3063\u3066\u304F\u3060\u3055\u3044\u3002\u97F3\u91CF\u3060\u3051\u5909\u3048\u308B\u306A\u3089 @gain \u3092\u66F8\u304D\u307E\u3059)`);
     }
     const layers = list.map((m, i) => {
       const w = findWave(m.wave);
@@ -5402,8 +5740,8 @@ registerProcessor('mmsxx-filter', FilterNode);
     };
     const made = layers.map((m) => WAVEFORMS[m.wave].name).join(" + ");
     const n = layers.length;
-    entry.noteJa = `\u5408\u6210\u97F3\u8272\u3002${made} \u3092\u91CD\u306D\u305F ${n} \u58F0\u3002` + (entry.noteJa || "");
-    entry.note = `A layered voice \u2014 ${made}, ${n} voices.` + (entry.note ? " " + entry.note : "");
+    entry.descJa = `\u5408\u6210\u97F3\u8272\u3002${made} \u3092\u91CD\u306D\u305F ${n} \u58F0\u3002` + (entry.descJa || "");
+    entry.desc = `A layered voice \u2014 ${made}, ${n} voices.` + (entry.desc ? " " + entry.desc : "");
     if (at >= 0) WAVEFORMS[at] = entry;
     else WAVEFORMS.push(entry);
     return entry.id;
@@ -5463,6 +5801,25 @@ registerProcessor('mmsxx-filter', FilterNode);
         muffle: { min: 0, max: 2e4 },
         // `?` の中身。16 進の並びか `random`(既定)
         bytes: { hex: true }
+      }
+    },
+    // 生音の楽器(`@{acoustic(piano)}{ ... }`)。ほかの区間と違い、中はふつうの MML がそのまま書ける。
+    // 足すのは、その楽器だけの操作(`@名前 値`)。楽器だけの記号をふつうの MML に混ぜると、
+    // ピアノのための `@` が誰の曲にも入ってくる(2026-10-14 に言われた)。区間の中に閉じ込める。
+    //
+    // 書ける操作は楽器ごと(`only` に楽器の名前)。`#voice` で数を書き換えた音色も、元の楽器で見る
+    acoustic: {
+      byKind: "modal",
+      full: true,
+      chars: [],
+      keys: {
+        // 右ペダル(ダンパーペダル)。1 で踏み、0 で放す。踏んでいるあいだは鍵盤を放しても音が止まらず、
+        // ほかの弦もつられて鳴る。区間を閉じると放す
+        ped: { min: 0, max: 1, step: 1, only: ["piano"] },
+        // ロールの強弱。次の音符のロールを、その音符の音量からこの音量まで少しずつ変えていく
+        // (クレッシェンド・デクレッシェンド)。音量と同じ 0〜15。タイでつないだ音は、つながり全体で変える。
+        // 区切って v を変えると、区切りごとに 1 打目から叩き直して継ぎ目が出る(2026-10-14)
+        to: { min: 0, max: 15, step: 1, only: ["timpaniRoll"] }
       }
     }
   };
@@ -5664,9 +6021,65 @@ registerProcessor('mmsxx-filter', FilterNode);
     }
     return src.replace(/[\[\]]/g, "");
   }
+  function readFxWords(words2, tempo, tag, fail2) {
+    const head = words2.shift();
+    if (!FX_KINDS[head]) {
+      fail2(`[ChpTnSnd] MML: ${tag(head ?? "")} \u2014 "${head ?? ""}" \u3068\u3044\u3046\u30A8\u30D5\u30A7\u30AF\u30C8\u306F\u3042\u308A\u307E\u305B\u3093(\u66F8\u3051\u308B\u306E\u306F ${Object.keys(FX_KINDS).join(" / ")})`);
+      return null;
+    }
+    const names = Object.keys(FX_KINDS[head].params);
+    const got = {};
+    if (words2.length && !words2[0].startsWith("@")) {
+      const f = parseFloat(words2.shift());
+      if (!Number.isFinite(f)) {
+        fail2(`[ChpTnSnd] MML: ${tag(head)} \u306E 1 \u3064\u76EE\u306F ${names[0]} \u306E\u6570\u3067\u3059`);
+        return null;
+      }
+      got[names[0]] = f;
+    }
+    while (words2.length) {
+      const key2 = words2.shift();
+      if (!key2.startsWith("@")) {
+        fail2(`[ChpTnSnd] MML: ${tag(head)} \u2014 "${key2}" \u306F\u540D\u524D\u3067\u66F8\u3044\u3066\u304F\u3060\u3055\u3044(\u4F8B @resonance 0.8)\u3002\u4F4D\u7F6E\u3067\u66F8\u3051\u308B\u306E\u306F 1 \u3064\u76EE\u306E ${names[0]} \u3060\u3051\u3067\u3059`);
+        return null;
+      }
+      let name = key2.slice(1);
+      const raw = parseFloat(words2.shift());
+      if (!Number.isFinite(raw)) {
+        fail2(`[ChpTnSnd] MML: ${tag(head)} \u306E "@${name}" \u306B\u6570\u304C\u3042\u308A\u307E\u305B\u3093`);
+        return null;
+      }
+      let val = raw;
+      if (name === "note" && FX_KINDS[head].params.time) {
+        if (raw <= 0) {
+          fail2(`[ChpTnSnd] MML: ${tag(head)} \u306E\u97F3\u7B26\u306E\u9577\u3055\u306F 1 \u4EE5\u4E0A\u3067\u3059`);
+          return null;
+        }
+        name = "time";
+        val = 240 / tempo / raw;
+      }
+      if (!FX_KINDS[head].params[name]) {
+        fail2(`[ChpTnSnd] MML: ${tag(head)} \u306B "@${name}" \u306F\u3042\u308A\u307E\u305B\u3093(\u66F8\u3051\u308B\u306E\u306F ${Object.keys(FX_KINDS[head].params).map((k) => "@" + k).join(" ")}${FX_KINDS[head].params.time ? " / @note" : ""})`);
+        return null;
+      }
+      got[name] = val;
+    }
+    const spec = { kind: head };
+    for (const [name, d] of Object.entries(FX_KINDS[head].params)) {
+      spec[name] = clamp(got[name] ?? d.default, d.min, d.max);
+    }
+    return spec;
+  }
+  function firstTempo(src) {
+    const body = String(src ?? "").replace(/\/\*[\s\S]*?\*\//g, " ").replace(/\/\/[^\n]*/g, " ").replace(/"[^"]*"/g, " ");
+    const m = /(?:^|[^A-Za-z@_])t[ \t]*(\d+(?:\.\d+)?)/.exec(body);
+    return m ? Number(m[1]) : null;
+  }
   function readDirectives(mml) {
     const meta = {};
     const sections = [];
+    let bodyT;
+    const bodyTempo = () => bodyT === void 0 ? bodyT = firstTempo(mml) ?? 120 : bodyT;
     for (const line of commentLines(String(mml ?? ""))) {
       const m = DIRECTIVE.exec(line);
       if (!m) continue;
@@ -5709,6 +6122,14 @@ registerProcessor('mmsxx-filter', FilterNode);
         }
         meta.gain = Math.min(8, n);
         if (words2[1]) meta.gainBy = words2[1].toLowerCase();
+      } else if (key2 === "fx") {
+        const spec = readFxWords(
+          val.split(/[\s,]+/).filter(Boolean),
+          meta.tempo ?? bodyTempo(),
+          (h) => `"#fx ${h} \u2026"`,
+          (msg) => warn(`${msg}\u3002\u8AAD\u307F\u98DB\u3070\u3057\u307E\u3059`)
+        );
+        if (spec) (meta.fx || (meta.fx = [])).push(spec);
       } else if (key2 === "looptimes") {
         const n = Number(val);
         if (Number.isFinite(n) && n > 0) meta.loopTimes = Math.floor(n);
@@ -5808,7 +6229,7 @@ ${val}`;
       }
       out.set(
         name.toLowerCase(),
-        makeVoice(name, parts.map((t) => readVoicePart(name, t)))
+        makeVoice(name, parts.map((t) => readVoicePart(name, t, mml)))
       );
     }
     return out;
@@ -5831,8 +6252,70 @@ ${val}`;
     "@gain\\{(?<gain>[^}]*)\\}",
     "@o(?<octave>[+-]?\\d+)",
     "@d(?<detune>[+-]?\\d+)",
+    // 外のファイルが加えた書き方(registerVoiceSyntax)。上のどれにも当たらないときだけ見る。
+    // 入れ子は 2 段まで読む(`body{ 2{freq 215} }`。生音の胴の山は番号で並ぶ)
+    "@(?<extName>[A-Za-z]+)\\{(?<extBody>(?:[^{}]|\\{(?:[^{}]|\\{[^{}]*\\})*\\})*)\\}",
     "\\s+"
   ].join("|"), "giy");
+  var VOICE_SYNTAX = /* @__PURE__ */ new Map();
+  function registerVoiceSyntax(word, make, opts = {}) {
+    VOICE_SYNTAX.set(String(word).toLowerCase(), { make, tree: !!opts.tree });
+  }
+  function readVoiceTree(text, name, word) {
+    const items = [];
+    for (const one of splitParts(text)) {
+      const t = one.trim();
+      if (!t) continue;
+      const m = /^([A-Za-z0-9_]+)\s*(?:\{([\s\S]*)\}|(-?\d*\.?\d+(?:e-?\d+)?))?$/i.exec(t);
+      if (!m) {
+        bad(`[ChpTnSnd] MML: \u97F3\u8272 "${name}" \u306E @${word} \u306E "${t}" \u306F\u8AAD\u3081\u307E\u305B\u3093(guitar / t60 4.2 / head{sharp 0.8} \u306E\u3088\u3046\u306B\u66F8\u304D\u307E\u3059)`);
+      }
+      const value = m[2] !== void 0 ? readVoiceTree(m[2], name, word) : m[3] !== void 0 ? Number(m[3]) : null;
+      items.push({ key: m[1], value });
+    }
+    return items;
+  }
+  function readExtSpec(text, name, word, mml = "") {
+    const spec = {};
+    for (const one of splitParts(text)) {
+      const m = /^([A-Za-z]+)\s*(?:\{([^}]*)\}|(-?\d+(?:\.\d+)?)|\$([\w]+)|([A-Za-z][\w.-]*(?:\([^)]*\))?))$/.exec(one.trim());
+      if (!m) {
+        bad(`[ChpTnSnd] MML: \u97F3\u8272 "${name}" \u306E @${word} \u306E "${one.trim()}" \u306F\u8AAD\u3081\u307E\u305B\u3093(mod{\u2026} car{\u2026} \u304B\u3001feedback 5 / from \u540D\u524D / from $\u30DE\u30AF\u30ED \u306E\u3088\u3046\u306B\u66F8\u304D\u307E\u3059)`);
+      }
+      if (m[2] !== void 0) {
+        const fields = {};
+        for (const pair of String(m[2]).split(",")) {
+          const w = pair.trim().split(/\s+/).filter(Boolean);
+          if (w.length !== 2 || !Number.isFinite(Number(w[1]))) {
+            bad(`[ChpTnSnd] MML: \u97F3\u8272 "${name}" \u306E @${word} \u306E ${m[1]}{${m[2]}} \u306F\u300C\u540D\u524D \u6570\u300D\u3092 \`,\` \u3067\u533A\u5207\u3063\u3066\u66F8\u304D\u307E\u3059`);
+          }
+          fields[w[0]] = Number(w[1]);
+        }
+        spec[m[1]] = fields;
+      } else if (m[3] !== void 0) {
+        spec[m[1]] = Number(m[3]);
+      } else if (m[4] !== void 0) {
+        spec[m[1]] = { macro: m[4].toLowerCase(), mml: macroText(mml, m[4], name, word) };
+      } else {
+        spec[m[1]] = m[5];
+      }
+    }
+    if (!Object.keys(spec).length) bad(`[ChpTnSnd] MML: \u97F3\u8272 "${name}" \u306E @${word} \u306B\u4E2D\u8EAB\u304C\u3042\u308A\u307E\u305B\u3093`);
+    return spec;
+  }
+  function macroText(mml, macro, name, word) {
+    const MARK = "";
+    const key2 = String(macro).toLowerCase();
+    const src = lowerOutsideDrums(stripComments(String(mml))) + `
+${MARK}$${key2}${MARK}`;
+    const out = expandMacros(src);
+    const at = out.lastIndexOf(MARK, out.length - 2);
+    const body = at >= 0 ? out.slice(at + 1, out.length - 1).trim() : "";
+    if (!body || body === `$${key2}`) {
+      bad(`[ChpTnSnd] MML: \u97F3\u8272 "${name}" \u306E @${word} \u304C\u6307\u3059\u30DE\u30AF\u30ED $${macro} \u304C\u3042\u308A\u307E\u305B\u3093`);
+    }
+    return body;
+  }
   function voiceNums(text, name, what) {
     const list = String(text).split(/[\s,]+/).filter(Boolean).map(Number);
     if (!list.length || list.some((v) => !Number.isFinite(v))) {
@@ -5972,7 +6455,7 @@ ${val}`;
     }
     return out;
   }
-  function readVoicePart(name, text) {
+  function readVoicePart(name, text, mml = "") {
     const part = {
       wave: null,
       env: null,
@@ -5988,14 +6471,15 @@ ${val}`;
       detune: 0,
       role: null,
       opll: null,
-      opm: null
+      opm: null,
+      ext: null
     };
     let at = 0;
     while (at < text.length) {
       VOICE_PART.lastIndex = at;
       const m = VOICE_PART.exec(text);
       if (!m) {
-        bad(`[ChpTnSnd] MML: \u97F3\u8272 "${name}" \u306E "${text.slice(at)}" \u306F\u8AAD\u3081\u307E\u305B\u3093(\u66F8\u3051\u308B\u306E\u306F @{\u97F3\u8272} @e{\u5F62} @role @adsr @opll @opm @arp @pitch @vol @duty @loop @delay @gain @o @d \u3060\u3051\u3067\u3059)`);
+        bad(`[ChpTnSnd] MML: \u97F3\u8272 "${name}" \u306E "${text.slice(at)}" \u306F\u8AAD\u3081\u307E\u305B\u3093(\u66F8\u3051\u308B\u306E\u306F @{\u97F3\u8272} @e{\u5F62} @role @adsr @opll @opm ` + [...VOICE_SYNTAX.keys()].map((k) => "@" + k + " ").join("") + "@arp @pitch @vol @duty @loop @delay @gain @o @d \u3060\u3051\u3067\u3059)");
       }
       at = VOICE_PART.lastIndex;
       const g = m.groups;
@@ -6021,6 +6505,14 @@ ${val}`;
       }
       if (g.opm !== void 0) {
         part.opm = readOpmSpec(g.opm, name);
+        continue;
+      }
+      if (g.extName !== void 0) {
+        const word = g.extName.toLowerCase();
+        if (!VOICE_SYNTAX.has(word)) {
+          bad(`[ChpTnSnd] MML: \u97F3\u8272 "${name}" \u306E @${g.extName}{\u2026} \u306F\u8AAD\u3081\u307E\u305B\u3093\u3002\u77E5\u3089\u306A\u3044\u66F8\u304D\u65B9\u3067\u3059` + (VOICE_SYNTAX.size ? `(\u52A0\u3048\u3089\u308C\u3066\u3044\u308B\u3082\u306E: ${[...VOICE_SYNTAX.keys()].map((k) => "@" + k).join(" ")})` : ""));
+        }
+        part.ext = { word, spec: VOICE_SYNTAX.get(word).tree ? readVoiceTree(g.extBody, name, word) : readExtSpec(g.extBody, name, word, mml) };
         continue;
       }
       if (g.arp !== void 0) {
@@ -6086,6 +6578,36 @@ ${val}`;
   function makeVoice(name, parts) {
     if (parts.length === 1) {
       const p = parts[0];
+      if (p.ext) {
+        if (p.wave !== null) {
+          bad(`[ChpTnSnd] MML: \u97F3\u8272 "${name}" \u306B @{${p.wave}} \u306F\u66F8\u3051\u307E\u305B\u3093(@${p.ext.word} \u304C\u97F3\u8272\u305D\u306E\u3082\u306E\u3067\u3059)`);
+        }
+        refuse(
+          name,
+          p,
+          [
+            "env",
+            "adsr",
+            "arp",
+            "pitch",
+            "vol",
+            "duty",
+            "loop",
+            "delay",
+            "gain",
+            "octave",
+            "detune"
+          ],
+          `@${p.ext.word} \u306F\u97F3\u8272\u305D\u306E\u3082\u306E\u3067\u3059\u3002\u8868\u3092\u7740\u305B\u308B\u3068\u304D\u306F\u5225\u306E #voice \u3067\u3053\u306E\u540D\u524D\u3092\u547C\u3093\u3067\u304F\u3060\u3055\u3044`
+        );
+        tellIfTaken(name, findWave(name) >= 0, "\u97F3\u8272");
+        VOICE_SYNTAX.get(p.ext.word).make(
+          name,
+          p.ext.spec,
+          { ...p.role === null ? {} : { role: p.role }, overwrite: true }
+        );
+        return p.ext.word;
+      }
       if (p.opm) {
         if (p.wave !== null) {
           bad(`[ChpTnSnd] MML: \u97F3\u8272 "${name}" \u306B @{${p.wave}} \u306F\u66F8\u3051\u307E\u305B\u3093(@opm \u304C\u97F3\u8272\u305D\u306E\u3082\u306E\u3067\u3059)`);
@@ -6167,25 +6689,30 @@ ${val}`;
         registerEnvelope(name, { ...p.adsr, overwrite: true });
         return "env";
       }
-      refuse(
-        name,
-        p,
-        ["adsr", "delay", "gain", "octave", "detune"],
-        "@adsr \u306F\u5225\u306E #voice \u306B\u3001@delay @gain @o @d \u306F\u91CD\u306D\u305F\u3068\u304D\u3060\u3051\u66F8\u3051\u307E\u3059"
-      );
-      tellIfTaken(name, findWave(name) >= 0, "\u97F3\u8272");
-      registerTone(name, {
-        wave: p.wave,
-        ...p.env ? { env: p.env } : {},
-        arp: p.arp,
-        pitch: p.pitch,
-        vol: p.vol,
-        duty: p.duty,
-        loop: p.loop,
-        ...p.role === null ? {} : { role: p.role },
-        overwrite: true
-      });
-      return "tone";
+      const tables = ["adsr", "arp", "pitch", "vol", "duty", "loop"];
+      const gainOnly = p.gain !== null && !tables.some((k) => k === "loop" ? Object.keys(p.loop).length > 0 : p[k] !== null);
+      if (!gainOnly) {
+        refuse(
+          name,
+          p,
+          ["adsr", "delay", "gain", "octave", "detune"],
+          "@adsr \u306F\u5225\u306E #voice \u306B\u3001@delay @o @d \u306F\u91CD\u306D\u305F\u3068\u304D\u3060\u3051\u66F8\u3051\u307E\u3059\u3002@gain \u306F\u8868\u3068\u4E00\u7DD2\u306B\u306F\u66F8\u3051\u306A\u3044\u306E\u3067\u3001\u8868\u3092\u7740\u305B\u305F\u97F3\u8272\u3092\u5148\u306B #voice \u3067\u4F5C\u3063\u3066\u304F\u3060\u3055\u3044"
+        );
+        tellIfTaken(name, findWave(name) >= 0, "\u97F3\u8272");
+        registerTone(name, {
+          wave: p.wave,
+          ...p.env ? { env: p.env } : {},
+          arp: p.arp,
+          pitch: p.pitch,
+          vol: p.vol,
+          duty: p.duty,
+          loop: p.loop,
+          ...p.role === null ? {} : { role: p.role },
+          overwrite: true
+        });
+        return "tone";
+      }
+      refuse(name, p, ["delay", "octave", "detune"], "@delay @o @d \u306F\u91CD\u306D\u305F\u3068\u304D\u3060\u3051\u66F8\u3051\u307E\u3059");
     }
     const layers = parts.map((p, i) => {
       if (p.wave === null) {
@@ -6472,7 +6999,36 @@ ${val}`;
     }
     if (!lines.length) return voices;
     const head = lines.join("\n") + "\n";
-    return voices.map((v) => head + String(v ?? ""));
+    const defs = /* @__PURE__ */ new Map();
+    for (const v of voices) for (const [k, d] of macroDefs(String(v ?? ""))) if (!defs.has(k)) defs.set(k, d);
+    const want = /* @__PURE__ */ new Set();
+    const take = (text) => {
+      for (const m of String(text).matchAll(/\$([A-Za-z0-9_]+)/g)) {
+        const k = m[1].toLowerCase();
+        if (want.has(k) || !defs.has(k)) continue;
+        want.add(k);
+        take(defs.get(k));
+      }
+    };
+    for (const line of lines) if (VOICE_LINE.test(line.slice(2))) take(line);
+    return voices.map((v) => {
+      const have = macroDefs(String(v ?? ""));
+      const add = [...want].filter((k) => !have.has(k)).map((k) => defs.get(k));
+      return head + (add.length ? add.join("\n") + "\n" : "") + String(v ?? "");
+    });
+  }
+  function macroDefs(text) {
+    const out = /* @__PURE__ */ new Map();
+    const src = String(text);
+    for (const m of src.matchAll(/\$([A-Za-z0-9_]+)[ \t\r\n]*=[ \t\r\n]*\{/g)) {
+      let depth = 0, k = m.index + m[0].length - 1;
+      for (; k < src.length; k++) {
+        if (src[k] === "{") depth++;
+        else if (src[k] === "}" && --depth === 0) break;
+      }
+      if (k < src.length) out.set(m[1].toLowerCase(), src.slice(m.index, k + 1));
+    }
+    return out;
   }
   function splitParts(text) {
     const out = [];
@@ -6732,6 +7288,10 @@ ${val}`;
     return { body, table };
   }
   var AT_WORDS = ["key", "tuning", "fade"];
+  var AT_EXAMPLE = {
+    ped: "@{acoustic(piano)}{ @ped 1 c e g @ped 0 }",
+    to: "@{acoustic(timpaniRoll)}{ v4 @to 14 a1 }"
+  };
   var AT_BRACED = [...AT_WORDS, "p"];
   var AT_BUNDLE_ONLY = ["vsteps", "vcurve"];
   var AT_LIST = "@{\u97F3\u8272} @e{\u5F62} @key{\u2026} @tuning{\u2026} @fade{\u2026} @p{\u2026} @f{\u2026} @d @o @v @m @s";
@@ -6824,6 +7384,14 @@ ${val}`;
     const cues = [];
     const texts = [];
     const filters = [];
+    const pedalAt = (down) => {
+      const last = sec._pedals[sec._pedals.length - 1];
+      if (down && sec._pedOn == null) sec._pedOn = last && time - last[1] < 0.06 ? last[1] + 0.06 : time;
+      if (!down && sec._pedOn != null) {
+        if (time > sec._pedOn) sec._pedals.push([sec._pedOn, time]);
+        sec._pedOn = null;
+      }
+    };
     const pushNote = (dur, freq, extra) => {
       if (!bundle) {
         const ev = oneNote(dur, freq, null, extra);
@@ -6874,6 +7442,12 @@ ${val}`;
           warn(`[ChpTnSnd] MML: \u97F3\u8272 "${w.name}" \u306F\u97F3\u91CF\u3092\u53D7\u3051\u4ED8\u3051\u307E\u305B\u3093(vsteps: 1)\u3002"@fade" \u306F\u52B9\u304D\u307E\u305B\u3093`);
         }
       }
+      let rollTo = null;
+      if (section && SECTIONS[section].full && sec.to != null) {
+        rollTo = clamp(sec.to + volShift, 0, 15);
+        vol = sec.to;
+        sec.to = null;
+      }
       const note = {
         t: time,
         dur,
@@ -6896,6 +7470,7 @@ ${val}`;
         ...vibSaid ? { vib: { depth: vibrato, speed: vibSpeed, delay: vibDelay } } : {},
         // 鳴っているあいだの音量の動き。フェードの途中の音にだけ載る
         ...fd && !muted ? { fade: fd } : {},
+        ...rollTo != null && !muted ? { rollTo } : {},
         ...extra
       };
       if (!muted) written.set(note, base);
@@ -7144,49 +7719,39 @@ ${val}`;
       py = n[1] ?? 0;
       pz = n[2] ?? 0;
     };
-    const readFilter = () => {
+    const readFx = (slot) => {
       let body = "";
       while (pos < src.length && src[pos] !== "}") body += src[pos++];
       pos++;
       const words2 = body.trim().split(/[\s,]+/).filter(Boolean);
-      const kinds = Object.keys(FILTERS);
-      const kind = words2.shift();
-      if (!FILTERS[kind]) {
-        bad(`[ChpTnSnd] MML: "@f{${kind ?? ""}\u2026}" \u2014 "${kind ?? ""}" \u3068\u3044\u3046\u30D5\u30A3\u30EB\u30BF\u306F\u3042\u308A\u307E\u305B\u3093(\u66F8\u3051\u308B\u306E\u306F ${kinds.join(" / ")})`);
+      const at = slot === 1 ? "@f" : `@f${slot}`;
+      if (words2[0] === "off") {
+        filters.push({ t: time, slot, off: true });
+        return;
       }
-      const def = FILTERS[kind].params;
-      const got = {};
-      if (words2.length && !words2[0].startsWith("@")) {
-        const f = parseFloat(words2.shift());
-        if (!Number.isFinite(f)) {
-          bad(`[ChpTnSnd] MML: "@f{${kind} \u2026}" \u306E 1 \u3064\u76EE\u306F cutoff \u306E\u6570\u3067\u3059`);
+      const got = readFxWords(words2, tempo, (h) => `"${at}{${h} \u2026}"`, bad);
+      if (!got) return;
+      const head = got.kind;
+      const first = filters.find((f) => (f.slot ?? 1) === slot && f.kind);
+      if (first && first.kind !== head) {
+        warn(`[ChpTnSnd] MML: "${at}{${head} \u2026}" \u2014 \u30A8\u30D5\u30A7\u30AF\u30C8\u306E\u7A2E\u985E\u306F 1 \u53F0\u306B 1 \u3064\u3067\u3059(\u5148\u306B\u66F8\u3044\u305F "${first.kind}" \u3067\u9CF4\u3089\u3057\u307E\u3059)\u3002\u5225\u306E\u7A2E\u985E\u3092\u8DB3\u3059\u306A\u3089\u3001\u7A7A\u3044\u3066\u3044\u308B\u756A\u53F7\u306B\u66F8\u3044\u3066\u304F\u3060\u3055\u3044`);
+      }
+      const kind = first ? first.kind : head;
+      let spec = got;
+      if (kind !== head) {
+        spec = { kind };
+        for (const [name, d] of Object.entries(FX_KINDS[kind].params)) {
+          spec[name] = clamp(got[name] ?? d.default, d.min, d.max);
         }
-        got.cutoff = f;
       }
-      while (words2.length) {
-        const key2 = words2.shift();
-        if (!key2.startsWith("@")) {
-          bad(`[ChpTnSnd] MML: "@f{${kind} \u2026}" \u2014 "${key2}" \u306F\u540D\u524D\u3067\u66F8\u3044\u3066\u304F\u3060\u3055\u3044(\u4F8B @resonance 0.8)\u3002\u4F4D\u7F6E\u3067\u66F8\u3051\u308B\u306E\u306F 1 \u3064\u76EE\u306E cutoff \u3060\u3051\u3067\u3059`);
+      if (first && !FILTERS[kind]) {
+        const same = Object.keys(FX_KINDS[kind].params).every((k) => first[k] === spec[k]);
+        if (!same) {
+          warn(`[ChpTnSnd] MML: "${at}{${kind} \u2026}" \u2014 ${kind} \u306F\u9014\u4E2D\u3067\u5024\u3092\u5909\u3048\u3089\u308C\u307E\u305B\u3093(\u5148\u306B\u66F8\u3044\u305F\u3082\u306E\u3067\u9CF4\u3089\u3057\u307E\u3059)\u3002\u4F5C\u308B\u3068\u304D\u306B\u5024\u304C\u6C7A\u307E\u308B\u305F\u3081\u3067\u3059`);
+          for (const name of Object.keys(FX_KINDS[kind].params)) spec[name] = first[name];
         }
-        const name = key2.slice(1);
-        if (!def[name]) {
-          bad(`[ChpTnSnd] MML: "@f{${kind} \u2026}" \u306B "@${name}" \u306F\u3042\u308A\u307E\u305B\u3093(\u66F8\u3051\u308B\u306E\u306F ${Object.keys(def).map((k) => "@" + k).join(" ")})`);
-        }
-        const f = parseFloat(words2.shift());
-        if (!Number.isFinite(f)) {
-          bad(`[ChpTnSnd] MML: "@f{${kind} \u2026}" \u306E "@${name}" \u306B\u6570\u304C\u3042\u308A\u307E\u305B\u3093`);
-        }
-        got[name] = f;
       }
-      const first = filters.find((f) => f.kind);
-      if (first && first.kind !== kind) {
-        warn(`[ChpTnSnd] MML: "@f{${kind} \u2026}" \u2014 \u30D5\u30A3\u30EB\u30BF\u306E\u7A2E\u985E\u306F 1 \u672C\u306E\u30C1\u30E3\u30F3\u30CD\u30EB\u306B 1 \u3064\u3067\u3059(\u5148\u306B\u66F8\u3044\u305F "${first.kind}" \u3067\u9CF4\u3089\u3057\u307E\u3059)\u3002\u30AB\u30C3\u30C8\u30AA\u30D5\u30FB\u30EC\u30BE\u30CA\u30F3\u30B9\u30FB\u98FD\u548C\u306F\u9014\u4E2D\u3067\u52D5\u304B\u305B\u307E\u3059`);
-      }
-      const spec = { kind: first ? first.kind : kind };
-      for (const [name, d] of Object.entries(def)) {
-        spec[name] = clamp(got[name] ?? d.default, d.min, d.max);
-      }
-      filters.push({ t: time, ...spec });
+      filters.push({ t: time, slot, ...spec });
     };
     const readPitchArg = () => {
       const back2 = pos;
@@ -7532,7 +8097,7 @@ ${val}`;
           continue;
         }
         if (" \n	\r".includes(ch)) continue;
-        if (section && ch !== MARK_AT && ch !== CUE_AT && ch !== "@" && !SEC_COMMON.includes(ch) && !SECTIONS[section].chars.includes(ch) && !(SECTIONS[section].digits && ch >= "0" && ch <= "9") && !(SECTIONS[section].notes && SEMI[ch] !== void 0)) {
+        if (section && !SECTIONS[section].full && ch !== MARK_AT && ch !== CUE_AT && ch !== "@" && !SEC_COMMON.includes(ch) && !SECTIONS[section].chars.includes(ch) && !(SECTIONS[section].digits && ch >= "0" && ch <= "9") && !(SECTIONS[section].notes && SEMI[ch] !== void 0)) {
           const ok = [
             ...SECTIONS[section].chars,
             ...SECTIONS[section].digits ? ["\u6570\u5B57"] : [],
@@ -7676,6 +8241,12 @@ ${val}`;
             time += dur;
           }
         } else if (ch === "}" && section) {
+          if (SECTIONS[section].full) {
+            pedalAt(false);
+            if (sec._pedals.length) {
+              for (let i = sec._first; i < events.length; i++) events[i].pedals = sec._pedals;
+            }
+          }
           if (section === "buzz") {
             buzzFlush();
             let j = pos;
@@ -7897,7 +8468,33 @@ ${val}`;
             }
           }
         } else if (ch === "@") {
-          if (section) {
+          let fullOther = false;
+          if (section && SECTIONS[section].full) {
+            let name = "";
+            let j = pos;
+            while (j < src.length && src[j] >= "a" && src[j] <= "z") name += src[j++];
+            const keys = SECTIONS[section].keys;
+            if (!name && src[j] === "{") {
+              bad(`[ChpTnSnd] MML: ${howOpen(section)} \u306E\u4E2D\u3067\u306F\u97F3\u8272\u3092\u5909\u3048\u3089\u308C\u307E\u305B\u3093\u3002\u533A\u9593\u3092\u9589\u3058\u3066\u304B\u3089\u5909\u3048\u3066\u304F\u3060\u3055\u3044`);
+            }
+            if (keys[name] && src[j] !== "{") {
+              const k = keys[name];
+              if (k.only && !k.only.includes(sec._inst)) {
+                const can = Object.keys(keys).filter((x) => !keys[x].only || keys[x].only.includes(sec._inst));
+                bad(`[ChpTnSnd] MML: "@${name}" \u306F ${k.only.join(" / ")} \u306E\u64CD\u4F5C\u3067\u3059(\u3053\u306E\u97F3\u8272\u306E\u5143\u306F ${sec._inst || "\u4E0D\u660E"}\u3002\u66F8\u3051\u308B\u306E\u306F ${can.length ? can.map((x) => `@${x}`).join(" / ") : "\u3042\u308A\u307E\u305B\u3093"})`);
+              }
+              pos = j;
+              const v = readFloat();
+              if (v === null || v < k.min || v > k.max || k.step && Math.abs(v / k.step - Math.round(v / k.step)) > 1e-9) {
+                bad(`[ChpTnSnd] MML: "@${name}" \u306E\u5024\u306F ${k.min}\u301C${k.max}${k.step ? `(${k.step} \u304D\u3056\u307F)` : ""} \u3067\u66F8\u304D\u307E\u3059`);
+              }
+              if (name === "ped") pedalAt(v === 1);
+              else sec[name] = v;
+              continue;
+            }
+            fullOther = true;
+          }
+          if (section && !fullOther) {
             let name = "";
             let j = pos;
             while (j < src.length && src[j] >= "a" && src[j] <= "z") name += src[j++];
@@ -7961,6 +8558,10 @@ ${val}`;
             bad(`[ChpTnSnd] MML: "@${word}" \u306F "@${word}{\u2026}" \u3068\u56F2\u3093\u3067\u66F8\u304D\u307E\u3059`);
           }
           if (word.length > 1 && !AT_WORDS.includes(word)) {
+            const inSec = Object.entries(SECTIONS).find(([, v]) => v.full && v.keys[word]);
+            if (inSec) {
+              bad(`[ChpTnSnd] MML: "@${word}" \u306F ${howOpen(inSec[0])} \u306E\u4E2D\u3060\u3051\u3067\u66F8\u3051\u307E\u3059(${(inSec[1].keys[word].only || []).join(" / ")} \u306E\u64CD\u4F5C\u3067\u3059\u3002\u4F8B: ${AT_EXAMPLE[word] || ""})`);
+            }
             bad(AT_BUNDLE_ONLY.includes(word) ? `[ChpTnSnd] MML: "@${word}" \u306F\u30D0\u30F3\u30C9\u30EB\u97F3\u8272(#bundle)\u306E\u4E2D\u3060\u3051\u3067\u66F8\u3051\u307E\u3059` : `[ChpTnSnd] MML: "@${word}" \u3068\u3044\u3046\u547D\u4EE4\u306F\u3042\u308A\u307E\u305B\u3093(\u66F8\u3051\u308B\u306E\u306F ${AT_LIST})`);
           }
           if (kind === "{") {
@@ -7981,6 +8582,13 @@ ${val}`;
                 pos = j + 1;
                 section = opened;
                 sec = {};
+                if (SECTIONS[opened].full) {
+                  const d = describeVoice((WAVEFORMS[wave] || {}).name);
+                  sec._inst = d && d.detail ? d.detail.instrument : null;
+                  sec._first = events.length;
+                  sec._pedals = [];
+                  sec._pedOn = null;
+                }
                 sec._from = time;
                 sec._ids = [];
                 continue;
@@ -8027,14 +8635,22 @@ ${val}`;
           } else if (kind === "p" && src[pos + 1] === "{") {
             pos += 2;
             readPlace();
-          } else if (kind === "f" && src[pos + 1] === "{") {
-            pos += 2;
-            readFilter();
-          } else if (kind === "f" && src[pos + 1] === "0") {
-            pos += 2;
-            filters.push({ t: time, off: true });
           } else if (kind === "f") {
-            bad('[ChpTnSnd] MML: "@f" \u306F "@f{lowpass 800}" \u3068\u56F2\u3093\u3067\u66F8\u304D\u307E\u3059(\u5916\u3059\u3068\u304D\u306F @f0)');
+            pos++;
+            let digits = "";
+            while (src[pos] >= "0" && src[pos] <= "9") digits += src[pos++];
+            if (digits === "0") {
+              filters.push({ t: time, off: true, all: true });
+            } else if (src[pos] === "{") {
+              pos++;
+              const slot = digits ? parseInt(digits, 10) : 1;
+              if (slot > 999) {
+                bad(`[ChpTnSnd] MML: "@f${digits}{\u2026}" \u2014 \u756A\u53F7\u306F 1 \u304B\u3089 999 \u307E\u3067\u3067\u3059`);
+              }
+              readFx(slot);
+            } else {
+              bad('[ChpTnSnd] MML: "@f" \u306F "@f{lowpass 800}" \u3068\u56F2\u3093\u3067\u66F8\u304D\u307E\u3059(2 \u53F0\u76EE\u304B\u3089\u306F "@f2{echo 0.125}"\u3002\u5916\u3059\u3068\u304D\u306F @f0\u30011 \u53F0\u3060\u3051\u306A\u3089 @f2{off})');
+            }
           } else if (kind === "n") {
             pos++;
             wave = findWave("noise");
@@ -8118,6 +8734,16 @@ ${val}`;
       }
     } catch (e) {
       if (!(e instanceof LooseStop)) throw e;
+    }
+    if (filters.length) {
+      const seen = /* @__PURE__ */ new Map();
+      for (const f of filters) if (f.kind && !seen.has(f.slot ?? 1)) seen.set(f.slot ?? 1, f);
+      let cost = 0;
+      for (const f of seen.values()) cost += fxCost(f);
+      if (cost > FX_WARN_COST) {
+        const names = [...seen.values()].map((f) => f.kind).join(" + ");
+        warn(`[ChpTnSnd] MML: \u3053\u306E\u30C1\u30E3\u30F3\u30CD\u30EB\u306E\u30A8\u30D5\u30A7\u30AF\u30C8(${names})\u306F\u30011 \u30D6\u30ED\u30C3\u30AF\u306E\u7DE0\u3081\u5207\u308A\u306E ${cost.toFixed(1)}% \u3092\u4F7F\u3046\u898B\u7A4D\u3082\u308A\u3067\u3059(${FX_WARN_COST}% \u3092\u8D8A\u3048\u307E\u3057\u305F)\u3002\u6A5F\u68B0\u306B\u3088\u3063\u3066\u306F\u97F3\u304C\u9014\u5207\u308C\u307E\u3059\u3002\u66F8\u304D\u51FA\u3057(renderBGM)\u306B\u306F\u7DE0\u3081\u5207\u308A\u304C\u7121\u3044\u306E\u3067\u3001\u713C\u3051\u3070\u5FC5\u305A\u805E\u3051\u307E\u3059`);
+      }
     }
     return {
       events,
@@ -8448,7 +9074,7 @@ ${val}`;
     return { ok: errors.length === 0, errors, warnings, channels, total };
   }
 
-  // player-latest/sound/chipset.js
+  // sound/chipset.js
   var ROLE_RANK = {
     lead: 6,
     // 旋律。いちばん前に出るもの
@@ -8469,7 +9095,7 @@ ${val}`;
   };
   var ROLES_COVERED = ROLES.every((r) => ROLE_RANK[r] !== void 0);
 
-  // player-latest/sound/mask.js
+  // sound/mask.js
   function groupsOf(tracks) {
     const out = [];
     for (const t of tracks ?? []) {
@@ -8483,11 +9109,11 @@ ${val}`;
     }
     return out;
   }
-  function groupPick(tracks, pick = {}) {
+  function groupPick(tracks, pick2 = {}) {
     const list = groupsOf(tracks);
-    const want = pick.group == null ? null : String(pick.group);
+    const want = pick2.group == null ? null : String(pick2.group);
     const now = want && list.find((g) => g.name === want) || list[0] || null;
-    const sets = now ? pick.sets == null ? now.sets.slice() : now.sets.filter((s) => pick.sets.includes(s)) : [];
+    const sets = now ? pick2.sets == null ? now.sets.slice() : now.sets.filter((s) => pick2.sets.includes(s)) : [];
     const silent = [];
     (tracks ?? []).forEach((t, i) => {
       if (!t || !t.group) return;
@@ -8505,7 +9131,7 @@ ${val}`;
     return { group: now ? now.name : null, sets, silent, machine };
   }
 
-  // player-latest/sound/wavetables.js
+  // sound/wavetables.js
   var N = 32;
   var build = (f) => Array.from({ length: N }, (_, i) => f(i / N, i));
   var norm = (w) => {
@@ -8536,15 +9162,15 @@ ${val}`;
   });
   function registerDefaultWaves() {
     registerFamily("waveSine", {
-      note: "A sine held in wavetable memory. The only thing that changes is the bit depth, so it is the clearest way to hear what depth does.",
+      desc: "A sine held in wavetable memory. The only thing that changes is the bit depth, so it is the clearest way to hear what depth does.",
       params: [{
         name: "bits",
         default: "5",
-        note: "Bit depth of each sample. Fewer bits, coarser steps, more buzz.",
+        desc: "Bit depth of each sample. Fewer bits, coarser steps, more buzz.",
         values: [
-          { value: "8", note: "Eight bits (256 steps), the depth of an SCC. The steps all but disappear." },
-          { value: "5", note: "Five bits (32 steps), the depth of a PC Engine. Reads as a chip, not a synth." },
-          { value: "3", note: "Three bits (8 steps). Not on any real chip; the corners make the sine buzz." }
+          { value: "8", desc: "Eight bits (256 steps), the depth of an SCC. The steps all but disappear." },
+          { value: "5", desc: "Five bits (32 steps), the depth of a PC Engine. Reads as a chip, not a synth." },
+          { value: "3", desc: "Three bits (8 steps). Not on any real chip; the corners make the sine buzz." }
         ]
       }]
     });
@@ -8554,8 +9180,8 @@ ${val}`;
       8,
       {
         role: "chord",
-        noteJa: "\u540C\u3058\u30B5\u30A4\u30F3\u6CE2\u3092 8 \u30D3\u30C3\u30C8(256 \u6BB5)\u3067\u3002SCC \u306B\u8F09\u305B\u305F\u3068\u304D\u306E\u7C97\u3055\u3067\u3001\u3053\u3053\u307E\u3067\u7D30\u304B\u3044\u3068\u307B\u3068\u3093\u3069\u6BB5\u304C\u805E\u3053\u3048\u306A\u3044\u3002\u7C97\u3055\u306E\u7AEF\u3068\u3057\u3066\u3001\u3053\u308C\u304C\u3044\u3061\u3070\u3093\u304D\u308C\u3044\u306A\u307B\u3046",
-        note: "The same sine at eight bits (256 steps), the depth of an SCC. Fine enough that the steps all but disappear \u2014 the clean end of the range."
+        descJa: "\u540C\u3058\u30B5\u30A4\u30F3\u6CE2\u3092 8 \u30D3\u30C3\u30C8(256 \u6BB5)\u3067\u3002SCC \u306B\u8F09\u305B\u305F\u3068\u304D\u306E\u7C97\u3055\u3067\u3001\u3053\u3053\u307E\u3067\u7D30\u304B\u3044\u3068\u307B\u3068\u3093\u3069\u6BB5\u304C\u805E\u3053\u3048\u306A\u3044\u3002\u7C97\u3055\u306E\u7AEF\u3068\u3057\u3066\u3001\u3053\u308C\u304C\u3044\u3061\u3070\u3093\u304D\u308C\u3044\u306A\u307B\u3046",
+        desc: "The same sine at eight bits (256 steps), the depth of an SCC. Fine enough that the steps all but disappear \u2014 the clean end of the range."
       }
     );
     registerWave(
@@ -8564,8 +9190,8 @@ ${val}`;
       5,
       {
         role: "chord",
-        noteJa: "\u6CE2\u5F62\u30E1\u30E2\u30EA\u306B\u8F09\u305B\u305F\u30B5\u30A4\u30F3\u6CE2\u30025 \u30D3\u30C3\u30C8(32 \u6BB5)\u3002\u968E\u6BB5\u306B\u3057\u3066\u3042\u308B\u306E\u306F\u308F\u3056\u3068\u3067\u3001\u305D\u306E\u7C97\u3055\u304C\u300C\u30B7\u30F3\u30BB\u3067\u306F\u306A\u304F\u30C1\u30C3\u30D7\u306E\u97F3\u300D\u306B\u805E\u3053\u3048\u308B\u6B63\u4F53\u3002PC \u30A8\u30F3\u30B8\u30F3\u306B\u8F09\u305B\u305F\u3068\u304D\u306E\u7C97\u3055",
-        note: "Wavetable sine at five bits (32 steps) \u2014 the depth of a PC Engine. The staircase is deliberate: that coarseness is what makes it read as a chip and not a synth."
+        descJa: "\u6CE2\u5F62\u30E1\u30E2\u30EA\u306B\u8F09\u305B\u305F\u30B5\u30A4\u30F3\u6CE2\u30025 \u30D3\u30C3\u30C8(32 \u6BB5)\u3002\u968E\u6BB5\u306B\u3057\u3066\u3042\u308B\u306E\u306F\u308F\u3056\u3068\u3067\u3001\u305D\u306E\u7C97\u3055\u304C\u300C\u30B7\u30F3\u30BB\u3067\u306F\u306A\u304F\u30C1\u30C3\u30D7\u306E\u97F3\u300D\u306B\u805E\u3053\u3048\u308B\u6B63\u4F53\u3002PC \u30A8\u30F3\u30B8\u30F3\u306B\u8F09\u305B\u305F\u3068\u304D\u306E\u7C97\u3055",
+        desc: "Wavetable sine at five bits (32 steps) \u2014 the depth of a PC Engine. The staircase is deliberate: that coarseness is what makes it read as a chip and not a synth."
       }
     );
     registerWave(
@@ -8574,8 +9200,8 @@ ${val}`;
       3,
       {
         role: "chord",
-        noteJa: "\u540C\u3058\u30B5\u30A4\u30F3\u6CE2\u3092 3 \u30D3\u30C3\u30C8(8 \u6BB5)\u307E\u3067\u843D\u3068\u3057\u305F\u3082\u306E\u3002\u6BB5\u306E\u89D2\u304B\u3089\u500D\u97F3\u304C\u751F\u3048\u3066\u3001\u30B5\u30A4\u30F3\u6CE2\u306A\u306E\u306B\u30B8\u30EA\u30B8\u30EA\u9CF4\u308B\u3002\u3053\u3053\u307E\u3067\u6765\u308B\u3068\u3001\u6DF1\u3055\u304C\u4F55\u3092\u3057\u3066\u3044\u308B\u306E\u304B\u304C\u4E00\u5EA6\u3067\u5206\u304B\u308B",
-        note: "The same sine crushed to three bits (8 steps). The corners of the staircase grow harmonics, so a sine ends up buzzing \u2014 at this depth you hear what bit depth does in one listen."
+        descJa: "\u540C\u3058\u30B5\u30A4\u30F3\u6CE2\u3092 3 \u30D3\u30C3\u30C8(8 \u6BB5)\u307E\u3067\u843D\u3068\u3057\u305F\u3082\u306E\u3002\u6BB5\u306E\u89D2\u304B\u3089\u500D\u97F3\u304C\u751F\u3048\u3066\u3001\u30B5\u30A4\u30F3\u6CE2\u306A\u306E\u306B\u30B8\u30EA\u30B8\u30EA\u9CF4\u308B\u3002\u3053\u3053\u307E\u3067\u6765\u308B\u3068\u3001\u6DF1\u3055\u304C\u4F55\u3092\u3057\u3066\u3044\u308B\u306E\u304B\u304C\u4E00\u5EA6\u3067\u5206\u304B\u308B",
+        desc: "The same sine crushed to three bits (8 steps). The corners of the staircase grow harmonics, so a sine ends up buzzing \u2014 at this depth you hear what bit depth does in one listen."
       }
     );
     registerWave(
@@ -8584,19 +9210,19 @@ ${val}`;
       8,
       {
         role: "counter",
-        noteJa: "\u4E0A\u306E\u500D\u97F3\u3092\u5F37\u304F\u6301\u305F\u305B\u305F\u6CE2\u5F62\u30E1\u30E2\u30EA\u3002\u7ACB\u3061\u4E0A\u304C\u308A\u304C\u91D1\u5C5E\u7684\u3067\u3001\u9418\u3084\u30C1\u30E3\u30A4\u30E0\u306B\u5411\u304F",
-        note: "Wavetable with strong upper partials. Metallic attack, good for bells and chimes."
+        descJa: "\u4E0A\u306E\u500D\u97F3\u3092\u5F37\u304F\u6301\u305F\u305B\u305F\u6CE2\u5F62\u30E1\u30E2\u30EA\u3002\u7ACB\u3061\u4E0A\u304C\u308A\u304C\u91D1\u5C5E\u7684\u3067\u3001\u9418\u3084\u30C1\u30E3\u30A4\u30E0\u306B\u5411\u304F",
+        desc: "Wavetable with strong upper partials. Metallic attack, good for bells and chimes."
       }
     );
     registerFamily("waveOrgan", {
-      note: "Stacked octaves in one wavetable cycle, like pulling an organ stop. Two bit depths to compare.",
+      desc: "Stacked octaves in one wavetable cycle, like pulling an organ stop. Two bit depths to compare.",
       params: [{
         name: "bits",
         default: "8",
-        note: "Bit depth of each sample.",
+        desc: "Bit depth of each sample.",
         values: [
-          { value: "8", note: "Eight bits (256 steps), the coarseness of an SCC." },
-          { value: "5", note: "Five bits (32 steps), the coarseness of a PC Engine. Grittier." }
+          { value: "8", desc: "Eight bits (256 steps), the coarseness of an SCC." },
+          { value: "5", desc: "Five bits (32 steps), the coarseness of a PC Engine. Grittier." }
         ]
       }]
     });
@@ -8606,8 +9232,8 @@ ${val}`;
       8,
       {
         role: "chord",
-        noteJa: "1 \u5468\u671F\u306E\u4E2D\u306B\u30AA\u30AF\u30BF\u30FC\u30D6\u3092\u7A4D\u3093\u3067\u3042\u308B\u30021 \u3064\u306E\u97F3\u3068\u3044\u3046\u3088\u308A\u3001\u30AA\u30EB\u30AC\u30F3\u306E\u97F3\u6813\u3092\u5F15\u3044\u305F\u3088\u3046\u306B\u805E\u3053\u3048\u308B\u30028 \u30D3\u30C3\u30C8(256 \u6BB5)\u306A\u306E\u3067\u3001SCC \u306B\u8F09\u305B\u305F\u3068\u304D\u306E\u7C97\u3055",
-        note: "Stacked octaves in one cycle, so it reads as an organ register rather than a single note. Eight bits (256 steps) \u2014 the coarseness you get on an SCC."
+        descJa: "1 \u5468\u671F\u306E\u4E2D\u306B\u30AA\u30AF\u30BF\u30FC\u30D6\u3092\u7A4D\u3093\u3067\u3042\u308B\u30021 \u3064\u306E\u97F3\u3068\u3044\u3046\u3088\u308A\u3001\u30AA\u30EB\u30AC\u30F3\u306E\u97F3\u6813\u3092\u5F15\u3044\u305F\u3088\u3046\u306B\u805E\u3053\u3048\u308B\u30028 \u30D3\u30C3\u30C8(256 \u6BB5)\u306A\u306E\u3067\u3001SCC \u306B\u8F09\u305B\u305F\u3068\u304D\u306E\u7C97\u3055",
+        desc: "Stacked octaves in one cycle, so it reads as an organ register rather than a single note. Eight bits (256 steps) \u2014 the coarseness you get on an SCC."
       }
     );
     registerWave(
@@ -8616,8 +9242,8 @@ ${val}`;
       5,
       {
         role: "chord",
-        noteJa: "\u540C\u3058\u5F62\u3092 5 \u30D3\u30C3\u30C8(32 \u6BB5)\u3067\u4E38\u3081\u305F\u3082\u306E\u3002PC \u30A8\u30F3\u30B8\u30F3\u306B\u8F09\u305B\u305F\u3068\u304D\u306E\u7C97\u3055\u3002\u6BB5\u304C\u7C97\u3044\u3076\u3093\u9AD8\u3044\u500D\u97F3\u304C\u5897\u3048\u3066\u3001\u540C\u3058\u5F62\u3067\u3082\u3056\u3089\u3064\u304F",
-        note: "The same shape rounded to five bits (32 steps) \u2014 the coarseness you get on a PC Engine. The coarser steps add upper harmonics, so the same shape comes out grittier."
+        descJa: "\u540C\u3058\u5F62\u3092 5 \u30D3\u30C3\u30C8(32 \u6BB5)\u3067\u4E38\u3081\u305F\u3082\u306E\u3002PC \u30A8\u30F3\u30B8\u30F3\u306B\u8F09\u305B\u305F\u3068\u304D\u306E\u7C97\u3055\u3002\u6BB5\u304C\u7C97\u3044\u3076\u3093\u9AD8\u3044\u500D\u97F3\u304C\u5897\u3048\u3066\u3001\u540C\u3058\u5F62\u3067\u3082\u3056\u3089\u3064\u304F",
+        desc: "The same shape rounded to five bits (32 steps) \u2014 the coarseness you get on a PC Engine. The coarser steps add upper harmonics, so the same shape comes out grittier."
       }
     );
     registerWave(
@@ -8626,8 +9252,8 @@ ${val}`;
       5,
       {
         role: "lead",
-        noteJa: "\u306E\u3053\u304E\u308A\u6CE2\u3092\u6CE2\u5F62\u30E1\u30E2\u30EA\u3067\u6301\u3063\u305F\u3082\u306E\u3002\u308F\u3056\u3068\u7C97\u304F(5 \u30D3\u30C3\u30C8)\u3057\u3066\u3042\u308B",
-        note: "Sawtooth held in the wavetable, kept coarse (5-bit) on purpose."
+        descJa: "\u306E\u3053\u304E\u308A\u6CE2\u3092\u6CE2\u5F62\u30E1\u30E2\u30EA\u3067\u6301\u3063\u305F\u3082\u306E\u3002\u308F\u3056\u3068\u7C97\u304F(5 \u30D3\u30C3\u30C8)\u3057\u3066\u3042\u308B",
+        desc: "Sawtooth held in the wavetable, kept coarse (5-bit) on purpose."
       }
     );
     registerWave(
@@ -8636,8 +9262,8 @@ ${val}`;
       5,
       {
         role: "lead",
-        noteJa: "\u5171\u9CF4\u306E\u5C71\u3092\u4F5C\u3063\u305F\u5F62\u3002\u7C97\u3044\u3002\u697D\u5668\u3068\u3044\u3046\u3088\u308A\u6BCD\u97F3\u306B\u805E\u3053\u3048\u308B",
-        note: "Formant-ish shape, coarse. Reads as a vowel more than an instrument."
+        descJa: "\u5171\u9CF4\u306E\u5C71\u3092\u4F5C\u3063\u305F\u5F62\u3002\u7C97\u3044\u3002\u697D\u5668\u3068\u3044\u3046\u3088\u308A\u6BCD\u97F3\u306B\u805E\u3053\u3048\u308B",
+        desc: "Formant-ish shape, coarse. Reads as a vowel more than an instrument."
       }
     );
     registerWave(
@@ -8647,8 +9273,8 @@ ${val}`;
       {
         role: "chord",
         env: "pad",
-        noteJa: "\u548C\u97F3\u3092\u6577\u304F\u305F\u3081\u306E\u5F62\u3002\u500D\u97F3\u3092 3 \u672C\u3060\u3051\u306B\u3057\u3066\u4E0A\u3092\u7A7A\u3051\u3066\u3042\u308B\u3002\u3086\u3063\u304F\u308A\u5165\u308B\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u3092\u9023\u308C\u3066\u304F\u308B\u306E\u3067\u3001\u7F6E\u3044\u305F\u3060\u3051\u3067\u65CB\u5F8B\u306E\u4E0B\u306B\u56DE\u308B",
-        note: "A shape for laying chords under things: only three partials, with the top left empty. It brings a slow envelope with it, so it sits under the melody without being told to."
+        descJa: "\u548C\u97F3\u3092\u6577\u304F\u305F\u3081\u306E\u5F62\u3002\u500D\u97F3\u3092 3 \u672C\u3060\u3051\u306B\u3057\u3066\u4E0A\u3092\u7A7A\u3051\u3066\u3042\u308B\u3002\u3086\u3063\u304F\u308A\u5165\u308B\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u3092\u9023\u308C\u3066\u304F\u308B\u306E\u3067\u3001\u7F6E\u3044\u305F\u3060\u3051\u3067\u65CB\u5F8B\u306E\u4E0B\u306B\u56DE\u308B",
+        desc: "A shape for laying chords under things: only three partials, with the top left empty. It brings a slow envelope with it, so it sits under the melody without being told to."
       }
     );
     registerWave(
@@ -8658,8 +9284,8 @@ ${val}`;
       {
         role: "chord",
         env: "swell",
-        noteJa: "\u540C\u3058\u304F\u548C\u97F3\u306E\u305F\u3081\u306E\u5F62\u3060\u304C\u3001\u5947\u6570\u500D\u97F3\u3060\u3051\u3067\u4E2D\u304C\u7A7A\u3044\u3066\u3044\u308B\u3002\u6E29\u304B\u3044\u307B\u3046\u3068\u91CD\u306D\u308B\u3068\u3001\u540C\u3058\u548C\u97F3\u3067\u3082\u5225\u306E\u8272\u306B\u306A\u308B\u3002\u7ACB\u3061\u4E0A\u304C\u308A\u306F\u3055\u3089\u306B\u9045\u3044",
-        note: "Also for chords, but odd partials only, hollow in the middle. Layered against the warm one the same chord changes colour. Slower to arrive again."
+        descJa: "\u540C\u3058\u304F\u548C\u97F3\u306E\u305F\u3081\u306E\u5F62\u3060\u304C\u3001\u5947\u6570\u500D\u97F3\u3060\u3051\u3067\u4E2D\u304C\u7A7A\u3044\u3066\u3044\u308B\u3002\u6E29\u304B\u3044\u307B\u3046\u3068\u91CD\u306D\u308B\u3068\u3001\u540C\u3058\u548C\u97F3\u3067\u3082\u5225\u306E\u8272\u306B\u306A\u308B\u3002\u7ACB\u3061\u4E0A\u304C\u308A\u306F\u3055\u3089\u306B\u9045\u3044",
+        desc: "Also for chords, but odd partials only, hollow in the middle. Layered against the warm one the same chord changes colour. Slower to arrive again."
       }
     );
     registerWave(
@@ -8668,13 +9294,13 @@ ${val}`;
       8,
       {
         role: "lead",
-        noteJa: "\u89D2\u3092\u4E38\u3081\u305F\u77E9\u5F62\u6CE2\u3002\u4E2D\u304C\u7A7A\u3044\u305F\u611F\u3058\u306F\u6B8B\u3057\u305F\u307E\u307E\u3001\u304D\u3064\u3055\u3060\u3051\u53D6\u308C\u308B",
-        note: "Square with the corners rounded off. Less harsh than a hard pulse while keeping the hollow character."
+        descJa: "\u89D2\u3092\u4E38\u3081\u305F\u77E9\u5F62\u6CE2\u3002\u4E2D\u304C\u7A7A\u3044\u305F\u611F\u3058\u306F\u6B8B\u3057\u305F\u307E\u307E\u3001\u304D\u3064\u3055\u3060\u3051\u53D6\u308C\u308B",
+        desc: "Square with the corners rounded off. Less harsh than a hard pulse while keeping the hollow character."
       }
     );
   }
 
-  // player-latest/sound/fmpresets.js
+  // sound/fmpresets.js
   var FM_PRESETS = {
     // 1 バイオリン。弓のこすれを出すため、比を少しずらして倍音を残す
     // 2 ギター。はじいた瞬間だけ硬く、あとは丸くなる
@@ -8697,9 +9323,9 @@ ${val}`;
       gm: "Lead 1 (square)",
       pitch: [-180, -110, -50, 0],
       vib: { depth: 12, speed: 6.5, delay: 18 },
-      noteJa: "\u305C\u3093\u3076\u306E\u4E0A\u306B\u4E57\u305B\u308B\u305F\u3081\u306E\u3001\u72EC\u594F\u306E\u97F3\u30024 \u30D5\u30EC\u30FC\u30E0\u3067\u6ED1\u308A\u8FBC\u3093\u3067\u304B\u3089\u300118 \u30D5\u30EC\u30FC\u30E0\u5F8C\u306B\u6DF1\u304F\u63FA\u308C\u308B\u30022 \u3064\u63C3\u3063\u3066\u521D\u3081\u3066\u300C\u5F3E\u3044\u3066\u3044\u308B\u300D\u97F3\u306B\u306A\u308B",
+      descJa: "\u305C\u3093\u3076\u306E\u4E0A\u306B\u4E57\u305B\u308B\u305F\u3081\u306E\u3001\u72EC\u594F\u306E\u97F3\u30024 \u30D5\u30EC\u30FC\u30E0\u3067\u6ED1\u308A\u8FBC\u3093\u3067\u304B\u3089\u300118 \u30D5\u30EC\u30FC\u30E0\u5F8C\u306B\u6DF1\u304F\u63FA\u308C\u308B\u30022 \u3064\u63C3\u3063\u3066\u521D\u3081\u3066\u300C\u5F3E\u3044\u3066\u3044\u308B\u300D\u97F3\u306B\u306A\u308B",
       role: "lead",
-      note: "Solo voice meant to sit on top of everything else. Slides up into place over four frames, then wobbles deeply from eighteen. Both together are what makes a lead sound played rather than triggered.",
+      desc: "Solo voice meant to sit on top of everything else. Slides up into place over four frames, then wobbles deeply from eighteen. Both together are what makes a lead sound played rather than triggered.",
       ratio: 2.5,
       depth: 7,
       attack: 4e-3,
@@ -8710,9 +9336,9 @@ ${val}`;
     fm2Growl: {
       gm: "Lead 8 (bass + lead)",
       vib: { depth: 14, speed: 9, delay: 6 },
-      noteJa: "\u6DF1\u304F\u63FA\u3089\u3057\u3066\u3001\u6BD4\u3082\u6574\u6570\u304B\u3089\u5927\u304D\u304F\u5916\u3057\u3066\u3042\u308B\u3002\u500D\u97F3\u304C\u305D\u308D\u308F\u306A\u3044\u306E\u3067\u5538\u308B\u3002\u3053\u306E\u4E2D\u3067\u3044\u3061\u3070\u3093\u901F\u304F\u6DF1\u304F\u3001\u307B\u3068\u3093\u3069\u6700\u521D\u304B\u3089\u63FA\u308C\u308B\u3002\u843D\u3061\u7740\u304F\u524D\u306B\u5538\u308B",
+      descJa: "\u6DF1\u304F\u63FA\u3089\u3057\u3066\u3001\u6BD4\u3082\u6574\u6570\u304B\u3089\u5927\u304D\u304F\u5916\u3057\u3066\u3042\u308B\u3002\u500D\u97F3\u304C\u305D\u308D\u308F\u306A\u3044\u306E\u3067\u5538\u308B\u3002\u3053\u306E\u4E2D\u3067\u3044\u3061\u3070\u3093\u901F\u304F\u6DF1\u304F\u3001\u307B\u3068\u3093\u3069\u6700\u521D\u304B\u3089\u63FA\u308C\u308B\u3002\u843D\u3061\u7740\u304F\u524D\u306B\u5538\u308B",
       role: "bass",
-      note: "Deep modulation with the ratio well off a whole number \u2014 inharmonic, so it snarls. The fastest and deepest wobble here, starting almost at once. It snarls before it settles.",
+      desc: "Deep modulation with the ratio well off a whole number \u2014 inharmonic, so it snarls. The fastest and deepest wobble here, starting almost at once. It snarls before it settles.",
       ratio: 1.5,
       depth: 9,
       attack: 2e-3,
@@ -8723,9 +9349,9 @@ ${val}`;
     fm2Chime: {
       gm: "Tubular Bells",
       vol: [15, 15, 14, 13, 12, 11, 10, 9, 8, 7, 7, 6, 5, 5, 4, 4, 3, 3, 2, 2, 1],
-      noteJa: "\u9418\u306E\u3088\u3046\u306A\u97F3\u3002\u9AD8\u3044\u500D\u97F3\u304C\u9577\u304F\u6B8B\u308B\u300221 \u30D5\u30EC\u30FC\u30E0\u304B\u3051\u3066\u3086\u3063\u304F\u308A\u843D\u3061\u308B\u3002\u9418\u306F\u5C3B\u5C3E\u306E\u307B\u3046\u304C\u672C\u4F53",
+      descJa: "\u9418\u306E\u3088\u3046\u306A\u97F3\u3002\u9AD8\u3044\u500D\u97F3\u304C\u9577\u304F\u6B8B\u308B\u300221 \u30D5\u30EC\u30FC\u30E0\u304B\u3051\u3066\u3086\u3063\u304F\u308A\u843D\u3061\u308B\u3002\u9418\u306F\u5C3B\u5C3E\u306E\u307B\u3046\u304C\u672C\u4F53",
       role: "counter",
-      note: "Bell-like, high partials, long tail. Falls slowly over twenty-one frames. A bell is mostly its tail.",
+      desc: "Bell-like, high partials, long tail. Falls slowly over twenty-one frames. A bell is mostly its tail.",
       ratio: 4.7,
       depth: 5,
       attack: 2e-3,
@@ -8753,39 +9379,39 @@ ${val}`;
   };
   function registerDefaultFM() {
     for (const [name, p] of Object.entries(FM_PRESETS)) {
-      registerFM(name, p, { overwrite: true, note: p.note, noteJa: p.noteJa, role: p.role, gm: p.gm });
+      registerFM(name, p, { overwrite: true, desc: p.desc, descJa: p.descJa, role: p.role, gm: p.gm });
     }
   }
 
-  // player-latest/sound/beeppresets.js
+  // sound/beeppresets.js
   var BEEP_PRESETS = {
     // ---- 搬送波を刻む型。**音程を変える回路が無い機械** ----
     // 2.4kHz が鳴りっぱなしで、ソフトはそれを On/Off するだけ。
     // 消せない搬送波が乗り、画面の DMA で刻む間隔も揺れる = 濁る
     "beep(noisy)": {
       role: "lead",
-      note: "Japanese 8-bit micro beeper. A 2.4kHz carrier runs constantly and software only gates it on and off, so the carrier bleeds through and the video DMA jitters the gaps. The muddiness is the sound, not a defect.",
+      desc: "Japanese 8-bit micro beeper. A 2.4kHz carrier runs constantly and software only gates it on and off, so the carrier bleeds through and the video DMA jitters the gaps. The muddiness is the sound, not a defect.",
       carrier: 2400,
       jitter: 0.4,
       frame: 60,
       display: 0.7,
-      noteJa: "\u56FD\u7523 8 \u30D3\u30C3\u30C8\u6A5F\u306E\u30D3\u30FC\u30D7\u3002\u6FC1\u308A\u304C\u3053\u306E\u97F3\u306E\u672C\u4F53"
+      descJa: "\u56FD\u7523 8 \u30D3\u30C3\u30C8\u6A5F\u306E\u30D3\u30FC\u30D7\u3002\u6FC1\u308A\u304C\u3053\u306E\u97F3\u306E\u672C\u4F53"
     },
     "beep(calm)": {
       role: "lead",
-      note: "The same machine with the jitter halved. Use when the melody matters more than the character.",
+      desc: "The same machine with the jitter halved. Use when the melody matters more than the character.",
       carrier: 2400,
       jitter: 0.15,
       frame: 60,
       display: 0.7,
-      noteJa: "\u540C\u3058\u4F5C\u308A\u3067\u63FA\u308C\u3092\u6D45\u304F\u3057\u305F\u3082\u306E\u3002\u65CB\u5F8B\u3092\u805E\u304B\u305B\u305F\u3044\u3068\u304D"
+      descJa: "\u540C\u3058\u4F5C\u308A\u3067\u63FA\u308C\u3092\u6D45\u304F\u3057\u305F\u3082\u306E\u3002\u65CB\u5F8B\u3092\u805E\u304B\u305B\u305F\u3044\u3068\u304D"
     },
     "beep(flat)": {
       role: "lead",
-      note: "Does not exist on real hardware. Same carrier bleed, jitter removed \u2014 the display always fought the CPU, so it always wobbled.",
+      desc: "Does not exist on real hardware. Same carrier bleed, jitter removed \u2014 the display always fought the CPU, so it always wobbled.",
       carrier: 2400,
       jitter: 0,
-      noteJa: "**\u5B9F\u5728\u3057\u306A\u3044\u3002**\u540C\u3058\u6FC1\u308A\u306E\u307E\u307E\u63FA\u308C\u3060\u3051\u6B62\u3081\u305F\u3082\u306E\u3002\u5B9F\u6A5F\u306F\u753B\u9762\u3068\u98DF\u3044\u5408\u3046\u306E\u3067\u5FC5\u305A\u63FA\u308C\u305F"
+      descJa: "**\u5B9F\u5728\u3057\u306A\u3044\u3002**\u540C\u3058\u6FC1\u308A\u306E\u307E\u307E\u63FA\u308C\u3060\u3051\u6B62\u3081\u305F\u3082\u306E\u3002\u5B9F\u6A5F\u306F\u753B\u9762\u3068\u98DF\u3044\u5408\u3046\u306E\u3067\u5FC5\u305A\u63FA\u308C\u305F"
     },
     // ---- 線を直接叩く型。搬送波が無いので素直な矩形 ----
     // 画面とメモリを取り合う機械は、同じ理由で揺れる。
@@ -8793,21 +9419,21 @@ ${val}`;
     // 「ビープの、濁っていないほう」でしかない
     "beep(direct)": {
       role: "lead",
-      note: "Speaker driven directly, so no carrier: a clean square. Still jitters because video and memory share the bus.",
+      desc: "Speaker driven directly, so no carrier: a clean square. Still jitters because video and memory share the bus.",
       carrier: 0,
       jitter: 0.4,
       frame: 50,
       display: 0.62,
-      noteJa: "\u7DDA\u3092\u76F4\u63A5\u53E9\u304F\u578B\u3002\u642C\u9001\u6CE2\u304C\u7121\u3044\u306E\u3067\u7D20\u76F4\u306A\u77E9\u5F62\u3002\u753B\u9762\u3092\u63CF\u304F\u9593\u3060\u3051 CPU \u304C\u5F85\u305F\u3055\u308C\u3066\u63FA\u308C\u308B(50Hz)"
+      descJa: "\u7DDA\u3092\u76F4\u63A5\u53E9\u304F\u578B\u3002\u642C\u9001\u6CE2\u304C\u7121\u3044\u306E\u3067\u7D20\u76F4\u306A\u77E9\u5F62\u3002\u753B\u9762\u3092\u63CF\u304F\u9593\u3060\u3051 CPU \u304C\u5F85\u305F\u3055\u308C\u3066\u63FA\u308C\u308B(50Hz)"
     },
     "beep(clean)": {
       role: "lead",
-      note: "Direct-drive beeper on a faster machine. Cleaner and higher.",
+      desc: "Direct-drive beeper on a faster machine. Cleaner and higher.",
       carrier: 0,
       jitter: 0,
       frame: 60,
       display: 0.7,
-      noteJa: "\u540C\u3058\u4F5C\u308A\u3067\u3001\u753B\u9762\u3068\u98DF\u3044\u5408\u308F\u306A\u3044\u6A5F\u68B0\u306E\u3082\u306E\u3002\u63FA\u308C\u306A\u3044"
+      descJa: "\u540C\u3058\u4F5C\u308A\u3067\u3001\u753B\u9762\u3068\u98DF\u3044\u5408\u308F\u306A\u3044\u6A5F\u68B0\u306E\u3082\u306E\u3002\u63FA\u308C\u306A\u3044"
     },
     // ---- エンベロープを連れてくるもの ----
     // **音色とエンベロープの組み合わせで初めて楽器になる**例。
@@ -8816,23 +9442,23 @@ ${val}`;
     // 別々の名前で並べるより、1 行の中で押し比べられるほうが早い。
     "beep(pluck)": {
       role: "lead",
-      note: "Beeper gated with a short envelope so each note reads as plucked.",
+      desc: "Beeper gated with a short envelope so each note reads as plucked.",
       carrier: 2400,
       jitter: 0.25,
       frame: 60,
       display: 0.7,
       env: "pluck",
-      noteJa: "**\u5B9F\u6A5F\u306B\u7121\u3044\u697D\u5668\u3002**\u6FC1\u3063\u305F\u30D3\u30FC\u30D7\u3092\u5F3E\u3044\u305F\u97F3\u306B\u3059\u308B\u3002\u982D\u3060\u3051\u9CF4\u3063\u3066\u843D\u3061\u308B\u306E\u3067\u3001\u901F\u3044\u523B\u307F\u3067\u3082\u7C92\u304C\u7ACB\u3064"
+      descJa: "**\u5B9F\u6A5F\u306B\u7121\u3044\u697D\u5668\u3002**\u6FC1\u3063\u305F\u30D3\u30FC\u30D7\u3092\u5F3E\u3044\u305F\u97F3\u306B\u3059\u308B\u3002\u982D\u3060\u3051\u9CF4\u3063\u3066\u843D\u3061\u308B\u306E\u3067\u3001\u901F\u3044\u523B\u307F\u3067\u3082\u7C92\u304C\u7ACB\u3064"
     },
     "beep(chime)": {
       role: "lead",
-      note: "Two beeper tones close together, beating against each other.",
+      desc: "Two beeper tones close together, beating against each other.",
       carrier: 3600,
       jitter: 0.1,
       frame: 60,
       display: 0.7,
       env: "piano",
-      noteJa: "\u540C\u3058\u4F5C\u308A\u3067\u9AD8\u3044\u642C\u9001\u6CE2 + \u30D4\u30A2\u30CE\u98A8\u306E\u6E1B\u8870\u3002\u786C\u304F\u6F84\u3093\u3060\u7C92"
+      descJa: "\u540C\u3058\u4F5C\u308A\u3067\u9AD8\u3044\u642C\u9001\u6CE2 + \u30D4\u30A2\u30CE\u98A8\u306E\u6E1B\u8870\u3002\u786C\u304F\u6F84\u3093\u3060\u7C92"
     },
     // ---- カセット ----
     // 搬送波は持たない(ロード音は 2 つの音の切り替えそのもの)。
@@ -8856,7 +9482,7 @@ ${val}`;
       special: ["tape"],
       dev: ["done"],
       tags: ["tape", "loading", "cassette"],
-      note: "Cassette loading noise off an ordinary tape: the speed holds, a little hiss underneath, the top end softened.",
+      desc: "Cassette loading noise off an ordinary tape: the speed holds, a little hiss underneath, the top end softened.",
       carrier: 0,
       jitter: 0.02,
       frame: 7,
@@ -8864,14 +9490,14 @@ ${val}`;
       hiss: 0.05,
       wow: 0,
       muffle: 4e3,
-      noteJa: "\u30AB\u30BB\u30C3\u30C8\u306E\u30ED\u30FC\u30C9\u97F3\u7528\u3002\u3075\u3064\u3046\u306B\u4F7F\u3063\u3066\u304D\u305F\u30C6\u30FC\u30D7\u3002\u56DE\u8EE2\u3080\u3089\u306F\u7121\u304F\u3001\u5730\u306E\u30CE\u30A4\u30BA\u304C\u5C11\u3057\u4E57\u3063\u3066\u3001\u9AD8\u3044\u3068\u3053\u308D\u304C\u3084\u308F\u3089\u3050"
+      descJa: "\u30AB\u30BB\u30C3\u30C8\u306E\u30ED\u30FC\u30C9\u97F3\u7528\u3002\u3075\u3064\u3046\u306B\u4F7F\u3063\u3066\u304D\u305F\u30C6\u30FC\u30D7\u3002\u56DE\u8EE2\u3080\u3089\u306F\u7121\u304F\u3001\u5730\u306E\u30CE\u30A4\u30BA\u304C\u5C11\u3057\u4E57\u3063\u3066\u3001\u9AD8\u3044\u3068\u3053\u308D\u304C\u3084\u308F\u3089\u3050"
     },
     "tape(worn)": {
       role: "se",
       special: ["tape"],
       dev: ["done"],
       tags: ["tape", "loading", "cassette"],
-      note: "The same loading noise off a worn tape: the speed wobbles, the top end is gone, the hiss is always there.",
+      desc: "The same loading noise off a worn tape: the speed wobbles, the top end is gone, the hiss is always there.",
       carrier: 0,
       jitter: 0.02,
       frame: 7,
@@ -8879,14 +9505,14 @@ ${val}`;
       hiss: 0.16,
       wow: 0.05,
       muffle: 2200,
-      noteJa: "\u540C\u3058\u30ED\u30FC\u30C9\u97F3\u3092\u52A3\u5316\u3057\u305F\u30C6\u30FC\u30D7\u3067\u3002\u56DE\u8EE2\u3080\u3089\u3067\u97F3\u7A0B\u304C\u63FA\u308C\u3001\u9AD8\u3044\u3068\u3053\u308D\u304C\u843D\u3061\u3066\u3053\u3082\u308A\u3001\u5730\u306E\u30CE\u30A4\u30BA\u304C\u5E38\u306B\u9CF4\u3063\u3066\u3044\u308B"
+      descJa: "\u540C\u3058\u30ED\u30FC\u30C9\u97F3\u3092\u52A3\u5316\u3057\u305F\u30C6\u30FC\u30D7\u3067\u3002\u56DE\u8EE2\u3080\u3089\u3067\u97F3\u7A0B\u304C\u63FA\u308C\u3001\u9AD8\u3044\u3068\u3053\u308D\u304C\u843D\u3061\u3066\u3053\u3082\u308A\u3001\u5730\u306E\u30CE\u30A4\u30BA\u304C\u5E38\u306B\u9CF4\u3063\u3066\u3044\u308B"
     },
     "tape(clean)": {
       role: "se",
       special: ["tape"],
       dev: ["done"],
       tags: ["tape", "loading", "cassette"],
-      note: "The same loading noise off a fresh tape: no hiss at all, only the top end rolled off.",
+      desc: "The same loading noise off a fresh tape: no hiss at all, only the top end rolled off.",
       carrier: 0,
       jitter: 0.02,
       frame: 7,
@@ -8894,50 +9520,50 @@ ${val}`;
       hiss: 0,
       wow: 0,
       muffle: 6e3,
-      noteJa: "\u540C\u3058\u30ED\u30FC\u30C9\u97F3\u3092\u65B0\u54C1\u306E\u30C6\u30FC\u30D7\u3067\u3002\u5730\u306E\u30CE\u30A4\u30BA\u304C\u307E\u3063\u305F\u304F\u7121\u304F\u3001\u9AD8\u3044\u3068\u3053\u308D\u304C\u5C11\u3057\u843D\u3061\u3066\u3044\u308B\u3060\u3051"
+      descJa: "\u540C\u3058\u30ED\u30FC\u30C9\u97F3\u3092\u65B0\u54C1\u306E\u30C6\u30FC\u30D7\u3067\u3002\u5730\u306E\u30CE\u30A4\u30BA\u304C\u307E\u3063\u305F\u304F\u7121\u304F\u3001\u9AD8\u3044\u3068\u3053\u308D\u304C\u5C11\u3057\u843D\u3061\u3066\u3044\u308B\u3060\u3051"
     },
     // ---- 実在しないもの。**これも同じ仲間の作り分け** ----
     "beep(glass)": {
       role: "lead",
-      note: "High and thin, on the edge of the machine's range.",
+      desc: "High and thin, on the edge of the machine's range.",
       carrier: 6e3,
       jitter: 0.25,
       frame: 120,
       display: 0.4,
-      noteJa: "\u5B9F\u5728\u3057\u306A\u3044\u3002\u642C\u9001\u6CE2\u304C\u9AD8\u304F\u3001\u63FA\u308C\u304C\u901F\u3044\u3002\u786C\u304F\u3066\u843D\u3061\u7740\u304B\u306A\u3044\u97F3"
+      descJa: "\u5B9F\u5728\u3057\u306A\u3044\u3002\u642C\u9001\u6CE2\u304C\u9AD8\u304F\u3001\u63FA\u308C\u304C\u901F\u3044\u3002\u786C\u304F\u3066\u843D\u3061\u7740\u304B\u306A\u3044\u97F3"
     },
     // **これだけ音程が出ない。**揺れ 0.55 は書いた高さの 45〜100% まで動くので、
     // しかも 30Hz とゆっくりなので、音符ではなく地響きとして聞こえる。役は se
     "beep(tar)": {
       role: "se",
-      note: "Low and coarse. Slow enough that the individual gate steps are audible.",
+      desc: "Low and coarse. Slow enough that the individual gate steps are audible.",
       carrier: 900,
       jitter: 0.55,
       frame: 30,
       display: 0.8,
-      noteJa: "\u5B9F\u5728\u3057\u306A\u3044\u3002\u642C\u9001\u6CE2\u304C\u4F4E\u304F\u3001\u63FA\u308C\u304C\u6DF1\u3044\u3002**\u97F3\u7A0B\u306F\u51FA\u306A\u3044** \u2014 \u66F8\u3044\u305F\u9AD8\u3055\u306E\u534A\u5206\u307E\u3067\u63FA\u308C\u308B\u306E\u3067\u3001\u97F3\u7B26\u3067\u306F\u306A\u304F\u5730\u97FF\u304D\u306B\u805E\u3053\u3048\u308B"
+      descJa: "\u5B9F\u5728\u3057\u306A\u3044\u3002\u642C\u9001\u6CE2\u304C\u4F4E\u304F\u3001\u63FA\u308C\u304C\u6DF1\u3044\u3002**\u97F3\u7A0B\u306F\u51FA\u306A\u3044** \u2014 \u66F8\u3044\u305F\u9AD8\u3055\u306E\u534A\u5206\u307E\u3067\u63FA\u308C\u308B\u306E\u3067\u3001\u97F3\u7B26\u3067\u306F\u306A\u304F\u5730\u97FF\u304D\u306B\u805E\u3053\u3048\u308B"
     }
   };
   function familyFrom(head, spec) {
-    const values = Object.entries(BEEP_PRESETS).filter(([name]) => name.startsWith(head + "(")).map(([name, p]) => ({ value: name.slice(head.length + 1, -1), note: p.note }));
-    registerFamily(head, { note: spec.note, params: [{ ...spec.param, values }] });
+    const values = Object.entries(BEEP_PRESETS).filter(([name]) => name.startsWith(head + "(")).map(([name, p]) => ({ value: name.slice(head.length + 1, -1), desc: p.desc }));
+    registerFamily(head, { desc: spec.desc, params: [{ ...spec.param, values }] });
   }
   function registerDefaultBeeps() {
     familyFrom("beep", {
-      note: "1-bit beeper speakers of 8-bit micros. Opens its own section: @{beep( )}{ \u2026 } takes BASIC-style BEEP sweeps.",
-      param: { name: "model", default: "noisy", note: "Which beeper circuit, real or imagined." }
+      desc: "1-bit beeper speakers of 8-bit micros. Opens its own section: @{beep( )}{ \u2026 } takes BASIC-style BEEP sweeps.",
+      param: { name: "model", default: "noisy", desc: "Which beeper circuit, real or imagined." }
     });
     familyFrom("tape", {
-      note: "Cassette loading noise. Opens its own section: @{tape( )}{ \u2026 } takes = for pilot tone and ? for data.",
-      param: { name: "wear", default: "used", note: "Condition of the tape." }
+      desc: "Cassette loading noise. Opens its own section: @{tape( )}{ \u2026 } takes = for pilot tone and ? for data.",
+      param: { name: "wear", default: "used", desc: "Condition of the tape." }
     });
     for (const [name, p] of Object.entries(BEEP_PRESETS)) {
       registerBeep(
         name,
         p,
         {
-          note: p.note,
-          noteJa: p.noteJa,
+          desc: p.desc,
+          descJa: p.descJa,
           role: p.role,
           tags: p.tags,
           special: p.special,
@@ -8949,12 +9575,12 @@ ${val}`;
     }
   }
 
-  // player-latest/sound/opmpresets.js
+  // sound/opmpresets.js
   var OPM_PRESETS = {
     "opnBrass": {
-      noteJa: "4 \u30AA\u30DA\u306E\u91D1\u7BA1\u3002\u30AA\u30DA\u30EC\u30FC\u30BF\u304C\u5897\u3048\u305F\u3076\u3093\u3001\u4F38\u3070\u3057\u3066\u3044\u308B\u3042\u3044\u3060\u306B\u500D\u97F3\u304C\u80B2\u3064\u3002\u672C\u7269\u306E\u91D1\u7BA1\u3068\u540C\u3058\u52D5\u304D\u3067\u30012 \u30AA\u30DA\u306B\u306F\u3067\u304D\u306A\u3044",
+      descJa: "4 \u30AA\u30DA\u306E\u91D1\u7BA1\u3002\u30AA\u30DA\u30EC\u30FC\u30BF\u304C\u5897\u3048\u305F\u3076\u3093\u3001\u4F38\u3070\u3057\u3066\u3044\u308B\u3042\u3044\u3060\u306B\u500D\u97F3\u304C\u80B2\u3064\u3002\u672C\u7269\u306E\u91D1\u7BA1\u3068\u540C\u3058\u52D5\u304D\u3067\u30012 \u30AA\u30DA\u306B\u306F\u3067\u304D\u306A\u3044",
       role: "lead",
-      note: "Four-operator brass. The extra operators let the harmonics build over the note the way a real horn does \u2014 the thing two operators cannot do.",
+      desc: "Four-operator brass. The extra operators let the harmonics build over the note the way a real horn does \u2014 the thing two operators cannot do.",
       of: "\u4E3B\u5F79\u306E\u30D6\u30E9\u30B9\u3002\u7D50\u7DDA 2 + \u5E30\u9084\u3002\u3044\u3061\u3070\u3093\u8033\u306B\u6B8B\u308B\u5F79",
       patch: opmPatch({ alg: 2, fb: 5, ops: [
         { ar: 17, d1r: 8, d2r: 0, rr: 10, d1l: 1, tl: 29, ks: 0, mul: 1, dt1: 2, dt2: 0 },
@@ -8964,9 +9590,9 @@ ${val}`;
       ] })
     },
     "opnLead": {
-      noteJa: "4 \u30AA\u30DA\u306E\u30EA\u30FC\u30C9\u3002\u660E\u308B\u304F\u524D\u3078\u51FA\u308B\u3002\u539A\u3044\u7DE8\u6210\u306E\u4E0A\u306B\u4E57\u305B\u308B\u305F\u3081\u306E\u97F3",
+      descJa: "4 \u30AA\u30DA\u306E\u30EA\u30FC\u30C9\u3002\u660E\u308B\u304F\u524D\u3078\u51FA\u308B\u3002\u539A\u3044\u7DE8\u6210\u306E\u4E0A\u306B\u4E57\u305B\u308B\u305F\u3081\u306E\u97F3",
       role: "lead",
-      note: "Four-operator lead. Bright and cutting, meant to sit above a full arrangement.",
+      desc: "Four-operator lead. Bright and cutting, meant to sit above a full arrangement.",
       of: "\u7D30\u3081\u3067\u524D\u306B\u51FA\u308B\u30EA\u30FC\u30C9",
       patch: opmPatch({ alg: 4, fb: 4, ops: [
         { ar: 25, d1r: 12, d2r: 0, rr: 10, d1l: 3, tl: 34, ks: 0, mul: 3, dt1: 2, dt2: 0 },
@@ -8976,9 +9602,9 @@ ${val}`;
       ] })
     },
     "opnBass": {
-      noteJa: "4 \u30AA\u30DA\u306E\u4F4E\u97F3\u3002\u82AF\u304C\u3057\u3063\u304B\u308A\u3057\u3066\u3044\u3066\u4E0A\u306E\u500D\u97F3\u3082\u3042\u308B\u306E\u3067\u3001\u5C0F\u3055\u3044\u30B9\u30D4\u30FC\u30AB\u30FC\u3067\u3082\u805E\u3053\u3048\u308B",
+      descJa: "4 \u30AA\u30DA\u306E\u4F4E\u97F3\u3002\u82AF\u304C\u3057\u3063\u304B\u308A\u3057\u3066\u3044\u3066\u4E0A\u306E\u500D\u97F3\u3082\u3042\u308B\u306E\u3067\u3001\u5C0F\u3055\u3044\u30B9\u30D4\u30FC\u30AB\u30FC\u3067\u3082\u805E\u3053\u3048\u308B",
       role: "bass",
-      note: "Four-operator bass. Solid fundamental with enough upper harmonics to be heard on small speakers.",
+      desc: "Four-operator bass. Solid fundamental with enough upper harmonics to be heard on small speakers.",
       of: "\u982D\u304C\u7ACB\u3063\u3066\u3059\u3050\u7DE0\u307E\u308B\u30D9\u30FC\u30B9\u3002\u5E30\u9084\u3092\u6DF1\u3081\u306B",
       patch: opmPatch({ alg: 0, fb: 5, ops: [
         { ar: 27, d1r: 16, d2r: 0, rr: 11, d1l: 5, tl: 31, ks: 0, mul: 1, dt1: 1, dt2: 0 },
@@ -8988,9 +9614,9 @@ ${val}`;
       ] })
     },
     "opnEP": {
-      noteJa: "\u30A8\u30EC\u30AF\u30C8\u30EA\u30C3\u30AF\u30D4\u30A2\u30CE\u30024 \u30AA\u30DA\u306E FM \u304C\u3044\u3061\u3070\u3093\u6709\u540D\u306B\u306A\u3063\u305F\u97F3",
+      descJa: "\u30A8\u30EC\u30AF\u30C8\u30EA\u30C3\u30AF\u30D4\u30A2\u30CE\u30024 \u30AA\u30DA\u306E FM \u304C\u3044\u3061\u3070\u3093\u6709\u540D\u306B\u306A\u3063\u305F\u97F3",
       role: "chord",
-      note: "Electric piano. The sound four-operator FM is most famous for.",
+      desc: "Electric piano. The sound four-operator FM is most famous for.",
       of: "\u30A8\u30EC\u30D4\u3002\u9AD8\u3044\u6BD4(11)\u3067\u982D\u3060\u3051\u9CF4\u3089\u3057\u3066\u843D\u3068\u3059",
       patch: opmPatch({ alg: 4, fb: 0, ops: [
         { ar: 27, d1r: 22, d2r: 0, rr: 9, d1l: 15, tl: 31, ks: 0, mul: 11, dt1: 2, dt2: 0 },
@@ -9000,9 +9626,9 @@ ${val}`;
       ] })
     },
     "opmBell": {
-      noteJa: "\u9418\u3002\u305D\u308D\u308F\u306A\u3044\u500D\u97F3\u3067\u3001\u9577\u304F\u6E1B\u308B",
+      descJa: "\u9418\u3002\u305D\u308D\u308F\u306A\u3044\u500D\u97F3\u3067\u3001\u9577\u304F\u6E1B\u308B",
       role: "counter",
-      note: "Bell. Inharmonic partials, long decay.",
+      desc: "Bell. Inharmonic partials, long decay.",
       of: "\u9418\u3002**\u534A\u7AEF\u306A\u6BD4**(3.5 / 7)\u3002\u6574\u6570\u3067\u306A\u3044\u3068\u9418\u306B\u306A\u3089\u306A\u3044",
       patch: opmPatch({ alg: 4, fb: 3, ops: [
         { ar: 27, d1r: 14, d2r: 0, rr: 4, d1l: 15, tl: 32, ks: 0, mul: 2, dt1: 2, dt2: 3 },
@@ -9012,9 +9638,9 @@ ${val}`;
       ] })
     },
     "opnKlang": {
-      noteJa: "\u91D1\u5C5E\u3092\u53E9\u3044\u305F\u97F3\u3002\u308F\u3056\u3068\u500D\u97F3\u3092\u305D\u308D\u3048\u3066\u3044\u306A\u3044\u306E\u3067\u3001\u97F3\u3068\u3044\u3046\u3088\u308A\u30CE\u30A4\u30BA\u306B\u8FD1\u3044",
+      descJa: "\u91D1\u5C5E\u3092\u53E9\u3044\u305F\u97F3\u3002\u308F\u3056\u3068\u500D\u97F3\u3092\u305D\u308D\u3048\u3066\u3044\u306A\u3044\u306E\u3067\u3001\u97F3\u3068\u3044\u3046\u3088\u308A\u30CE\u30A4\u30BA\u306B\u8FD1\u3044",
       role: "perc",
-      note: "Metallic hit. Deliberately inharmonic \u2014 closer to noise than to a note.",
+      desc: "Metallic hit. Deliberately inharmonic \u2014 closer to noise than to a note.",
       of: "\u3044\u304B\u306B\u3082 FM \u306A\u30EA\u30FC\u30C9\u3002\u6BD4 7 \u3092\u982D\u3060\u3051\u6DF1\u304F\u304B\u3051\u3066\u843D\u3068\u3059",
       patch: opmPatch({ alg: 0, fb: 5, ops: [
         { ar: 27, d1r: 23, d2r: 0, rr: 9, d1l: 15, tl: 19, ks: 0, mul: 7, dt1: 3, dt2: 0 },
@@ -9024,9 +9650,9 @@ ${val}`;
       ] })
     },
     "opmGlass": {
-      noteJa: "\u30AC\u30E9\u30B9\u306E\u3088\u3046\u306B\u7D30\u304F\u6F84\u3093\u3060\u97F3\u3002\u982D\u306F\u786C\u3044",
+      descJa: "\u30AC\u30E9\u30B9\u306E\u3088\u3046\u306B\u7D30\u304F\u6F84\u3093\u3060\u97F3\u3002\u982D\u306F\u786C\u3044",
       role: "counter",
-      note: "Glassy and thin, with a hard attack.",
+      desc: "Glassy and thin, with a hard attack.",
       of: "\u30AC\u30E9\u30B9\u306E\u9418\u3002\u6BD4 4.7 \u3068 9.1\u3002**\u6574\u6570\u304B\u3089\u5916\u3059**\u307B\u3069\u91D1\u5C5E\u306B\u306A\u308B",
       patch: opmPatch({ alg: 4, fb: 3, ops: [
         { ar: 27, d1r: 17, d2r: 0, rr: 6, d1l: 15, tl: 21, ks: 0, mul: 3, dt1: 2, dt2: 2 },
@@ -9036,9 +9662,9 @@ ${val}`;
       ] })
     },
     "opnSlap": {
-      noteJa: "\u30B9\u30E9\u30C3\u30D7\u306E\u30D9\u30FC\u30B9\u3002\u982D\u3067\u307B\u3068\u3093\u3069\u6C7A\u307E\u308B",
+      descJa: "\u30B9\u30E9\u30C3\u30D7\u306E\u30D9\u30FC\u30B9\u3002\u982D\u3067\u307B\u3068\u3093\u3069\u6C7A\u307E\u308B",
       role: "bass",
-      note: "Slapped bass. The attack carries most of the character.",
+      desc: "Slapped bass. The attack carries most of the character.",
       of: "\u5F3E\u304F\u30D9\u30FC\u30B9\u3002\u982D\u3067\u6BD4 5 \u304C\u5F3E\u3051\u3066\u3001\u3059\u3050\u82AF\u3060\u3051\u6B8B\u308B",
       patch: opmPatch({ alg: 0, fb: 6, ops: [
         { ar: 27, d1r: 24, d2r: 0, rr: 9, d1l: 15, tl: 20, ks: 0, mul: 5, dt1: 2, dt2: 0 },
@@ -9056,9 +9682,9 @@ ${val}`;
     // OPM のノイズは帯域が広く、短く切ると破裂音、伸ばすと波の音になる。
     // 金物に寄せるには倍音のほうを主役にすることになり、それならノイズは要らない。
     "opmLeadVib": {
-      noteJa: "\u30D3\u30D6\u30E9\u30FC\u30C8\u306E\u639B\u304B\u3063\u305F\u30EA\u30FC\u30C9\u3002LFO \u304C\u9AD8\u3055\u3092\u63FA\u3089\u3059",
+      descJa: "\u30D3\u30D6\u30E9\u30FC\u30C8\u306E\u639B\u304B\u3063\u305F\u30EA\u30FC\u30C9\u3002LFO \u304C\u9AD8\u3055\u3092\u63FA\u3089\u3059",
       role: "lead",
-      note: "Lead with vibrato: the LFO moves the pitch.",
+      desc: "Lead with vibrato: the LFO moves the pitch.",
       of: "\u63FA\u308C\u308B\u30EA\u30FC\u30C9\u3002`opnLead` \u306B LFO \u3092\u8DB3\u3057\u305F\u3082\u306E",
       dev: ["wip"],
       patch: opmPatch({ alg: 4, fb: 4, pms: 4, lfo: { rate: 196, pmd: 36, wf: 2 }, ops: [
@@ -9069,9 +9695,9 @@ ${val}`;
       ] })
     },
     "opmBrassTrem": {
-      noteJa: "\u30C8\u30EC\u30E2\u30ED\u306E\u639B\u304B\u3063\u305F\u91D1\u7BA1\u3002LFO \u304C\u97F3\u91CF\u3092\u63FA\u3089\u3059",
+      descJa: "\u30C8\u30EC\u30E2\u30ED\u306E\u639B\u304B\u3063\u305F\u91D1\u7BA1\u3002LFO \u304C\u97F3\u91CF\u3092\u63FA\u3089\u3059",
       role: "lead",
-      note: "Brass with tremolo: the LFO moves the level.",
+      desc: "Brass with tremolo: the LFO moves the level.",
       of: "\u63FA\u308C\u308B\u91D1\u7BA1\u3002`opnBrass` \u306B LFO \u3092\u8DB3\u3057\u3001\u51FA\u53E3\u306E\u30AA\u30DA\u3060\u3051\u3067\u53D7\u3051\u308B\u3002\u6DF1\u304F\u639B\u3051\u308B\u3068\u9014\u5207\u308C\u3066\u805E\u3053\u3048\u308B",
       dev: ["wip"],
       patch: opmPatch({ alg: 2, fb: 5, ams: 1, lfo: { rate: 200, amd: 20, wf: 2 }, ops: [
@@ -9082,9 +9708,9 @@ ${val}`;
       ] })
     },
     "opmTom": {
-      noteJa: "\u97F3\u7A0B\u306E\u843D\u3061\u308B\u30BF\u30E0",
+      descJa: "\u97F3\u7A0B\u306E\u843D\u3061\u308B\u30BF\u30E0",
       role: "perc",
-      note: "Tom with a pitch drop.",
+      desc: "Tom with a pitch drop.",
       of: "\u6253\u697D\u5668\u3002\u5E30\u9084\u3092\u6DF1\u304F\u6F70\u3059",
       patch: opmPatch({ alg: 0, fb: 6, ops: [
         { ar: 27, d1r: 23, d2r: 0, rr: 9, d1l: 15, tl: 28, ks: 0, mul: 1, dt1: 1, dt2: 0 },
@@ -9101,8 +9727,8 @@ ${val}`;
   function registerOPMPresets() {
     for (const [name, p] of Object.entries(OPM_PRESETS)) {
       registerOPM(name, p.patch, {
-        note: p.note,
-        noteJa: p.noteJa,
+        desc: p.desc,
+        descJa: p.descJa,
         role: p.role,
         tags: PREFIX_TAGS[name.slice(0, 3)],
         dev: p.dev
@@ -9113,12 +9739,12 @@ ${val}`;
       octaves: [3, 4, 5],
       step: 3,
       role: "lead",
-      noteJa: "opnBrass \u3092 3 \u30AA\u30AF\u30BF\u30FC\u30D6\u3076\u3093\u713C\u3044\u3066\u6CE2\u5F62\u306B\u3057\u305F\u3082\u306E\u3002\u5834\u6240\u306F\u98DF\u3046\u304C\u8A08\u7B97\u306F\u8981\u3089\u306A\u3044 \u2014 \u5B9F\u6A5F\u304C\u3084\u3063\u3066\u3044\u305F\u53D6\u308A\u5F15\u304D\u3068\u540C\u3058",
-      note: "The four-operator brass rendered to samples across three octaves. Baking it costs memory but no CPU \u2014 the trade real hardware made."
+      descJa: "opnBrass \u3092 3 \u30AA\u30AF\u30BF\u30FC\u30D6\u3076\u3093\u713C\u3044\u3066\u6CE2\u5F62\u306B\u3057\u305F\u3082\u306E\u3002\u5834\u6240\u306F\u98DF\u3046\u304C\u8A08\u7B97\u306F\u8981\u3089\u306A\u3044 \u2014 \u5B9F\u6A5F\u304C\u3084\u3063\u3066\u3044\u305F\u53D6\u308A\u5F15\u304D\u3068\u540C\u3058",
+      desc: "The four-operator brass rendered to samples across three octaves. Baking it costs memory but no CPU \u2014 the trade real hardware made."
     });
   }
 
-  // player-latest/sound/extrawaves.js
+  // sound/extrawaves.js
   var EXTRA_LEN = 32;
   var build2 = (fn) => Array.from({ length: EXTRA_LEN }, (_, i) => fn(i / EXTRA_LEN));
   var pulse = (n) => build2((p) => p < n / 16 ? 1 : -1);
@@ -9143,39 +9769,39 @@ ${val}`;
   });
   var EXTRA_PRESETS = {
     "wavePulse(6)": {
-      noteJa: "\u5E45 6.25%(16 \u5206\u306E 1)\u3002\u7D30\u304F\u3066\u9F3B\u306B\u304B\u304B\u308B\u3002\u6DF7\u3093\u3060\u3068\u3053\u308D\u3067\u3082\u4ED6\u3068\u3076\u3064\u304B\u3089\u305A\u306B\u4E0A\u3078\u4E57\u308B",
+      descJa: "\u5E45 6.25%(16 \u5206\u306E 1)\u3002\u7D30\u304F\u3066\u9F3B\u306B\u304B\u304B\u308B\u3002\u6DF7\u3093\u3060\u3068\u3053\u308D\u3067\u3082\u4ED6\u3068\u3076\u3064\u304B\u3089\u305A\u306B\u4E0A\u3078\u4E57\u308B",
       role: "lead",
       wave: pulse(1),
       bits: 1,
-      note: "1/16 duty (6.25%). Thin and reedy; sits above a busier mix without fighting it."
+      desc: "1/16 duty (6.25%). Thin and reedy; sits above a busier mix without fighting it."
     },
     "wavePulse(18)": {
-      noteJa: "\u5E45 18.75%(16 \u5206\u306E 3)\u3002\u30D7\u30EA\u30BB\u30C3\u30C8\u306E 12.5% \u3068 25% \u306E\u3042\u3044\u3060",
+      descJa: "\u5E45 18.75%(16 \u5206\u306E 3)\u3002\u30D7\u30EA\u30BB\u30C3\u30C8\u306E 12.5% \u3068 25% \u306E\u3042\u3044\u3060",
       role: "lead",
       wave: pulse(3),
       bits: 1,
-      note: "3/16 duty (18.75%). Between the built-in 12.5% and 25%."
+      desc: "3/16 duty (18.75%). Between the built-in 12.5% and 25%."
     },
     "wavePulse(31)": {
-      noteJa: "\u5E45 31.25%(16 \u5206\u306E 5)",
+      descJa: "\u5E45 31.25%(16 \u5206\u306E 5)",
       role: "lead",
       wave: pulse(5),
       bits: 1,
-      note: "5/16 duty (31.25%)."
+      desc: "5/16 duty (31.25%)."
     },
     "wavePulse(37)": {
-      noteJa: "\u5E45 37.5%(16 \u5206\u306E 6)",
+      descJa: "\u5E45 37.5%(16 \u5206\u306E 6)",
       role: "lead",
       wave: pulse(6),
       bits: 1,
-      note: "6/16 duty (37.5%)."
+      desc: "6/16 duty (37.5%)."
     },
     "wavePulse(43)": {
-      noteJa: "\u5E45 43.75%(16 \u5206\u306E 7)\u3002\u307B\u3068\u3093\u3069\u77E9\u5F62\u6CE2\u3068\u540C\u3058\u592A\u3055",
+      descJa: "\u5E45 43.75%(16 \u5206\u306E 7)\u3002\u307B\u3068\u3093\u3069\u77E9\u5F62\u6CE2\u3068\u540C\u3058\u592A\u3055",
       role: "lead",
       wave: pulse(7),
       bits: 1,
-      note: "7/16 duty (43.75%). Nearly as full as a square wave."
+      desc: "7/16 duty (43.75%). Nearly as full as a square wave."
     },
     // 音律を確かめるためのもの。楽器ではない。
     //
@@ -9192,35 +9818,35 @@ ${val}`;
     // そこで 2〜5 倍音を持たせて、4 倍音と 5 倍音を basic より大きくした。
     // 3 度も 5 度も、ずれていればはっきりうなる。
     toolTuner: {
-      noteJa: "\u97F3\u5F8B\u3092\u78BA\u304B\u3081\u308B\u305F\u3081\u306E\u3082\u306E\u3002\u697D\u5668\u3067\u306F\u306A\u3044\u30024 \u500D\u97F3\u3068 5 \u500D\u97F3\u3092\u5F37\u304F\u3057\u3066\u3042\u308B\u306E\u3067\u30013 \u5EA6\u3068 5 \u5EA6\u306E\u305A\u308C\u304C\u3046\u306A\u308A\u306B\u306A\u3063\u3066\u51FA\u308B\u3002\u97F3\u5F8B\u3092\u66FF\u3048\u3066\u9577\u304F\u306E\u3070\u3059\u3068\u3001\u3046\u306A\u308A\u306E\u901F\u3055\u304C\u5909\u308F\u308B\u306E\u304C\u5206\u304B\u308B\u3002\u77E9\u5F62\u6CE2\u3067\u306F\u5076\u6570\u500D\u97F3\u304C\u7121\u3044\u306E\u3067\u3001\u305D\u3082\u305D\u3082\u3046\u306A\u308A\u304C\u51FA\u306A\u3044\u3002\u5B9F\u6A5F\u306E\u5206\u5468\u306B\u306F\u4E57\u305B\u306A\u3044\u3002\u4E38\u3081\u308B\u3068\u7D14\u6B63\u306E 3 \u5EA6\u304C 1.5Hz \u3046\u306A\u3063\u3066\u3001\u5E73\u5747\u5F8B\u306E\u901F\u3044\u3046\u306A\u308A\u3088\u308A\u63FA\u308C\u3066\u805E\u3053\u3048\u3066\u3057\u307E\u3046\u3002\u5C71\u3092 1 \u306B\u5747\u3059\u3076\u3093\u5B9F\u52B9\u5024\u304C\u4E0B\u304C\u308B\u306E\u3067\u3001\u97F3\u91CF\u306E\u4E0B\u99C4\u3092 1.9 \u500D\u306F\u304B\u305B\u3066\u3001\u77E9\u5F62\u6CE2\u3068\u540C\u3058 v \u3067\u540C\u3058\u304F\u3089\u3044\u306E\u5927\u304D\u3055\u306B\u306A\u308B\u3088\u3046\u306B\u3057\u3066\u3042\u308B",
+      descJa: "\u97F3\u5F8B\u3092\u78BA\u304B\u3081\u308B\u305F\u3081\u306E\u3082\u306E\u3002\u697D\u5668\u3067\u306F\u306A\u3044\u30024 \u500D\u97F3\u3068 5 \u500D\u97F3\u3092\u5F37\u304F\u3057\u3066\u3042\u308B\u306E\u3067\u30013 \u5EA6\u3068 5 \u5EA6\u306E\u305A\u308C\u304C\u3046\u306A\u308A\u306B\u306A\u3063\u3066\u51FA\u308B\u3002\u97F3\u5F8B\u3092\u66FF\u3048\u3066\u9577\u304F\u306E\u3070\u3059\u3068\u3001\u3046\u306A\u308A\u306E\u901F\u3055\u304C\u5909\u308F\u308B\u306E\u304C\u5206\u304B\u308B\u3002\u77E9\u5F62\u6CE2\u3067\u306F\u5076\u6570\u500D\u97F3\u304C\u7121\u3044\u306E\u3067\u3001\u305D\u3082\u305D\u3082\u3046\u306A\u308A\u304C\u51FA\u306A\u3044\u3002\u5B9F\u6A5F\u306E\u5206\u5468\u306B\u306F\u4E57\u305B\u306A\u3044\u3002\u4E38\u3081\u308B\u3068\u7D14\u6B63\u306E 3 \u5EA6\u304C 1.5Hz \u3046\u306A\u3063\u3066\u3001\u5E73\u5747\u5F8B\u306E\u901F\u3044\u3046\u306A\u308A\u3088\u308A\u63FA\u308C\u3066\u805E\u3053\u3048\u3066\u3057\u307E\u3046\u3002\u5C71\u3092 1 \u306B\u5747\u3059\u3076\u3093\u5B9F\u52B9\u5024\u304C\u4E0B\u304C\u308B\u306E\u3067\u3001\u97F3\u91CF\u306E\u4E0B\u99C4\u3092 1.9 \u500D\u306F\u304B\u305B\u3066\u3001\u77E9\u5F62\u6CE2\u3068\u540C\u3058 v \u3067\u540C\u3058\u304F\u3089\u3044\u306E\u5927\u304D\u3055\u306B\u306A\u308B\u3088\u3046\u306B\u3057\u3066\u3042\u308B",
       role: "lead",
       wave: TUNER,
       bits: 8,
       special: ["exact"],
       gain: 1.9,
-      note: "A ruler, not an instrument. The fourth and fifth harmonics are pushed up, so a third or a fifth that is out of tune beats audibly. Hold a dyad and switch tunings: the beat rate is the difference. A square wave has no even harmonics, so nothing beats there at all. This one is never rounded onto the real chip dividers: rounding leaves a pure third beating at 1.5Hz, which reads as more wobble than the fast one."
+      desc: "A ruler, not an instrument. The fourth and fifth harmonics are pushed up, so a third or a fifth that is out of tune beats audibly. Hold a dyad and switch tunings: the beat rate is the difference. A square wave has no even harmonics, so nothing beats there at all. This one is never rounded onto the real chip dividers: rounding leaves a pure third beating at 1.5Hz, which reads as more wobble than the fast one."
     },
     waveSawStep: {
-      noteJa: "\u6BB5\u306E\u3042\u308B\u306E\u3053\u304E\u308A\u30027 \u6BB5\u306E\u307C\u3063\u3066 1 \u6BB5\u843D\u3061\u308B\u3002\u8DB3\u3057\u7B97\u5668\u3067\u4F5C\u308B\u30C1\u30C3\u30D7\u306F\u3053\u306E\u5F62\u306B\u306A\u308B\u3002\u7D20\u306E\u306A\u3060\u3089\u304B\u306A\u5742\u3088\u308A\u3056\u3089\u3064\u304F\u3002VRC6 \u306E\u306E\u3053\u304E\u308A\u306B\u305D\u306E\u307E\u307E\u5F53\u3066\u306F\u307E\u308B",
+      descJa: "\u6BB5\u306E\u3042\u308B\u306E\u3053\u304E\u308A\u30027 \u6BB5\u306E\u307C\u3063\u3066 1 \u6BB5\u843D\u3061\u308B\u3002\u8DB3\u3057\u7B97\u5668\u3067\u4F5C\u308B\u30C1\u30C3\u30D7\u306F\u3053\u306E\u5F62\u306B\u306A\u308B\u3002\u7D20\u306E\u306A\u3060\u3089\u304B\u306A\u5742\u3088\u308A\u3056\u3089\u3064\u304F\u3002VRC6 \u306E\u306E\u3053\u304E\u308A\u306B\u305D\u306E\u307E\u307E\u5F53\u3066\u306F\u307E\u308B",
       role: "lead",
       wave: SAW_STEP,
       bits: 5,
-      note: "Stepped saw: seven rising steps and a drop, the way an adder-based chip builds one. Grittier than a plain ramp. Maps straight onto the VRC6 saw."
+      desc: "Stepped saw: seven rising steps and a drop, the way an adder-based chip builds one. Grittier than a plain ramp. Maps straight onto the VRC6 saw."
     }
   };
   function registerExtraFamilies() {
     registerFamily("wavePulse", {
-      note: "One-bit wavetable pulses in sixteenths, for widths the built-in pulse does not have.",
+      desc: "One-bit wavetable pulses in sixteenths, for widths the built-in pulse does not have.",
       params: [{
         name: "width",
         default: "6",
-        note: "Share of each cycle spent high, in percent (rounded down).",
+        desc: "Share of each cycle spent high, in percent (rounded down).",
         values: [
-          { value: "6", note: "1/16 (6.25%). Thin and reedy; sits above a busy mix without fighting it." },
-          { value: "18", note: "3/16 (18.75%). Between the built-in 12.5% and 25%." },
-          { value: "31", note: "5/16 (31.25%)." },
-          { value: "37", note: "6/16 (37.5%)." },
-          { value: "43", note: "7/16 (43.75%). Nearly as full as a square wave." }
+          { value: "6", desc: "1/16 (6.25%). Thin and reedy; sits above a busy mix without fighting it." },
+          { value: "18", desc: "3/16 (18.75%). Between the built-in 12.5% and 25%." },
+          { value: "31", desc: "5/16 (31.25%)." },
+          { value: "37", desc: "6/16 (37.5%)." },
+          { value: "43", desc: "7/16 (43.75%). Nearly as full as a square wave." }
         ]
       }]
     });
@@ -9236,8 +9862,8 @@ ${val}`;
           p.bits,
           {
             role: p.role,
-            note: p.note,
-            noteJa: p.noteJa,
+            desc: p.desc,
+            descJa: p.descJa,
             special: p.special,
             gain: p.gain,
             vsteps: p.vsteps,
@@ -9250,7 +9876,7 @@ ${val}`;
     }
   }
 
-  // player-latest/sound/pcmbake.js
+  // sound/pcmbake.js
   var MIN_LOOP = 1024;
   function periodMultiple(ratios, maxM = 8) {
     for (let m = 1; m <= maxM; m++) {
@@ -9287,6 +9913,22 @@ ${val}`;
     }
     return out;
   }
+  function opmRateSec(v) {
+    if (!(v > 0)) return Infinity;
+    const r = Math.min(63, v * 2);
+    return 1023 * 3 * Math.pow(2, 11 - r / 4) / 55930;
+  }
+  var OPM_DT2_RATIO = [1, Math.pow(2, 600 / 1200), Math.pow(2, 781.25 / 1200), Math.pow(2, 950 / 1200)];
+  function bakeOps(patch) {
+    return { ops: patch.ops.map((x) => {
+      if (x.ratio !== void 0) return x;
+      const ratio = (x.mul > 0 ? x.mul : 0.5) * OPM_DT2_RATIO[(x.dt2 ?? 0) & 3];
+      const sl = (x.d2r ?? 0) === 0 && (x.d1l ?? 0) < 15 ? 1 - (x.d1l ?? 0) / 15 : 0;
+      const ar = x.ar >= 31 ? 0 : Math.min(2, opmRateSec(x.ar) / 8);
+      const dr = Math.min(4, opmRateSec(x.d1r) * Math.min(1, (x.d1l ?? 0) * 3 / 96));
+      return { ratio, sl, ar, dr };
+    }) };
+  }
   function bakePlan(patch, o = {}) {
     const sampleRate = o.sampleRate ?? 22050;
     const m = periodMultiple(patch.ops.map((x) => x.ratio));
@@ -9301,7 +9943,7 @@ ${val}`;
     if (!loop && sustains) {
       notes.push("\u6BB5\u304C\u6B8B\u3063\u3066\u3044\u308B\u306E\u306B\u8F2A\u306B\u3057\u306A\u3044\u306E\u3067\u3001\u9014\u4E2D\u3067\u5207\u308C\u307E\u3059");
     }
-    const attack = patch.ops.reduce((a, x) => Math.max(a, x.ar + x.dr), 0) + 0.02;
+    const attack = o.length > 0 ? o.length : patch.ops.reduce((a, x) => Math.max(a, x.ar + x.dr), 0) + 0.02;
     const jobs = pitchSet(o).map((note) => {
       const freq = midiToFreq(note);
       const plan = loop ? loopPlan(freq, sampleRate, clean ? m : 1, minLoop) : null;
@@ -9331,8 +9973,22 @@ ${val}`;
       seconds: total / sampleRate
     };
   }
+  function bakeSourceOf(name, spec, word, more = []) {
+    const { from, ...rest } = spec;
+    for (const k of Object.keys(rest)) {
+      const ok = ["rate", "length", "tempo", ...more];
+      if (!ok.includes(k)) {
+        throw new Error(`[ChpTnSnd] MML: \u97F3\u8272 "${name}" \u306E @${word} \u306B "${k}" \u306F\u66F8\u3051\u307E\u305B\u3093(from ${ok.join(" ")})`);
+      }
+    }
+    const src = from && typeof from === "object" ? { phrase: from.mml } : { from };
+    if (src.phrase && rest.length !== void 0) {
+      throw new Error(`[ChpTnSnd] MML: \u97F3\u8272 "${name}" \u306E @${word} \u306E length \u306F\u3001from \u306B\u97F3\u8272\u3092\u66F8\u3044\u305F\u3068\u304D\u3060\u3051\u3067\u3059(\u30D5\u30EC\u30FC\u30BA\u306E\u9577\u3055\u306F\u66F8\u3044\u305F MML \u3067\u6C7A\u307E\u308A\u307E\u3059)`);
+    }
+    return { ...rest, ...src };
+  }
 
-  // player-latest/sound/opllpresets.js
+  // sound/opllpresets.js
   var OPLL_PRESETS = [
     [
       1,
@@ -9666,13 +10322,13 @@ ${val}`;
   var OPLL_VOL = { vcurve: "3db", vsteps: 16 };
   var OPLL_CHOP_BASS = [5, 2, 19, 0, 176, 182, 3, 89];
   function registerOPLLPresets() {
-    for (const [inst, name, role, noteJa, note] of OPLL_PRESETS) {
+    for (const [inst, name, role, descJa, desc] of OPLL_PRESETS) {
       try {
         registerOPLL(name, inst, {
           ...OPLL_VOL,
           role,
-          noteJa: `${noteJa}\u3002YM2413 \u306E ${inst} \u756A`,
-          note,
+          descJa: `${descJa}\u3002YM2413 \u306E ${inst} \u756A`,
+          desc,
           steal: STEAL_OK.has(inst) ? "ok" : "avoid",
           alias: OPLL_ALIASES[name]
         });
@@ -9680,23 +10336,23 @@ ${val}`;
       }
     }
     for (const [set, list] of [[2, OPLLP_PRESETS], [1, VRC7_PRESETS]]) {
-      for (const [inst, name, role, noteJa, note] of list) {
+      for (const [inst, name, role, descJa, desc] of list) {
         try {
-          registerOPLL(name, inst, { ...OPLL_VOL, role, set, noteJa, note });
+          registerOPLL(name, inst, { ...OPLL_VOL, role, set, descJa, desc });
         } catch (e) {
         }
       }
     }
-    for (const [drum, name, noteJa, note] of OPLL_DRUMS) {
+    for (const [drum, name, descJa, desc] of OPLL_DRUMS) {
       if (drum === "bd") {
         try {
           registerFamily(name, {
-            note: "The OPLL rhythm bass drum, at three pitches. The chip holds one pitch per channel, but the bass drum has channel 6 to itself, so moving it leaves the other drums alone.",
+            desc: "The OPLL rhythm bass drum, at three pitches. The chip holds one pitch per channel, but the bass drum has channel 6 to itself, so moving it leaves the other drums alone.",
             params: [{
               name: "pitch",
               default: "mid",
-              note: "How far from the pitch the real driver used.",
-              values: OPLL_KICK_VARIANTS.map(([value, , vn]) => ({ value, note: vn }))
+              desc: "How far from the pitch the real driver used.",
+              values: OPLL_KICK_VARIANTS.map(([value, , vn]) => ({ value, desc: vn }))
             }]
           });
         } catch (e) {
@@ -9708,8 +10364,8 @@ ${val}`;
               role: "perc",
               drum,
               semi,
-              noteJa: `${noteJa}\u3002\u4F7F\u3046\u3068\u97F3\u306E\u30C1\u30E3\u30F3\u30CD\u30EB\u304C 9 \u672C\u304B\u3089 6 \u672C\u306B\u6E1B\u308B`,
-              note: `${note} ${vn}`
+              descJa: `${descJa}\u3002\u4F7F\u3046\u3068\u97F3\u306E\u30C1\u30E3\u30F3\u30CD\u30EB\u304C 9 \u672C\u304B\u3089 6 \u672C\u306B\u6E1B\u308B`,
+              desc: `${desc} ${vn}`
             });
           } catch (e) {
           }
@@ -9721,30 +10377,30 @@ ${val}`;
           ...OPLL_VOL,
           role: "perc",
           drum,
-          noteJa: `${noteJa}\u3002\u4F7F\u3046\u3068\u97F3\u306E\u30C1\u30E3\u30F3\u30CD\u30EB\u304C 9 \u672C\u304B\u3089 6 \u672C\u306B\u6E1B\u308B`,
-          note
+          descJa: `${descJa}\u3002\u4F7F\u3046\u3068\u97F3\u306E\u30C1\u30E3\u30F3\u30CD\u30EB\u304C 9 \u672C\u304B\u3089 6 \u672C\u306B\u6E1B\u308B`,
+          desc
         });
       } catch (e) {
       }
     }
     try {
       registerFamily("opllPulse", {
-        note: "The OPLL standing in for a pulse wave, so a PSG channel can be freed for noise. Two operators matched against the first sixteen partials of a pulse; the duty cycle itself is not reproduced. Quieter than the real pulse at the same v \u2014 how much is in each width. The chip holds one user voice at a time, so these three cannot sound independently at once.",
+        desc: "The OPLL standing in for a pulse wave, so a PSG channel can be freed for noise. Two operators matched against the first sixteen partials of a pulse; the duty cycle itself is not reproduced. Quieter than the real pulse at the same v \u2014 how much is in each width. The chip holds one user voice at a time, so these three cannot sound independently at once.",
         params: [{
           name: "width",
           default: "50",
-          note: "Which pulse width it aims at, in percent. The same values pulse() takes.",
-          values: OPLL_PULSES.map(([value, , , vn]) => ({ value, note: vn }))
+          desc: "Which pulse width it aims at, in percent. The same values pulse() takes.",
+          values: OPLL_PULSES.map(([value, , , vn]) => ({ value, desc: vn }))
         }]
       });
     } catch (e) {
     }
-    for (const [width, bytes, gain, note] of OPLL_PULSES) {
+    for (const [width, bytes, gain, desc] of OPLL_PULSES) {
       try {
         registerOPLLVoice(
           `opllPulse(${width})`,
           { bytes },
-          { ...OPLL_VOL, gain, role: "lead", note }
+          { ...OPLL_VOL, gain, role: "lead", desc }
         );
       } catch (e) {
       }
@@ -9753,19 +10409,19 @@ ${val}`;
       registerOPLLVoice("opllChopBass", { bytes: OPLL_CHOP_BASS }, {
         ...OPLL_VOL,
         role: "bass",
-        note: "A chopper bass: a short biting pluck that keeps the same tone across octaves. Modulator ML 5 against carrier ML 2, a 2.5 ratio, so the written pitch sounds an octave higher. KSR is off on both operators, which is what keeps o2 and o5 the same as o3 and o4. Matched against a 2-operator OPN lead, sidebands read every 220Hz up to 18kHz. The chip holds one user voice at a time."
+        desc: "A chopper bass: a short biting pluck that keeps the same tone across octaves. Modulator ML 5 against carrier ML 2, a 2.5 ratio, so the written pitch sounds an octave higher. KSR is off on both operators, which is what keeps o2 and o5 the same as o3 and o4. Matched against a 2-operator OPN lead, sidebands read every 220Hz up to 18kHz. The chip holds one user voice at a time."
       });
     } catch (e) {
     }
-    for (const [name, spec, note] of OPLL_USER_DRUMS) {
+    for (const [name, spec, desc] of OPLL_USER_DRUMS) {
       try {
-        registerOPLLVoice(name, spec, { ...OPLL_VOL, role: "perc", note, dev: ["check"] });
+        registerOPLLVoice(name, spec, { ...OPLL_VOL, role: "perc", desc, dev: ["check"] });
       } catch (e) {
       }
     }
   }
 
-  // player-latest/sound/ay.js
+  // sound/ay.js
   var AY_CLOCK = 1789772;
   var AY_VOLTBL = [
     [
@@ -9891,27 +10547,27 @@ ${val}`;
   var ENV_BITS = {
     name: "bits",
     default: "5bit",
-    note: "Which volume table the envelope runs through.",
+    desc: "Which volume table the envelope runs through.",
     values: [
-      { value: "5bit", note: "Thirty-two steps, as on a YM2149 (MSX2 and later)." },
-      { value: "4bit", note: "Sixteen uneven steps, as on an AY-3-8910 (MSX1, ZX Spectrum). Coarser." }
+      { value: "5bit", desc: "Thirty-two steps, as on a YM2149 (MSX2 and later)." },
+      { value: "4bit", desc: "Sixteen uneven steps, as on an AY-3-8910 (MSX1, ZX Spectrum). Coarser." }
     ]
   };
   function registerAYPresets() {
     try {
       registerFamily("ayEnvSaw", {
-        note: "The AY / YM2149 volume envelope cycled at audio rate as a falling sawtooth, from the chip itself.",
+        desc: "The AY / YM2149 volume envelope cycled at audio rate as a falling sawtooth, from the chip itself.",
         params: [ENV_BITS]
       });
       registerFamily("ayEnvTri", {
-        note: "The AY / YM2149 volume envelope cycled at audio rate as a triangle, from the chip itself.",
+        desc: "The AY / YM2149 volume envelope cycled at audio rate as a triangle, from the chip itself.",
         params: [ENV_BITS]
       });
     } catch (e) {
     }
-    for (const [name, params, role, note] of AY_PRESETS) {
+    for (const [name, params, role, desc] of AY_PRESETS) {
       try {
-        registerAY(name, params, { role, note });
+        registerAY(name, params, { role, desc });
       } catch (e) {
       }
     }
@@ -10305,7 +10961,7 @@ class AyBank extends AudioWorkletProcessor {
 registerProcessor('mmsxx-ay', AyBank);
 `;
 
-  // player-latest/sound/nes.js
+  // sound/nes.js
   var NES_CLOCK = 1789773;
   var NES_NOISE_PERIODS = [4, 8, 16, 32, 64, 96, 128, 160, 202, 254, 380, 508, 762, 1016, 2034, 4068];
   var NES_DUTIES = [0.125, 0.25, 0.5, 0.75];
@@ -10373,35 +11029,35 @@ registerProcessor('mmsxx-ay', AyBank);
   function registerNESPresets() {
     try {
       registerFamily("nesPulse", {
-        note: "The NES APU pulse channel, from the chip itself.",
+        desc: "The NES APU pulse channel, from the chip itself.",
         params: [{
           name: "duty",
           default: "50",
-          note: "Share of each cycle spent high, in percent (rounded down).",
+          desc: "Share of each cycle spent high, in percent (rounded down).",
           values: [
-            { value: "12", note: "12.5%. Thin and nasal." },
-            { value: "25", note: "25%. The classic NES lead." },
-            { value: "50", note: "50%. A plain square." }
+            { value: "12", desc: "12.5%. Thin and nasal." },
+            { value: "25", desc: "25%. The classic NES lead." },
+            { value: "50", desc: "50%. A plain square." }
           ]
         }]
       });
       registerFamily("nesNoise", {
-        note: "The NES APU noise channel, from the chip itself.",
+        desc: "The NES APU noise channel, from the chip itself.",
         params: [{
           name: "mode",
           default: "long",
-          note: "Which loop the shift register runs.",
+          desc: "Which loop the shift register runs.",
           values: [
-            { value: "long", note: "The full 32767-step loop: white noise. Drums and effects." },
-            { value: "short", note: "A 93-step loop, heard as a metallic buzz with a pitch." }
+            { value: "long", desc: "The full 32767-step loop: white noise. Drums and effects." },
+            { value: "short", desc: "A 93-step loop, heard as a metallic buzz with a pitch." }
           ]
         }]
       });
     } catch (e) {
     }
-    for (const [name, params, role, note] of NES_PRESETS) {
+    for (const [name, params, role, desc] of NES_PRESETS) {
       try {
-        registerNES(name, params, { role, note });
+        registerNES(name, params, { role, desc });
       } catch (e) {
       }
     }
@@ -10831,7 +11487,7 @@ class NesBank extends AudioWorkletProcessor {
 registerProcessor('mmsxx-nes', NesBank);
 `;
 
-  // player-latest/sound/fds.js
+  // sound/fds.js
   var FDS_CLOCK = 1789773;
   var FDS_LEN = 64;
   var FDS_OUT_PEAK = 2.4 * (95.88 / (8128 / 15 + 100)) * 1.876;
@@ -10905,9 +11561,9 @@ registerProcessor('mmsxx-nes', NesBank);
     ]
   ];
   function registerFDSPresets() {
-    for (const [name, params, role, note, tags] of FDS_PRESETS) {
+    for (const [name, params, role, desc, tags] of FDS_PRESETS) {
       try {
-        registerFDS(name, params, { role, note, tags });
+        registerFDS(name, params, { role, desc, tags });
       } catch (e) {
       }
     }
@@ -11198,7 +11854,7 @@ class FdsBank extends AudioWorkletProcessor {
 registerProcessor('mmsxx-fds', FdsBank);
 `;
 
-  // player-latest/sound/scc.js
+  // sound/scc.js
   var SCC_CLOCK = 3579545;
   var SCC_OUT_GAIN = 0.1404;
   function sccPeriod(freq) {
@@ -11233,9 +11889,9 @@ registerProcessor('mmsxx-fds', FdsBank);
     ]
   ];
   function registerSCCPresets() {
-    for (const [name, wave, role, note] of SCC_PRESETS) {
+    for (const [name, wave, role, desc] of SCC_PRESETS) {
       try {
-        registerSCC(name, { wave: sccWave(wave) }, { role, note });
+        registerSCC(name, { wave: sccWave(wave) }, { role, desc });
       } catch (e) {
       }
     }
@@ -11453,7 +12109,7 @@ class SccBank extends AudioWorkletProcessor {
 registerProcessor('mmsxx-scc', SccBank);
 `;
 
-  // player-latest/sound/pce.js
+  // sound/pce.js
   var PCE_CLOCK = 3579545;
   var PCE_OUT_GAIN = 0.1393;
   function pcePeriod(freq) {
@@ -11493,16 +12149,16 @@ registerProcessor('mmsxx-scc', SccBank);
     ]
   ];
   function registerPCEPresets() {
-    for (const [name, wave, role, note] of PCE_PRESETS) {
+    for (const [name, wave, role, desc] of PCE_PRESETS) {
       try {
-        registerPCE(name, { wave: pceWave(wave) }, { role, note });
+        registerPCE(name, { wave: pceWave(wave) }, { role, desc });
       } catch (e) {
       }
     }
     try {
       registerPCE("pceNoise", { noise: true }, {
         role: "noise",
-        note: "Noise from the PC Engine chip itself (voices 5 and 6 only). The note picks the noise clock; o4a lands mid-range, lower notes are coarser."
+        desc: "Noise from the PC Engine chip itself (voices 5 and 6 only). The note picks the noise clock; o4a lands mid-range, lower notes are coarser."
       });
     } catch (e) {
     }
@@ -11778,7 +12434,7 @@ class PceBank extends AudioWorkletProcessor {
 registerProcessor('mmsxx-pce', PceBank);
 `;
 
-  // player-latest/sound/opnarhythm.js
+  // sound/opnarhythm.js
   var OPNA_CLOCK = 7987200;
   var OPNA_RHYTHM_OUT_GAIN = 0.36;
   var OPNA_RHYTHM_KEYS = ["bd", "sd", "top", "hh", "tom", "rim"];
@@ -11792,13 +12448,14 @@ registerProcessor('mmsxx-pce', PceBank);
   ];
   var REDRAWN = " Redrawn to sound like the YM2608 rhythm ROM, not the ROM data itself; played as 4-bit ADPCM-A at the chip's own rate. o4c plays it as recorded. The recording may be redrawn closer to the real chip later, so the sound can change.";
   function registerOPNARhythmPresets() {
-    for (const [name, key2, note] of OPNA_RHYTHM_PRESETS) {
+    for (const [name, key2, desc] of OPNA_RHYTHM_PRESETS) {
       try {
         registerOPNARhythm(
           name,
           { key: key2 },
-          // OPNA を積んだ機械(PC-88FA / MA と PC-98 の 86 ボード)でだけ鳴る
-          { role: "perc", note: note + REDRAWN, tags: ["opna", "pc88", "pc98", "drum"] }
+          // OPNA を積んだ機械(PC-88FA / MA と PC-98 の 86 ボード)でだけ鳴る。
+          // 描き直した録音なので、実機と同じとは言えない(approx。sound/mml.js の metaOf)
+          { role: "perc", desc: desc + REDRAWN, tags: ["opna", "pc88", "pc98", "drum", "approx"] }
         );
       } catch (e) {
       }
@@ -11990,7 +12647,7 @@ class OpnaRhythmBank extends AudioWorkletProcessor {
 registerProcessor('mmsxx-opna-rhythm', OpnaRhythmBank);
 `;
 
-  // player-latest/sound/duty.js
+  // sound/duty.js
   var DUTY_CODE = `
 const FRAME = ${TONE_FRAME};
 
@@ -12144,7 +12801,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     return Math.min(0.98, Math.max(0.02, x));
   };
 
-  // player-latest/sound/modal.js
+  // sound/modal.js
   var MODAL_NODE = "mmsxx-modal";
   var MODAL_VOICES = 24;
   var MODAL_MODES = 1024;
@@ -12174,10 +12831,28 @@ registerProcessor('mmsxx-duty', DutyBank);
     const head = ev.h ? Object.assign({}, def.head, ev.h) : def.head || {};
     const [nb, nb1, nb2] = roll(def.neighbor || 0);
     if (nb && ev.f) out.extra.push({ t: ev.t + 6e-3 + 0.02 * nb1, p: ev.p, f: ev.f * Math.pow(2, (nb2 < 0.5 ? -1 : 1) / 12), v: vel * (0.45 + 0.25 * nb2), d: ev.d, k: ev.k, nf: 1 });
-    const [db, db1, db2] = roll(def.double || 0);
-    if (db) out.extra.push({ t: ev.t + 0.012 + 0.025 * db1, p: ev.p, f: ev.f, v: vel * (0.4 + 0.2 * db2), d: ev.d == null ? void 0 : Math.max(0.02, ev.d - 0.03), k: ev.k, nf: 1 });
-    const [bz, bz1] = roll((def.buzz || 0) * (0.5 + vel));
-    if (bz) out.buzz = (def.buzzLevel ?? 0.4) * (0.6 + 0.4 * bz1);
+    roll(0);
+    if (def.double > 0 && ev.f) {
+      let kh = Math.imul(Math.round(12 * Math.log2(ev.f / 440)) + 69, 2654435761) ^ Math.imul((def.doubleSeed | 0) + 1, 2246822507);
+      const ku = () => {
+        kh = Math.imul(kh ^ kh >>> 15, 2246822507);
+        kh = Math.imul(kh ^ kh >>> 13, 3266489909);
+        kh ^= kh >>> 16;
+        return (kh >>> 0) / 4294967296;
+      };
+      const bad2 = ku() < def.double, k1 = ku(), k2 = ku();
+      if (bad2 && vel >= 0.75) {
+        out.extra.push({ t: ev.t + 0.012 + 0.025 * k1, p: ev.p, f: ev.f, v: vel * (0.4 + 0.2 * k2), d: ev.d == null ? void 0 : Math.max(0.02, ev.d - 0.03), k: ev.k, nf: 1 });
+      }
+    }
+    roll(0);
+    if (def.buzz > 0 && ev.f && vel >= 0.6) {
+      let kh = Math.imul(Math.round(12 * Math.log2(ev.f / 440)) + 69, 668265263) ^ Math.imul((def.buzzSeed | 0) + 1, 374761393);
+      kh = Math.imul(kh ^ kh >>> 15, 2246822507);
+      kh = Math.imul(kh ^ kh >>> 13, 3266489909);
+      kh ^= kh >>> 16;
+      if ((kh >>> 0) / 4294967296 < def.buzz) out.buzz = (def.buzzLevel ?? 0.4) * Math.min(1, 0.4 + 1.5 * (vel - 0.6));
+    }
     const [sl] = roll(def.slip || 0);
     if (sl) {
       out.amp *= 0.5;
@@ -12185,7 +12860,7 @@ registerProcessor('mmsxx-duty', DutyBank);
     }
     const [gh] = roll((def.ghost || 0) * (1.3 - vel));
     if (gh) {
-      out.t60k *= 0.05;
+      out.t60k *= 0.05 / Math.sqrt(def.strings > 1 && def.after > 1 ? def.after : 1);
       out.amp *= 0.7;
       out.head = Object.assign({}, out.head, { noise: Math.max(head.noise || 0, 0.6) });
     }
@@ -12205,10 +12880,115 @@ registerProcessor('mmsxx-duty', DutyBank);
     }
     return out;
   }
+  function guitarHand(hand, f) {
+    const OPEN = [40, 45, 50, 55, 59, 64];
+    const m = Math.round(69 + 12 * Math.log2(f / 440));
+    const cands = [];
+    for (let s = 0; s < 6; s++) {
+      const fr = m - OPEN[s];
+      if (fr >= 0 && fr <= 19) cands.push([s, fr]);
+    }
+    if (!cands.length) return null;
+    const open = cands.find((c) => c[1] === 0);
+    if (open) return { pos: hand.pos, s: open[0], fret: 0, moved: 0 };
+    const inside = cands.filter((c) => c[1] >= hand.pos && c[1] <= hand.pos + 3);
+    if (inside.length) {
+      const c = inside.find((x) => x[0] === hand.s) || inside[0];
+      return { pos: hand.pos, s: c[0], fret: c[1], moved: 0 };
+    }
+    let best = null;
+    for (const [s, fr] of cands) {
+      const pos = fr < hand.pos ? fr : fr - 3;
+      const moved = Math.abs(pos - hand.pos);
+      const better = !best || moved < best.moved || moved === best.moved && s === hand.s && best.s !== hand.s;
+      if (better) best = { pos, s, fret: fr, moved };
+    }
+    return best;
+  }
+  function modalHandling(def, cur, prev, n, now, handOf) {
+    const out = [];
+    const h = handOf(prev || { pos: 1, s: -1 }, cur.f);
+    const hand = h ? { pos: h.pos, s: h.s, fret: h.fret } : prev ? { pos: prev.pos, s: -1, fret: 0 } : { pos: 1, s: -1, fret: 0 };
+    if (!prev || !h || !prev.f) return { ev: out, hand };
+    const same = Math.abs(12 * Math.log2(cur.f / prev.f)) < 0.5;
+    if (same) return { ev: out, hand };
+    const t0 = Math.max(prev.end != null && prev.end < cur.t ? prev.end : cur.t - 0.1, now);
+    const lift = Math.min(1, Math.max(0, def.lift ?? 0.3));
+    const care = Math.min(1, Math.max(0, def.care || 0));
+    const careK = Math.max(0.1, 1 - care);
+    const liftK = Math.max(0.1, lift), slideK = Math.max(0.1, 1 - lift);
+    const fretted = prev.s >= 0 && prev.fret > 0;
+    const ring = (def.openRing ?? 0) * liftK * careK;
+    if (ring > 0 && fretted && cur.t - t0 > 0.03) {
+      const open = 440 * Math.pow(2, ([40, 45, 50, 55, 59, 64][prev.s] - 69) / 12);
+      out.push({
+        t: t0,
+        p: cur.p,
+        f: open,
+        v: Math.min(1, 0.6 * ring),
+        d: cur.t - t0,
+        nf: 1,
+        h: { sharp: 2.5, bright: 0.7, noise: 0.1 }
+      });
+    }
+    const amt = (def.stringNoise || 0) * careK;
+    if (!(amt > 0)) return { ev: out, hand };
+    const tick = amt * liftK * Math.min(1, Math.max(0, def.click ?? 1));
+    if (fretted && prev.s <= 2 && tick > 0) {
+      out.push({
+        t: t0,
+        p: cur.p,
+        sq: 1,
+        nf: 1,
+        sqLen: 0.02,
+        sqF: 0,
+        sqB: 1200,
+        sqN: 0.5,
+        sqSeed: n * 31 + 3,
+        v: 0.47 * Math.pow(tick, 1.7)
+      });
+    }
+    const wound = fretted && prev.s <= 2 || h.fret > 0 && h.s <= 2;
+    const slide = amt * slideK;
+    const sp = Math.min(1, h.moved / 12);
+    const glide = 1 - Math.min(1, Math.max(0, (lift - 0.05) / 0.2));
+    const want = glide * (0.08 + 0.06 * sp) + (1 - glide) * (0.02 + 0.03 * sp);
+    const short = Math.max(0, want - (cur.t - 5e-3 - (t0 + 5e-3)));
+    const rush = Math.min(1, Math.max(0, def.rush || 0));
+    const st = Math.max(now, prev.t != null ? prev.t + 0.05 : -Infinity, t0 + 5e-3 - rush * short);
+    const room = cur.t - 5e-3 - st;
+    if (h.moved > 0 && wound && room >= 0.015) {
+      const bend = fretted && glide >= 0.5 ? Math.sign(h.pos - prev.pos) * h.moved : 0;
+      const hs = (k) => {
+        let x = (((def.flawSeed ?? 1) | 0) * 2654435761 ^ Math.imul(n | 0, 40503) ^ Math.imul(k, 2654435761)) >>> 0;
+        x ^= x >>> 15;
+        x = Math.imul(x, 739982445) >>> 0;
+        x ^= x >>> 12;
+        x = Math.imul(x, 695872825) >>> 0;
+        x ^= x >>> 15;
+        return (x >>> 0) / 4294967296;
+      };
+      const s2 = st + Math.min(0.01 * hs(1), Math.max(0, room - 0.015));
+      out.push({
+        t: s2,
+        p: cur.p,
+        sq: 1,
+        nf: 1,
+        sqLen: Math.min(want * (0.7 + 0.5 * hs(2)), cur.t - 5e-3 - s2),
+        sqF: (1900 + 400 * sp) * (0.88 + 0.24 * hs(3)),
+        sqB: 0,
+        sqN: 0.2,
+        sqSeed: n * 31 + 7,
+        v: 0.4 * slide * (0.6 + 0.4 * sp) * (0.65 + 0.55 * hs(4)),
+        bend
+      });
+    }
+    return { ev: out, hand };
+  }
   function modalModes(def, f0, t60k, spot, sr, max, maxStrings, onString, onMode) {
     const kr = def.pitched ? f0 / 261.63 : 1;
     const t60 = def.t60 * Math.pow(kr, -(def.decayKey || 0)) * t60k;
-    const bb = (def.stretch || 0) * Math.pow(kr, def.stretchKey || 0);
+    const bb = def.bStretch > 0 && def.pitched && f0 < 40.5 ? def.bStretch : (def.stretch || 0) * Math.pow(kr, def.stretchKey || 0);
     const damp = def.damp;
     const guide = def.guide > 0 && f0 < def.guide;
     let ns = 0;
@@ -12220,9 +13000,21 @@ registerProcessor('mmsxx-duty', DutyBank);
       }
     }
     const tb = def.table;
+    const hn = def.pitched && def.harmonic >= 2 ? def.harmonic | 0 : 0;
+    let pkNorm = 1;
+    if (def.pickupAt > 0) {
+      let e = 0, e0 = 0;
+      for (let k = 1; k <= 12; k++) {
+        const a = Math.pow(k, -1.25), w = a * Math.pow(Math.abs(Math.sin(Math.PI * k * def.pickupAt)), def.pickupDepth ?? 1);
+        e += w * w;
+        e0 += a * a;
+      }
+      pkNorm = Math.sqrt(e0 / e);
+    }
     let n = 0;
     for (let i = 0; i < tb.length && n < max; i += 4) {
       const h = tb[i + 3];
+      if (hn && h > 0 && h % hn) continue;
       if (guide && h >= 0) continue;
       let f, tt;
       if (h < 0) {
@@ -12231,17 +13023,38 @@ registerProcessor('mmsxx-duty', DutyBank);
       } else {
         f = tb[i] * f0 * (h > 0 && bb > 0 ? Math.sqrt(1 + bb * h * h) : 1);
         tt = t60 * tb[i + 2] / (1 + damp * (f / 1e3) * (f / 1e3));
+        if (def.mute > 0) tt = 60 / (60 / tt + def.mute * (45 * Math.pow(f / 165, 1.5) + 20));
       }
       if (f <= 20 || f >= sr * 0.45) continue;
       let ga = 1;
-      if (spot === 1 && n < tb.length / 12) ga = 1.3;
+      if (h >= 0 && (def.body || def.bodyLow)) {
+        let g2 = 1;
+        for (const pk of def.body || []) {
+          const A = Math.pow(10, pk.gain / 40), q = 1 / (2 - 2 * Math.min(0.95, pk.resonance));
+          const x = f / pk.freq, d = (1 - x * x) * (1 - x * x);
+          g2 *= (d + x * x * A * A / (q * q)) / (d + x * x / (A * A * q * q));
+        }
+        if (def.bodyLow > 0) {
+          const x4 = Math.pow(f / def.bodyLow, 4);
+          g2 *= x4 / (1 + x4);
+        }
+        ga = Math.sqrt(g2);
+      }
+      if (h > 0 && def.pickupAt > 0) {
+        ga *= Math.pow(Math.abs(Math.sin(Math.PI * h * def.pickupAt)), def.pickupDepth ?? 1) * pkNorm;
+        if (def.pickupPeakGain > 0 && def.pickupPeak > 0) {
+          const A = Math.pow(10, def.pickupPeakGain / 40), q = 1, x = f / def.pickupPeak, d = (1 - x * x) * (1 - x * x);
+          ga *= Math.sqrt((d + x * x * A * A / (q * q)) / (d + x * x / (A * A * q * q)));
+        }
+      }
+      if (spot === 1 && n < tb.length / 12) ga *= 1.3;
       else if (spot === 2) {
         if (n < 8) {
-          ga = 3;
+          ga *= 3;
           tt *= 2;
-        } else ga = 0.4;
+        } else ga *= 0.4;
       }
-      onMode(n, f, tt, tb[i + 1] * ga);
+      onMode(n, f, tt, tb[i + 1] * ga, h >= 0);
       n++;
     }
     return ns;
@@ -12251,15 +13064,41 @@ const V = ${MODAL_VOICES};
 const M = ${MODAL_MODES};
 const B = 128;
 // \u5171\u632F\u5668 1 \u672C\u306E\u6301\u3061\u7269: a1 a2 b y1 y2 cos sin t60
-const S = 8;
+// \u5171\u632F\u5668 1 \u672C\u306E\u6301\u3061\u7269\u3002a1 a2 b y1 y2 cos sin t60 \u3068\u3001\u97F3\u306E\u9AD8\u3055\u306B\u4ED8\u3044\u3066\u3044\u304F\u304B(1 \u304B 0)
+const S = 9;
 // \u58F0\u306E\u6301\u3061\u7269(\u5E73\u3089\u306A\u914D\u5217\u306E\u4E2D\u306E\u4F4D\u7F6E)
 const ON = 0, POS = 1, LEN = 2, LP1 = 3, LP2 = 4, COMB = 5, AMP = 6, LPC = 7,
   NOISE = 8, DIRECT = 9, RATTLE = 10, RENV = 11, NM = 12, REL = 13, RELT = 14,
   LEVEL = 15, OFF = 16, BORN = 17, NORM = 18, VARY = 19, HPOS = 20, RHP = 21,
   WG = 22, WGAIN = 23, FELT = 24, TL1 = 25, TL2 = 26, TC = 27, TA1 = 28, TA2 = 29,
   GN = 30, GL = 31, BZ = 32, BP = 33, PK = 34, PO = 35, PV = 36, PD = 37,
-  WD = 38, TD = 39, TR = 40;
-const K = 41;
+  WD = 38, TD = 39, TR = 40,
+  // \u62BC\u3055\u3048\u66FF\u3048\u306E\u30CE\u30A4\u30BA(\u30AD\u30E5\u30C3\u3068\u30C1\u30C3)\u3002\u5927\u304D\u3055\u30FB\u5DFB\u304D\u7DDA\u3092\u306A\u305E\u308B\u4F4D\u76F8\u30FB\u7D4C\u3063\u305F\u6570\u30FB\u9577\u3055\u30FB\u30AD\u30E5\u30C3\u306E\u9AD8\u3055\u30FB\u30C1\u30C3\u306E\u9AD8\u3055\u30FB\u4F4E\u3044\u307B\u3046\u3092\u629C\u304F\u72B6\u614B
+  SQ = 41, SQP = 42, SQT = 43, SQL = 44, SQF = 45, SQB = 46, SQH = 47,
+  // \u3073\u3073\u308A\u304C\u6B62\u307E\u308B\u63FA\u308C\u306E\u5927\u304D\u3055(\u63FA\u308C\u306E\u5C71\u306B\u5BFE\u3059\u308B\u5272\u5408)
+  BG = 48,
+  // \u62BC\u3055\u3048\u66FF\u3048\u306E\u30CE\u30A4\u30BA\u306B\u6DF7\u305C\u308B\u96D1\u97F3\u306E\u5272\u5408
+  SQN = 49,
+  // \u9CF4\u3063\u3066\u3044\u308B\u97F3\u3092\u62BC\u3055\u3048\u305F\u307E\u307E\u6ED1\u3089\u305B\u308B\u3002\u52D5\u304F\u534A\u97F3\u306E\u6570(\u7B26\u53F7\u4ED8\u304D)\u30FB\u3044\u307E\u52D5\u3044\u3066\u3044\u308B\u6570\u30FB\u7D4C\u3063\u305F\u6570\u30FB\u9577\u3055(\u30B5\u30F3\u30D7\u30EB)
+  BNS = 50, BNC = 51, BNT = 52, BNL = 53,
+  // \u62BC\u3055\u3048\u66FF\u3048\u306E\u30CE\u30A4\u30BA\u3068\u9375\u76E4\u306E\u97F3\u306E\u3001\u4F4E\u3044\u307B\u3046\u3092\u629C\u304F\u9AD8\u3055(Hz\u30020 \u306A\u3089 400Hz)
+  SQC = 54,
+  // \u3042\u3068\u304B\u3089\u81A8\u3089\u3080\u9AD8\u97F3(\u30C9\u30E9)\u3002\u5927\u304D\u3055\u30FB\u7ACB\u3061\u4E0A\u304C\u308A\u30FB\u6E1B\u308A(\u30B5\u30F3\u30D7\u30EB)\u30FB\u7D4C\u3063\u305F\u6570\u30FB\u30CF\u30A4\u30D1\u30B9\u306E\u4FC2\u6570\u3068 2 \u6BB5\u306E\u72B6\u614B
+  BLA = 55, BLR = 56, BLF = 57, BLP = 58, BLC = 59, BH1 = 60, BH2 = 61,
+  // \u81A8\u3089\u3080\u3042\u3044\u3060\u306B\u4F4E\u3044\u63FA\u308C\u304B\u3089\u629C\u304F\u91CF(1 \u30B5\u30F3\u30D7\u30EB\u3042\u305F\u308A\u3001\u30CD\u30FC\u30D1\u30FC)\u3068\u3001\u81A8\u3089\u307F\u304C\u5165\u308B\u9AD8\u3055(cos \u03C9)\u3001
+  // \u629C\u304F\u9AD8\u3055(cos \u03C9)
+  BLD = 62, BLK = 63, BLDK = 64,
+  // \u30D3\u30D6\u30E9\u30D5\u30A9\u30F3\u306E\u30E2\u30FC\u30BF\u30FC\u3002\u63FA\u308C\u306E\u6DF1\u3055\u3068\u901F\u3055
+  MO = 65, MR = 66,
+  // \u3073\u3073\u308A\u304C\u97F3\u7A0B\u306E\u5468\u671F\u3067\u8108\u6253\u3064\u91CF(1 \u3067\u8108\u6253\u3064\u30010 \u3067\u306A\u3081\u3089\u304B\u306A\u96D1\u97F3)
+  BZR = 67,
+  // \u306A\u3081\u3089\u304B\u306A\u3073\u3073\u308A\u306E\u5305\u7D61(\u63FA\u308C\u306E\u5927\u304D\u3055\u3092\u3001\u97F3\u7A0B\u306E\u5468\u671F\u3088\u308A\u9577\u304F\u306A\u3089\u3057\u305F\u3082\u306E)
+  BZS = 68,
+  // \u9CF4\u3063\u3066\u3044\u308B\u97F3\u3092\u6ED1\u3089\u305B\u308B\u3068\u304D\u3001\u534A\u97F3\u305A\u3064\u6BB5\u3067\u52D5\u304B\u3059(0\u3001\u30D5\u30EC\u30C3\u30C8)\u304B\u3001\u306A\u3081\u3089\u304B\u306B\u52D5\u304B\u3059(1\u3001\u30D5\u30EC\u30C3\u30C8\u306E\u7121\u3044\u6307\u677F)\u304B
+  BNF = 69,
+  // \u30C1\u30C3(\u62BC\u3055\u3048\u66FF\u3048\u306E\u30CE\u30A4\u30BA\u30FB\u9375\u76E4\u306E\u97F3\u30FB\u30B9\u30CA\u30C3\u30D7)\u306E\u9AD8\u3044\u307B\u3046\u3092\u4E38\u3081\u308B\u9AD8\u3055(Hz\u30020 \u306A\u3089 4kHz)
+  SQLP = 70;
+const K = 71;
 // \u982D\u306E\u7C92\u30021 \u58F0\u306B 32 \u7C92\u307E\u3067\u3002\u7C92\u3054\u3068\u306B \u59CB\u307E\u308A(\u30B5\u30F3\u30D7\u30EB)\u3068\u5927\u304D\u3055
 const G = 32;
 // \u5C0E\u6CE2\u7BA1(\u4F4E\u3044\u5F26)\u30021 \u58F0\u306B\u5F26 3 \u672C\u307E\u3067\u3002\u9045\u5EF6\u7DDA\u306E\u307B\u304B\u306B\u30011 \u672C\u305A\u3064\u6301\u3064\u3082\u306E:
@@ -12290,6 +13129,8 @@ const QUIET = 1e-5;
 const sourOf = ${sourOf};
 const modalFlaws = ${modalFlaws};
 const modalModes = ${modalModes};
+const guitarHand = ${guitarHand};
+const modalHandling = ${modalHandling};
 
 // \u30D4\u30C3\u30AF\u30A2\u30C3\u30D7\u306E\u5165\u53E3\u306E\u5927\u304D\u3055\u3002pickup 1\u3001ff \u306E\u771F\u3093\u4E2D\u306E\u97F3\u3067\u3001\u632F\u308C\u304C\u78C1\u77F3\u307E\u3067\u306E\u8DDD\u96E2\u306E 7 \u5272\u307B\u3069\u306B\u5C4A\u304F
 const PICKUP_SCALE = 1.2;
@@ -12322,9 +13163,17 @@ class ModalBank extends AudioWorkletProcessor {
     this.seed = new Uint32Array(V);       // \u7A2E\u3092\u56FA\u5B9A\u3057\u305F\u96D1\u97F3
     this.free = 0x9e3779b9;               // \u6BCE\u56DE\u9055\u3046\u96D1\u97F3(\u5168\u90E8\u306E\u58F0\u3067 1 \u672C)
     this.hb = new Float64Array(B);        // \u982D\u306E\u584A
+    this.bb = new Float64Array(B);        // \u3042\u3068\u304B\u3089\u81A8\u3089\u3080\u9AD8\u97F3\u306E\u584A(bloomFrom \u3088\u308A\u9AD8\u3044\u5171\u632F\u5668\u306B\u3060\u3051\u5165\u308B)
     this.vb = new Float64Array(B);        // \u58F0\u306E\u584A
     this.tb = new Float64Array(B);        // \u5C0E\u6CE2\u7BA1\u3078\u5165\u308C\u308B\u982D(tilt \u3092\u639B\u3051\u305F\u3082\u306E)
     this.ob = new Float32Array(B);        // \u51FA\u53E3\u304C 1 \u672C\u306E\u3068\u304D\u3001\u53F3\u3078\u884C\u304F\u675F\u3092\u7F6E\u304F
+    this.sqLp = new Float64Array(V);      // \u30AD\u30E5\u30C3\u306E\u9AD8\u3044\u307B\u3046\u3092\u4E38\u3081\u308B\u72B6\u614B
+    this.sqBp = new Float64Array(V);      // \u30AD\u30E5\u30C3\u306E\u30AB\u30C1\u306E\u6B8B\u308A
+    this.vpat = new Array(V).fill(null);  // \u58F0\u3054\u3068\u306E\u3001\u5171\u9CF4\u5F26\u3078\u6D41\u3059\u30D1\u30C3\u30C1\u306E\u540D\u524D
+    this.sym = {};                        // \u30D1\u30C3\u30C1\u3054\u3068\u306E\u5171\u9CF4\u5F26
+    this.ped = {};                        // \u30D1\u30C3\u30C1\u3054\u3068\u306E\u53F3\u30DA\u30C0\u30EB(1 \u3067\u8E0F\u3093\u3067\u3044\u308B)
+    this.pedIv = {};                      // \u30D1\u30C3\u30C1\u3054\u3068\u306E\u3001\u53F3\u30DA\u30C0\u30EB\u3092\u8E0F\u3080\u533A\u9593(\u6642\u8A08\u306E\u79D2)
+    this.vname = new Array(V).fill(null); // \u58F0\u3054\u3068\u306E\u3001\u30D1\u30C3\u30C1\u306E\u540D\u524D(\u30DA\u30C0\u30EB\u3067\u6B62\u3081\u308B\u304B\u3092\u898B\u308B)
     this.patch = p.patches || {};
     this.events = [];
     this.at = 0;
@@ -12333,18 +13182,154 @@ class ModalBank extends AudioWorkletProcessor {
     // \u5931\u6557\u30FB\u5D29\u308C\u306E\u7A2E\u306B\u4F7F\u3046\u3001\u30D1\u30C3\u30C1\u3054\u3068\u306E\u97F3\u306E\u6570\u3068\u524D\u306E\u97F3\u306E\u9AD8\u3055
     this.count = {};
     this.lastF = {};
+    // \u62BC\u3055\u3048\u66FF\u3048\u306E\u30AD\u30E5\u30C3\u3092\u6C7A\u3081\u308B\u305F\u3081\u306E\u3001\u53D7\u3051\u53D6\u3063\u305F\u9806\u306E\u6570\u30FB\u524D\u306E\u97F3\u306E\u9AD8\u3055\u30FB\u524D\u306B\u30AD\u30E5\u30C3\u3092\u9CF4\u3089\u3057\u305F\u6642\u523B
+    this.sqCount = {};
+    this.rollCount = {};
+    // \u30B9\u30E9\u30FC\u306E\u7D9A\u304D(sl)\u304C\u52D5\u304B\u3059\u5F26\u3002MML \u306E\u3064\u306A\u304C\u308A\u306E\u756A\u53F7 \u2192 { \u58F0, \u751F\u307E\u308C\u305F\u756A\u53F7, \u3044\u307E\u306E\u9AD8\u3055 }
+    this.ties = new Map();
+    this.sqLast = {};
     this.add(p.events || []);
     this.port.onmessage = (e) => {
       const d = e.data || {};
       if (d.patch) this.patch[d.patch] = d.def;
+      // MML \u306E #voice \u3067\u4F5C\u3063\u305F\u30D1\u30C3\u30C1\u3002\u97F3\u7B26\u3088\u308A\u5148\u306B\u5165\u308C\u308B(sound/audio.js \u306E MML_PATCHES)
+      if (d.patches) Object.assign(this.patch, d.patches);
       if (d.add) this.add(d.add);
-      if (d.cut) { this.events = []; this.at = 0; this.cutAt = 0; }
+      if (d.cut) { this.events = []; this.at = 0; this.cutAt = 0; this.pedIv = {}; }
     };
   }
 
   /** \u97F3\u7B26\u3092\u8DB3\u3059\u3002\u6642\u523B\u9806\u306B\u4E26\u3079\u76F4\u3057\u3066\u3001\u6E08\u3093\u3060\u3076\u3093\u306F\u6368\u3066\u308B */
   add(list) {
     if (!list.length) return;
+    // \u62BC\u3055\u3048\u66FF\u3048\u306E\u30CE\u30A4\u30BA(modalHandling)\u3002\u524D\u306E\u97F3\u3092\u96E2\u3057\u305F\u3068\u3053\u308D\u3067\u9CF4\u308B\u306E\u3067\u3001\u6B21\u306E\u97F3\u3092\u53D7\u3051\u53D6\u3063\u305F\u3068\u304D\u306B
+    // \u6C7A\u3081\u3066\u5DEE\u3057\u8FBC\u3080\u3002\u548C\u97F3\u306F\u307B\u307C\u540C\u6642\u306E\u97F3\u3092\u3072\u3068\u307E\u3068\u307E\u308A\u306B\u3057\u3066\u3001\u3044\u3061\u3070\u3093\u4F4E\u3044\u97F3\u3067\u898B\u308B
+    const sq = [];
+    const cand = list.filter((ev) => { const d = this.patch[ev.p]; return d && (d.stringNoise > 0 || d.openRing > 0) && !ev.nf && !ev.sq && ev.f; })
+      .sort((a, b) => a.t - b.t);
+    // \u524D\u306E\u97F3\u3092\u96E2\u3057\u305F\u6642\u523B\u304C\u3001\u3082\u3046\u904E\u304E\u3066\u3044\u308B\u3053\u3068\u304C\u3042\u308B(\u30EA\u30A2\u30EB\u30BF\u30A4\u30E0\u306F 0.5 \u79D2\u5148\u307E\u3067\u3057\u304B\u7A4D\u307E\u306A\u3044)\u3002
+    // \u305D\u306E\u3068\u304D\u306F\u3001\u3044\u307E\u304B\u3089\u9CF4\u3089\u3059
+    const now = typeof currentTime === 'number' ? currentTime : 0;
+    for (let i = 0; i < cand.length;) {
+      const p = cand[i].p, t = cand[i].t;
+      let f = Infinity, end = null, j = i;
+      const group = [];
+      // \u304B\u304D\u9CF4\u3089\u3057\u305F\u548C\u97F3\u306F\u5C11\u3057\u305A\u3064\u305A\u308C\u3066\u5C4A\u304F\u306E\u3067\u30011 \u3064\u524D\u306E\u97F3\u304B\u3089 30 \u30DF\u30EA\u79D2\u4EE5\u5185\u306A\u3089\u3064\u306A\u3052\u308B
+      for (; j < cand.length && cand[j].p === p && (j === i || cand[j].t - cand[j - 1].t < 0.03); j++) {
+        f = Math.min(f, cand[j].f);
+        group.push(cand[j]);
+        if (cand[j].d != null) end = Math.max(end ?? -Infinity, cand[j].t + cand[j].d);
+      }
+      const n = this.sqCount[p] = (this.sqCount[p] || 0) + 1;
+      const prev = this.sqLast[p] || null;
+      const r = modalHandling(this.patch[p], { t, f, p }, prev, cand[i].k ?? n, now, guitarHand);
+      // \u6B21\u306E\u97F3\u304B\u3089\u898B\u305F\u300C\u524D\u300D\u3002\u3044\u3061\u3070\u3093\u4F4E\u3044\u97F3\u306E\u9AD8\u3055\u3001\u96E2\u3057\u305F\u6642\u523B\u3001\u624B\u306E\u4F4D\u7F6E\u3068\u5F26
+      this.sqLast[p] = { t, f, end, ...r.hand, evs: group };
+      // \u6ED1\u3089\u305B\u308B\u524D\u306E\u97F3\u3002\u58F0\u3092\u63A2\u3059\u306E\u306F\u9CF4\u3089\u3059\u3068\u304D\u306A\u306E\u3067\u3001\u97F3\u7B26\u305D\u306E\u3082\u306E\u3092\u6301\u305F\u305B\u308B
+      for (const e of r.ev) { if (e.bend && prev) e.from = prev.evs; sq.push(e); }
+      i = j;
+    }
+    // \u9375\u76E4\u306E\u97F3(keyNoise)\u3002\u62BC\u3057\u3066\u9375\u76E4\u304C\u5E95\u306B\u5F53\u305F\u308B\u30B3\u30C8\u30C3\u3068\u3001\u96E2\u3057\u3066\u623B\u308B\u30B3\u30C8\u3002\u5F26\u306F\u95A2\u4FC2\u3057\u306A\u3044\u306E\u3067\u3001
+    // \u6D88\u97F3\u30DA\u30C0\u30EB\u3067\u3082\u9CF4\u308B(2026-10-14\u3002\u6D88\u97F3\u3067\u3082\u9375\u76E4\u3092\u62BC\u3059\u97F3\u304C\u3059\u308B\u3068\u3044\u3046\u52D5\u753B\u3092\u898B\u305F\u3001\u3068\u8A00\u308F\u308C\u305F)\u3002
+    // \u97F3\u304C\u9CF4\u308B\u306E\u3068\u307B\u307C\u540C\u6642\u306B\u5E95\u306B\u5F53\u305F\u308B(Goebl \u307B\u304B 2014\u3001OFAI \u306E\u5831\u544A)\u3002\u3069\u3061\u3089\u3082\u920D\u3044\u6728\u306E\u97F3(\u4F4E\u3044\u5C71)\u306B\u3001
+    // \u77ED\u3044\u30AB\u30C1\u3092\u91CD\u306D\u308B\u3002\u9375\u76E4\u3054\u3068\u306B\u6728\u306E\u9577\u3055\u304C\u9055\u3046\u306E\u3067\u3001\u5C71\u306E\u9AD8\u3055\u3092\u9375\u3054\u3068\u306B\u5C11\u3057\u305A\u3089\u3059(\u4E71\u6570\u3067\u306F\u306A\u304F\u9375\u3067\u6C7A\u307E\u308B)\u3002
+    // \u6307\u304C\u9375\u76E4\u306E\u4E0A\u9762\u3092\u53E9\u304F\u97F3(\u97F3\u306E 20\u301C30 \u30DF\u30EA\u79D2\u524D)\u306F\u3001\u5F3E\u304D\u65B9\u3067\u5909\u308F\u308B\u306E\u3067\u3001\u307E\u3060\u5165\u308C\u3066\u3044\u306A\u3044\u3002
+    // \u5024\u306F\u898B\u5F53\u3067\u3001\u9332\u97F3\u306B\u306F\u5408\u308F\u305B\u3066\u3044\u306A\u3044(\u9375\u76E4\u306E\u97F3\u3060\u3051\u306E\u9332\u97F3\u304C\u898B\u3064\u304B\u3089\u306A\u304B\u3063\u305F)
+    for (const ev of list) {
+      const d = this.patch[ev.p];
+      if (!d || !(d.keyNoise > 0) || ev.nf || ev.sq || !ev.f) continue;
+      const m = Math.round(12 * Math.log2(ev.f / 440) + 69);
+      let x = Math.imul(m + 1, 0x27d4eb2f) >>> 0; x ^= x >>> 15; x = Math.imul(x, 0x2c1b3c6d) >>> 0; x ^= x >>> 13;
+      const kh = (x >>> 0) / 4294967296;
+      const vel = ev.v == null ? 0.8 : Math.max(0, Math.min(1, ev.v));
+      const g = d.keyNoise * Math.pow(vel, 1.5);
+      const fb = 170 * (0.85 + 0.3 * kh);
+      sq.push({ t: ev.t + 0.003, p: ev.p, sq: 1, nf: 1, sqLen: 0.022, sqF: 0, sqB: fb, sqN: 0.45, sqHp: 50, sqSeed: m * 7 + 1, v: 0.5 * g });
+      sq.push({ t: ev.t + 0.003, p: ev.p, sq: 1, nf: 1, sqLen: 0.004, sqF: 0, sqB: 2600, sqN: 0.8, sqHp: 800, sqSeed: m * 7 + 2, v: 0.25 * g });
+      // \u653E\u3057\u305F\u3068\u304D\u3002\u9375\u76E4\u304C\u843D\u3061\u308B\u97F3\u3068\u3001\u30CF\u30F3\u30DE\u30FC\u304C\u5143\u306E\u4F4D\u7F6E(\u30CF\u30F3\u30DE\u30FC\u30EC\u30FC\u30EB\u306E\u7DD1\u306E\u30D5\u30A7\u30EB\u30C8)\u306B\u843D\u3061\u308B\u97F3\u3002
+      // \u8ABF\u5F8B\u5E2B\u306E\u89E3\u8AAC\u3067\u306F\u3001\u30AB\u30BF\u30AB\u30BF\u30FB\u30B3\u30C8\u30B3\u30C8\u306F\u4E3B\u306B\u3053\u3061\u3089\u3067\u3001\u30D1\u30FC\u30C4\u304C\u7740\u5730\u3059\u308B\u97F3\u3002\u3044\u3064\u3082\u9CF4\u3063\u3066\u3044\u308B\u304C\u3001
+      // \u5F26\u306E\u97F3\u306B\u6D88\u3055\u308C\u3066\u6C17\u306B\u306A\u3089\u306A\u3044\u3002\u6D88\u97F3\u306B\u3059\u308B\u3068\u76EE\u7ACB\u3064(2026-10-14\u3001\u89E3\u8AAC\u306E\u52D5\u753B\u3068\u6587\u3092\u898B\u305B\u3066\u3082\u3089\u3063\u305F)\u3002
+      // \u30CF\u30F3\u30DE\u30FC\u306F\u30D5\u30A7\u30EB\u30C8\u306B\u843D\u3061\u308B\u306E\u3067\u3001\u9375\u76E4\u3088\u308A\u67D4\u3089\u304B\u304F\u5C11\u3057\u9045\u308C\u308B
+      if (ev.d != null) {
+        const r = d.keyNoise * 0.6;
+        sq.push({ t: ev.t + ev.d, p: ev.p, sq: 1, nf: 1, sqLen: 0.018, sqF: 0, sqB: fb * 1.2, sqN: 0.45, sqHp: 50, sqSeed: m * 7 + 3, v: 0.5 * r });
+        sq.push({ t: ev.t + ev.d, p: ev.p, sq: 1, nf: 1, sqLen: 0.003, sqF: 0, sqB: 3000, sqN: 0.8, sqHp: 800, sqSeed: m * 7 + 4, v: 0.2 * r });
+        sq.push({ t: ev.t + ev.d + 0.012 + 0.006 * kh, p: ev.p, sq: 1, nf: 1, sqLen: 0.025, sqF: 0, sqB: fb * 1.6, sqN: 0.6, sqHp: 80, sqSeed: m * 7 + 5, v: 0.35 * r });
+      }
+    }
+    // \u30ED\u30FC\u30EB(roll\u30011 \u79D2\u306B\u4F55\u6253)\u30021 \u3064\u306E\u97F3\u7B26\u3092\u3001\u5DE6\u53F3\u4EA4\u4E92\u306B\u6253\u3061\u7D9A\u3051\u308B\u3082\u306E\u306B\u3059\u308B\u30022 \u6253\u76EE\u304B\u3089\u306F
+    // 1 \u6253\u76EE\u306E\u58F0\u3092\u53E9\u304D\u76F4\u3059(start \u306E ev.rs)\u3002\u9593\u9694\u3068\u5F37\u3055\u306F\u7A2E\u3067\u6C7A\u307E\u308B\u3076\u3093\u3060\u3051\u3070\u3089\u3064\u304B\u305B\u308B\u3002
+    // \u5DE6\u53F3\u306E\u624B\u306E\u5DEE\u306F\u4ED8\u3051\u306A\u3044(\u9332\u97F3\u3067 1dB \u672A\u6E80\u3060\u3063\u305F\u30022026-10-14)
+    for (const ev of list) {
+      const d = this.patch[ev.p];
+      if (!d || !(d.roll > 0) || ev.nf || ev.sq || ev.rs) continue;
+      const n = this.rollCount[ev.p] = (this.rollCount[ev.p] || 0) + 1;
+      const k = ((ev.k ?? n) + 1) * 7919 + (d.rollSeed | 0) * 104729;
+      const u = (i) => { let x = Math.imul(k + i * 2654435761, 0x27d4eb2f) >>> 0; x ^= x >>> 15; x = Math.imul(x, 0x2c1b3c6d) >>> 0; x ^= x >>> 13; return (x >>> 0) / 4294967296; };
+      const vel = ev.v == null ? 0.8 : Math.max(0, Math.min(1, ev.v));
+      const end = ev.t + (ev.d == null ? 1 : ev.d);
+      const step = 1 / d.roll, jit = d.rollJitter ?? 0.15, vary = d.rollVary ?? 3;
+      let t = ev.t;
+      for (let i = 1; ; i++) {
+        t += step * (1 + jit * (2 * u(2 * i) - 1));
+        if (t >= end - 0.01) break;
+        // \u5F37\u5F31(v2\u3001MML \u306E @to)\u3002\u5F37\u3055\u3092\u59CB\u307E\u308A\u304B\u3089\u7D42\u308F\u308A\u307E\u3067\u771F\u3063\u76F4\u3050\u52D5\u304B\u3059
+        const vt = ev.v2 == null ? vel : vel + (Math.max(0, Math.min(1, ev.v2)) - vel) * (t - ev.t) / (end - ev.t);
+        // \u5927\u304D\u3055\u306F\u5F37\u3055\u306E 1.5 \u4E57\u306A\u306E\u3067\u3001\xB1vary dB \u306B\u3059\u308B\u306B\u306F\u5F37\u3055\u3092 1/30 \u3067\u52D5\u304B\u3059
+        const vi = Math.min(1, vt * Math.pow(10, vary * (2 * u(2 * i + 1) - 1) / 30));
+        sq.push({ t, p: ev.p, f: ev.f, v: vi, nf: 1, rs: ev, h: ev.h });
+      }
+    }
+    // \u30B9\u30CA\u30C3\u30D7(snap)\u3002\u5F26\u3092\u6307\u677F\u304B\u3089\u5F15\u304D\u96E2\u3057\u3066\u653E\u3059\u3068\u3001\u623B\u3063\u305F\u5F26\u304C\u6307\u677F\u306B\u5F53\u305F\u3063\u3066\u30D1\u30C1\u30C3\u3068\u9CF4\u308B
+    // (\u30ED\u30AB\u30D3\u30EA\u30FC\u306E\u30B9\u30E9\u30C3\u30D7\u30022026-10-14)\u3002\u9332\u97F3\u304C\u624B\u306B\u5165\u3089\u305A\u3001\u898B\u5F53\u3067\u4F5C\u3063\u305F\u3002\u9AD8\u3055\u306B\u3088\u3089\u306A\u3044\u77ED\u3044\u96D1\u97F3
+    for (const ev of list) {
+      const d = this.patch[ev.p];
+      if (!d || !(d.snap > 0) || ev.nf || ev.sq || ev.rs || !ev.f) continue;
+      const vel = ev.v == null ? 0.8 : Math.max(0, Math.min(1, ev.v));
+      const m = Math.round(12 * Math.log2(ev.f / 440) + 69);
+      const g = d.snap * Math.pow(vel, 1.5);
+      // \u89AA\u6307(thumbBelow \u3088\u308A\u4F4E\u3044\u97F3)\u3002\u89AA\u6307\u306E\u9AA8\u3067\u5F26\u3092\u53E9\u304F\u300C\u30D9\u30F3\u300D\u3002\u53E9\u3044\u305F\u5F26\u304C\u6307\u677F\u306B\u5F53\u305F\u308B\u304C\u3001\u5F15\u3063\u3071\u3063\u3066\u653E\u3059\u3088\u308A
+      // \u5F53\u305F\u308A\u65B9\u304C\u920D\u3044\u3002\u30A8\u30EC\u30AD\u306E\u30B9\u30E9\u30C3\u30D7\u306E\u4F4E\u3044\u97F3(E1)\u3067\u306F\u3001\u30D1\u30C1\u30C3\u304C 1.3kHz \u307B\u3069\u3067\u300120\u301C30 \u30DF\u30EA\u79D2\u6B8B\u3063\u305F
+      // (\u3053\u3061\u3089\u306F 1.8kHz \u307B\u3069\u300115 \u30DF\u30EA\u79D2\u307B\u3069\u3002\u6728\u306E\u6307\u677F\u3068\u30AC\u30C3\u30C8\u5F26\u306A\u306E\u3067\u3001\u305D\u308C\u3088\u308A\u9577\u304F\u306F\u6B8B\u3055\u306A\u3044)\u3002
+      // \u982D\u306F\u5C11\u3057\u9577\u304F\u3001\u660E\u308B\u3055\u306F\u63A7\u3048\u3081\u306B\u3059\u308B(\u6307\u306E\u8179\u3088\u308A\u786C\u3044\u304C\u3001\u722A\u3084\u5F15\u3063\u304B\u3051\u305F\u6307\u307B\u3069\u3067\u306F\u306A\u3044)\u3002
+      // \u9AD8\u3044\u97F3\u306F\u6307\u3067\u5F15\u3063\u3071\u3063\u3066\u653E\u3059\u300C\u30DA\u30AD\u30C3\u300D\u3002\u30C1\u30E7\u30C3\u30D1\u30FC\u306E\u5B9A\u756A(\u89AA\u6307\u3067\u4F4E\u3044\u97F3\u3001\u6307\u3067 1 \u30AA\u30AF\u30BF\u30FC\u30D6\u4E0A)\u304C\u3001
+      // \u66F8\u304D\u5206\u3051\u306A\u304F\u3066\u3082\u305D\u306E\u307E\u307E\u9CF4\u308B(2026-10-14)
+      // \u624B\u306E\u3072\u3089(palm)\u3002\u624B\u306E\u3072\u3089\u3067\u5F26\u3092\u6307\u677F\u306B\u53E9\u304D\u3064\u3051\u308B\u3001\u97F3\u7A0B\u306E\u7121\u3044\u97F3\u3002
+      // \u96D1\u97F3\u3068\u920D\u3044\u5C71(190Hz)\u3067\u4F5C\u3063\u305F\u3089\u3001\u30B9\u30CD\u30A2\u30C9\u30E9\u30E0\u306B\u3057\u304B\u805E\u3053\u3048\u306A\u304B\u3063\u305F(2026-10-14)\u3002\u305D\u308C\u306F\u30B9\u30CD\u30A2\u306E\u4F5C\u308A\u65B9\u305D\u306E\u3082\u306E\u3002
+      // \u624B\u306E\u3072\u3089\u306F 4 \u672C\u306E\u5F26\u3092\u307E\u3068\u3081\u3066\u6307\u677F\u3078\u62BC\u3057\u3064\u3051\u308B\u306E\u3067\u30014 \u672C\u306E\u958B\u653E\u5F26(E1 A1 D2 G2)\u304C\u3054\u304F\u77ED\u304F\u9CF4\u3063\u3066\u6B62\u307E\u308B\u3002
+      // \u305D\u308C\u3092\u9CF4\u3089\u3057\u3001\u6728\u306E\u300C\u30B3\u30C3\u300D\u306F\u4E00\u77AC\u3060\u3051\u306B\u3059\u308B\u3002\u66F8\u3044\u305F\u97F3\u305D\u306E\u3082\u306E\u306F\u9CF4\u3089\u3055\u306A\u3044(4 \u672C\u3067\u4EE3\u3048\u308B)
+      if (d.palm > 0) {
+        for (const [k, om] of [28, 33, 38, 43].entries()) {
+          sq.push({ t: ev.t + 0.0015 * k, p: ev.p, f: 440 * Math.pow(2, (om - 69) / 12), v: vel * 0.8, nf: 1, d: 0.06, h: { sharp: 1.2, bright: 0.95, noise: 0.15 } });
+        }
+        sq.push({ t: ev.t + 0.001, p: ev.p, sq: 1, nf: 1, sqLen: 0.004, sqF: 0, sqB: 900, sqN: 1, sqHp: 400, sqLp: 2000, sqSeed: m * 11 + 11, v: 0.8 * g });
+        ev.palmMain = 1;
+        continue;
+      }
+      if (d.thumbBelow > 0 && ev.f < d.thumbBelow) {
+        // \u982D\u306F\u97F3\u8272\u306E\u982D\u304B\u3089\u6C7A\u3081\u308B\u3002thumbDull \u304C 1 \u3067\u3001\u9577\u3055 +10 \u30DF\u30EA\u79D2\u3001\u660E\u308B\u3055 \u22120.2\u3001\u96D1\u97F3 2 \u5272\u3002
+        // \u89AA\u6307\u306E\u8179\u306F\u5F26\u306B\u6570\u30DF\u30EA\u79D2\u89E6\u308C\u308B\u306E\u3067\u3001\u305D\u308C\u3088\u308A\u901F\u3044\u63FA\u308C(\u4E0A\u306E\u500D\u97F3)\u304C\u51FA\u306B\u304F\u3044\u3002\u9577\u3055\u306F\u639B\u3051\u305A\u306B\u8DB3\u3059\u3002
+        // \u639B\u3051\u308B\u3068\u3001\u982D\u306E\u77ED\u3044\u97F3\u8272(\u30A8\u30EC\u30AD\u306E\u30B9\u30E9\u30C3\u30D7\u30010.57 \u30DF\u30EA\u79D2)\u3067\u306F 2 \u30DF\u30EA\u79D2\u306B\u3082\u306A\u3089\u305A\u3001E1 \u306E\u500D\u97F3\u306B\u52B9\u304B\u306A\u304B\u3063\u305F\u3002
+        // \u30A6\u30C3\u30C9\u30D9\u30FC\u30B9(sharp 2.5\u3001bright 0.92\u3001noise 0.3\u3001thumbDull 0.075)\u3067\u306F 3.25\u30010.905\u30010.28 \u306B\u306A\u308B
+        const dull = d.thumbDull;
+        ev.h = Object.assign({ sharp: d.head.sharp + 10 * dull, bright: d.head.bright - 0.2 * dull, noise: d.head.noise * (1 - 0.8 * dull) }, ev.h || {});
+        sq.push({ t: ev.t + 0.002, p: ev.p, sq: 1, nf: 1, sqLen: 0.025, sqF: 0, sqB: 1100, sqN: 1, sqHp: 350, sqLp: 1800, sqSeed: m * 11 + 9, v: 0.7 * g });
+        sq.push({ t: ev.t + 0.002, p: ev.p, sq: 1, nf: 1, sqLen: 0.018, sqF: 0, sqB: 280, sqN: 0.5, sqHp: 100, sqSeed: m * 11 + 10, v: 0.8 * g });
+        continue;
+      }
+      // \u9AD8\u3055\u306E\u6C7A\u307E\u3063\u305F\u6CE2\u3092\u6DF7\u305C\u308B\u3068\u3001\u3069\u306E\u97F3\u3067\u3082\u540C\u3058\u9AD8\u3055\u306E\u300C\u30BF\u30BF\u30BF\u30F3\u300D\u304C\u9CF4\u308A\u3001\u5225\u306E\u697D\u5668\u304C\u4E00\u7DD2\u306B\u9CF4\u3063\u3066\u3044\u308B\u3088\u3046\u306B
+      // \u805E\u3053\u3048\u305F(2026-10-14)\u3002\u96D1\u97F3\u3060\u3051\u306B\u3057\u3066\u3001\u9AD8\u3044\u307B\u3046\u3092\u4E38\u3081\u3066\u6697\u3055\u3092\u51FA\u3059
+      sq.push({ t: ev.t + 0.002, p: ev.p, sq: 1, nf: 1, sqLen: 0.006, sqF: 0, sqB: 1700, sqN: 1, sqHp: 500, sqLp: 2500, sqSeed: m * 11 + 7, v: g });
+      // \u6307\u677F\u306E\u6728\u304C\u9CF4\u308B\u920D\u3044\u97F3\u3002\u4E0A\u306E\u30D1\u30C1\u30C3\u306F\u30A8\u30EC\u30AD\u306E\u30B9\u30E9\u30C3\u30D7(1.3\u301C3.3kHz)\u3088\u308A\u6697\u3081\u306E 1.9kHz \u307B\u3069
+      sq.push({ t: ev.t + 0.002, p: ev.p, sq: 1, nf: 1, sqLen: 0.012, sqF: 0, sqB: 350, sqN: 0.5, sqHp: 120, sqSeed: m * 11 + 8, v: 0.6 * g });
+    }
+    if (sq.length) list = list.concat(sq);
+    // \u53F3\u30DA\u30C0\u30EB\u306E\u533A\u9593(MML \u306E\u751F\u97F3\u306E\u533A\u9593\u306E @ped)\u3002\u97F3\u7B26\u304C\u6301\u3063\u3066\u304F\u308B\u3002\u540C\u3058\u533A\u9593\u306F\u4F55\u5EA6\u6765\u3066\u3082 1 \u3064
+    for (const ev of list) {
+      if (!ev.pd) continue;
+      const iv = this.pedIv[ev.p] || (this.pedIv[ev.p] = new Map());
+      for (const [a, b] of ev.pd) iv.set(a.toFixed(4) + '|' + b.toFixed(4), [a, b]);
+    }
     // \u9CF4\u308A\u306F\u3058\u3081\u308B\u6642\u523B(s0)\u3092\u5148\u306B\u6C7A\u3081\u3066\u304A\u304F\u3002align \u306E\u3042\u308B\u97F3\u8272\u306F\u3001\u982D\u306E\u3044\u3061\u3070\u3093\u5927\u304D\u3044
     // \u3068\u3053\u308D\u304C\u97F3\u7B26\u306E\u6642\u523B\u306B\u6765\u308B\u3088\u3046\u306B\u3001\u305D\u306E\u3076\u3093\u65E9\u304F\u9CF4\u308A\u306F\u3058\u3081\u308B
     for (const ev of list) ev.s0 = ev.t - this.lead(ev);
@@ -12395,10 +13380,43 @@ class ModalBank extends AudioWorkletProcessor {
   start(ev, off) {
     const def = this.patch[ev.p];
     if (!def) return;
+    // \u624B\u306E\u3072\u3089\u306E\u97F3(palm)\u306F\u3001\u66F8\u3044\u305F\u97F3\u3092\u9CF4\u3089\u3055\u305A\u30014 \u672C\u306E\u958B\u653E\u5F26\u3067\u4EE3\u3048\u308B(add \u3067\u8DB3\u3057\u3066\u3042\u308B)
+    if (ev.palmMain) return;
     const sr = sampleRate;
-    const v = this.pick();
-    const o = v * K;
     const vo = this.voice;
+    // \u30ED\u30FC\u30EB\u306E 2 \u6253\u76EE\u304B\u3089(ev.rs \u304C 1 \u6253\u76EE\u306E\u97F3\u7B26)\u3002\u65B0\u3057\u3044\u58F0\u3092\u53D6\u3089\u305A\u30011 \u6253\u76EE\u306E\u58F0\u3092\u53E9\u304D\u76F4\u3059\u3002
+    // \u9CF4\u3063\u3066\u3044\u308B\u819C\u3092\u53E9\u304F\u306E\u3067\u3001\u5171\u632F\u5668\u306E\u63FA\u308C\u306F\u6D88\u3055\u305A\u306B\u3001\u6253\u3063\u305F\u529B\u3092\u8DB3\u3059\u3002
+    // 1 \u6253\u76EE\u306E\u58F0\u304C\u3082\u3046\u5225\u306E\u97F3\u306B\u53D6\u3089\u308C\u3066\u3044\u305F\u3089\u3001\u6253\u305F\u306A\u3044
+    // \u30B9\u30E9\u30FC\u306E\u7D9A\u304D(MML \u306E c&e)\u3002\u5F26\u306E\u697D\u5668(neck \u304C 1 \u304B 2)\u3067\u306F\u3001\u9CF4\u3063\u3066\u3044\u308B\u5F26\u306E\u9AD8\u3055\u3092\u5909\u3048\u3066\u3001
+    // \u6307\u3067\u53E9\u3044\u305F(\u30CF\u30F3\u30DE\u30EA\u30F3\u30B0)\u304B\u5F15\u3063\u304B\u3051\u305F(\u30D7\u30EA\u30F3\u30B0)\u3076\u3093\u3060\u3051\u5C0F\u3055\u304F\u53E9\u304D\u76F4\u3059\u3002\u5F3E\u304D\u76F4\u3055\u306A\u3044
+    if (ev.sl != null) {
+      const tv = this.ties.get(ev.p + '|' + ev.sl);
+      if (!tv || !(def.neck > 0) || !ev.f) return;
+      const w = tv.v * K;
+      if (vo[w + ON] !== 1 || vo[w + BORN] !== tv.born) return;
+      const steps = 12 * Math.log2(ev.f / tv.f);
+      if (Math.abs(steps) < 0.01) return;
+      vo[w + BNS] = steps; vo[w + BNC] = 0; vo[w + BNT] = -off;
+      // \u6307\u304C\u5F26\u3092\u62BC\u3055\u3048\u308B(\u96E2\u3059)\u306E\u306F\u4E00\u77AC\u30023 \u30DF\u30EA\u79D2\u3067\u79FB\u308B
+      vo[w + BNL] = Math.max(1, Math.round(0.003 * sr)); vo[w + BNF] = 1;
+      tv.f = ev.f;
+      // \u53E9\u304D\u76F4\u3059\u5F37\u3055\u3002\u5F3E\u3044\u305F\u3068\u304D\u306E 4 \u5272\u307B\u3069(\u6307\u3067\u53E9\u304F\u30FB\u5F15\u3063\u304B\u3051\u308B\u306E\u306F\u3001\u306F\u3058\u304F\u3088\u308A\u5F31\u3044)\u3002\u898B\u5F53\u3067\u3001\u9332\u97F3\u306B\u306F\u5408\u308F\u305B\u3066\u3044\u306A\u3044
+      ev.rs = { vx: tv.v, born: tv.born };
+      ev.v = (ev.v == null ? 0.8 : ev.v) * 0.4;
+    }
+    const rs = ev.rs;
+    const re = !!rs && rs.vx != null && vo[rs.vx * K + ON] === 1 && vo[rs.vx * K + BORN] === rs.born;
+    if (rs && !re) return;
+    const v = re ? rs.vx : this.pick();
+    const o = v * K;
+    ev.vx = v;
+    if (ev.sq) { this.vpat[v] = null; this.vname[v] = null; this.squeak(v, def, ev, off); return; }
+    this.vname[v] = ev.p;
+    // \u6D88\u97F3(silent)\u3002\u5F26\u3092\u9CF4\u3089\u3055\u306A\u3044\u3002\u9375\u76E4\u306E\u97F3\u3084\u62BC\u3055\u3048\u66FF\u3048\u306E\u30CE\u30A4\u30BA\u306F\u3001\u5F26\u306E\u5916\u306A\u306E\u3067\u9CF4\u308B(2026-10-14)
+    if (def.silent) return;
+    // \u5171\u9CF4\u5F26\u3078\u6D41\u3059\u306E\u306B\u3001\u3069\u306E\u30D1\u30C3\u30C1\u306E\u58F0\u304B\u3092\u899A\u3048\u3066\u304A\u304F
+    this.vpat[v] = this.symBank(ev.p) ? ev.p : null;
+    vo[o + SQ] = 0;
     let h = ev.h ? Object.assign({}, def.head, ev.h) : def.head;
     const vel = ev.v == null ? 0.8 : Math.max(0, Math.min(1, ev.v));
     // \u5931\u6557\u30FB\u5D29\u308C\u3002\u8D77\u304D\u308B\u304B\u3069\u3046\u304B\u306F\u3001\u97F3\u7B26\u306E\u756A\u53F7\u30FB\u97F3\u306E\u9AD8\u3055\u30FB\u524D\u306E\u97F3\u306E\u9AD8\u3055\u30FB\u7A2E\u304B\u3089\u6C7A\u3081\u308B\u3002
@@ -12417,7 +13435,9 @@ class ModalBank extends AudioWorkletProcessor {
       if (fl.head) h = Object.assign({}, h, fl.head);
       if (fl.extra.length) this.add(fl.extra);
     }
-    const f0 = sourOf(def, ev.f || def.base);
+    // \u30CF\u30FC\u30E2\u30CB\u30AF\u30B9(harmonic)\u3002\u66F8\u3044\u305F\u9AD8\u3055\u306F\u805E\u3053\u3048\u308B\u9AD8\u3055\u3002\u5F26\u306F 1/n \u306E\u9AD8\u3055\u306E\u958B\u653E\u5F26\u3067\u3001\u89E6\u308C\u305F\u7BC0\u3067
+    // n \u306E\u500D\u6570\u3067\u306A\u3044\u500D\u97F3\u304C\u6B62\u307E\u308B(modalModes \u3067\u98DB\u3070\u3059)\u3002\u5F3E\u304F\u4F4D\u7F6E\u306E\u8C37\u3082\u5F26\u306E\u9577\u3055\u306E\u307E\u307E\u52B9\u304F
+    const f0 = sourOf(def, ev.f || def.base) / (def.pitched && def.harmonic >= 2 ? def.harmonic : 1);
     // \u5F37\u3055\u3067\u982D\u304C\u77ED\u304F\u3001\u660E\u308B\u304F\u306A\u308B\u3002\u6CE2\u5F62\u306F\u5DEE\u3057\u66FF\u3048\u306A\u3044
     // \u97F3\u57DF\u3067\u5909\u308F\u308B\u3082\u306E\u3002\u771F\u3093\u4E2D\u306E C \u3092\u57FA\u6E96\u306B\u3059\u308B
     const kr = def.pitched ? f0 / 261.63 : 1;
@@ -12442,11 +13462,49 @@ class ModalBank extends AudioWorkletProcessor {
     vo[o + VARY] = h.vary;
     // \u30D5\u30A7\u30EB\u30C8\u306F\u5F37\u304F\u53E9\u304F\u307B\u3069\u786C\u304F\u306A\u308A\u3001\u529B\u306E\u5F62\u304C\u5C16\u308B\u3002\u5C71\u3092\u4F55\u4E57\u3059\u308B\u304B\u3067\u6301\u3064
     vo[o + FELT] = 1 + (h.felt || 0) * vel * vel;
+    // \u3042\u3068\u304B\u3089\u81A8\u3089\u3080\u9AD8\u97F3(head \u306E bloom)\u3002\u5F31\u304F\u53E9\u304F\u3068\u8D77\u304D\u306A\u3044\u306E\u3067\u3001\u5F37\u3055\u306E bloomVelo \u4E57\u3067\u52B9\u304B\u305B\u308B
+    vo[o + BLA] = (h.bloom || 0) * Math.pow(vel, h.bloomVelo ?? 4);
+    vo[o + BLR] = Math.max(1, (h.bloomRise ?? 0.3) * sr);
+    vo[o + BLF] = Math.max(1, (h.bloomFall ?? 1) * sr);
+    vo[o + BLP] = 0;
+    vo[o + BLC] = Math.exp(-TAU * (h.bloomFrom ?? 1000) / sr);
+    vo[o + BH1] = 0; vo[o + BH2] = 0;
+    vo[o + BLD] = (h.bloomDrain || 0) / 8.686 / sr * Math.pow(vel, h.bloomVelo ?? 4);
+    vo[o + BLK] = Math.cos(TAU * Math.min(sr * 0.45, h.bloomFrom ?? 1000) / sr);
+    vo[o + BLDK] = Math.cos(TAU * Math.min(sr * 0.45, h.bloomDrainBelow ?? 300) / sr);
     vo[o + DIRECT] = def.direct || 0;
     vo[o + RATTLE] = def.rattle || 0;
     vo[o + RENV] = 0;
     vo[o + RHP] = 0;
+    // \u3086\u308B\u3093\u3060\u91D1\u5177\u3084\u4E0A\u306B\u7F6E\u3044\u305F\u7269\u306E\u5171\u9CF4(loose)\u3002\u5F3E\u304D\u65B9\u306E\u5931\u6557\u3067\u306F\u306A\u304F\u697D\u5668\u306E\u72B6\u614B\u306A\u306E\u3067\u3001\u4E71\u6570\u3092\u4F7F\u308F\u306A\u3044\u3002
+    // \u63FA\u308C\u3084\u3059\u3044\u9AD8\u3055(looseFreq)\u306E\u8FD1\u304F\u306B\u500D\u97F3\u304C\u3042\u308A\u3001\u5F37\u304F\u5F3E\u304F\u307B\u3069\u63FA\u3055\u3076\u3089\u308C\u308B\u3002\u63FA\u3055\u3076\u308A\u304C
+    // looseFrom \u3092\u8D8A\u3048\u305F\u97F3\u3060\u3051\u304C\u9CF4\u3089\u3057\u3001\u6E1B\u3063\u3066\u4E0B\u56DE\u308B\u3068\u6B62\u307E\u308B\u3002\u540C\u3058\u97F3\u3092\u540C\u3058\u5F37\u3055\u3067\u5F3E\u3051\u3070\u6BCE\u56DE\u540C\u3058
+    // (2026-10-13\u3002\u524D\u306F\u30D4\u30A2\u30CE\u306E\u3073\u3073\u308A\u3092 buzz \u306E\u4E71\u6570\u3067\u8D77\u3053\u3057\u3066\u3044\u3066\u3001\u3068\u304D\u3069\u304D\u9CF4\u308B\u306E\u306F\u304A\u304B\u3057\u3044\u3068\u8A00\u308F\u308C\u305F)
+    let bg = 0.35;
+    if (def.loose > 0 && def.pitched) {
+      const lf = def.looseFreq || 233, tb = def.table;
+      let top = 0;
+      for (let i = 0; i < tb.length; i += 4) if (tb[i + 3] >= 0 && tb[i + 1] > top) top = tb[i + 1];
+      let drive = 0;
+      for (let i = 0; i < tb.length && top > 0; i += 4) {
+        if (tb[i + 3] < 0) continue;
+        const f = tb[i] * f0;
+        // \u63FA\u308C\u3084\u3059\u3055\u306F Q 10 \u306E\u5C71\u3002\u982D\u306E\u660E\u308B\u3055(2 \u6BB5\u306E\u30ED\u30FC\u30D1\u30B9)\u3067\u4E0A\u306E\u500D\u97F3\u306F\u5F31\u304F\u5165\u308B
+        const x = (f - lf) / (lf / 10), y = f / fc;
+        drive += tb[i + 1] / top / (1 + x * x) / (1 + y * y);
+      }
+      drive *= Math.pow(vel, 1.5);
+      const from = def.looseFrom ?? 0.3;
+      if (drive > from) {
+        // \u8D8A\u3048\u305F\u5206\u3060\u3051\u5927\u304D\u304F\u30022 \u500D\u3067\u982D\u6253\u3061\u3002\u6B62\u307E\u308B\u306E\u306F\u3001\u63FA\u308C\u304C\u5C71\u306E from / drive \u307E\u3067\u6E1B\u3063\u305F\u3068\u3053\u308D
+        const lz = def.loose * Math.min(1, (drive - from) / Math.max(1e-6, from));
+        if (lz > buzz) { buzz = lz; bg = from / drive; }
+      }
+    }
     vo[o + BZ] = buzz;
+    vo[o + BZR] = def.buzzRasp ?? 1;
+    vo[o + BZS] = 0;
+    vo[o + BG] = bg;
     vo[o + BP] = 0;
     vo[o + PK] = def.pickup || 0;
     vo[o + PO] = def.pickupOffset || 0;
@@ -12459,15 +13517,20 @@ class ModalBank extends AudioWorkletProcessor {
     vo[o + WD] = def.width || 0;
     vo[o + TD] = def.tremolo || 0;
     vo[o + TR] = def.tremoloRate || 0;
+    vo[o + MO] = def.motor || 0;
+    vo[o + MR] = def.motorRate || 0;
     // \u9AD8\u3044\u97F3\u3092\u6301\u3061\u4E0A\u3052\u308B\u3002\u4E2D\u592E\u306E C \u304B\u3089\u4E0A\u3078 1 \u30AA\u30AF\u30BF\u30FC\u30D6\u3054\u3068\u306B trebleGain dB\u3002
     // \u672C\u7269\u306E\u30D4\u30A2\u30CE\u306F\u9AD8\u97F3\u3067\u3082\u51FA\u3060\u3057\u306E\u5927\u304D\u3055\u304C\u3042\u307E\u308A\u843D\u3061\u306A\u3044(\u9332\u97F3\u3067\u6E2C\u3063\u305F)
     const tg = def.trebleGain ? Math.pow(10, def.trebleGain * Math.max(0, Math.log2(kr)) / 20) : 1;
     vo[o + LEVEL] = (def.level == null ? 0.5 : def.level) * tg;
     vo[o + OFF] = off;
-    vo[o + BORN] = ++this.born;
-    vo[o + REL] = ev.d == null ? -1 : ev.t + ev.d;
-    vo[o + RELT] = def.release || 0.15;
-    vo[o + HPOS] = 0;
+    if (!re) {
+      vo[o + BORN] = ev.born = ++this.born;
+      vo[o + BNS] = 0; vo[o + BNC] = 0;
+      vo[o + REL] = ev.d == null ? -1 : ev.t + ev.d;
+      vo[o + RELT] = def.release || 0.15;
+      vo[o + HPOS] = 0;
+    }
     // \u982D\u304C\u9577\u3044\u307B\u3069\u4F4E\u3044\u5171\u632F\u5668\u3078\u591A\u304F\u5165\u308B\u306E\u3067\u3001\u305D\u306E\u3076\u3093\u5272\u308B\u3002
     // \u92ED\u3055\u306F\u660E\u308B\u3055\u3060\u3051\u3092\u5909\u3048\u3001\u5927\u304D\u3055\u306F\u5909\u3048\u306A\u3044
     // \u30D5\u30A7\u30EB\u30C8\u3067\u5C71\u304C\u5C16\u308B\u3068\u9762\u7A4D\u304C\u6E1B\u308B\u306E\u3067\u3001\u305D\u306E\u9762\u7A4D\u3067\u5272\u308B\u3002\u5272\u3089\u306A\u3044\u3068\u3001\u30D5\u30A7\u30EB\u30C8\u3092
@@ -12498,6 +13561,8 @@ class ModalBank extends AudioWorkletProcessor {
     } else {
       vo[o + NORM] = 1 / Math.max(1, area * len);
     }
+    // \u53E9\u304D\u76F4\u3059\u3068\u304D\u306F\u3001\u3053\u3053\u307E\u3067(\u982D\u306E\u5F62\u3068\u5927\u304D\u3055)\u3060\u3051\u3092\u6C7A\u3081\u76F4\u3059
+    if (re) return;
     this.ring.fill(0, v * R, v * R + R);
     this.seed[v] = (h.seed | 0) * 2654435761 + 1 >>> 0 || 1;
     // \u4FC2\u6570\u3092\u4F5C\u308B\u3002\u30CA\u30A4\u30AD\u30B9\u30C8\u306B\u8FD1\u3044\u3082\u306E\u306F\u8F09\u305B\u306A\u3044
@@ -12509,7 +13574,7 @@ class ModalBank extends AudioWorkletProcessor {
     const ns = modalModes(def, f0, t60k, spot, sr, M, WS, (s, f, t60s, damp, bb) => {
       this.string(v, s, f, t60s, damp, bb);
       this.wg[(v * WS + s) * WK + WLV] = s === 0 ? 1 : (def.afterLevel ?? 1);
-    }, (n, f, tt, a) => {
+    }, (n, f, tt, a, follow) => {
       const w = TAU * f / sr;
       const r = Math.exp(-LN1000 / (Math.max(0.005, tt) * sr));
       const c = Math.cos(w), s = Math.sin(w);
@@ -12522,9 +13587,18 @@ class ModalBank extends AudioWorkletProcessor {
       md[m + 5] = c;
       md[m + 6] = s;
       md[m + 7] = tt;
+      md[m + 8] = follow ? 1 : 0;
       vo[o + NM] = n + 1;
     });
     vo[o + WG] = ns;
+    // \u30DD\u30EB\u30BF\u30E1\u30F3\u30C8(MML \u306E c*e)\u3002\u5F26\u306E\u697D\u5668\u3060\u3051\u3002\u97F3\u7B26\u306E\u9577\u3055\u3092\u304B\u3051\u3066\u6ED1\u3089\u305B\u308B
+    let fNow = ev.f || def.base;
+    if (ev.gs && def.neck > 0) {
+      vo[o + BNS] = ev.gs; vo[o + BNC] = 0; vo[o + BNT] = -off;
+      vo[o + BNL] = Math.max(1, Math.round((ev.gl || 0.1) * sr)); vo[o + BNF] = def.neck === 2 ? 1 : 0;
+      fNow *= Math.pow(2, ev.gs / 12);
+    }
+    if (ev.tie != null) this.ties.set(ev.p + '|' + ev.tie, { v, born: vo[o + BORN], f: fNow });
     if (ns) {
       // \u4E0A\u306E\u500D\u97F3\u3092\u5F31\u3081\u308B\u91CF(tilt)\u3092\u3001\u5C0E\u6CE2\u7BA1\u306B\u3082\u540C\u3058\u610F\u5473\u3067\u52B9\u304B\u305B\u308B\u3002\u5171\u632F\u5668\u306E\u675F\u306F\u8868\u306E\u632F\u5E45\u3067
       // 1/n^tilt \u306B\u3057\u3066\u3044\u308B\u304C\u3001\u5C0E\u6CE2\u7BA1\u306B\u306F\u8868\u304C\u7121\u3044\u3002\u57FA\u97F3\u306E\u3068\u3053\u308D\u3067\u5207\u308C\u308B 1 \u6B21\u306E\u30ED\u30FC\u30D1\u30B9\u3092
@@ -12609,6 +13683,104 @@ class ModalBank extends AudioWorkletProcessor {
     this.wring.fill(0, (v * WS + s) * WR, (v * WS + s + 1) * WR);
   }
 
+  /**
+   * \u62BC\u3055\u3048\u66FF\u3048\u306E\u30CE\u30A4\u30BA(modalHandling)\u3092\u9CF4\u3089\u3059\u58F0\u3092\u5F35\u308B\u3002\u5171\u632F\u5668\u3082\u5C0E\u6CE2\u7BA1\u3082\u982D\u3082\u6301\u305F\u306A\u3044\u3002
+   * \u30AD\u30E5\u30C3\u306F\u3001\u6307\u304C\u5DFB\u304D\u5F26\u306E\u4E0A\u3092\u6ED1\u308A\u3001\u5DFB\u304D\u7DDA\u306E\u6BB5\u5DEE\u3092 1 \u3064\u305A\u3064\u306A\u305E\u308B\u97F3\u3002\u6BB5\u5DEE\u3092\u901A\u308B\u901F\u3055\u304C\u9AD8\u3055\u306B\u306A\u308B\u306E\u3067\u3001
+   * \u6ED1\u3063\u3066\u3044\u308B\u3042\u3044\u3060\u306E\u901F\u3055\u306F\u307B\u307C\u4E00\u5B9A\u3068\u307F\u3066\u3001\u9AD8\u3055\u306F\u52D5\u304B\u3055\u306A\u3044\u3002
+   * \u30C1\u30C3\u306F\u3001\u9AD8\u3055\u3092\u52D5\u304B\u3055\u305A\u306B\u96D1\u97F3\u3092\u591A\u3081\u306B\u3057\u305F\u77ED\u3044\u3082\u306E
+   */
+  squeak(v, def, ev, off) {
+    const vo = this.voice, o = v * K, sr = sampleRate;
+    vo[o + ON] = 1;
+    vo[o + NM] = 0; vo[o + WG] = 0;
+    // \u982D\u306F\u7121\u3044\u3002head() \u304C\u3059\u3050\u7D42\u308F\u308B\u3088\u3046\u3001\u5C3D\u304D\u305F\u3068\u3053\u308D\u304B\u3089\u59CB\u3081\u308B
+    vo[o + LEN] = 0; vo[o + POS] = R;
+    vo[o + DIRECT] = 0; vo[o + RATTLE] = 0; vo[o + BZ] = 0; vo[o + RENV] = 0;
+    vo[o + PK] = 0; vo[o + PD] = 0; vo[o + WD] = 0; vo[o + TD] = 0; vo[o + TR] = 0;
+    vo[o + LEVEL] = def.level == null ? 0.5 : def.level;
+    vo[o + OFF] = off;
+    vo[o + BORN] = ++this.born;
+    vo[o + REL] = -1;
+    vo[o + SQ] = ev.v;
+    // \u584A\u306E\u9014\u4E2D\u304B\u3089\u59CB\u3081\u308B\u3002OFF \u306F\u982D\u306E\u51E6\u7406(head)\u304C\u5148\u306B\u8AAD\u3093\u3067 0 \u306B\u623B\u3059\u306E\u3067\u3001\u3053\u3061\u3089\u306F
+    // \u7D4C\u3063\u305F\u6570\u3092\u8CA0\u304B\u3089\u59CB\u3081\u3066\u6570\u3048\u308B\u3002OFF \u3092\u4F7F\u3046\u3068\u3001\u584A\u306E\u982D\u307E\u3067\u6700\u5927 128 \u30B5\u30F3\u30D7\u30EB\u65E9\u304F\u9CF4\u3063\u305F
+    vo[o + SQP] = 0; vo[o + SQT] = -off; vo[o + SQH] = 0; this.sqLp[v] = 0; this.sqBp[v] = 0;
+    vo[o + SQL] = Math.max(1, Math.round(ev.sqLen * sr));
+    vo[o + SQF] = ev.sqF; vo[o + SQB] = ev.sqB; vo[o + SQN] = ev.sqN ?? 0.15; vo[o + SQC] = ev.sqHp || 0; vo[o + SQLP] = ev.sqLp || 0;
+    this.seed[v] = (ev.sqSeed | 0) * 2654435761 + 1 >>> 0 || 1;
+    // \u62BC\u3055\u3048\u3066\u3044\u305F\u524D\u306E\u97F3\u3092\u3001\u6ED1\u308B\u3042\u3044\u3060\u306B\u540C\u3058\u3060\u3051\u52D5\u304B\u3059\u3002\u524D\u306E\u97F3\u304C\u307E\u3060\u540C\u3058\u58F0\u3067\u9CF4\u3063\u3066\u3044\u308B\u3068\u304D\u3060\u3051
+    if (ev.bend && ev.from) {
+      for (const e of ev.from) {
+        if (e.vx == null || e.vb == null) continue;
+        const w = e.vx * K;
+        if (!vo[w + ON] || vo[w + BORN] !== e.vb) continue;
+        vo[w + BNS] = ev.bend; vo[w + BNC] = 0; vo[w + BNT] = -off; vo[w + BNL] = vo[o + SQL]; vo[w + BNF] = 0;
+      }
+    }
+  }
+
+  /** \u62BC\u3055\u3048\u66FF\u3048\u306E\u30CE\u30A4\u30BA\u3092 vb \u3078\u8DB3\u3059\u3002\u7D42\u308F\u3063\u305F\u3089\u5927\u304D\u3055\u3092 0 \u306B\u3059\u308B */
+  squeakRender(v) {
+    const vo = this.voice, vb = this.vb, o = v * K, sr = sampleRate;
+    const amp = vo[o + SQ], len = vo[o + SQL], fpk = vo[o + SQF], fb = vo[o + SQB], nm = vo[o + SQN];
+    let t = vo[o + SQT], ph = vo[o + SQP], hp = vo[o + SQH], lp = this.sqLp[v], sd = this.seed[v], b1 = this.sqBp[v];
+    // \u4F4E\u3044\u307B\u3046\u3092\u629C\u304F(1 \u6B21)\u3002\u6307\u304C\u5F26\u3092\u62BC\u3059\u920D\u3044\u97F3\u306F\u8981\u3089\u306A\u3044\u3002\u9375\u76E4\u306E\u97F3\u306F\u3001\u920D\u3044\u97F3\u305D\u306E\u3082\u306E\u306A\u306E\u3067\u4F4E\u304F\u629C\u304F
+    const a = Math.exp(-TAU * (vo[o + SQC] || 400) / sr);
+    // \u9AD8\u3044\u307B\u3046\u3092\u5C11\u3057\u4E38\u3081\u308B(1 \u6B21)\u3002\u306E\u3053\u304E\u308A\u306E\u307E\u307E\u3060\u3068\u30B8\u30C3\u30D1\u30FC\u306E\u3088\u3046\u306B\u805E\u3053\u3048\u305F\u3002
+    // 1.8kHz \u307E\u3067\u4E38\u3081\u308B\u3068\u3001\u4ECA\u5EA6\u306F\u97F3\u7A0B\u304C\u57CB\u3082\u308C\u3066\u96D1\u97F3\u306B\u805E\u3053\u3048\u305F\u3002\u672C\u7269\u306F\u97F3\u7A0B\u306E\u306F\u3063\u304D\u308A\u3057\u305F\u30AD\u30E5\u30C3(2026-10-13)
+    // \u30AD\u30E5\u30C3\u306F\u9AD8\u3044\u306E\u3067 8kHz \u307E\u3067\u901A\u3059(2026-10-13\u30021kHz \u3042\u305F\u308A\u3067\u306F\u4F4E\u3044\u3001\u3068\u8A00\u308F\u308C\u305F)
+    const c = 1 - Math.exp(-TAU * Math.min(vo[o + SQLP] || (fpk > 0 ? 8000 : 4000), sr * 0.4) / sr);
+    for (let i = 0; i < B && t < len; i++, t++) {
+      if (t < 0) continue;
+      const u = t / len;
+      let f, env;
+      if (fpk > 0) {
+        // \u30AD\u30E5\u30FC\u3002\u9AD8\u3055\u306F\u4E00\u5B9A(sqF)\u3067\u3001\u5927\u304D\u3055\u306F\u307B\u307C\u5E73\u3089\u3067\u3001\u7D42\u308F\u308A\u3060\u3051\u5207\u308B\u3002
+        // \u524D\u306F\u4E0A\u304C\u3063\u3066\u4E0B\u304C\u308B\u5F62(\u6ED1\u308B\u901F\u3055\u306E\u5C71)\u3067\u3001\u5927\u304D\u3055\u3082\u540C\u3058\u5C71\u306B\u3057\u3066\u3044\u305F\u3002\u30B8\u30FC\u3068\u805E\u3053\u3048\u305F(2026-10-13)\u3002
+        // \u305D\u306E\u6B21\u306F\u982D\u3067\u4E00\u6C17\u306B\u4E0A\u304C\u308B\u5F62\u306B\u3057\u305F\u304C\u3001\u77ED\u304F\u6E1B\u3063\u3066\u3044\u304F\u3088\u3046\u306B\u805E\u3053\u3048\u305F\u3002\u672C\u7269\u306F\u6291\u63DA\u304C\u5C11\u306A\u3044(2026-10-13)\u3002
+        // \u9AD8\u3055\u3092\u4E0A\u3052\u3066\u3044\u304F\u3068\u3001\u30AB\u30E2\u30E1\u304C\u9CF4\u3044\u3066\u3044\u308B\u3088\u3046\u306B\u805E\u3053\u3048\u305F(2026-10-14)\u3002
+        // \u9AD8\u3055\u306F\u6ED1\u308B\u901F\u3055\u3067\u6C7A\u307E\u308A\u3001\u6ED1\u3063\u3066\u3044\u308B\u3042\u3044\u3060\u306E\u901F\u3055\u306F\u307B\u307C\u4E00\u5B9A\u306A\u306E\u3067\u3001\u52D5\u304B\u3055\u306A\u3044
+        f = fpk;
+        // \u77ED\u3044\u30AD\u30E5\u30C3(20 \u30DF\u30EA\u79D2\u307B\u3069)\u3067\u3082\u5F62\u304C\u6B8B\u308B\u3088\u3046\u3001\u7D42\u308F\u308A\u306E\u5207\u308A\u65B9\u306F\u9577\u3055\u306E 4 \u5272\u307E\u3067\u306B\u3059\u308B
+        env = Math.min(1, t / (0.004 * sr)) * Math.min(1, (len - t) / Math.min(0.012 * sr, 0.4 * len));
+      } else {
+        // \u30C1\u30C3\u3002\u9AD8\u3055\u306F\u52D5\u304B\u306A\u3044
+        f = fb;
+        env = Math.sin(Math.PI * u);
+      }
+      const pp = ph;
+      ph += f / sr;
+      if (ph >= 1) ph -= 1;
+      sd ^= sd << 13; sd >>>= 0; sd ^= sd >>> 17; sd ^= sd << 5; sd >>>= 0;
+      const z = sd / 2147483648 - 1;
+      let x;
+      if (fpk > 0) {
+        // \u30AD\u30E5\u30C3\u306F\u3001\u5DFB\u304D\u7DDA\u306E\u5C71\u3092 1 \u3064\u8D8A\u3048\u308B\u305F\u3073\u306E\u5C0F\u3055\u306A\u30AB\u30C1\u306E\u4E26\u3073\u3002\u5C71\u3092\u8D8A\u3048\u308B\u9593\u9694\u306F\u305D\u308D\u308F\u306A\u3044\u306E\u3067\u3001
+        // 1 \u3064\u305A\u3064\u5C11\u3057\u305A\u3089\u3057(\u6B21\u307E\u3067\u3092\u6700\u5927 3 \u5272\u306E\u3070\u3059)\u3001\u5F37\u3055\u3082\u63FA\u3089\u3059\u3002\u30AB\u30C1\u306F 0.1 \u30DF\u30EA\u79D2\u307B\u3069\u3067\u6D88\u3048\u308B\u3002
+        // \u97FF\u304B\u305B\u306A\u3044(\u4E7E\u3044\u305F\u97F3)\u3002
+        // \u524D\u306F\u97F3\u7A0B\u306E\u6CE2\u3068\u3001\u305D\u306E\u9AD8\u3055\u306E\u307E\u308F\u308A\u3092\u901A\u3057\u305F\u96D1\u97F3(Q 2)\u306E\u534A\u3005\u3067\u3001\u3082\u3063\u3068\u4E7E\u3044\u305F\u97F3\u3060\u3068\u8A00\u308F\u308C\u305F(2026-10-14)\u3002
+        // \u305D\u306E\u524D\u306F\u3001\u97F3\u7A0B\u306E\u6CE2\u3060\u3051\u3067\u30AB\u30E2\u30E1\u3001\u96D1\u97F3\u3092\u7D30\u304B\u304F\u63FA\u3089\u3057\u3066\u3056\u3089\u3064\u304D\u3001\u30DB\u30EF\u30A4\u30C8\u30CE\u30A4\u30BA\u3067\u30B6\u30FC\u30B6\u30FC\u3068\u8A00\u308F\u308C\u305F
+        if (ph < pp) {
+          b1 += 1 + 0.4 * z;
+          ph -= 0.3 * (0.5 + 0.5 * z);
+        }
+        const cl = b1;
+        b1 *= 0.55;
+        x = (1 - nm) * cl * 2.2 + nm * z * 0.5;
+      } else {
+        // \u30C1\u30C3\u306F\u3001\u500D\u97F3\u306E\u5C11\u306A\u3044\u4E38\u3044\u6CE2\u306B\u96D1\u97F3\u3092\u591A\u3081\u306B\u6DF7\u305C\u308B
+        const w = Math.sin(TAU * ph) + 0.25 * Math.sin(2 * TAU * ph);
+        x = (1 - nm) * w + nm * z;
+      }
+      lp += c * (x - lp);
+      const y = lp - hp;
+      hp = lp + a * (hp - lp);
+      vb[i] += amp * env * y;
+    }
+    vo[o + SQT] = t; vo[o + SQP] = ph; vo[o + SQH] = hp; this.sqLp[v] = lp; this.seed[v] = sd; this.sqBp[v] = b1;
+    if (t >= len) vo[o + SQ] = 0;
+  }
+
   /** \u5C0E\u6CE2\u7BA1\u306E\u5F26\u3092\u56DE\u3057\u3066 vb \u3078\u8DB3\u3059\u3002\u307E\u3060\u9CF4\u3063\u3066\u3044\u308B\u5F26\u306E\u6570\u3092\u8FD4\u3059 */
   strings(v, live) {
     const vo = this.voice, wg = this.wg, ring = this.wring, vb = this.vb;
@@ -12669,6 +13841,40 @@ class ModalBank extends AudioWorkletProcessor {
     return alive;
   }
 
+  /**
+   * \u62BC\u3055\u3048\u305F\u307E\u307E\u6ED1\u3089\u305B\u308B\u3002\u30D5\u30EC\u30C3\u30C8\u3092 1 \u3064\u8D8A\u3048\u308B\u3054\u3068\u306B\u534A\u97F3\u305A\u3064\u3001\u97F3\u306E\u9AD8\u3055\u306B\u4ED8\u3044\u3066\u3044\u304F\u5171\u632F\u5668\u3092
+   * \u305A\u3089\u3059\u3002\u6ED1\u308B\u901F\u3055\u306F\u4E00\u5B9A\u306A\u306E\u3067\u3001\u8D8A\u3048\u308B\u6642\u523B\u306F\u7B49\u3057\u304F\u4E26\u3076\u3002
+   * \u632F\u308C\u306E\u5927\u304D\u3055\u3068\u4F4D\u76F8\u306F\u305D\u306E\u307E\u307E\u3001\u9AD8\u3055\u3060\u3051\u3092\u5909\u3048\u308B(y2 \u3092\u65B0\u3057\u3044\u9AD8\u3055\u3067\u4F5C\u308A\u76F4\u3059)
+   */
+  bend(v) {
+    const vo = this.voice, md = this.modes, o = v * K;
+    const steps = vo[o + BNS], len = vo[o + BNL];
+    const t = vo[o + BNT] + B;
+    vo[o + BNT] = t;
+    const u = Math.min(1, Math.max(0, t / len));
+    // \u30D5\u30EC\u30C3\u30C8\u306E\u3042\u308B\u5F26\u306F\u534A\u97F3\u305A\u3064\u6BB5\u3067\u3001\u7121\u3044\u5F26\u306F\u306A\u3081\u3089\u304B\u306B\u52D5\u304F
+    const want = vo[o + BNF] ? steps * u : Math.sign(steps) * Math.min(Math.abs(steps), Math.floor(u * Math.abs(steps) + 1e-9));
+    const d = want - vo[o + BNC];
+    if (d) {
+      const ratio = Math.pow(2, d / 12);
+      for (let k = 0; k < vo[o + NM]; k++) {
+        const m = (v * M + k) * S;
+        if (!md[m + 8]) continue;
+        const c = md[m + 5], s = md[m + 6], y1 = md[m + 3], y2 = md[m + 4];
+        const w = Math.atan2(s, c) * ratio;
+        if (w >= Math.PI * 0.9) { md[m + 3] = 0; md[m + 4] = 0; md[m + 2] = 0; continue; }
+        const c2 = Math.cos(w), s2 = Math.sin(w);
+        const ac = (y1 * c - y2) / s;
+        md[m + 4] = y1 * c2 - ac * s2;
+        md[m] = 2 * Math.sqrt(md[m + 1]) * c2;
+        md[m + 2] = md[m + 2] / s * s2;
+        md[m + 5] = c2; md[m + 6] = s2;
+      }
+      vo[o + BNC] = want;
+    }
+    if (u >= 1) vo[o + BNS] = 0;
+  }
+
   /** \u96E2\u3059\u3002\u6E1B\u8870\u3092\u7E2E\u3081\u308B\u3060\u3051\u3067\u3001\u9CF4\u3063\u3066\u3044\u308B\u5F62\u306F\u5D29\u3055\u306A\u3044 */
   release(v) {
     const vo = this.voice, md = this.modes, sr = sampleRate;
@@ -12709,8 +13915,35 @@ class ModalBank extends AudioWorkletProcessor {
     const base = v * R;
     const off = vo[o + OFF];
     vo[o + OFF] = 0;
+    // \u3042\u3068\u304B\u3089\u81A8\u3089\u3080\u9AD8\u97F3(bloom)\u3002\u5F37\u304F\u53E9\u3044\u305F\u30C9\u30E9\u306F\u3001\u53E9\u3044\u305F\u529B\u304C\u4F4E\u3044\u63FA\u308C\u304B\u3089\u9AD8\u3044\u63FA\u308C\u3078\u5C11\u3057\u305A\u3064\u79FB\u308A\u3001
+    // 0.3\u301C1 \u79D2\u9045\u308C\u3066\u9AD8\u3044\u97F3\u304C\u81A8\u3089\u3080(\u9332\u97F3\u3067\u3001fff \u306E 6kHz \u3088\u308A\u4E0A\u304C\u53E9\u3044\u305F\u77AC\u9593\u3088\u308A 34dB \u5927\u304D\u304F\u306A\u3063\u305F)\u3002
+    // \u5171\u632F\u5668\u306F\u8DB3\u3057\u7B97\u3067\u3057\u304B\u3064\u306A\u304C\u3063\u3066\u3044\u306A\u3044\u306E\u3067\u3001\u79FB\u308B\u3068\u3053\u308D\u306F\u4F5C\u308C\u306A\u3044\u3002\u4EE3\u308F\u308A\u306B\u3001\u9AD8\u3044\u307B\u3046\u3060\u3051\u3092\u901A\u3057\u305F
+    // \u96D1\u97F3\u3092\u3001\u9045\u308C\u3066\u7ACB\u3061\u4E0A\u304C\u308B\u5F62\u3067\u982D\u306B\u8DB3\u3057\u7D9A\u3051\u308B\u3002\u4F4E\u3044\u5171\u632F\u5668\u306B\u306F\u307B\u3068\u3093\u3069\u5165\u3089\u306A\u3044
+    const bla = vo[o + BLA], bb = this.bb;
+    let blive = false;
+    bb.fill(0);
+    if (bla > 0) {
+      const rise = vo[o + BLR], fall = vo[o + BLF], c = vo[o + BLC];
+      let t = vo[o + BLP], h1 = vo[o + BH1], h2 = vo[o + BH2], fr2 = this.free;
+      for (let i = off; i < B; i++) {
+        const env = (1 - Math.exp(-t / rise)) * Math.exp(-t / fall);
+        fr2 ^= fr2 << 13; fr2 >>>= 0; fr2 ^= fr2 >>> 17; fr2 ^= fr2 << 5; fr2 >>>= 0;
+        const x = (fr2 / 2147483648 - 1) * env * bla;
+        // 2 \u6BB5\u306E\u30CF\u30A4\u30D1\u30B9(1 \u6B21\u3092 2 \u3064)
+        const y1 = x - h1; h1 = c * h1 + (1 - c) * x;
+        const y2 = y1 - h2; h2 = c * h2 + (1 - c) * y1;
+        bb[i] = y2;
+        t++;
+      }
+      this.free = fr2;
+      vo[o + BLP] = t; vo[o + BH1] = h1; vo[o + BH2] = h2;
+      // 60dB \u4E0B\u304C\u3063\u305F\u3089\u6B62\u3081\u308B
+      if (t > fall * 6.9) vo[o + BLA] = 0;
+      blive = true;
+      this.bloomOn = true;
+    }
     // \u982D\u304C\u5C3D\u304D\u3066\u3082\u3001\u30ED\u30FC\u30D1\u30B9\u3068\u6ADB\u306E\u5C3E\u304C R \u30B5\u30F3\u30D7\u30EB\u6B8B\u308B
-    if (pos >= len + R) return false;
+    if (pos >= len + R) return blive;
     for (let i = off; i < B; i++) {
       let x = 0;
       if (pos < len) {
@@ -12741,7 +13974,7 @@ class ModalBank extends AudioWorkletProcessor {
         : lp2;
       ring[base + hp] = lp2;
       hp = (hp + 1) % R;
-      hb[i] = y;
+      hb[i] += y;
       pos++;
     }
     vo[o + POS] = pos; vo[o + LP1] = lp1; vo[o + LP2] = lp2; vo[o + HPOS] = hp;
@@ -12760,12 +13993,31 @@ class ModalBank extends AudioWorkletProcessor {
     const live = this.head(v);
     const norm = vo[o + NORM];
     vb.fill(0);
+    if (vo[o + BNS]) this.bend(v);
+    // \u81A8\u3089\u3080\u9AD8\u97F3\u3078\u79FB\u3063\u305F\u529B\u306E\u3076\u3093\u3001\u4F4E\u3044\u63FA\u308C\u3092\u6E1B\u3089\u3059(bloomDrain)\u3002\u81A8\u3089\u307F\u3068\u540C\u3058\u5F62\u3067\u52B9\u304B\u305B\u308B
+    let gd = 1;
+    const cth = vo[o + BLK], dth = vo[o + BLDK];
+    if (vo[o + BLD] > 0 && vo[o + BLA] > 0) {
+      const t = vo[o + BLP];
+      const env = (1 - Math.exp(-t / vo[o + BLR])) * Math.exp(-t / vo[o + BLF]);
+      gd = Math.exp(-vo[o + BLD] * env * B);
+    }
+    // \u81A8\u3089\u3080\u9AD8\u97F3\u306F\u3001bloomFrom \u3088\u308A\u9AD8\u3044\u5171\u632F\u5668\u306B\u3060\u3051\u5165\u308C\u308B\u3002\u4F4E\u3044\u5171\u632F\u5668\u306F\u9577\u304F\u9CF4\u308B\u306E\u3067\u3001
+    // \u96D1\u97F3\u306E\u88FE\u3092\u53D7\u3051\u3066\u5C11\u3057\u305A\u3064\u7A4D\u307F\u4E0A\u304C\u308A\u3001\u4F4E\u3044\u5E2F\u57DF\u307E\u3067\u81A8\u3089\u3093\u3067\u3057\u307E\u3063\u305F(2026-10-14)
+    const bon = this.bloomOn, bb = this.bb;
+    this.bloomOn = false;
     let n = vo[o + NM];
     for (let k = 0; k < n; k++) {
       const m = (v * M + k) * S;
       const a1 = md[m], a2 = md[m + 1], b = md[m + 2] * norm;
       let y1 = md[m + 3], y2 = md[m + 4];
-      if (live) {
+      if (gd < 1 && md[m + 5] > dth) { y1 *= gd; y2 *= gd; }
+      if (bon && md[m + 5] <= cth) {
+        for (let i = 0; i < B; i++) {
+          const y = a1 * y1 - a2 * y2 + b * (hb[i] + bb[i]);
+          y2 = y1; y1 = y; vb[i] += y;
+        }
+      } else if (live) {
         for (let i = 0; i < B; i++) {
           const y = a1 * y1 - a2 * y2 + b * hb[i];
           y2 = y1; y1 = y; vb[i] += y;
@@ -12791,6 +14043,7 @@ class ModalBank extends AudioWorkletProcessor {
     }
     vo[o + NM] = n;
     const wgAlive = vo[o + WG] ? this.strings(v, live) : 0;
+    if (vo[o + SQ] > 0) this.squeakRender(v);
     // \u30D4\u30C3\u30AF\u30A2\u30C3\u30D7(\u30A8\u30EC\u30D4)\u3002\u78C1\u77F3\u306B\u8FD1\u3065\u304F\u307B\u3069\u78C1\u675F\u304C\u6025\u306B\u5897\u3048\u308B(1/\u8DDD\u96E2\xB2)\u306E\u3067\u3001\u632F\u308C\u5E45\u304C\u5927\u304D\u3044\u307B\u3069
     // \u6B6A\u307F\u3001\u5076\u6570\u500D\u97F3\u304C\u5897\u3048\u308B(\u30D0\u30FC\u30AF)\u3002\u5C0F\u3055\u3044\u632F\u308C\u3067\u306F\u7D20\u901A\u308A\u306B\u306A\u308B\u3088\u3046\u3001\u50BE\u304D\u3067\u5272\u3063\u3066\u3042\u308B\u3002
     // \u6B6A\u307F\u306E\u91CF\u306F\u632F\u308C\u5E45\u3060\u3051\u3067\u6C7A\u307E\u308B\u306E\u3067\u3001\u5F37\u304F\u5F3E\u3051\u3070\u6B6A\u307F\u3001\u6E1B\u308B\u306B\u3064\u308C\u3066\u4E38\u304F\u306A\u308B\u3002
@@ -12814,8 +14067,8 @@ class ModalBank extends AudioWorkletProcessor {
     // \u97FF\u304D\u7DDA(\u30B9\u30CD\u30A2\u306E\u88CF\u306E\u7DDA)\u3002\u80F4\u306E\u63FA\u308C\u306E\u5927\u304D\u3055\u3067\u96D1\u97F3\u3092\u958B\u304F\u3002
     // \u3073\u3073\u308A(\u5931\u6557)\u3082\u540C\u3058\u5305\u7D61\u3092\u4F7F\u3046\u3002\u63FA\u308C\u304C\u5927\u304D\u3044\u3046\u3061\u3060\u3051\u3001\u5F26\u304C\u4F55\u304B\u306B\u5F53\u305F\u3063\u3066\u96D1\u97F3\u304C\u4E57\u308B\u3002
     // \u63FA\u308C\u306E\u5C71\u306E 35% \u3092\u5207\u308B\u3068\u6B62\u307E\u308A\u3001\u63FA\u308C\u306E\u5C71\u306E\u5411\u304D\u306B\u5408\u308F\u305B\u3066\u958B\u304F\u306E\u3067\u3001\u97F3\u7A0B\u306E\u5468\u671F\u3067\u8108\u6253\u3064
-    const rt = vo[o + RATTLE], bzl = vo[o + BZ];
-    let renv = vo[o + RENV];
+    const rt = vo[o + RATTLE], bzl = vo[o + BZ], bg = vo[o + BG] || 0.35, rasp = vo[o + BZR];
+    let renv = vo[o + RENV], sm = vo[o + BZS];
     if (rt || bzl) {
       let fr = this.free, hp = vo[o + RHP], bp = vo[o + BP];
       for (let i = 0; i < B; i++) {
@@ -12826,11 +14079,18 @@ class ModalBank extends AudioWorkletProcessor {
         const z = fr / 2147483648 - 1;
         // 1 \u3064\u524D\u3068\u306E\u5DEE\u3067\u4F4E\u3044\u307B\u3046\u3092\u629C\u304F\u3002\u7DDA\u306E\u97F3\u306F\u9AD8\u3044
         let add = rt * renv;
-        if (bzl && renv > 0.35 * bp && a > 0.5 * renv) add += bzl * 3 * (renv - 0.35 * bp);
+        // \u8108\u6253\u305F\u305B\u308B(rasp 1)\u3068\u304D\u306F\u3001\u63FA\u308C\u306E\u5C71\u306E\u5411\u304D\u306E\u3068\u304D\u3060\u3051\u958B\u304F\u30020 \u3067\u306F\u3001\u63FA\u308C\u306E\u5927\u304D\u3055\u3092
+        // 20 \u30DF\u30EA\u79D2\u307B\u3069\u3067\u306A\u3089\u3057\u305F\u3082\u306E\u3067\u958B\u304F(\u97F3\u7A0B\u306E\u5468\u671F\u3067\u63FA\u308C\u306A\u3044\u3001\u767D\u3044\u96D1\u97F3\u306B\u8FD1\u3044\u3082\u306E)
+        sm += 0.001 * (renv - sm);
+        if (bzl) {
+          const pulse = renv > bg * bp && a > 0.5 * renv ? renv - bg * bp : 0;
+          const smooth = sm > bg * bp ? 0.5 * (sm - bg * bp) : 0;
+          add += bzl * 3 * (rasp * pulse + (1 - rasp) * smooth);
+        }
         vb[i] += add * (z - hp);
         hp = z;
       }
-      this.free = fr; vo[o + RHP] = hp; vo[o + BP] = bp;
+      this.free = fr; vo[o + RHP] = hp; vo[o + BP] = bp; vo[o + BZS] = sm;
       if (renv < 1e-6) renv = 0;
       vo[o + RENV] = renv;
     }
@@ -12845,6 +14105,13 @@ class ModalBank extends AudioWorkletProcessor {
     // \u5C0F\u3055\u304F\u3059\u308B\u5F62\u3002\u4F4D\u76F8\u306F\u9006\u306B\u3057\u306A\u3044\u306E\u3067\u3001\u8DB3\u305B\u3070\u63FA\u308C\u306F\u6D88\u3048\u3066\u5143\u306E\u97F3\u306B\u623B\u308B\u3002
     // \u63FA\u308C\u306E\u4F4D\u76F8\u306F\u6587\u8108\u306E\u6642\u8A08(currentTime)\u304B\u3089\u51FA\u3059\u3002\u30CE\u30FC\u30C9\u3092\u4F5C\u3063\u305F\u6642\u523B\u3092\u8D77\u70B9\u306B\u3059\u308B\u3068\u3001
     // \u540C\u3058\u66F2\u3067\u3082\u9CF4\u3089\u3057\u65B9\u3067\u63FA\u308C\u65B9\u304C\u5909\u308F\u308B\u3002\u6642\u8A08\u304B\u3089\u51FA\u305B\u3070\u3001\u540C\u3058\u30CE\u30FC\u30C9\u306E\u58F0\u306F 1 \u53F0\u306E\u30A2\u30F3\u30D7\u306E\u3088\u3046\u306B\u63C3\u3046
+    // \u30D3\u30D6\u30E9\u30D5\u30A9\u30F3\u306E\u30E2\u30FC\u30BF\u30FC\u3002\u5171\u9CF4\u7BA1\u306E\u53E3\u3067\u7FBD\u6839\u304C\u56DE\u308A\u3001\u958B\u304F\u3068\u97FF\u304D\u3001\u9589\u3058\u308B\u3068\u97FF\u304B\u306A\u3044\u3002
+    // \u97F3\u91CF\u3060\u3051\u304C\u63FA\u308C\u308B\u306E\u3067\u3001\u5DE6\u53F3\u3078\u306F\u632F\u3089\u306A\u3044\u3002\u4F4D\u76F8\u306F\u30C8\u30EC\u30E2\u30ED\u3068\u540C\u3058\u304F\u6587\u8108\u306E\u6642\u8A08\u304B\u3089\u51FA\u3059
+    const mo = vo[o + MO], mr = vo[o + MR];
+    if (mo > 0 && mr > 0) {
+      const ph = TAU * ((mr * t0) % 1), step = TAU * mr / sampleRate;
+      for (let i = 0; i < B; i++) vb[i] *= 1 - mo * (0.5 - 0.5 * Math.cos(ph + step * i));
+    }
     const sw = vo[o + WD] * vo[o + TD], rate = vo[o + TR];
     if (sw > 0 && rate > 0) {
       const ph = TAU * ((rate * t0) % 1), step = TAU * rate / sampleRate;
@@ -12860,7 +14127,105 @@ class ModalBank extends AudioWorkletProcessor {
         b[i] += y;
       }
     }
-    if (!live && n === 0 && renv === 0 && wgAlive === 0) vo[o + ON] = 0;
+    // \u5171\u9CF4\u5F26\u3078\u6D41\u3059(\u5DE6\u53F3\u3092\u8DB3\u3057\u305F\u58F0\u305D\u306E\u3082\u306E)
+    const pn = this.vpat[v];
+    if (pn) { const sb = this.sym[pn].buf; for (let i = 0; i < B; i++) sb[i] += vb[i] * lv; }
+    if (!live && n === 0 && renv === 0 && wgAlive === 0 && !(vo[o + SQ] > 0)) vo[o + ON] = 0;
+  }
+
+  /**
+   * \u5171\u9CF4\u5F26\u3002\u5F3E\u3044\u3066\u3044\u306A\u3044\u5F26\u304C\u3001\u9AD8\u3055\u306E\u5408\u3046\u97F3\u306B\u3064\u3089\u308C\u3066\u9CF4\u308B(3 \u5F26 2 \u30D5\u30EC\u30C3\u30C8\u306E A \u3067\u30015 \u5F26\u306E\u958B\u653E A \u304C\u9CF4\u308B)\u3002
+   * \u5F26\u3092\u500D\u97F3\u305A\u3064\u306E\u5171\u632F\u5668\u306B\u3057\u3066\u3001\u305D\u306E\u30D1\u30C3\u30C1\u306E\u58F0\u3092\u8DB3\u3057\u305F\u3082\u306E\u3092\u6D41\u3057\u8FBC\u3080\u3002\u9AD8\u3055\u306E\u5408\u3046\u500D\u97F3\u3060\u3051\u304C\u3001
+   * \u3086\u3063\u304F\u308A\u5927\u304D\u304F\u306A\u3063\u3066\u9577\u304F\u6B8B\u308B\u3002\u30D1\u30C3\u30C1\u3054\u3068\u306B 1 \u7D44\u306A\u306E\u3067\u3001\u58F0\u304C\u5897\u3048\u3066\u3082\u91CD\u304F\u306A\u3089\u306A\u3044\u3002
+   * sympathetic \u304C 0 \u306A\u3089\u4F5C\u3089\u306A\u3044(2026-10-14\u3002\u91CD\u304F\u306A\u3063\u3066\u3088\u3044\u306E\u3067\u3001\u30AA\u30D5\u306B\u3067\u304D\u308B\u3053\u3068\u3001\u3068\u8A00\u308F\u308C\u305F)\u3002
+   *
+   * \u5F26\u306E\u4E26\u3073(symTuning):
+   * - guitar: \u958B\u653E\u5F26 6 \u672C \xD7 \u500D\u97F3 10 \u672C\u3002\u30C0\u30F3\u30D1\u30FC\u306F\u7121\u3044\u3002\u8ABF\u5F26\u306F\u6A19\u6E96(E A D G B E)\u3060\u3051
+   * - piano: 88 \u9375 \xD7 \u500D\u97F3 3 \u672C\u3002\u30C0\u30F3\u30D1\u30FC\u306E\u3042\u308B\u5F26(F6 \u3088\u308A\u4E0B)\u306F\u3001\u53F3\u30DA\u30C0\u30EB\u3092\u8E0F\u3093\u3067\u3044\u308B\u3042\u3044\u3060\u3060\u3051\u9CF4\u308B\u3002
+   *   \u653E\u3059\u3068\u30C0\u30F3\u30D1\u30FC\u304C 0.12 \u79D2\u3067\u6B62\u3081\u308B\u3002\u3044\u3061\u3070\u3093\u4E0A\u306E 20 \u672C\u307B\u3069\u306F\u30C0\u30F3\u30D1\u30FC\u304C\u7121\u3044\u306E\u3067\u3001\u3044\u3064\u3082\u9CF4\u308B
+   *   (\u8ABF\u5F8B\u5E2B\u306E\u89E3\u8AAC\u30022026-10-14)\u3002\u8E0F\u3093\u3067\u3044\u306A\u3044\u3042\u3044\u3060\u3001\u6B62\u307E\u3063\u305F\u5F26\u306F\u56DE\u3055\u306A\u3044
+   * \u5F3E\u3044\u3066\u3044\u308B\u5F26\u304C\u305D\u306E\u307E\u307E\u5171\u9CF4\u5F26\u3068\u3057\u3066\u3082\u9CF4\u308B\u306E\u306F\u3001\u307E\u3060\u6B62\u3081\u3066\u3044\u306A\u3044
+   */
+  symBank(p) {
+    const def = this.patch[p];
+    if (!def || !(def.sympathetic > 0) || !def.pitched) return null;
+    let s = this.sym[p];
+    if (s && s.def === def) return s;
+    const sr = sampleRate;
+    const strings = def.symTuning === 'piano'
+      ? Array.from({ length: 88 }, (_, i) => [21 + i, 3, 21 + i < 89])
+      : [40, 45, 50, 55, 59, 64].map((m) => [m, 10, false]);
+    const list = [];
+    for (const [m, hs, damper] of strings) {
+      const f0 = 440 * Math.pow(2, (m - 69) / 12), kr = f0 / 261.63;
+      const t60 = (def.t60 || 2) * Math.pow(kr, -(def.decayKey || 0));
+      const bb = (def.stretch || 0) * Math.pow(kr, def.stretchKey || 0);
+      for (let h = 1; h <= hs; h++) {
+        const f = h * f0 * Math.sqrt(1 + bb * h * h);
+        if (f >= sr * 0.45) break;
+        const tt = t60 / (1 + (def.damp || 0) * (f / 1000) * (f / 1000));
+        const w = TAU * f / sr;
+        const r = Math.exp(-LN1000 / (Math.max(0.005, tt) * sr)), rd = Math.exp(-LN1000 / (0.12 * sr));
+        // \u5C71\u306E\u9AD8\u3055\u304C 1 \u306B\u306A\u308B\u3088\u3046\u306B\u5165\u53E3\u3092\u7D5E\u308B\u3002\u500D\u97F3\u304C\u4E0A\u307B\u3069\u5F31\u3044\u306E\u306F\u3001\u5F26\u306E\u632F\u308C\u65B9(1/h)\u3067
+        list.push(2 * r * Math.cos(w), r * r, 2 * rd * Math.cos(w), rd * rd, 2 * (1 - r) * Math.sin(w) / h, damper ? 1 : 0);
+      }
+    }
+    const n = list.length / 6;
+    if (!s || s.n !== n) s = this.sym[p] = { def: null, n, c: null, y: new Float64Array(n * 2), buf: new Float64Array(B), quiet: 0, since: 1e9 };
+    s.c = Float64Array.from(list);
+    s.def = def;
+    return s;
+  }
+
+  /** \u53F3\u30DA\u30C0\u30EB\u3002\u8E0F\u3093\u3067\u3044\u308B\u3042\u3044\u3060\u306F\u3001\u96E2\u3057\u305F\u97F3\u3092\u6B62\u3081\u305A\u3001\u30C0\u30F3\u30D1\u30FC\u306E\u3042\u308B\u5171\u9CF4\u5F26\u3082\u9CF4\u3089\u3059\u3002\u8E0F\u3080\u30FB\u653E\u3059\u3067\u30B7\u30E5\u30C3\u3068\u9CF4\u308B */
+  pedalTo(p, down, off) {
+    const was = !!this.ped[p];
+    this.ped[p] = down ? 1 : 0;
+    const s = this.sym[p];
+    if (s) s.since = 0;
+    const def = this.patch[p];
+    // \u30C0\u30F3\u30D1\u30FC\u306E\u30D5\u30A7\u30EB\u30C8\u304C\u5F26\u3068\u64E6\u308C\u308B\u30B7\u30E5\u30C3\u3002\u30B0\u30E9\u30F3\u30C9\u3067\u5206\u304B\u308A\u3084\u3059\u3044(\u8ABF\u5F8B\u5E2B\u306E\u89E3\u8AAC)\u3002\u5927\u304D\u3055\u306F keyNoise \u306B\u63C3\u3048\u308B\u3002
+    // \u5024\u306F\u898B\u5F53\u3067\u3001\u9332\u97F3\u306B\u306F\u5408\u308F\u305B\u3066\u3044\u306A\u3044
+    if (def && was !== !!down && def.keyNoise > 0) {
+      this.start({ p, sq: 1, nf: 1, sqLen: down ? 0.09 : 0.07, sqF: 0, sqB: 3200, sqN: 0.95, sqHp: 700,
+        sqSeed: (this.born | 0) + 11, v: def.keyNoise * (down ? 0.12 : 0.09) }, off);
+    }
+  }
+
+  /** \u5171\u9CF4\u5F26\u3092\u56DE\u3057\u3066\u51FA\u53E3\u3078\u8DB3\u3059\u3002\u5165\u3063\u3066\u304F\u308B\u97F3\u304C\u7121\u304F\u3001\u9CF4\u308A\u3082\u6D88\u3048\u3066\u3044\u308C\u3070\u56DE\u3055\u306A\u3044 */
+  symRender(a, b) {
+    for (const p in this.sym) {
+      const s = this.symBank(p);
+      if (!s) continue;
+      // \u30D4\u30A2\u30CE\u306F 88 \u672C\u3076\u3093\u3064\u3089\u308C\u308B\u306E\u3067\u3001\u30AE\u30BF\u30FC(6 \u672C)\u3068\u540C\u3058\u4FC2\u6570\u3067\u306F\u97FF\u304D\u304C\u97F3\u3088\u308A\u5927\u304D\u304F\u306A\u3063\u305F(2026-10-14)\u3002
+      // 4 \u5206\u306E 1 \u306B\u3057\u3066\u3001\u8E0F\u3093\u3067 1 \u79D2\u5F8C\u306B\u9CF4\u3063\u3066\u3044\u308B\u97F3\u3088\u308A 10dB \u307B\u3069\u4E0B\u306B\u7F6E\u304F
+      const buf = s.buf, c = s.c, y = s.y, g = s.def.sympathetic * (s.def.symTuning === 'piano' ? 0.25 : 1);
+      const pedal = !!this.ped[p];
+      // \u30DA\u30C0\u30EB\u3092\u653E\u3057\u3066 0.4 \u79D2\u305F\u3066\u3070\u3001\u30C0\u30F3\u30D1\u30FC\u306E\u3042\u308B\u5F26\u306F\u6B62\u307E\u308A\u304D\u3063\u3066\u3044\u308B\u3002\u56DE\u3055\u306A\u3044
+      const skipDamped = !pedal && s.since > 0.4 * sampleRate;
+      s.since += B;
+      let inE = 0;
+      for (let i = 0; i < B; i++) inE += buf[i] * buf[i];
+      if (inE === 0 && s.quiet) { buf.fill(0); continue; }
+      let e = 0;
+      for (let k = 0; k < s.n; k++) {
+        const j = 6 * k, damped = c[j + 5] && !pedal;
+        if (damped && skipDamped) { y[2 * k] = 0; y[2 * k + 1] = 0; continue; }
+        const a1 = damped ? c[j + 2] : c[j], a2 = damped ? c[j + 3] : c[j + 1], bk = c[j + 4];
+        let y1 = y[2 * k], y2 = y[2 * k + 1];
+        for (let i = 0; i < B; i++) {
+          const v = a1 * y1 - a2 * y2 + bk * buf[i];
+          y2 = y1; y1 = v;
+          const o = g * v;
+          a[i] += o; b[i] += o;
+        }
+        y[2 * k] = y1; y[2 * k + 1] = y2;
+        e += y1 * y1 + y2 * y2;
+      }
+      s.quiet = e < 1e-14 ? 1 : 0;
+      if (s.quiet) y.fill(0);
+      buf.fill(0);
+    }
   }
 
   process(inputs, outputs) {
@@ -12873,16 +14238,31 @@ class ModalBank extends AudioWorkletProcessor {
     const t0 = currentTime;
     const tEnd = t0 + B / sr;
     const vo = this.voice;
+    // \u53F3\u30DA\u30C0\u30EB\u306E\u533A\u9593\u3092\u898B\u3066\u3001\u8E0F\u3080\u30FB\u653E\u3059\u3002\u305A\u308C\u306F\u584A\u306E\u9577\u3055(2.7 \u30DF\u30EA\u79D2)\u307E\u3067
+    for (const p in this.pedIv) {
+      const iv = this.pedIv[p];
+      let down = false;
+      for (const [k, [a, b]] of iv) {
+        if (b < t0 - 1) { iv.delete(k); continue; }
+        if (a <= t0 && t0 < b) down = true;
+      }
+      if (down !== !!this.ped[p]) this.pedalTo(p, down, 0);
+    }
     // \u96E2\u3059\u306E\u306F\u584A\u306E\u5883\u76EE\u3067\u3002\u305A\u308C\u306F 2.9 \u30DF\u30EA\u79D2\u307E\u3067
     for (let v = 0; v < V; v++) {
       const o = v * K;
-      if (vo[o + ON] && vo[o + REL] >= 0 && vo[o + REL] < tEnd) this.release(v);
+      // \u53F3\u30DA\u30C0\u30EB\u3092\u8E0F\u3093\u3067\u3044\u308B\u3042\u3044\u3060\u306F\u6B62\u3081\u306A\u3044\u3002\u653E\u3057\u305F\u3089\u3001\u96E2\u3059\u6642\u523B\u306E\u904E\u304E\u305F\u97F3\u3092\u3053\u3053\u3067\u6B62\u3081\u308B
+      if (vo[o + ON] && vo[o + REL] >= 0 && vo[o + REL] < tEnd && !this.ped[this.vname[v]]) this.release(v);
     }
     while (this.at < this.events.length && this.events[this.at].s0 < tEnd) {
       const ev = this.events[this.at++];
+      if (ev.ped != null) { this.pedalTo(ev.p, ev.ped, Math.max(0, Math.min(B - 1, Math.round((ev.s0 - t0) * sr)))); continue; }
       this.start(ev, Math.max(0, Math.min(B - 1, Math.round((ev.s0 - t0) * sr))));
+      // \u3069\u306E\u58F0\u3067\u9CF4\u3063\u305F\u304B\u3002\u3042\u3068\u3067\u62BC\u3055\u3048\u305F\u307E\u307E\u6ED1\u3089\u305B\u308B\u3068\u304D\u306B\u3001\u305D\u306E\u58F0\u3092\u63A2\u3059
+      if (ev.vx != null) ev.vb = this.voice[ev.vx * K + BORN];
     }
     for (let v = 0; v < V; v++) if (vo[v * K + ON]) this.render(v, out, rb, t0);
+    this.symRender(out, rb);
     // \u6B62\u3081\u3066\u3044\u308B\u6700\u4E2D\u306A\u3089\u3001\u3077\u3064\u3063\u3068\u9CF4\u3089\u306A\u3044\u3088\u3046 10 \u30DF\u30EA\u79D2\u3067\u843D\u3068\u3059
     if (this.cutAt >= 0) {
       const len = Math.max(1, Math.round(sr * 0.01));
@@ -12892,7 +14272,7 @@ class ModalBank extends AudioWorkletProcessor {
         rb[i] *= k;
         this.cutAt++;
       }
-      if (this.cutAt >= len) { vo.fill(0); this.cutAt = -1; }
+      if (this.cutAt >= len) { vo.fill(0); this.cutAt = -1; this.ped = {}; this.pedIv = {}; for (const p in this.sym) this.sym[p].y.fill(0); }
     }
     if (chs.length === 1) for (let i = 0; i < out.length; i++) out[i] += rb[i];
     // 3 \u672C\u76EE\u304B\u3089\u5148\u306F\u4F7F\u308F\u306A\u3044
@@ -12911,6 +14291,76 @@ registerProcessor('${MODAL_NODE}', ModalBank);
       return ((t ^ t >>> 14) >>> 0) / 4294967296;
     };
   }
+  var GONG = [
+    [0.851, 0.0201, 0.93],
+    [1, 1, 1],
+    [1.19, 0.0101, 1],
+    [1.429, 0.0505, 0.6],
+    [1.775, 0.0192, 1.5],
+    [1.842, 0.0149, 0.43],
+    [1.994, 0.3314, 0.61],
+    [2.137, 0.1304, 0.61],
+    [2.23, 0.2121, 0.99],
+    [2.444, 0.4484, 1.5],
+    [2.625, 0.057, 1.5],
+    [2.801, 0.1512, 1.5],
+    [2.959, 0.4411, 1.35],
+    [3.138, 0.1143, 0.63],
+    [3.208, 0.1217, 0.47],
+    [3.38, 0.4639, 0.4],
+    [3.449, 0.1993, 1.5],
+    [3.649, 0.0656, 1.5],
+    [3.765, 0.0649, 1.5],
+    [4.006, 0.259, 1.5],
+    [4.082, 0.2687, 1.47],
+    [4.247, 0.0642, 1.18],
+    [4.371, 0.0257, 0.33],
+    [4.516, 0.0238, 1.5],
+    [4.605, 0.0428, 0.38],
+    [4.769, 0.0426, 1.5],
+    [4.852, 0.0623, 0.89],
+    [4.913, 0.0517, 0.75],
+    [5.075, 0.0893, 1.5],
+    [5.172, 0.0394, 1.09],
+    [5.331, 0.0404, 1.38],
+    [5.732, 0.0521, 1.5],
+    [5.843, 0.1274, 0.86],
+    [5.925, 0.0619, 1.36],
+    [6.046, 0.0449, 1.5],
+    [6.195, 0.1026, 0.82],
+    [6.415, 0.082, 0.82],
+    [6.839, 0.1818, 0.46],
+    [6.997, 0.1211, 1.5],
+    [7.189, 0.035, 0.49],
+    [7.926, 0.0535, 0.85],
+    [8.017, 0.0455, 1.5],
+    [8.13, 0.0936, 1.5],
+    [8.254, 0.1245, 0.95],
+    [8.437, 0.0634, 0.92],
+    [9.282, 0.1088, 1.29],
+    [9.355, 0.1144, 1.47],
+    [9.476, 0.1355, 1.5],
+    [10.878, 0.1461, 1.5],
+    [10.956, 0.1024, 1.5],
+    [11.074, 0.3567, 1],
+    [12.462, 0.1162, 0.49],
+    [13.336, 0.2774, 0.62]
+  ];
+  var KETTLE = [
+    [0.76, 0.3, 0.12],
+    [1, 1, 1],
+    [1.006, 0.35, 1],
+    [1.5, 0.55, 1.15],
+    [1.32, 0.05, 0.25],
+    [1.985, 0.25, 1],
+    [2.44, 0.11, 0.8],
+    [2.86, 0.18, 0.65],
+    [3.25, 0.32, 0.5],
+    [3.7, 0.27, 0.45],
+    [4.15, 0.33, 0.4],
+    [4.6, 0.22, 0.35],
+    [5.05, 0.16, 0.3]
+  ];
   var MEMBRANE = [
     1,
     1.594,
@@ -12933,9 +14383,789 @@ registerProcessor('${MODAL_NODE}', ModalBank);
     5.412,
     5.473
   ];
+  var MODAL_PARAMS = {
+    // 頭
+    sharp: {
+      live: false,
+      group: "head",
+      min: 0.2,
+      max: 300,
+      unit: "ms",
+      desc: "Length of the strike. Short is a click, long is a thud or a sweep."
+    },
+    bright: {
+      live: false,
+      group: "head",
+      min: 0,
+      max: 1,
+      desc: "Low-pass on the strike, 100 Hz to 25 kHz. Wood at the bottom, metal at the top."
+    },
+    comb: {
+      live: false,
+      group: "head",
+      min: 0,
+      max: 0.5,
+      desc: "Where it is struck, as a fraction of one period. Hollows out the modes that have a node there."
+    },
+    noise: {
+      live: false,
+      group: "head",
+      min: 0,
+      max: 1,
+      desc: "Noise against a smooth bump. 0 knocks, 1 scrapes."
+    },
+    vary: {
+      live: false,
+      group: "head",
+      min: 0,
+      max: 1,
+      when: [{ key: "head.noise", gt: 0 }],
+      desc: "How much the noise changes from note to note. 0 repeats the same strike every time."
+    },
+    seed: {
+      live: false,
+      group: "head",
+      min: 1,
+      max: 9999,
+      step: 1,
+      when: [{ key: "head.noise", gt: 0 }, { key: "head.vary", lt: 1 }],
+      desc: "Seed for the repeatable part of the noise."
+    },
+    felt: {
+      live: false,
+      group: "head",
+      min: 0,
+      max: 8,
+      desc: "How much the felt hardens on hard strikes. The strike gets peaked and sharp, so the upper partials come in. 0 keeps a smooth bump at every velocity."
+    },
+    grains: {
+      live: false,
+      group: "head",
+      min: 0,
+      max: 32,
+      step: 1,
+      desc: "Splits the strike into this many small hits, each as long as sharp, scattered in time. 0 keeps one smooth bump. Many wires of a brush landing slightly apart."
+    },
+    scatter: {
+      live: false,
+      group: "head",
+      min: 0,
+      max: 40,
+      unit: "ms",
+      when: [{ key: "head.grains", gt: 0 }],
+      desc: "How widely the small hits are spread in time."
+    },
+    align: {
+      live: false,
+      group: "head",
+      min: 0,
+      max: 1,
+      desc: "Starts a slow strike early so its loudest point lands on the beat. 0 starts on the beat; 1 puts the peak there. For soft swells such as a brush sweep."
+    },
+    velo: {
+      live: false,
+      group: "head",
+      min: 0,
+      max: 6,
+      unit: "oct",
+      desc: "How far the brightness moves between the softest and the hardest note, in octaves."
+    },
+    hardKey: {
+      live: false,
+      group: "head",
+      min: 0,
+      max: 2,
+      desc: "How much harder and shorter the strike gets per doubling of pitch, as a power. Pitched patches only."
+    },
+    bloom: {
+      live: false,
+      group: "head",
+      min: 0,
+      max: 400,
+      desc: "High sound that swells up a moment after a hard strike, as on a big gong or tam-tam. The strike slowly moves into the high modes. 0 has none."
+    },
+    bloomVelo: {
+      live: false,
+      group: "head",
+      min: 1,
+      max: 12,
+      when: [{ key: "head.bloom", gt: 0 }],
+      desc: "How much harder you must strike for the swell to come, as a power of the velocity. Higher keeps soft strikes clean."
+    },
+    bloomRise: {
+      live: false,
+      group: "head",
+      min: 0.02,
+      max: 2,
+      unit: "s",
+      when: [{ key: "head.bloom", gt: 0 }],
+      desc: "How long the swell takes to grow."
+    },
+    bloomFall: {
+      live: false,
+      group: "head",
+      min: 0.1,
+      max: 6,
+      unit: "s",
+      when: [{ key: "head.bloom", gt: 0 }],
+      desc: "How long the swell keeps feeding the high modes before it dies away."
+    },
+    bloomFrom: {
+      live: false,
+      group: "head",
+      min: 200,
+      max: 8e3,
+      unit: "Hz",
+      when: [{ key: "head.bloom", gt: 0 }],
+      desc: "Lowest pitch the swell reaches. Below it the swell hardly adds anything."
+    },
+    bloomDrain: {
+      live: false,
+      group: "head",
+      min: 0,
+      max: 60,
+      unit: "dB/s",
+      when: [{ key: "head.bloom", gt: 0 }],
+      desc: "How fast the low modes give up their sound to the swell, at its peak on the hardest strike. The low hum fades as the high sound grows. 0 leaves the low modes alone."
+    },
+    bloomDrainBelow: {
+      live: false,
+      group: "head",
+      min: 50,
+      max: 2e3,
+      unit: "Hz",
+      when: [{ key: "head.bloomDrain", gt: 0 }],
+      desc: "Modes below this pitch are the ones that give up their sound to the swell."
+    },
+    hardFrom: {
+      live: false,
+      group: "head",
+      min: 20,
+      max: 2e3,
+      unit: "Hz",
+      when: [{ key: "head.hardKey", gt: 0 }],
+      desc: "The pitch where hardKey starts to act. Below it the strike is the same at every key. Middle C by default; lower for low instruments."
+    },
+    // 共振器
+    count: {
+      live: false,
+      group: "modes",
+      min: 1,
+      max: 1024,
+      step: 1,
+      desc: "How many resonators per string or per drum."
+    },
+    stretch: {
+      live: false,
+      group: "modes",
+      min: 0,
+      max: 0.01,
+      desc: "Stiffness of a string at middle C. Pushes the upper partials sharp, as on a piano."
+    },
+    pickupAt: {
+      live: false,
+      group: "modes",
+      min: 0,
+      max: 0.5,
+      desc: "Electric bass and guitar: where the magnetic pickup sits, as a share of the string length from the bridge. A pickup hears each harmonic as strongly as the string swings right above it, so harmonics with a node near the pickup go quiet. Near the bridge (0.05, the bridge pickup of a jazz bass) the tone is thin, tight and nasal; further up (0.17, a precision bass) it is fat and round; at 0.25 and beyond, towards the neck, it gets hollow and soft. 0 leaves the tone as fitted to recordings."
+    },
+    pickupDepth: {
+      live: false,
+      group: "modes",
+      min: 0,
+      max: 3,
+      when: [{ key: "pickupAt", gt: 0 }],
+      desc: "How strongly the pickup position colours the tone. 1 is what the physics gives, a fairly subtle change on a bass played alone; above 1 the difference is exaggerated so it reads clearly; 0 removes it."
+    },
+    pickupPeak: {
+      live: false,
+      group: "modes",
+      min: 500,
+      max: 8e3,
+      unit: "Hz",
+      when: [{ key: "pickupAt", gt: 0 }],
+      desc: "The resonant peak of a passive magnetic pickup and its cable, a bump in the upper mids that gives the tone its edge. Lower sounds warmer and more vintage, higher sounds brighter and more modern."
+    },
+    pickupPeakGain: {
+      live: false,
+      group: "modes",
+      min: 0,
+      max: 18,
+      unit: "dB",
+      when: [{ key: "pickupAt", gt: 0 }],
+      desc: "How tall the pickup resonance is. 0 removes it."
+    },
+    bStretch: {
+      live: false,
+      group: "modes",
+      min: 0,
+      max: 0.01,
+      desc: "Five-string bass: the stiffness of the low B string, used for every note below E1. The B string is thick but slack, so its upper partials run sharp, a little like the low strings of a piano. 0 plays those notes on the E string tuned down. Not fitted to recordings."
+    },
+    stretchKey: {
+      live: false,
+      group: "modes",
+      min: 0,
+      max: 3,
+      desc: "How much stiffer the strings get per doubling of pitch, as a power. 0 keeps it the same everywhere."
+    },
+    strings: {
+      live: false,
+      group: "modes",
+      min: 1,
+      max: 3,
+      step: 1,
+      desc: "Strings per note. More than one beats against itself."
+    },
+    detune: {
+      live: false,
+      group: "modes",
+      min: 0,
+      max: 50,
+      unit: "cent",
+      when: [{ key: "strings", gt: 1 }],
+      desc: "Spread between the strings of one note."
+    },
+    tilt: {
+      live: false,
+      group: "modes",
+      min: 0,
+      max: 3,
+      desc: "How fast the upper modes get quieter. Applied to the table, before the strike."
+    },
+    warp: {
+      live: false,
+      group: "modes",
+      min: 0.5,
+      max: 1.5,
+      desc: "Raises every ratio to this power. 1 keeps the series; anything else bends it."
+    },
+    spread: {
+      live: false,
+      group: "modes",
+      min: 0,
+      max: 0.2,
+      desc: "Random offset of each ratio. Breaks a series into something that never existed."
+    },
+    guide: {
+      live: false,
+      group: "modes",
+      min: 0,
+      max: 2e3,
+      unit: "Hz",
+      desc: "Strings below this pitch are played as a waveguide, which has every partial up to the top. 0 never uses it."
+    },
+    trebleGain: {
+      live: false,
+      group: "out",
+      min: 0,
+      max: 12,
+      unit: "dB",
+      desc: "Lift for notes above middle C, in dB per octave. Pitched patches only."
+    },
+    sour: {
+      live: false,
+      group: "modes",
+      min: 0,
+      max: 100,
+      unit: "cent",
+      desc: "How far each key is out of tune, at most. Every key gets its own offset, the same every time it is played."
+    },
+    sourSeed: {
+      live: false,
+      group: "modes",
+      min: 1,
+      max: 9999,
+      step: 1,
+      when: [{ key: "sour", gt: 0 }],
+      desc: "Seed that decides which keys go out of tune and by how much."
+    },
+    bodyLow: {
+      live: false,
+      group: "modes",
+      min: 0,
+      max: 400,
+      unit: "Hz",
+      desc: "Below this pitch the body stops sounding the string, falling 24 dB per octave. A guitar body hardly radiates below its air resonance. 0 lets every partial through. Only on strings played as resonators, not on the waveguide."
+    },
+    knock: {
+      live: false,
+      group: "modes",
+      min: 0,
+      max: 2,
+      desc: "Wooden knock of the key and hammer. A few short resonators that stay put whatever the pitch."
+    },
+    lo: {
+      live: false,
+      group: "modes",
+      min: 1,
+      max: 40,
+      desc: "Lowest ratio of a cymbal cloud, or of the dense upper modes of a timpani."
+    },
+    hi: {
+      live: false,
+      group: "modes",
+      min: 2,
+      max: 80,
+      desc: "Highest ratio of a cymbal cloud, or of the dense upper modes of a timpani."
+    },
+    light: {
+      live: false,
+      group: "modes",
+      min: 0,
+      max: 1,
+      desc: "Makes a timpani or gong lighter to compute. Leaves out the weakest measured modes and thins the dense upper modes. 0 is the full sound; 1 keeps about a third of the resonators."
+    },
+    cloud: {
+      live: false,
+      group: "modes",
+      min: 0,
+      max: 6,
+      desc: "Level of the dense upper modes of a timpani, above the measured table. They fill in the sound above about five times the pitch. How many there are is count minus the table. 0 leaves only the table."
+    },
+    // 減衰
+    t60: {
+      live: false,
+      group: "decay",
+      min: 0.02,
+      max: 60,
+      unit: "s",
+      desc: "Time for the lowest mode to fall by 60 dB. For pitched patches this is at middle C."
+    },
+    decayKey: {
+      live: false,
+      group: "decay",
+      min: 0,
+      max: 2,
+      desc: "How much shorter notes ring per doubling of pitch, as a power. 0 rings the same in every register."
+    },
+    afterLevel: {
+      live: false,
+      group: "decay",
+      min: 0,
+      max: 1,
+      when: [{ key: "strings", gt: 1 }],
+      desc: "Level of every string after the first. Low values make the first, fast-falling string dominate, so the note drops quickly and leaves a quiet tail."
+    },
+    after: {
+      live: false,
+      group: "decay",
+      min: 1,
+      max: 10,
+      when: [{ key: "strings", gt: 1 }],
+      desc: "Decay of every string after the first, as a multiple of t60. Above 1 the note falls fast, then lingers."
+    },
+    sympathetic: {
+      live: false,
+      group: "decay",
+      min: 0,
+      max: 1,
+      desc: "How much the strings that are not played ring along with notes that match them, like the open A of a guitar sounding under an A fretted on another string. A natural halo after each note. On a guitar the six open strings in standard tuning ring. On a piano only the top strings, which have no dampers, ring, until the sustain pedal lifts all the dampers. 0 turns it off and saves the work."
+    },
+    damp: {
+      live: false,
+      group: "decay",
+      min: 0,
+      max: 20,
+      desc: "Extra loss that grows with frequency squared. High modes die first."
+    },
+    harmonic: {
+      live: false,
+      group: "modes",
+      min: 0,
+      max: 6,
+      step: 1,
+      desc: "Natural harmonic: a finger lightly touches the string at 1/n of its length and lets go as the string is plucked, so only every n-th harmonic rings, a pure, glassy tone. The written pitch is the pitch you hear; the string itself is tuned n times lower. 2 is the 12th fret (an octave above the open string), 3 the 7th fret, 4 the 5th fret, 5 near the 4th fret. 0 and 1 play normally. Not fitted to recordings."
+    },
+    mute: {
+      live: false,
+      group: "decay",
+      min: 0,
+      max: 1,
+      desc: "Palm mute: the side of the hand rests on the strings by the bridge. The note starts as usual, but the upper harmonics die within a moment and the low ones soon after, leaving a short, round thump. 1 is a firm mute, fitted to recordings of a muted electric bass. 0 rings freely."
+    },
+    release: {
+      live: false,
+      group: "decay",
+      min: 0.01,
+      max: 8,
+      unit: "s",
+      desc: "Decay after the note is let go. Only notes given a length are let go."
+    },
+    // 声の外へ出さないもの
+    direct: {
+      live: false,
+      group: "out",
+      min: 0,
+      max: 1,
+      desc: "The strike itself, heard straight through. The sweep of a brush lives here."
+    },
+    rattle: {
+      live: false,
+      group: "out",
+      min: 0,
+      max: 4,
+      desc: "Snare wires. Noise opened by how hard the body is ringing."
+    },
+    pickup: {
+      live: false,
+      group: "out",
+      min: 0,
+      max: 2,
+      desc: "Electric piano pickup. How close the tine swings to the magnet. 0 is clean; higher values bark on loud notes and stay round on soft ones, since the distortion follows how wide the tine swings."
+    },
+    pickupOffset: {
+      live: false,
+      group: "out",
+      min: -0.5,
+      max: 0.5,
+      when: [{ key: "pickup", gt: 0 }],
+      desc: "Where the tine rests against the magnet. Towards the magnet the bark grows and gets more even harmonics; away from it the tone is rounder."
+    },
+    // 棒の楽器
+    strike: {
+      live: false,
+      group: "modes",
+      min: 0,
+      max: 0.5,
+      desc: "Where the mallet lands on a bar, from the end (0) to the middle (0.5). The middle is a still point of the second and fourth modes, so the overtone at 4 times the pitch drops out there; towards the end every mode sounds. Only on bars."
+    },
+    modeDecay: {
+      live: false,
+      group: "decay",
+      min: 0,
+      max: 4,
+      desc: "How much faster the higher modes of a bar die. A mode at r times the pitch lasts 1 / r to this power as long as the fundamental. 0 keeps them all as long. Only on bars."
+    },
+    tube: {
+      live: false,
+      group: "modes",
+      min: 0,
+      max: 8,
+      desc: "The resonator tube under the bar, tuned to its pitch. It lifts the fundamental only, by 1 + this many times; the higher modes pass it by. 0 is a bare bar. Only on bars."
+    },
+    motor: {
+      live: false,
+      group: "out",
+      min: 0,
+      max: 1,
+      desc: "Vibraphone motor. Fans in the tubes open and close, so the level swells and dips. Depth of the dip: 0 is off, 1 closes the sound completely each turn. The level only, not left and right."
+    },
+    motorRate: {
+      live: false,
+      group: "out",
+      min: 0.5,
+      max: 12,
+      unit: "Hz",
+      when: [{ key: "motor", gt: 0 }],
+      desc: "Speed of the vibraphone motor. Every note on the same output swings together and follows the song clock."
+    },
+    // 2 本の出口。左へ行く束と右へ行く束で、どこに置くかはエンジンが決める(@p{…} の両側)
+    width: {
+      live: false,
+      group: "out",
+      min: 0,
+      max: 1,
+      desc: "How far apart the two outputs may lean. 0 keeps every note centred; 1 lets a note move all the way into one output. Nothing moves unless something swings it, such as the tremolo. The two outputs always add back up to the plain note, so a mono mix loses the movement but keeps the sound."
+    },
+    tremolo: {
+      live: false,
+      group: "out",
+      min: 0,
+      max: 1,
+      when: [{ key: "width", gt: 0 }],
+      desc: "Suitcase amp tremolo. The amp feeds the same sound to two channels and swings it from one to the other, never flipping the phase. Depth of the swing; how far it can travel is width times this."
+    },
+    tremoloRate: {
+      live: false,
+      group: "out",
+      min: 0.5,
+      max: 12,
+      unit: "Hz",
+      when: [{ key: "tremolo", gt: 0 }],
+      desc: "Speed of the tremolo swing. Every note on the same output swings together, like one amp, and the swing follows the song clock, so a render is the same every time."
+    },
+    // 失敗・崩れ。どれも 1 音ごとの起きやすさ(0〜1)。起きる場所は flawSeed と音の並びで決まる
+    neighbor: {
+      live: false,
+      group: "flaw",
+      min: 0,
+      max: 1,
+      desc: "How often the next key is caught as well, softer and a little late. Above or below is up to the seed."
+    },
+    double: {
+      live: false,
+      group: "flaw",
+      min: 0,
+      max: 1,
+      desc: "Share of keys whose action is out of regulation, so the hammer bounces and strikes the same note again at once, softly. Not random note by note: a bad key does it every time it is played hard (velocity 0.75 or more). Which keys are bad is up to doubleSeed."
+    },
+    doubleSeed: {
+      live: false,
+      group: "flaw",
+      min: 1,
+      max: 9999,
+      step: 1,
+      when: [{ key: "double", gt: 0 }],
+      desc: "Seed that decides which keys are out of regulation. The same instrument always has the same bad keys."
+    },
+    buzz: {
+      live: false,
+      group: "flaw",
+      min: 0,
+      max: 1,
+      desc: "Share of notes where the string touches something and buzzes while it swings wide, like a string hitting a fret: low action or an uneven fret. Not random note by note: a buzzing note buzzes every time it is played hard (velocity 0.6 or more), louder the harder it is played, and stops as the note dies away. Which notes buzz is up to buzzSeed."
+    },
+    buzzSeed: {
+      live: false,
+      group: "flaw",
+      min: 1,
+      max: 9999,
+      step: 1,
+      when: [{ key: "buzz", gt: 0 }],
+      desc: "Seed that decides which notes buzz. The same instrument always buzzes on the same notes."
+    },
+    buzzLevel: {
+      live: false,
+      group: "flaw",
+      min: 0,
+      max: 2,
+      when: [{ key: "buzz", gt: 0 }],
+      desc: "How loud the buzz is."
+    },
+    buzzRasp: {
+      live: false,
+      group: "flaw",
+      min: 0,
+      max: 1,
+      when: [{ key: "buzz", gt: 0 }],
+      desc: "How much the buzz pulses with the pitch. 1 opens the noise only as the string swings out, a rasp like a string slapping a fret. 0 is a smooth hiss that follows how wide the string swings."
+    },
+    slip: {
+      live: false,
+      group: "flaw",
+      min: 0,
+      max: 1,
+      desc: "How often the finger slips off the string: a weak, scratchy start."
+    },
+    ghost: {
+      live: false,
+      group: "flaw",
+      min: 0,
+      max: 1,
+      desc: "How often a note is muted by mistake and comes out as a dead thump with hardly any pitch. More likely on soft notes."
+    },
+    splay: {
+      live: false,
+      group: "flaw",
+      min: 0,
+      max: 1,
+      desc: "How often the wires splay and land spread out instead of together. Only for strikes made of grains."
+    },
+    spot: {
+      live: false,
+      group: "flaw",
+      min: 0,
+      max: 1,
+      desc: "How often the stick lands off the spot: towards the edge (louder, darker, longer) or on the bell (a few modes ring out like a bell). More likely on loud hits."
+    },
+    loose: {
+      live: false,
+      group: "flaw",
+      min: 0,
+      max: 1,
+      desc: "Something loose on the instrument, or resting on it, that rattles along: a loose screw, a pencil on the lid. Not a mistake of the player, so it is the same every time: the same note at the same velocity always rattles, or never does. How loud the rattle is. 0 is a sound instrument."
+    },
+    looseFreq: {
+      live: false,
+      group: "flaw",
+      min: 40,
+      max: 4e3,
+      unit: "Hz",
+      when: [{ key: "loose", gt: 0 }],
+      desc: "The pitch the loose part shakes at most easily. Notes with a partial near it shake it hardest."
+    },
+    looseFrom: {
+      live: false,
+      group: "flaw",
+      min: 0.02,
+      max: 2,
+      when: [{ key: "loose", gt: 0 }],
+      desc: "How hard the part must be shaken before it rattles. Low values rattle on more notes and softer playing; the rattle stops once the note dies below it."
+    },
+    stringNoise: {
+      live: false,
+      group: "flaw",
+      min: 0,
+      max: 1,
+      desc: "How easily the wound strings make noise under a moving finger: new or rough strings are high, worn, coated or flatwound strings are low. The noise comes when the finger leaves a note to move to the next one, on low notes only, and grows with how far it moves. Never random: the same part makes the same noise every time. 0 is silent."
+    },
+    openRing: {
+      live: false,
+      group: "flaw",
+      min: 0,
+      max: 1,
+      desc: "How much the open string rings when a finger is lifted off it. Lifting the finger flicks the string, like a soft pull-off, and the open string sounds until the next note. Grows with lift; careful players make it quieter. Never random. 0 is silent, and only 0 is."
+    },
+    click: {
+      live: false,
+      group: "flaw",
+      min: 0,
+      max: 1,
+      desc: "How loud the click is when a finger lets go of a wound string, on top of stringNoise and lift. 0 removes it; 1 is full. Not compared with a real guitar yet."
+    },
+    rush: {
+      live: false,
+      group: "flaw",
+      min: 0,
+      max: 1,
+      desc: "How early the hand starts to move when the gap before the next note is too short for the slide. 0 waits until the note has stopped and squeezes the squeak into the gap. 1 starts sliding while the note still rings, so the squeak keeps its full length. A habit of the player, never random."
+    },
+    lift: {
+      live: false,
+      group: "flaw",
+      min: 0,
+      max: 1,
+      desc: "How the player moves between notes. 0 keeps the finger on the string and slides, so the squeak is loud and the click and the open string are quiet. 1 lifts the finger off, so the click and the open string are loud and the squeak is quiet. Neither ever goes silent here; at the far end it is 20 dB down."
+    },
+    care: {
+      live: false,
+      group: "flaw",
+      min: 0,
+      max: 1,
+      desc: "How carefully the player moves. 1 hovers just off the strings and mutes them, which makes every handling noise 20 dB quieter but never silent. Set stringNoise or openRing to 0 to remove them."
+    },
+    flawSeed: {
+      live: false,
+      group: "flaw",
+      min: 1,
+      max: 9999,
+      step: 1,
+      desc: "Seed for where the flaws happen, and for how each squeak of a moving hand differs a little in timing, length, pitch and loudness. Played from the start, the same part always slips and squeaks the same way."
+    },
+    silent: {
+      live: false,
+      group: "out",
+      min: 0,
+      max: 1,
+      step: 1,
+      desc: "Silences the strings, like the mute rail of a silent piano. 1 leaves only the sounds around them: the keys, and the handling noises of a guitar. 0 plays normally."
+    },
+    snap: {
+      live: false,
+      group: "out",
+      min: 0,
+      max: 1,
+      desc: "How loud the click is when a string pulled away from the neck snaps back against the fingerboard, as in a slapped upright bass. A short burst of noise at the start of every note, the same at every pitch. Not fitted to recordings. 0 is silent."
+    },
+    palm: {
+      live: false,
+      group: "out",
+      min: 0,
+      max: 1,
+      step: 1,
+      when: [{ key: "snap", gt: 0 }],
+      desc: "Slap bass: 1 makes every note the palm hit, the hand smacking all four strings flat against the fingerboard. The open strings sound for a moment and stop at once, with only a tiny click of wood, so it does not turn into a snare drum. The written pitch is not used. 0 plucks."
+    },
+    thumbBelow: {
+      live: false,
+      group: "out",
+      min: 0,
+      max: 400,
+      unit: "Hz",
+      when: [{ key: "snap", gt: 0 }],
+      desc: "Slap bass: notes below this pitch are struck with the thumb, a duller, rounder thump; notes above are pulled and let go, the sharper click. The usual pattern of a low thumb and a pulled octave above plays without marking either. 0 pulls every note."
+    },
+    thumbDull: {
+      live: false,
+      group: "out",
+      min: 0,
+      max: 1,
+      when: [{ key: "snap", gt: 0 }, { key: "thumbBelow", gt: 0 }],
+      desc: "Slap bass: how much rounder the thumb is than the pulled notes. The side of the thumb is wide and soft, so the strike is longer and darker, and the fundamental comes forward. 0 strikes like the pulled notes. 1 is a long, dark thump."
+    },
+    keyNoise: {
+      live: false,
+      group: "out",
+      min: 0,
+      max: 1,
+      desc: "How loud the action itself is: a dull knock as a key hits the bottom when the note starts, and, when it ends, the key falling back and the hammer dropping onto its felt rest a moment later. The strings have nothing to do with it, so it is there even on a silent piano. Not fitted to recordings. 0 is silent."
+    },
+    neck: {
+      live: false,
+      group: "modes",
+      min: 0,
+      max: 2,
+      step: 1,
+      desc: "What the left hand does with a slur (c&e in MML) or a portamento (c*e) on a ringing string. 0 ignores the new pitch. 1 is a fretted neck: the pitch steps a semitone at a time, and a slur is a hammer-on or pull-off. 2 is a fretless neck: the pitch glides smoothly."
+    },
+    roll: {
+      live: false,
+      group: "out",
+      min: 0,
+      max: 24,
+      unit: "/s",
+      desc: "Turns every note into a roll: strokes per second, alternating hands, for as long as the note lasts. Each stroke hits the head that is still ringing instead of starting a new voice. 0 plays one stroke."
+    },
+    rollJitter: {
+      live: false,
+      group: "out",
+      min: 0,
+      max: 0.5,
+      when: [{ key: "roll", gt: 0 }],
+      desc: "How unevenly the strokes of a roll are spaced, as a fraction of the gap. 0 is a machine."
+    },
+    rollVary: {
+      live: false,
+      group: "out",
+      min: 0,
+      max: 10,
+      unit: "dB",
+      when: [{ key: "roll", gt: 0 }],
+      desc: "How much the loudness of each stroke of a roll wanders, up or down."
+    },
+    rollSeed: {
+      live: false,
+      group: "out",
+      min: 1,
+      max: 9999,
+      step: 1,
+      when: [{ key: "roll", gt: 0 }],
+      desc: "Seed for the spacing and loudness of the strokes of a roll. The same note rolls the same way every time."
+    },
+    level: {
+      live: false,
+      group: "out",
+      min: 0.01,
+      max: 4,
+      desc: "Output level of this patch."
+    }
+  };
+  var MODAL_BODY = {
+    freq: {
+      live: false,
+      min: 40,
+      max: 6e3,
+      unit: "Hz",
+      desc: "Centre of the resonance."
+    },
+    gain: {
+      live: false,
+      min: -18,
+      max: 18,
+      unit: "dB",
+      desc: "How much it lifts or cuts the partials at the centre."
+    },
+    resonance: {
+      live: false,
+      min: 0,
+      max: 0.95,
+      desc: "How narrow the peak is. 0 is broad."
+    }
+  };
   var MODAL_PATCHES = {
     brush: {
-      note: "Wire brush on a snare. Mostly the sweep heard straight through, a short drum body and wires underneath.",
+      desc: "Wire brush on a snare. Mostly the sweep heard straight through, a short drum body and wires underneath.",
       series: "membrane",
       pitched: false,
       base: 190,
@@ -12981,7 +15211,7 @@ registerProcessor('${MODAL_NODE}', ModalBank);
       },
       macros: {
         fan: {
-          note: "How wide the wires of the brush are fanned out. 0 is a narrow, gathered fan with a tight, focused tap. 2 is a wide fan whose wires land spread out, softer and splashier.",
+          desc: "How wide the wires of the brush are fanned out. 0 is a narrow, gathered fan with a tight, focused tap. 2 is a wide fan whose wires land spread out, softer and splashier.",
           min: 0,
           max: 2,
           neutral: {
@@ -12995,7 +15225,7 @@ registerProcessor('${MODAL_NODE}', ModalBank);
       }
     },
     brushSweep: {
-      note: "Wire brush swept in circles on a snare. A long, slightly muffled scrape heard straight through, centred near 3 kHz; the drum body and wires barely sound.",
+      desc: "Wire brush swept in circles on a snare. A long, slightly muffled scrape heard straight through, centred near 3 kHz; the drum body and wires barely sound.",
       // ブラシの擦る音。叩く音(brush)と同じ作りで、頭だけが違う。前は聞くページの側で
       // 頭を上書きしていたので、頭のパラメータが効かず、MML からも呼べなかった(2026-10-05)。
       // 小さな櫛で低いところを削り、3kHz 前後を持ち上げている。削らないと 1kHz より下の
@@ -13042,7 +15272,7 @@ registerProcessor('${MODAL_NODE}', ModalBank);
       }
     },
     bass: {
-      note: "Upright bass, plucked. A finger strike with plenty of finger noise, heavy loss in the highs, a long ring, muted when let go. Fitted to recordings of a plucked double bass.",
+      desc: "Upright bass, plucked. A finger strike with plenty of finger noise, heavy loss in the highs, a long ring, muted when let go. Fitted to recordings of a plucked double bass.",
       // 録音(アイオワ大学のコントラバスのピチカート、E1〜C4 を 3 つの強さ)に寄せた(2026-10-05)。
       // 前は 1 秒で 25dB 落ちていたが、録音は 10〜20dB。弱く弾いた C4 が録音より 17dB 小さかった。
       // 頭の山が長く(約 5ms)、その形が 300Hz あたりを打ち消していたため。
@@ -13053,25 +15283,43 @@ registerProcessor('${MODAL_NODE}', ModalBank);
       head: { sharp: 4, bright: 0.875, comb: 0.226, noise: 0.6, vary: 0.3, seed: 11, velo: 0, felt: 1.13, hardKey: 0.5, hardFrom: 60 },
       count: 35,
       stretch: 6e-4,
-      strings: 1,
+      strings: 2,
       detune: 0,
+      after: 6,
+      afterLevel: 0.35,
       tilt: 0.635,
       warp: 1,
       spread: 0,
-      t60: 5.07,
-      decayKey: 0.175,
+      t60: 2,
+      decayKey: 0.3,
       damp: 20,
       release: 0.09,
+      // 胴。低い音は基音が出ない(E1 で 2 倍音より 15〜20dB 下、A1 で 4〜7dB 下)。C2 から上は基音がいちばん強い。
+      // アイオワ大学と VSCO 2 CE の両方の録音でそうなっていた。60Hz あたりで急に切れ、65Hz あたりで胴が鳴る形。
+      // 前は E1 も基音がいちばん強かった(2026-10-14)。
+      // 200Hz あたりは広く凹ませる。C2〜C3 の 2 倍音が、こちらは録音より 8dB ほど強かった
+      // (アイオワで −5〜−29dB、VSCO で −17〜−26dB。楽器ごとのばらつきが大きいので、平均に寄せた)
+      body: [{ freq: 65, gain: 10, resonance: 0.6 }, { freq: 200, gain: -12, resonance: 0.3 }],
+      bodyLow: 95,
       direct: 0,
       rattle: 0,
-      level: 0.37,
-      // 失敗: 強く弾くとときどきびびり、ときどき指がすべり、弱いときにときどき鳴らしそこねる
-      buzz: 0.08,
-      buzzLevel: 0.3,
+      level: 0.82,
+      // 失敗: 強く弾くとときどきびびり、ときどき指がすべり、弱いときにときどき鳴らしそこねる。
+      // びびりは脈打たせない(buzzRasp 0)。音程の周期で脈打つ「ジャー」が突然入って違和感がある、
+      // もっと白い雑音に近いのでは、と言われた(2026-10-14)。
+      // そのあと、もう少し小さく、と言われて buzzLevel 0.3 → 0.15(−6dB)。
+      // びびりは製作途中。本物の録音と聞き比べていないので、既定では鳴らさない(buzz 0.08 → 0)
+      buzz: 0,
+      buzzSeed: 1,
+      buzzLevel: 0.15,
+      buzzRasp: 0,
       slip: 0.04,
       ghost: 0.03,
       flawSeed: 1,
+      // スラー(c&e)とポルタメント(c*e)で鳴っている弦を動かす。フレットの無い指板なので、なめらかに(2026-10-14)
+      neck: 2,
       range: {
+        neck: [2, 2],
         "head.sharp": [2, 8],
         "head.bright": [0.6, 0.95],
         "head.comb": [0.1, 0.35],
@@ -13089,15 +15337,26 @@ registerProcessor('${MODAL_NODE}', ModalBank);
         tilt: [0.4, 1.2],
         warp: [0.95, 1.05],
         spread: [0, 0.02],
-        t60: [2.5, 8],
-        decayKey: [0, 0.5],
+        t60: [1.5, 4],
+        decayKey: [0.1, 0.5],
         damp: [8, 20],
         release: [0.05, 0.2],
+        bodyLow: [60, 120],
+        "body.0.freq": [55, 80],
+        "body.0.gain": [4, 14],
+        "body.0.resonance": [0.4, 0.8],
+        "body.1.freq": [150, 260],
+        "body.1.gain": [-16, -4],
+        "body.1.resonance": [0.1, 0.5],
+        after: [3, 8],
+        afterLevel: [0.2, 0.5],
         direct: [0, 0.1],
         rattle: [0, 0],
-        level: [0.2, 0.7],
+        level: [0.5, 1.2],
         buzz: [0, 0.4],
-        buzzLevel: [0.2, 1.2],
+        buzzSeed: [1, 9999],
+        buzzLevel: [0.05, 0.6],
+        buzzRasp: [0, 0.5],
         slip: [0, 0.2],
         ghost: [0, 0.2],
         flawSeed: [1, 9999]
@@ -13105,7 +15364,7 @@ registerProcessor('${MODAL_NODE}', ModalBank);
       macros: {
         // 0 は録音に寄せる前の値。丸く短い音で、曲の中で邪魔をしない
         upright: {
-          note: "How much it sounds like a plucked upright bass. 1 is the default, fitted to recordings. 0 is a soft, round, short thump with little finger noise, closer to a muted electric bass. Above 1 the finger noise, the brightness and the ring grow.",
+          desc: "How much it sounds like a plucked upright bass. 1 is the default, fitted to recordings. 0 is a soft, round, short thump with little finger noise, closer to a muted electric bass. Above 1 the finger noise, the brightness and the ring grow.",
           min: 0,
           max: 2,
           neutral: {
@@ -13118,15 +15377,575 @@ registerProcessor('${MODAL_NODE}', ModalBank);
             tilt: 0.7,
             t60: 2.6,
             decayKey: 0,
-            damp: 9
+            damp: 9,
+            "body.0.gain": 0,
+            "body.1.gain": 0,
+            bodyLow: 0,
+            afterLevel: 0
           },
-          // 2 では雑音が増えて基音が細り、7dB 小さく聞こえる
-          levelDb: [-0.9, 7.2]
+          // 2 では雑音が増えて基音が細り、13dB 小さく聞こえる(胴の低い切れと凹みも倍になる)
+          levelDb: [-7.3, 13.2]
+        }
+      }
+    },
+    fingerBass: {
+      desc: "Electric bass played with the fingers. Steel strings over a solid body, heard through a magnetic pickup: no body resonance, a strong low end, and a long, steady ring. Fitted to recordings of an electric bass.",
+      // エレキベースの指弾き(2026-10-14)。FreePats の Finger Bass YR(Yamaha RBX、CC0)に寄せる。
+      // Rickenbacker 4001(CC BY-NC-SA 3.0、聞き比べだけ)はずっと明るく、3〜5 倍音がいちばん強い。標準は Yamaha にした。
+      // ウッドベース(bass)との違い: 胴が鳴らない(body も bodyLow も無し)、金属の弦なので長く残る
+      // (1 秒で落ちるのは 3〜9dB。ウッドベースは 10〜17dB)、指の擦れが少ない。
+      // 値は Yamaha の E1・A1・D2 と Rickenbacker の G2・G3 に寄せた。1〜8 倍音の差は平均 5dB、1 秒の減りの差は 2dB。
+      // Yamaha の 3 音は明るさ(倍音の重心)が 3.1・2.6・2.3(録音 3.6・2.8・2.2)。Rickenbacker はずっと明るく、合わせていない。
+      // 弾く位置(comb 0.22)で 4〜5 倍音が凹む。録音でも 5 倍音のあたりが凹んでいる(指とピックアップの位置)
+      series: "string",
+      pitched: true,
+      head: { sharp: 3, bright: 0.85, comb: 0.22, noise: 0.15, vary: 0.2, seed: 13, velo: 1, felt: 1, hardKey: 0.3, hardFrom: 60 },
+      count: 40,
+      stretch: 2e-4,
+      bStretch: 6e-4,
+      pickupAt: 0,
+      pickupDepth: 1.6,
+      pickupPeak: 2500,
+      pickupPeakGain: 6,
+      strings: 2,
+      detune: 0,
+      after: 3,
+      afterLevel: 0.5,
+      tilt: 0.8,
+      warp: 1,
+      spread: 0,
+      t60: 8,
+      decayKey: 0.3,
+      damp: 4,
+      mute: 0,
+      release: 0.08,
+      direct: 0,
+      rattle: 0,
+      level: 0.17,
+      neck: 1,
+      harmonic: 0,
+      range: {
+        neck: [1, 1],
+        harmonic: [0, 6],
+        "head.sharp": [1, 4],
+        "head.bright": [0.7, 0.98],
+        "head.comb": [0.08, 0.3],
+        "head.noise": [0, 0.4],
+        "head.vary": [0, 0.5],
+        "head.seed": [1, 9999],
+        "head.velo": [0, 2],
+        "head.felt": [0, 3],
+        "head.hardKey": [0, 0.8],
+        "head.hardFrom": [40, 120],
+        count: [25, 60],
+        stretch: [0, 6e-4],
+        bStretch: [0, 2e-3],
+        pickupAt: [0, 0.3],
+        pickupDepth: [0.5, 2.5],
+        pickupPeak: [1200, 5e3],
+        pickupPeakGain: [0, 12],
+        strings: [1, 2],
+        detune: [0, 2],
+        tilt: [0.3, 1],
+        warp: [0.98, 1.02],
+        spread: [0, 0.01],
+        after: [1, 5],
+        afterLevel: [0.2, 0.8],
+        t60: [4, 16],
+        decayKey: [0, 0.6],
+        damp: [1, 10],
+        mute: [0, 1],
+        release: [0.04, 0.2],
+        direct: [0, 0.05],
+        rattle: [0, 0],
+        level: [0.08, 0.4]
+      }
+    },
+    pickBass: {
+      desc: "Electric bass played with a pick. The same bass as fingerBass, struck with a hard plastic edge instead of a fingertip: a sharper attack, much more of the upper harmonics, and the dips from where the string is struck are deeper. Fitted to recordings of an electric bass.",
+      // エレキベースのピック弾き(2026-10-15)。fingerBass を土台にした。
+      // ピックの録音は Rickenbacker 4001(CC BY-NC-SA 3.0、聞き比べだけ)にしか無い。Rickenbacker はもともと明るいので、
+      // 録音そのものには寄せず、同じ楽器で測ったピックと指の差を、fingerBass の目標(Yamaha の指)に足したものに寄せた。
+      // 差は 8〜12 倍音で 5〜10dB。ピックは当たるところが細いので、弾く位置の谷も深い。1 秒の減りはほとんど同じ。
+      // E1・A1 はその目標、G2・G3 は Rickenbacker のピックそのものと比べた。1〜12 倍音の差は平均 7dB(fingerBass のままだと 9dB)。
+      // 残る差は音ごとの谷の位置で、録音では弾くフレットで谷の倍音が動く。こちらは弾く位置を弦の長さの割合で持つので動かない。
+      // 1 回目は倍音だけ合わせて、指と同じに聞こえると言われた。弾いた瞬間を 2ms ごとに測ると、1kHz より上の音が
+      // 指では 1 周期に 1 回の塊になって、あいだが −40〜−55dB まで沈む。ピックはあいだも −20dB ほどで鳴り続ける。
+      // 打つ面に雑音を多く混ぜ(noise 0.8)、細くして(sharp 0.7)、あいだを埋めた。倍音の差は平均 8dB に広がる。
+      // G3 は録音より 4〜5dB 明るい。高い音ほど打つ面を短くする hardKey は、明るくする向きなので切った。
+      // 雑音が多いぶん打つ力が基音に乗らず、18dB 小さくなるので、level を大きくして fingerBass と揃えた(1.7)
+      series: "string",
+      pitched: true,
+      head: { sharp: 0.7, bright: 0.92, comb: 0.21, noise: 0.8, vary: 0.2, seed: 13, velo: 1, felt: 1, hardKey: 0, hardFrom: 60 },
+      count: 50,
+      stretch: 2e-4,
+      bStretch: 6e-4,
+      pickupAt: 0,
+      pickupDepth: 1.6,
+      pickupPeak: 2500,
+      pickupPeakGain: 6,
+      strings: 2,
+      detune: 0,
+      after: 3,
+      afterLevel: 0.5,
+      tilt: 0.93,
+      warp: 1,
+      spread: 0,
+      t60: 8,
+      decayKey: 0.3,
+      damp: 4,
+      mute: 0,
+      release: 0.08,
+      direct: 0,
+      rattle: 0,
+      level: 1.7,
+      neck: 1,
+      harmonic: 0,
+      range: {
+        neck: [1, 1],
+        harmonic: [0, 6],
+        "head.sharp": [0.3, 3],
+        "head.bright": [0.8, 0.99],
+        "head.comb": [0.08, 0.3],
+        "head.noise": [0.3, 1],
+        "head.vary": [0, 0.5],
+        "head.seed": [1, 9999],
+        "head.velo": [0, 2],
+        "head.felt": [0, 3],
+        "head.hardKey": [0, 0.8],
+        "head.hardFrom": [40, 120],
+        count: [25, 60],
+        stretch: [0, 6e-4],
+        bStretch: [0, 2e-3],
+        pickupAt: [0, 0.3],
+        pickupDepth: [0.5, 2.5],
+        pickupPeak: [1200, 5e3],
+        pickupPeakGain: [0, 12],
+        strings: [1, 2],
+        detune: [0, 2],
+        tilt: [0.3, 1],
+        warp: [0.98, 1.02],
+        spread: [0, 0.01],
+        after: [1, 5],
+        afterLevel: [0.2, 0.8],
+        t60: [4, 16],
+        decayKey: [0, 0.6],
+        damp: [1, 10],
+        mute: [0, 1],
+        release: [0.04, 0.2],
+        direct: [0, 0.05],
+        rattle: [0, 0],
+        level: [0.8, 3]
+      }
+    },
+    slapBass: {
+      desc: "Electric bass, slapped. Low notes are struck with the side of the thumb, a round, heavy thump; higher notes are hooked with a finger, pulled away and let go, so the string snaps back onto the frets with a bright crack. The strings ring bright and metallic for a moment after every note. Fitted to recordings of a slapped electric bass.",
+      // エレキベースのスラップ(2026-10-15)。fingerBass を土台にした。比べた録音は Rickenbacker 4001 のスラップ
+      // (CC BY-NC-SA 3.0、聞き比べだけ)。Slap1 と Slap2 の 2 つがあり、Slap2 は基音が強く暗いので親指、
+      // Slap1 は明るいので引っぱる音と見た(ファイル名には書かれていない)。
+      // スラップは指弾きより 2.5kHz のあたりが 15〜20dB 大きく、それが 200 ミリ秒ほどかけて消える。
+      // 打った瞬間のパチッだけでなく、弦そのものが明るく鳴っている。打つ面を細く明るく、ほぼ雑音にした(sharp 0.57、noise 1)。
+      // 低い音(E1 A1)は親指として、Yamaha の指の目標に Rickenbacker の(Slap2 − 指)を足したものに、
+      // 高い音(G2 G3)は Slap1 そのものに寄せた。引っぱる音の高い音の減り方は 20 ミリ秒ごとにほぼ合う。
+      // 親指は、頭を長く暗くして(thumbDull 0.59)基音を前に出し、上の倍音の並びを録音に寄せた。
+      // 1〜12 倍音の差は平均 6dB、2.5kHz・5kHz の 20 ミリ秒ごとの差は 5dB
+      series: "string",
+      pitched: true,
+      head: { sharp: 0.57, bright: 0.915, comb: 0.24, noise: 1, vary: 0.2, seed: 13, velo: 1, felt: 1, hardKey: 0, hardFrom: 60 },
+      count: 60,
+      stretch: 2e-4,
+      bStretch: 6e-4,
+      pickupAt: 0,
+      pickupDepth: 1.6,
+      pickupPeak: 2500,
+      pickupPeakGain: 6,
+      strings: 2,
+      detune: 0,
+      after: 3,
+      afterLevel: 0.5,
+      tilt: 1.1,
+      warp: 1,
+      spread: 0,
+      t60: 8,
+      decayKey: 0.3,
+      damp: 1.2,
+      mute: 0,
+      release: 0.08,
+      snap: 0.53,
+      // 親指で叩く音と、指で引っぱる音の分かれ目。D2(73Hz)から上を引っぱる。
+      // 定番の「親指で低い音、指で 1 オクターブ上」(E1 → E2、A1 → A2)が、そのまま親指と引っぱる音になる
+      thumbBelow: 70,
+      thumbDull: 0.59,
+      // 弦がフレットに当たってびびる。どの音でも(buzz 1)、小さく(0.13)。親指の録音は上の倍音が弱いのに、
+      // 2.5kHz のあたりが 160 ミリ秒ほど残る。親指の頭を長くして倍音を合わせると、それが消えてしまうので、びびりで出した
+      buzz: 1,
+      buzzSeed: 1,
+      buzzLevel: 0.13,
+      buzzRasp: 0.6,
+      direct: 0,
+      rattle: 0,
+      level: 0.72,
+      neck: 1,
+      range: {
+        neck: [1, 1],
+        "head.sharp": [0.3, 1.5],
+        "head.bright": [0.85, 0.98],
+        "head.comb": [0.1, 0.3],
+        "head.noise": [0.5, 1],
+        "head.vary": [0, 0.5],
+        "head.seed": [1, 9999],
+        "head.velo": [0, 2],
+        "head.felt": [0, 3],
+        "head.hardKey": [0, 0.8],
+        "head.hardFrom": [40, 120],
+        count: [40, 60],
+        stretch: [0, 6e-4],
+        bStretch: [0, 2e-3],
+        pickupAt: [0, 0.3],
+        pickupDepth: [0.5, 2.5],
+        pickupPeak: [1200, 5e3],
+        pickupPeakGain: [0, 12],
+        strings: [1, 2],
+        detune: [0, 2],
+        tilt: [0.8, 1.3],
+        warp: [0.98, 1.02],
+        spread: [0, 0.01],
+        after: [1, 5],
+        afterLevel: [0.2, 0.8],
+        t60: [4, 16],
+        decayKey: [0, 0.6],
+        damp: [0.5, 4],
+        mute: [0, 1],
+        release: [0.04, 0.2],
+        snap: [0.2, 0.8],
+        thumbBelow: [50, 100],
+        thumbDull: [0.3, 0.8],
+        buzz: [0, 1],
+        buzzSeed: [1, 9999],
+        buzzLevel: [0, 0.4],
+        buzzRasp: [0, 1],
+        direct: [0, 0.05],
+        rattle: [0, 0],
+        level: [0.3, 3]
+      }
+    },
+    bassSlap: {
+      desc: "Upright bass, slapped. Low notes are struck with the thumb, a round thump; higher notes are pulled away from the neck and let go, so the string snaps back against the fingerboard with a click. Brighter and shorter than a plain pluck. Made by ear from how the technique is described; not fitted to recordings.",
+      // スラップ(ロカビリー)。弦を指板から引き離して放す。戻った弦が指板に当たってパチッと鳴る(snap)。
+      // ふつうのピチカート(bass)をもとに、引っぱって放すので頭を短く明るく、指の擦れを減らし、短く切る。
+      // 録音が手に入らず(自由に使える録音が見つからない、Freesound にこのコンテナから届かない)、見当で作った。
+      // エレキのスラップ(Project16 Rickenbacker 4001、CC BY-NC-SA 3.0 で聞き比べだけ)と比べて寄せた。パチッの高さは
+      // エレキで 1.3〜3.3kHz、こちらは 5〜6kHz で明るすぎたので 1.9kHz ほどに下げた(木の指板なのでエレキより暗め)。
+      // パチッの大きさは A2 でエレキより 8dB ほど小さい。弦はピチカートより少し明るく(count 35 → 50、damp 20 → 10)。
+      // エレキは 30〜50 ミリ秒後も高い音が残る(金属の弦)が、ガット弦はそうならないと見て、合わせていない。
+      // 製作途中(2026-10-14)
+      // 調整中。MML からは使えない(draft)。エレキベースを先に作ってから戻る、と言われた(2026-10-14)
+      draft: true,
+      series: "string",
+      pitched: true,
+      head: { sharp: 2.5, bright: 0.92, comb: 0.226, noise: 0.3, vary: 0.3, seed: 11, velo: 0, felt: 1.13, hardKey: 0.5, hardFrom: 60 },
+      count: 50,
+      stretch: 6e-4,
+      strings: 2,
+      detune: 0,
+      after: 4,
+      afterLevel: 0.2,
+      tilt: 0.635,
+      warp: 1,
+      spread: 0,
+      t60: 1.4,
+      decayKey: 0.3,
+      damp: 10,
+      release: 0.09,
+      body: [{ freq: 65, gain: 10, resonance: 0.6 }, { freq: 200, gain: -12, resonance: 0.3 }],
+      bodyLow: 95,
+      snap: 0.5,
+      // 親指で叩く音と、指で引っぱる音の分かれ目。E2(82Hz)より下を親指にする
+      thumbBelow: 80,
+      thumbDull: 0.075,
+      direct: 0,
+      rattle: 0,
+      level: 0.69,
+      buzz: 0,
+      buzzSeed: 1,
+      buzzLevel: 0.15,
+      buzzRasp: 0,
+      slip: 0.04,
+      ghost: 0.03,
+      flawSeed: 1,
+      neck: 2,
+      range: {
+        neck: [2, 2],
+        "head.sharp": [1.5, 5],
+        "head.bright": [0.6, 0.95],
+        "head.comb": [0.1, 0.35],
+        "head.noise": [0.1, 0.6],
+        "head.vary": [0, 0.6],
+        "head.seed": [1, 9999],
+        "head.velo": [0, 1.5],
+        "head.felt": [0, 3],
+        "head.hardKey": [0, 1],
+        "head.hardFrom": [40, 120],
+        count: [30, 80],
+        stretch: [0, 1e-3],
+        strings: [1, 2],
+        detune: [0, 3],
+        tilt: [0.4, 1.2],
+        warp: [0.95, 1.05],
+        spread: [0, 0.02],
+        t60: [0.8, 3],
+        decayKey: [0.1, 0.5],
+        damp: [5, 20],
+        release: [0.05, 0.2],
+        bodyLow: [60, 120],
+        "body.0.freq": [55, 80],
+        "body.0.gain": [4, 14],
+        "body.0.resonance": [0.4, 0.8],
+        "body.1.freq": [150, 260],
+        "body.1.gain": [-16, -4],
+        "body.1.resonance": [0.1, 0.5],
+        after: [2, 6],
+        afterLevel: [0.1, 0.4],
+        snap: [0.3, 1],
+        thumbBelow: [60, 120],
+        thumbDull: [0, 0.3],
+        direct: [0, 0.1],
+        rattle: [0, 0],
+        level: [0.4, 1],
+        buzz: [0, 0.4],
+        buzzSeed: [1, 9999],
+        buzzLevel: [0.05, 0.6],
+        buzzRasp: [0, 0.5],
+        slip: [0, 0.2],
+        ghost: [0, 0.2],
+        flawSeed: [1, 9999]
+      }
+    },
+    bassSlapHit: {
+      desc: "Slapped upright bass, the palm hit: the hand smacks all four strings flat against the fingerboard, so the open strings sound for a moment and stop at once. A short, low, pitchless thump between the plucked notes. The note you write is not used. Made by ear; not fitted to recordings.",
+      // スラップの手のひらの「チャッ」。手のひらで弦を指板に叩きつける、音程の無い音(2026-10-14)。
+      // 弦は手で押さえつけられて鳴らない(t60 をごく短く)。雑音で作るとスネアにしか聞こえなかったので、
+      // 4 本の開放弦をまとめてごく短く鳴らし、木の音は一瞬だけにする(palm)。
+      // 書いた高さは使わない(4 本の開放弦で鳴らす)。
+      // ベースの専用の書き方ができるまでのつなぎ。見当で作った。製作途中
+      // 調整中。MML からは使えない(draft)。エレキベースを先に作ってから戻る、と言われた(2026-10-14)
+      draft: true,
+      series: "string",
+      pitched: true,
+      head: { sharp: 4, bright: 0.75, comb: 0.226, noise: 0.4, vary: 0.3, seed: 11, velo: 0, felt: 1.13, hardKey: 0.5, hardFrom: 60 },
+      count: 30,
+      stretch: 6e-4,
+      strings: 1,
+      detune: 0,
+      after: 1,
+      afterLevel: 0,
+      tilt: 0.635,
+      warp: 1,
+      spread: 0,
+      t60: 0.1,
+      decayKey: 0,
+      damp: 10,
+      release: 0.03,
+      body: [{ freq: 65, gain: 10, resonance: 0.6 }, { freq: 200, gain: -12, resonance: 0.3 }],
+      bodyLow: 95,
+      snap: 1,
+      thumbBelow: 400,
+      palm: 1,
+      direct: 0,
+      rattle: 0,
+      level: 0.5,
+      buzz: 0,
+      buzzSeed: 1,
+      buzzLevel: 0.15,
+      buzzRasp: 0,
+      slip: 0,
+      ghost: 0,
+      flawSeed: 1,
+      neck: 0,
+      range: {
+        neck: [0, 0],
+        "head.sharp": [2, 5],
+        "head.bright": [0.6, 0.9],
+        "head.comb": [0.1, 0.35],
+        "head.noise": [0.2, 0.7],
+        "head.vary": [0, 0.6],
+        "head.seed": [1, 9999],
+        "head.velo": [0, 1.5],
+        "head.felt": [0, 3],
+        "head.hardKey": [0, 1],
+        "head.hardFrom": [40, 120],
+        count: [20, 50],
+        stretch: [0, 1e-3],
+        strings: [1, 1],
+        detune: [0, 3],
+        tilt: [0.4, 1.2],
+        warp: [0.95, 1.05],
+        spread: [0, 0.02],
+        t60: [0.05, 0.2],
+        decayKey: [0, 0],
+        damp: [5, 20],
+        release: [0.02, 0.06],
+        bodyLow: [60, 120],
+        "body.0.freq": [55, 80],
+        "body.0.gain": [4, 14],
+        "body.0.resonance": [0.4, 0.8],
+        "body.1.freq": [150, 260],
+        "body.1.gain": [-16, -4],
+        "body.1.resonance": [0.1, 0.5],
+        after: [1, 1],
+        afterLevel: [0, 0],
+        snap: [0.5, 1],
+        thumbBelow: [400, 400],
+        palm: [1, 1],
+        direct: [0, 0.1],
+        rattle: [0, 0],
+        level: [0.25, 1],
+        buzz: [0, 0.4],
+        buzzSeed: [1, 9999],
+        buzzLevel: [0.05, 0.6],
+        buzzRasp: [0, 0.5],
+        slip: [0, 0],
+        ghost: [0, 0],
+        flawSeed: [1, 9999]
+      }
+    },
+    guitar: {
+      desc: "Classical guitar with nylon strings, plucked with the fingers. Each string swings in two directions that fall at different rates, and the body only sounds what it resonates with: the top plate near 210 Hz, little below it. Fitted to recordings of a classical guitar.",
+      series: "string",
+      pitched: true,
+      head: { sharp: 0.6, bright: 0.88, comb: 0.258, noise: 0.43, vary: 0.3, seed: 13, velo: 3.3, felt: 0.18, hardKey: 0.57 },
+      count: 160,
+      stretch: 31e-6,
+      strings: 2,
+      detune: 0.79,
+      tilt: 0.41,
+      warp: 1,
+      spread: 0,
+      body: [{ freq: 59, gain: 16.3, resonance: 0.95 }, { freq: 209, gain: 12.2, resonance: 0.6 }, { freq: 1087, gain: -16, resonance: 0.38 }],
+      bodyLow: 202,
+      t60: 3.52,
+      decayKey: 0.29,
+      after: 1.76,
+      afterLevel: 0.55,
+      damp: 0.021,
+      release: 0.1,
+      direct: 0,
+      rattle: 0,
+      level: 0.3,
+      // 失敗: 指のすべり(slip)がごくたまに起きる(乱数。弾き方の崩れ)。鳴りそこね(ghost)は既定で起こさない。
+      // びびり(buzz)は楽器の状態で、決まった音を強く弾いたときに毎回鳴る。既定は少なく小さく
+      // (音の 5%、大きさ 0.05)。0.3 では音の 11dB 下で激しすぎた(2026-10-13)
+      // 押さえ替えのノイズ(stringNoise・lift・care)と、離したときの開放弦の鳴り(openRing)は
+      // 乱数を使わない。弦の性質と弾く人の癖で決まる。
+      // 既定は、新しくも古くもない弦を、少し付けたまま移る人がそれなりに気をつけて弾く。値は見当
+      buzz: 0.05,
+      buzzSeed: 1,
+      buzzLevel: 0.05,
+      slip: 0.01,
+      ghost: 0,
+      flawSeed: 1,
+      stringNoise: 0.5,
+      openRing: 0.5,
+      lift: 0.3,
+      click: 0,
+      rush: 0,
+      care: 0.3,
+      sympathetic: 0.5,
+      // スラー(c&e)とポルタメント(c*e)で鳴っている弦を動かす。フレットがあるので、半音ずつ(2026-10-14)
+      neck: 1,
+      range: {
+        neck: [1, 1],
+        "head.sharp": [0.4, 3],
+        "head.bright": [0.75, 0.95],
+        "head.comb": [0.18, 0.3],
+        "head.noise": [0.2, 0.7],
+        "head.vary": [0, 0.6],
+        "head.seed": [1, 9999],
+        "head.velo": [1.5, 4.5],
+        "head.felt": [0, 1.5],
+        "head.hardKey": [0.3, 0.9],
+        count: [80, 240],
+        stretch: [0, 15e-5],
+        strings: [1, 2],
+        detune: [0, 1.5],
+        tilt: [0.2, 0.8],
+        warp: [0.99, 1.01],
+        spread: [0, 5e-3],
+        bodyLow: [140, 220],
+        "body.0.freq": [50, 70],
+        "body.0.gain": [10, 20],
+        "body.0.resonance": [0.8, 0.95],
+        "body.1.freq": [180, 240],
+        "body.1.gain": [6, 16],
+        "body.1.resonance": [0.5, 0.9],
+        "body.2.freq": [800, 1400],
+        "body.2.gain": [-18, -8],
+        "body.2.resonance": [0, 0.5],
+        t60: [2, 6],
+        decayKey: [0.1, 0.6],
+        after: [1.3, 3],
+        afterLevel: [0.3, 0.8],
+        damp: [5e-3, 0.1],
+        release: [0.05, 0.3],
+        direct: [0, 0.05],
+        rattle: [0, 0],
+        level: [0.1, 0.8],
+        buzz: [0, 0.4],
+        buzzSeed: [1, 9999],
+        buzzLevel: [0.03, 0.4],
+        slip: [0, 0.2],
+        ghost: [0, 0.2],
+        flawSeed: [1, 9999],
+        stringNoise: [0, 1],
+        openRing: [0, 1],
+        lift: [0, 1],
+        click: [0, 1],
+        rush: [0, 1],
+        care: [0, 0.8],
+        sympathetic: [0, 1]
+      },
+      macros: {
+        // 3 本が動かす値は重ならないようにしてある。重なると、あとから当てたほうが勝つ
+        classical: {
+          desc: "How much it sounds like a classical guitar. 1 is the default, fitted to recordings. 0 takes the body away and leaves the bare strings: no air below the top plate, no body peaks, a single steady decay. Above 1 the body peaks and the low cut grow.",
+          min: 0,
+          max: 2,
+          neutral: {
+            "body.0.gain": 0,
+            "body.1.gain": 0,
+            "body.2.gain": 0,
+            bodyLow: 0,
+            afterLevel: 0.2
+          },
+          // 大きさの補正(dB)。E2・G3・E4 を強さ 0.4・0.7・1 で 1 秒ずつ鳴らした実効値を、1 と比べた(2026-10-13)
+          levelDb: [0.1, 3.7]
+        },
+        pluck: {
+          desc: "Where the string is plucked. 1 is the default, over the sound hole. 0 is up over the fingerboard: round and soft. 2 is close to the bridge: thin, bright and metallic.",
+          min: 0,
+          max: 2,
+          neutral: {
+            "head.comb": 0.45,
+            "head.bright": 0.8,
+            tilt: 0.55
+          },
+          levelDb: [0.3, 1.8]
+        },
+        nail: {
+          desc: "What touches the string. 1 is the default, with nails. 0 is the flesh of the finger: a softer, darker attack with less scrape. 2 is more nail: a short, clicky, scratchy attack.",
+          min: 0,
+          max: 2,
+          neutral: {
+            "head.sharp": 1.4,
+            "head.noise": 0.15,
+            "head.felt": 0
+          },
+          levelDb: [-1.2, 1.3]
         }
       }
     },
     piano: {
-      note: "Piano-like. Stiff strings in pairs that beat and fall in two stages, a felt hammer whose brightness follows the velocity, and a wooden knock. Fitted to recordings of a grand piano.",
+      desc: "Piano-like. Stiff strings in pairs that beat and fall in two stages, a felt hammer whose brightness follows the velocity, and a wooden knock. Fitted to recordings of a grand piano.",
       series: "string",
       pitched: true,
       head: { sharp: 0.74, bright: 0.68, comb: 0.125, noise: 0.05, vary: 0.2, seed: 5, velo: 4.1, hardKey: 0.22, felt: 3.1 },
@@ -13152,12 +15971,29 @@ registerProcessor('${MODAL_NODE}', ModalBank);
       rattle: 0,
       trebleGain: 3.5,
       level: 0.16,
-      // 失敗: ときどきとなりの鍵盤も押し、ときどきハンマーが二度当たり、まれに弦がびびる
+      keyNoise: 0.3,
+      silent: 0,
+      // 共鳴弦。88 鍵ぶん。ダンパーのある弦は右ペダルを踏んだときだけ鳴る(2026-10-14)
+      sympathetic: 0.5,
+      symTuning: "piano",
+      // 失敗: ときどきとなりの鍵盤も押す(弾き方の失敗。乱数)。
+      // 二度打ちは調整の悪い鍵盤で起きる(楽器の状態。鍵盤の 5% で、どれかは doubleSeed で決まる)。
+      // 種 2 では C1・B♭2・A4・B4・B7 が、強く弾いたときに二度打つ
+      // 乱数のびびり(buzz)は既定で起こさない。曲の中で鳴らすとハイハットかと思うほど目立ち、
+      // ピアノでは弾き方で起きる音ではないと言われた(2026-10-13)。前は起きやすさ 0.02、大きさ 0.3 で、
+      // 音の頭より 10〜13dB 下の高い雑音だった。ピアノのびびりは楽器の状態なので、下の loose で鳴らす
       neighbor: 0.03,
-      double: 0.02,
-      buzz: 0.02,
-      buzzLevel: 0.3,
+      double: 0.05,
+      doubleSeed: 2,
+      buzz: 0,
+      buzzSeed: 1,
+      buzzLevel: 0.1,
       flawSeed: 1,
+      // どこかが少しゆるんでいる。233Hz(B♭3)の近くに倍音がある音を強く弾いたときだけ、かすかにびびる。
+      // A3〜B3 と、その倍音が重なる A2〜B2 あたり。ff のいちばん鳴る音で、音の 23〜30dB 下。値は見当
+      loose: 0.05,
+      looseFreq: 233,
+      looseFrom: 0.3,
       range: {
         "head.sharp": [0.5, 2.5],
         "head.bright": [0.55, 0.8],
@@ -13190,18 +16026,26 @@ registerProcessor('${MODAL_NODE}', ModalBank);
         rattle: [0, 0],
         trebleGain: [0, 8],
         level: [0.12, 0.8],
+        keyNoise: [0, 1],
+        silent: [0, 1],
+        sympathetic: [0, 1],
         neighbor: [0, 0.2],
-        double: [0, 0.15],
-        buzz: [0, 0.2],
-        buzzLevel: [0.1, 1],
-        flawSeed: [1, 9999]
+        double: [0, 0.2],
+        doubleSeed: [1, 9999],
+        buzz: [0, 0.1],
+        buzzSeed: [1, 9999],
+        buzzLevel: [0.03, 0.4],
+        flawSeed: [1, 9999],
+        loose: [0, 0.3],
+        looseFreq: [100, 1e3],
+        looseFrom: [0.1, 1]
       },
       macros: {
         // ちゃんとしたピアノの中での違いを 3 本。どちらの端もピアノのまま、
         // 性格だけが変わる。ソロで聞いて分かる違いのうち、声の中で作れるもの(2026-10-05)。
         // 響板、ペダルの共鳴、部屋、マイクの距離は声の外なので入れない
         voicing: {
-          note: "Voicing of the hammers, as a piano technician does it. 0 is soft and round, 2 is hard and bright.",
+          desc: "Voicing of the hammers, as a piano technician does it. 0 is soft and round, 2 is hard and bright.",
           min: 0,
           max: 2,
           neutral: {
@@ -13214,7 +16058,7 @@ registerProcessor('${MODAL_NODE}', ModalBank);
           levelDb: [2.6, -1.2]
         },
         size: {
-          note: "Size of the instrument. 0 is an upright with short, stiff strings and a shorter ring. 2 leans to a concert grand with long strings.",
+          desc: "Size of the instrument. 0 is an upright with short, stiff strings and a shorter ring. 2 leans to a concert grand with long strings.",
           min: 0,
           max: 2,
           neutral: {
@@ -13225,7 +16069,7 @@ registerProcessor('${MODAL_NODE}', ModalBank);
           levelDb: [1.7, -0.8]
         },
         unison: {
-          note: "How the strings of one key agree. 0 is a single dry, pure string. 2 is a fuller sound from strings slightly apart.",
+          desc: "How the strings of one key agree. 0 is a single dry, pure string. 2 is a fuller sound from strings slightly apart.",
           min: 0,
           max: 2,
           neutral: {
@@ -13237,7 +16081,7 @@ registerProcessor('${MODAL_NODE}', ModalBank);
       }
     },
     rhodes: {
-      note: "Electric piano with tines, like a Rhodes. A neoprene hammer strikes a thin tine; the metallic ping dies fast and the round tone of the tone bar stays. Played hard, the pickup barks.",
+      desc: "Electric piano with tines, like a Rhodes. A neoprene hammer strikes a thin tine; the metallic ping dies fast and the round tone of the tone bar stays. Played hard, the pickup barks.",
       // まだ録音に寄せていない。値は見当(2026-10-06)。
       // 頭はネオプレンのハンマー。強いほど短く明るくなり、ティンの上の倍音(キン)が出る。
       // 高い音ほど短く当てる(hardKey を C3 から効かせる)。前は C3 でしか「キン」が聞こえなかった。
@@ -13309,7 +16153,7 @@ registerProcessor('${MODAL_NODE}', ModalBank);
         // 0 はピックアップとトーンバーを抜いた音。金属の棒をハンマーで叩いて生音で聞く楽器で、
         // チェレスタ(鍵盤で鳴らす鉄琴)に近い。本物から取れる端なので、ここを 0 にした
         rhodes: {
-          note: "How much it sounds like a Rhodes. 1 is the default. 0 takes away the pickup and most of the tone bar and hardens the hammer: a struck metal bar heard acoustically, close to a celesta. Above 1 the bark, the metallic ping and the ring of the tone bar all grow.",
+          desc: "How much it sounds like a Rhodes. 1 is the default. 0 takes away the pickup and most of the tone bar and hardens the hammer: a struck metal bar heard acoustically, close to a celesta. Above 1 the bark, the metallic ping and the ring of the tone bar all grow.",
           min: 0,
           max: 2,
           neutral: {
@@ -13329,8 +16173,340 @@ registerProcessor('${MODAL_NODE}', ModalBank);
         }
       }
     },
+    timpani: {
+      desc: "Timpani. A calf or plastic head over a copper kettle, struck with felt mallets. The air in the kettle pulls the head modes into a near-harmonic row, so it has a clear pitch: the note you write is the principal tone. Fitted to recordings of orchestral timpani.",
+      series: "kettle",
+      pitched: true,
+      head: { sharp: 1.5, bright: 0.7, comb: 0, noise: 0.12, vary: 0.2, seed: 3, velo: 6, felt: 8, hardKey: 0 },
+      count: 113,
+      light: 0,
+      lo: 3.5,
+      hi: 40,
+      cloud: 3,
+      tilt: 0.5,
+      warp: 1,
+      spread: 0,
+      t60: 3,
+      decayKey: 0.3,
+      damp: 0.02,
+      release: 0.8,
+      direct: 0,
+      rattle: 0,
+      level: 0.08,
+      range: {
+        "head.sharp": [0.8, 4],
+        "head.bright": [0.55, 0.85],
+        "head.comb": [0, 0],
+        "head.noise": [0, 0.4],
+        "head.vary": [0, 0.5],
+        "head.seed": [1, 9999],
+        "head.velo": [4, 6],
+        "head.felt": [4, 8],
+        "head.hardKey": [0, 0.5],
+        count: [60, 160],
+        light: [0, 1],
+        lo: [2.5, 5.5],
+        hi: [25, 60],
+        cloud: [1.5, 5],
+        tilt: [0, 1],
+        warp: [0.98, 1.02],
+        spread: [0, 0.01],
+        t60: [1.5, 6],
+        decayKey: [0, 0.6],
+        damp: [0, 0.1],
+        release: [0.2, 2],
+        direct: [0, 0.05],
+        rattle: [0, 0],
+        level: [0.04, 0.15]
+      }
+    },
+    timpaniRoll: {
+      desc: "Timpani roll. One note is a roll for as long as it lasts: soft strokes, hand over hand, about 13 a second, each one hitting the head that is still ringing. Fitted to recordings of rolls on orchestral timpani.",
+      series: "kettle",
+      pitched: true,
+      head: { sharp: 1.5, bright: 0.75, comb: 0, noise: 0.12, vary: 0.2, seed: 3, velo: 6, felt: 8, hardKey: 0 },
+      count: 113,
+      light: 0,
+      lo: 3.5,
+      hi: 40,
+      cloud: 3,
+      tilt: 0.5,
+      warp: 1,
+      spread: 0,
+      t60: 3,
+      decayKey: 0.3,
+      damp: 0.02,
+      release: 0.8,
+      roll: 13,
+      rollJitter: 0.15,
+      rollVary: 3,
+      rollSeed: 1,
+      direct: 0,
+      rattle: 0,
+      level: 0.04,
+      range: {
+        "head.sharp": [0.8, 4],
+        "head.bright": [0.6, 0.9],
+        "head.comb": [0, 0],
+        "head.noise": [0, 0.4],
+        "head.vary": [0, 0.5],
+        "head.seed": [1, 9999],
+        "head.velo": [4, 6],
+        "head.felt": [4, 8],
+        "head.hardKey": [0, 0.5],
+        count: [60, 160],
+        light: [0, 1],
+        lo: [2.5, 5.5],
+        hi: [25, 60],
+        cloud: [1.5, 5],
+        tilt: [0, 1],
+        warp: [0.98, 1.02],
+        spread: [0, 0.01],
+        t60: [1.5, 6],
+        decayKey: [0, 0.6],
+        damp: [0, 0.1],
+        release: [0.2, 2],
+        roll: [10, 16],
+        rollJitter: [0.05, 0.3],
+        rollVary: [1, 5],
+        rollSeed: [1, 9999],
+        direct: [0, 0.05],
+        rattle: [0, 0],
+        level: [0.02, 0.08]
+      }
+    },
+    gong: {
+      desc: "Gong, a big flat tam-tam. A bronze plate struck with a soft beater. Its modes do not line up as harmonics, so it has a low pitch but no clear note: the note you write moves the lowest mode. Hit hard, the high sound swells up a moment later. Fitted to recordings of a large gong.",
+      series: "gong",
+      pitched: true,
+      head: {
+        sharp: 1.2,
+        bright: 0.6,
+        comb: 0,
+        noise: 0.1,
+        vary: 0.2,
+        seed: 5,
+        velo: 3,
+        felt: 8,
+        hardKey: 0,
+        bloom: 5,
+        bloomVelo: 7,
+        bloomRise: 0.3,
+        bloomFall: 1.2,
+        bloomFrom: 2500,
+        bloomDrain: 25,
+        bloomDrainBelow: 200
+      },
+      count: 160,
+      light: 0.5,
+      lo: 14,
+      hi: 45,
+      cloud: 4e-3,
+      tilt: 1.5,
+      warp: 1,
+      spread: 0,
+      t60: 25,
+      decayKey: 0,
+      damp: 0.01,
+      release: 3,
+      direct: 0,
+      rattle: 0,
+      level: 0.13,
+      range: {
+        "head.sharp": [0.8, 3],
+        "head.bright": [0.5, 0.8],
+        "head.comb": [0, 0],
+        "head.noise": [0, 0.3],
+        "head.vary": [0, 0.5],
+        "head.seed": [1, 9999],
+        "head.velo": [1, 5],
+        "head.felt": [2, 8],
+        "head.hardKey": [0, 0],
+        "head.bloom": [1, 15],
+        "head.bloomVelo": [4, 10],
+        "head.bloomRise": [0.15, 0.8],
+        "head.bloomFall": [0.5, 3],
+        "head.bloomFrom": [1e3, 4e3],
+        "head.bloomDrain": [0, 40],
+        "head.bloomDrainBelow": [150, 400],
+        count: [100, 300],
+        light: [0, 1],
+        lo: [10, 25],
+        hi: [30, 80],
+        cloud: [1e-3, 0.02],
+        tilt: [0.5, 2],
+        warp: [0.98, 1.02],
+        spread: [0, 0.01],
+        t60: [10, 40],
+        decayKey: [0, 0],
+        damp: [0, 0.05],
+        release: [1, 6],
+        direct: [0, 0.05],
+        rattle: [0, 0],
+        level: [0.08, 0.5]
+      }
+    },
+    marimba: {
+      desc: "Marimba. Rosewood bars cut underneath so the overtones sit at 4 and 10 times the pitch, struck with yarn mallets over tuned tubes. Low notes are warm and ring a few seconds; high notes are short and dry. Fitted to recordings of a concert marimba.",
+      // アイオワ大学のマリンバ(毛糸巻きのマレット、ff、C2〜C7)に寄せる(2026-10-14)。値はまだ見当
+      series: "bar",
+      pitched: true,
+      // 値は録音との差が小さくなるところを乱数で探した(250 回ずつ 2 回と 350 回)。差は山の強さ・基音と上の山の減り方・
+      // 音域ごとの大きさを足したもの。高い音ほどマレットを硬く(hardKey を 100Hz から)、高い音を持ち上げる(trebleGain)。
+      // どちらも無いと、C7 が録音より 28dB 小さかった。
+      // 叩く場所(strike)はほぼ真ん中。録音の C2 は 4 倍の山が 32dB 弱く、真ん中を叩いた形だった
+      head: { sharp: 0.64, bright: 0.6, comb: 0, noise: 0.02, vary: 0.2, seed: 7, velo: 2.22, felt: 0.3, hardKey: 0.11, hardFrom: 100 },
+      count: 4,
+      tilt: 0.06,
+      warp: 1,
+      spread: 0,
+      tube: 0,
+      trebleGain: 4.2,
+      strike: 0.49,
+      t60: 2.14,
+      decayKey: 1.13,
+      modeDecay: 1.25,
+      damp: 0,
+      release: 0.2,
+      direct: 0,
+      rattle: 0,
+      level: 0.36,
+      range: {
+        "head.sharp": [0.6, 3],
+        "head.bright": [0.35, 0.8],
+        "head.comb": [0, 0.2],
+        "head.noise": [0, 0.1],
+        "head.vary": [0, 0.5],
+        "head.seed": [1, 9999],
+        "head.velo": [1, 4],
+        "head.felt": [0, 3],
+        "head.hardKey": [0, 0.5],
+        "head.hardFrom": [80, 300],
+        count: [3, 4],
+        tilt: [0, 1],
+        warp: [0.99, 1.01],
+        spread: [0, 5e-3],
+        tube: [0, 3],
+        trebleGain: [0, 9],
+        strike: [0.3, 0.5],
+        t60: [1, 4],
+        decayKey: [0.5, 1.5],
+        modeDecay: [0.5, 1.6],
+        damp: [0, 1],
+        release: [0.1, 0.5],
+        direct: [0, 0.05],
+        rattle: [0, 0],
+        level: [0.15, 0.6]
+      }
+    },
+    vibraphone: {
+      desc: "Vibraphone. Aluminium bars tuned like a marimba, at 1, 4 and 10 times the pitch, struck with cord mallets over tubes. With the pedal down a note rings for many seconds, the overtones gone in the first moment. The motor, off by default, makes the level swell and dip. Fitted to recordings of a vibraphone with the motor off.",
+      // アイオワ大学のビブラフォン(ペダルを踏んで伸ばした音、ff、F3〜F6)に寄せる(2026-10-14)。値はまだ見当
+      series: "bar",
+      pitched: true,
+      // 値は録音との差が小さくなるところを乱数で探した(300 回と 350 回)。差は山の強さ・基音と上の山の減り方・
+      // 音域ごとの大きさを足したもの。叩く場所(strike)はほぼ真ん中に出た。共鳴管(tube)は 0 に出た
+      head: { sharp: 0.43, bright: 0.63, comb: 0, noise: 0.01, vary: 0.2, seed: 13, velo: 0.51, felt: 0.47, hardKey: 0.08, hardFrom: 454 },
+      count: 4,
+      tilt: 0,
+      warp: 1,
+      spread: 0,
+      tube: 0,
+      trebleGain: 1.5,
+      strike: 0.49,
+      t60: 23,
+      decayKey: 0.24,
+      modeDecay: 1.16,
+      damp: 0,
+      release: 0.15,
+      motor: 0,
+      motorRate: 5,
+      direct: 0,
+      rattle: 0,
+      level: 0.24,
+      range: {
+        "head.sharp": [0.2, 2],
+        "head.bright": [0.45, 0.8],
+        "head.comb": [0, 0.2],
+        "head.noise": [0, 0.05],
+        "head.vary": [0, 0.5],
+        "head.seed": [1, 9999],
+        "head.velo": [0.5, 4],
+        "head.felt": [0, 3],
+        "head.hardKey": [0, 0.5],
+        count: [3, 4],
+        tilt: [0, 1],
+        warp: [0.99, 1.01],
+        spread: [0, 5e-3],
+        tube: [0, 2],
+        trebleGain: [0, 9],
+        strike: [0.3, 0.5],
+        "head.hardFrom": [80, 600],
+        t60: [8, 35],
+        decayKey: [0, 0.4],
+        modeDecay: [0.6, 1.6],
+        damp: [0, 0.5],
+        release: [0.08, 0.4],
+        motor: [0, 0.8],
+        motorRate: [2, 8],
+        direct: [0, 0.03],
+        rattle: [0, 0],
+        level: [0.1, 0.4]
+      }
+    },
+    glockenspiel: {
+      desc: "Glockenspiel. Plain steel bars, not cut, so the overtones fall between the harmonics and ring like small bells; struck with hard brass mallets. Bright, with a long, pure tail once the clang has gone. Fitted to recordings of orchestra bells.",
+      // アイオワ大学のグロッケン(真鍮のマレット、ff、C6 と C7。C5 は山の並びが合わないので外した)に寄せる(2026-10-14)。値はまだ見当
+      series: "freebar",
+      pitched: true,
+      // 値は録音との差が小さくなるところを乱数で探した(300 回と 350 回)。差は山の強さ・基音と上の山の減り方・
+      // 音域ごとの大きさを足したもの。物差しの録音が C6 と C7 の 2 音だけなので、ほかの音域はあてにならない
+      head: { sharp: 0.2, bright: 0.94, comb: 0, noise: 0.02, vary: 0.2, seed: 17, velo: 1.8, felt: 4, hardKey: 0.28, hardFrom: 717 },
+      count: 5,
+      tilt: 0,
+      warp: 1,
+      spread: 0,
+      trebleGain: 0,
+      strike: 0.44,
+      // 探した値は modeDecay 1.79、decayKey 0.42 だったが、C6 と C7 で基音まで速く消えた(1.5 秒で録音 -9dB、
+      // こちら -17〜-22dB)。上の山は 5 本目(14.1 倍)だけ録音でも長く残り、1 本の modeDecay では揃わないので、間を取った
+      t60: 9.7,
+      decayKey: 0.1,
+      modeDecay: 1.4,
+      damp: 0,
+      release: 0.3,
+      direct: 0,
+      rattle: 0,
+      level: 0.21,
+      range: {
+        "head.sharp": [0.2, 1],
+        "head.bright": [0.7, 0.98],
+        "head.comb": [0, 0.2],
+        "head.noise": [0, 0.1],
+        "head.vary": [0, 0.5],
+        "head.seed": [1, 9999],
+        "head.velo": [1, 4],
+        "head.felt": [0, 4],
+        "head.hardKey": [0, 1],
+        count: [3, 5],
+        tilt: [0, 1],
+        warp: [0.98, 1.02],
+        spread: [0, 0.01],
+        trebleGain: [0, 9],
+        strike: [0.1, 0.5],
+        "head.hardFrom": [80, 1500],
+        t60: [5, 18],
+        decayKey: [0, 0.5],
+        modeDecay: [0.6, 2.5],
+        damp: [0, 0.2],
+        release: [0.15, 0.6],
+        direct: [0, 0.05],
+        rattle: [0, 0],
+        level: [0.08, 0.35]
+      }
+    },
     ride: {
-      note: "Ride cymbal. A dense cloud of long, inharmonic modes struck by a stick tip.",
+      desc: "Ride cymbal. A dense cloud of long, inharmonic modes struck by a stick tip.",
       series: "cymbal",
       pitched: false,
       base: 300,
@@ -13376,7 +16552,7 @@ registerProcessor('${MODAL_NODE}', ModalBank);
       },
       macros: {
         ride: {
-          note: "How much it sounds like a ride cymbal. 1 is the default ride. 0 leaves a short, dark, narrow cluster, closer to a small bell or a cowbell. Above 1 the wash grows longer and brighter. The number of resonators is set apart, by the steps.",
+          desc: "How much it sounds like a ride cymbal. 1 is the default ride. 0 leaves a short, dark, narrow cluster, closer to a small bell or a cowbell. Above 1 the wash grows longer and brighter. The number of resonators is set apart, by the steps.",
           min: 0,
           max: 2,
           neutral: {
@@ -13392,8 +16568,37 @@ registerProcessor('${MODAL_NODE}', ModalBank);
       }
     }
   };
+  function applyMacro(def, base, name, x) {
+    const m = base.macros && base.macros[name];
+    const out = structuredClone(def);
+    if (!m) return out;
+    if (m.levelDb) {
+      const db = x < 1 ? m.levelDb[0] * (1 - x) : m.levelDb[1] * (x - 1) / Math.max(1e-9, (m.max ?? 2) - 1);
+      out.macroLevel = { ...def.macroLevel || {}, [name]: Math.pow(10, db / 20) };
+    }
+    for (const [path, zero] of Object.entries(m.neutral)) {
+      const ks = path.split(".");
+      const key2 = ks[ks.length - 1];
+      const one = ks.reduce((o2, k) => o2?.[k], base);
+      const p = ks[0] === "body" ? MODAL_BODY[key2] : MODAL_PARAMS[key2];
+      let v = zero + x * (one - zero);
+      if (p) v = Math.min(p.max, Math.max(p.min, v));
+      let o = out;
+      for (let i = 0; i < ks.length - 1; i++) o = o[ks[i]];
+      o[key2] = v;
+    }
+    return out;
+  }
   var TINE = [1, 6.267, 17.547, 34.386, 56.843, 84.913];
   var TINE_DECAY = [1, 0.12, 0.05, 0.03, 0.02, 0.015];
+  var TUNED_BAR = [1, 4, 10, 15.5];
+  var FREE_BAR = [1, 3.05, 5.9, 9.26, 14.1];
+  var BAR_BETA = [4.73, 7.853, 10.996, 14.137, 17.279];
+  function barShape(n, x) {
+    const b = BAR_BETA[Math.min(n, BAR_BETA.length - 1)], bx = b * x;
+    const sg = (Math.cosh(b) - Math.cos(b)) / (Math.sinh(b) - Math.sin(b));
+    return Math.abs((Math.cosh(bx) + Math.cos(bx) - sg * (Math.sinh(bx) + Math.sin(bx))) / 2);
+  }
   var KNOCK = [[110, 1, 0.06], [290, 0.7, 0.04], [620, 0.5, 0.03], [1400, 0.35, 0.02]];
   function modalTable(def) {
     const out = [];
@@ -13424,6 +16629,40 @@ registerProcessor('${MODAL_NODE}', ModalBank);
       for (let n = 0; n < count; n++) {
         const ratio = n < MEMBRANE.length ? MEMBRANE[n] : MEMBRANE[MEMBRANE.length - 1] * (1 + 0.08 * (n - MEMBRANE.length + 1));
         push(ratio, (0.5 + 0.5 * r()) / Math.pow(n + 1, tilt), 1 / (1 + 0.15 * n));
+      }
+    } else if (def.series === "bar" || def.series === "freebar") {
+      const T = def.series === "bar" ? TUNED_BAR : FREE_BAR;
+      for (let n = 0; n < Math.min(count, T.length); n++) {
+        const at = def.strike == null ? 1 : barShape(n, def.strike);
+        push(T[n], at * (n === 0 ? 1 + (def.tube || 0) : 1) / Math.pow(T[n], tilt), Math.pow(T[n], -(def.modeDecay || 0)));
+      }
+    } else if (def.series === "kettle" || def.series === "gong") {
+      const TABLE2 = def.series === "gong" ? GONG : KETTLE;
+      const light = Math.max(0, Math.min(1, def.light || 0));
+      const nt = Math.min(count, TABLE2.length);
+      const strong = TABLE2.slice(0, nt).map((x, i) => [x[1] * Math.sqrt(x[2]), i]).sort((a, b) => b[0] - a[0]);
+      const want = Math.max(1, Math.round(nt * (1 - 0.6 * light)));
+      const keep2 = /* @__PURE__ */ new Set(), bins = /* @__PURE__ */ new Set();
+      for (const [, i] of strong) {
+        const bin = Math.round(4 * Math.log2(TABLE2[i][0]));
+        if (!bins.has(bin)) {
+          bins.add(bin);
+          keep2.add(i);
+        }
+      }
+      for (const [, i] of strong) if (keep2.size < want) keep2.add(i);
+      for (let n = 0; n < nt; n++) {
+        if (!keep2.has(n)) continue;
+        const [ratio, amp, dec] = TABLE2[n];
+        push(ratio, amp, dec);
+      }
+      const lo = def.lo || 3.5, hi = Math.max(lo * 1.01, def.hi || 40);
+      const full = Math.max(0, count - TABLE2.length), nc = Math.round(full * (1 - 0.75 * light));
+      const gc = nc > 0 ? Math.sqrt(full / nc) : 0;
+      for (let n = 0; n < nc; n++) {
+        const ratio = Math.sqrt(lo * lo + (hi * hi - lo * lo) * r());
+        const sign = r() < 0.5 ? -1 : 1;
+        push(ratio, gc * sign * (def.cloud ?? 0) * (0.3 + 0.7 * r()) * Math.pow(lo / ratio, tilt), (0.3 + 0.3 * r()) * Math.sqrt(lo / ratio));
       }
     } else if (def.series === "tine") {
       for (let n = 0; n < Math.min(count, TINE.length); n++) push(TINE[n], 1 / Math.pow(TINE[n], def.tilt ?? 1), TINE_DECAY[n]);
@@ -13457,7 +16696,14 @@ registerProcessor('${MODAL_NODE}', ModalBank);
         felt: h.felt ?? 0,
         align: h.align ?? 0,
         grains: h.grains ?? 0,
-        scatter: h.scatter ?? 0
+        scatter: h.scatter ?? 0,
+        bloom: h.bloom ?? 0,
+        bloomVelo: h.bloomVelo ?? 4,
+        bloomDrain: h.bloomDrain ?? 0,
+        bloomDrainBelow: h.bloomDrainBelow ?? 300,
+        bloomRise: h.bloomRise ?? 0.3,
+        bloomFall: h.bloomFall ?? 1,
+        bloomFrom: h.bloomFrom ?? 1e3
       },
       pitched: !!def.pitched,
       trebleGain: def.trebleGain ?? 0,
@@ -13465,15 +16711,24 @@ registerProcessor('${MODAL_NODE}', ModalBank);
       sour: def.sour ?? 0,
       sourSeed: def.sourSeed ?? 1,
       guide: def.series === "string" ? def.guide ?? 0 : 0,
+      body: (def.body || []).map((pk) => ({ freq: pk.freq, gain: pk.gain, resonance: pk.resonance })),
+      bodyLow: def.bodyLow ?? 0,
       strings: def.strings ?? 1,
       detune: def.detune ?? 0,
       after: def.after ?? 1,
       afterLevel: def.afterLevel ?? 1,
       stretch: def.stretch ?? 0,
       stretchKey: def.stretchKey ?? 0,
+      bStretch: def.bStretch ?? 0,
+      pickupAt: def.pickupAt ?? 0,
+      pickupDepth: def.pickupDepth ?? 1,
+      pickupPeak: def.pickupPeak ?? 2500,
+      pickupPeakGain: def.pickupPeakGain ?? 0,
       decayKey: def.decayKey ?? 0,
       t60: def.t60 ?? 2,
       damp: def.damp ?? 0,
+      mute: def.mute ?? 0,
+      harmonic: def.harmonic ?? 0,
       release: def.release ?? 0.15,
       direct: def.direct ?? 0,
       rattle: def.rattle ?? 0,
@@ -13484,20 +16739,47 @@ registerProcessor('${MODAL_NODE}', ModalBank);
       width: def.width ?? 0,
       tremolo: def.tremolo ?? 0,
       tremoloRate: def.tremoloRate ?? 0,
+      motor: def.motor ?? 0,
+      motorRate: def.motorRate ?? 0,
       neighbor: def.neighbor ?? 0,
       double: def.double ?? 0,
+      doubleSeed: def.doubleSeed ?? 1,
       buzz: def.buzz ?? 0,
+      buzzSeed: def.buzzSeed ?? 1,
       buzzLevel: def.buzzLevel ?? 0.4,
+      buzzRasp: def.buzzRasp ?? 1,
       slip: def.slip ?? 0,
       ghost: def.ghost ?? 0,
       splay: def.splay ?? 0,
       spot: def.spot ?? 0,
       flawSeed: def.flawSeed ?? 1,
+      stringNoise: def.stringNoise ?? 0,
+      openRing: def.openRing ?? 0,
+      lift: def.lift ?? 0.3,
+      click: def.click ?? 1,
+      rush: def.rush ?? 0,
+      care: def.care ?? 0,
+      loose: def.loose ?? 0,
+      looseFreq: def.looseFreq ?? 233,
+      looseFrom: def.looseFrom ?? 0.3,
+      sympathetic: def.sympathetic ?? 0,
+      symTuning: def.symTuning === "piano" ? "piano" : "guitar",
+      keyNoise: def.keyNoise ?? 0,
+      silent: def.silent ? 1 : 0,
+      neck: def.neck ?? 0,
+      snap: def.snap ?? 0,
+      thumbBelow: def.thumbBelow ?? 0,
+      thumbDull: def.thumbDull ?? 0.075,
+      palm: def.palm ?? 0,
+      roll: def.roll ?? 0,
+      rollJitter: def.rollJitter ?? 0.15,
+      rollVary: def.rollVary ?? 3,
+      rollSeed: def.rollSeed ?? 1,
       level: (def.level ?? 0.5) * Object.values(def.macroLevel || {}).reduce((a, b) => a * b, 1)
     };
   }
 
-  // player-latest/sound/brass.js
+  // sound/brass.js
   var BRASS_NODE = "mmsxx-brass";
   var BRASS_VOICES = 16;
   var BRASS_HOLD = 1;
@@ -13559,6 +16841,8 @@ class BrassBank extends AudioWorkletProcessor {
     this.port.onmessage = (e) => {
       const d = e.data || {};
       if (d.patch) this.patch[d.patch] = d.def;
+      // MML \u306E #voice \u3067\u4F5C\u3063\u305F\u30D1\u30C3\u30C1\u3002\u97F3\u7B26\u3088\u308A\u5148\u306B\u5165\u308C\u308B(sound/audio.js \u306E MML_PATCHES)
+      if (d.patches) Object.assign(this.patch, d.patches);
       if (d.add) this.add(d.add);
       if (d.cut) { this.events = []; this.at = 0; this.cutAt = 0; }
     };
@@ -13800,48 +17084,48 @@ registerProcessor('${BRASS_NODE}', BrassBank);
       live: false,
       min: 0,
       max: 40,
-      note: "How bright it gets at full breath, at A4. 0 is a pure sine at any loudness."
+      desc: "How bright it gets at full breath, at A4. 0 is a pure sine at any loudness."
     },
     brassKey: {
       live: false,
       min: 0,
       max: 3,
       when: [{ key: "brass", gt: 0 }],
-      note: "How much brighter low notes get, as a power of the pitch below A4. 0 gives every note the same number of harmonics; 2 makes the harmonics reach the same frequency at every pitch, as on a real horn."
+      desc: "How much brighter low notes get, as a power of the pitch below A4. 0 gives every note the same number of harmonics; 2 makes the harmonics reach the same frequency at every pitch, as on a real horn."
     },
     curve: {
       live: false,
       min: 0.3,
       max: 4,
       when: [{ key: "brass", gt: 0 }],
-      note: "How fast brightness follows loudness. High values stay dark until played hard."
+      desc: "How fast brightness follows loudness. High values stay dark until played hard."
     },
     attack: {
       live: false,
       min: 3e-3,
       max: 0.5,
       unit: "s",
-      note: "How fast the breath pressure builds. Harder notes build faster."
+      desc: "How fast the breath pressure builds. Harder notes build faster."
     },
     blat: {
       live: false,
       min: 0,
       max: 1,
-      note: "Overshoot of the breath on hard attacks, settling within about 60 ms."
+      desc: "Overshoot of the breath on hard attacks, settling within about 60 ms."
     },
     release: {
       live: false,
       min: 0.01,
       max: 1,
       unit: "s",
-      note: "How fast the breath falls when the note is let go. The tone darkens as it falls."
+      desc: "How fast the breath falls when the note is let go. The tone darkens as it falls."
     },
     scoop: {
       live: false,
       min: -300,
       max: 300,
       unit: "cent",
-      note: "Where the pitch starts, before it settles on the note. Negative comes up from below."
+      desc: "Where the pitch starts, before it settles on the note. Negative comes up from below."
     },
     scoopTime: {
       live: false,
@@ -13849,14 +17133,14 @@ registerProcessor('${BRASS_NODE}', BrassBank);
       max: 0.3,
       unit: "s",
       when: [{ key: "scoop", ne: 0 }],
-      note: "How long the pitch takes to settle."
+      desc: "How long the pitch takes to settle."
     },
     vib: {
       live: false,
       min: 0,
       max: 100,
       unit: "cent",
-      note: "Vibrato depth."
+      desc: "Vibrato depth."
     },
     vibRate: {
       live: false,
@@ -13864,7 +17148,7 @@ registerProcessor('${BRASS_NODE}', BrassBank);
       max: 9,
       unit: "Hz",
       when: [{ key: "vib", gt: 0 }],
-      note: "Vibrato speed."
+      desc: "Vibrato speed."
     },
     vibDelay: {
       live: false,
@@ -13872,40 +17156,40 @@ registerProcessor('${BRASS_NODE}', BrassBank);
       max: 2,
       unit: "s",
       when: [{ key: "vib", gt: 0 }],
-      note: "How long a note is held before the vibrato fades in."
+      desc: "How long a note is held before the vibrato fades in."
     },
     tongue: {
       live: false,
       min: 0,
       max: 1,
-      note: "Noise burst of the tongue at the start of a note."
+      desc: "Noise burst of the tongue at the start of a note."
     },
     breath: {
       live: false,
       min: 0,
       max: 0.3,
-      note: "Air noise that follows the breath pressure."
+      desc: "Air noise that follows the breath pressure."
     },
     airCurve: {
       live: false,
       min: 0.1,
       max: 2,
       when: [{ key: "breath", gt: 0 }],
-      note: "How the air noise follows the breath. Below 1, soft notes keep more air, as in a breathy saxophone."
+      desc: "How the air noise follows the breath. Below 1, soft notes keep more air, as in a breathy saxophone."
     },
     airPulse: {
       live: false,
       min: 0,
       max: 1,
       when: [{ key: "breath", gt: 0 }],
-      note: "How much the air noise pulses with each cycle of the reed. 0 is steady hiss."
+      desc: "How much the air noise pulses with each cycle of the reed. 0 is steady hiss."
     },
     push: {
       live: false,
       group: "flaw",
       min: 0,
       max: 1,
-      note: "How hard the start of a note is pushed: brighter and a little sharp, then it settles. Grows with velocity and pitch."
+      desc: "How hard the start of a note is pushed: brighter and a little sharp, then it settles. Grows with velocity and pitch."
     },
     pushTime: {
       live: false,
@@ -13914,14 +17198,14 @@ registerProcessor('${BRASS_NODE}', BrassBank);
       max: 0.4,
       unit: "s",
       when: [{ key: "push", gt: 0 }],
-      note: "How long the push takes to settle."
+      desc: "How long the push takes to settle."
     },
     crack: {
       live: false,
       group: "flaw",
       min: 0,
       max: 1,
-      note: "How likely the lips catch the neighbouring harmonic for a moment before landing on the note. More likely on loud notes, high in the harmonic series where the harmonics sit close together, and after a leap. Low notes rarely crack, but jump far when they do."
+      desc: "How likely the lips catch the neighbouring harmonic for a moment before landing on the note. More likely on loud notes, high in the harmonic series where the harmonics sit close together, and after a leap. Low notes rarely crack, but jump far when they do."
     },
     crackTime: {
       live: false,
@@ -13929,7 +17213,7 @@ registerProcessor('${BRASS_NODE}', BrassBank);
       min: 0.01,
       max: 0.15,
       unit: "s",
-      note: "How long the note stays on the wrong harmonic, for crack and wobble."
+      desc: "How long the note stays on the wrong harmonic, for crack and wobble."
     },
     pedal: {
       live: false,
@@ -13937,7 +17221,7 @@ registerProcessor('${BRASS_NODE}', BrassBank);
       min: 20,
       max: 400,
       unit: "Hz",
-      note: "Lowest harmonic of the tube. Sets which harmonic a note is, and so how far a crack or a wobble jumps."
+      desc: "Lowest harmonic of the tube. Sets which harmonic a note is, and so how far a crack or a wobble jumps."
     },
     crackSeed: {
       live: false,
@@ -13945,14 +17229,14 @@ registerProcessor('${BRASS_NODE}', BrassBank);
       min: 1,
       max: 9999,
       step: 1,
-      note: "Seed for which leaps crack and where held notes wobble. The same leap always cracks the same way."
+      desc: "Seed for which leaps crack and where held notes wobble. The same leap always cracks the same way."
     },
     squeak: {
       live: false,
       group: "flaw",
       min: 0,
       max: 1,
-      note: "How likely the reed squeaks at the start of a note, jumping to a harmonic near 2.8 kHz for a moment. More likely on loud notes and after a leap."
+      desc: "How likely the reed squeaks at the start of a note, jumping to a harmonic near 2.8 kHz for a moment. More likely on loud notes and after a leap."
     },
     wobble: {
       live: false,
@@ -13960,25 +17244,62 @@ registerProcessor('${BRASS_NODE}', BrassBank);
       min: 0,
       max: 5,
       unit: "/s",
-      note: "How often a held note flips to the neighbouring harmonic for a moment and comes back, per second. More likely on loud notes high in the harmonic series and at the top of the vibrato."
+      desc: "How often a held note flips to the neighbouring harmonic for a moment and comes back, per second. More likely on loud notes high in the harmonic series and at the top of the vibrato."
     },
     keyGain: {
       live: false,
       min: -12,
       max: 12,
       unit: "dB",
-      note: "Level change per octave above A4. Positive makes low notes quieter, as on a real trumpet, whose low register speaks softly at every dynamic."
+      desc: "Level change per octave above A4. Positive makes low notes quieter, as on a real trumpet, whose low register speaks softly at every dynamic."
     },
     level: {
       live: false,
       min: 0.01,
       max: 4,
-      note: "Output level of this patch."
+      desc: "Output level of this patch."
+    }
+  };
+  var BRASS_BODY = {
+    freq: {
+      live: true,
+      min: 100,
+      max: 6e3,
+      unit: "Hz",
+      desc: "Centre of the resonance."
+    },
+    gain: {
+      live: true,
+      min: -18,
+      max: 18,
+      unit: "dB",
+      desc: "How much it lifts or cuts at the centre."
+    },
+    resonance: {
+      live: true,
+      min: 0,
+      max: 0.95,
+      desc: "How narrow the peak is. 0 is broad."
+    }
+  };
+  var BRASS_BELL = {
+    freq: {
+      live: true,
+      min: 100,
+      max: 4e3,
+      unit: "Hz",
+      desc: "Where the bell starts to let sound out. Below it, sound is held back."
+    },
+    resonance: {
+      live: true,
+      min: 0,
+      max: 0.95,
+      desc: "Height of the peak at that point. 0 is no peak."
     }
   };
   var BRASS_PATCHES = {
     trumpet: {
-      note: "Trumpet, open. Bright when pushed, a short scoop into each note and a late vibrato. Fitted to recordings of a B-flat trumpet.",
+      desc: "Trumpet, open. Bright when pushed, a short scoop into each note and a late vibrato. Fitted to recordings of a B-flat trumpet.",
       // 録音(アイオワ大学の B♭ トランペット、ビブラートなし、E3〜C6 を 3 つの強さ)に寄せた(2026-10-05)。
       // 前は低い音ほど暗かった(E3 mf で重心 4.2、録音は 9.1)。本物は明るさが倍音の番号ではなく
       // Hz で決まり、1.1kHz あたりに山がある。brassKey と、山の立ったベルで合わせた。
@@ -14045,7 +17366,7 @@ registerProcessor('${BRASS_NODE}', BrassBank);
       }
     },
     trombone: {
-      note: "Trombone. Darker and slower to speak than the trumpet. Fitted to recordings of a tenor trombone.",
+      desc: "Trombone. Darker and slower to speak than the trumpet. Fitted to recordings of a tenor trombone.",
       // 録音(アイオワ大学のテナートロンボーン、E2〜C5 を 3 つの強さ)に寄せた(2026-10-05)。
       // トランペットと同じく低い音ほど暗かったので、brassKey とベルの山で合わせた。
       // 低い音ほど小さいのも同じで、keyGain 3.6。誤差は 3.75 → 3.14。残りの多くは E2 の録音で、
@@ -14109,7 +17430,7 @@ registerProcessor('${BRASS_NODE}', BrassBank);
       }
     },
     tenor: {
-      note: "Tenor saxophone. Breathy when soft, edgy when pushed, a wide scoop and a jaw vibrato. The honk and the edge come from two body peaks. Fitted to recordings of an alto saxophone, scaled down a fifth.",
+      desc: "Tenor saxophone. Breathy when soft, edgy when pushed, a wide scoop and a jaw vibrato. The honk and the edge come from two body peaks. Fitted to recordings of an alto saxophone, scaled down a fifth.",
       // テナーの録音は無いので、アルトサックス(アイオワ大学、D♭3・C4・C5 を 3 つの強さ)を
       // 物差しにした(2026-10-05)。テナーはアルトをおよそ 1.5 倍にした相似形なので、アルトの音を
       // 5 度下で鳴らし、倍音の番号ごとの並びで比べる。胴の山もその比で縮むので、テナーの値のまま比べられる。
@@ -14195,11 +17516,239 @@ registerProcessor('${BRASS_NODE}', BrassBank);
     if (def.airCurve == null) out.airCurve = 1;
     return out;
   }
+  function applyBrassMacro(def, base, name, x) {
+    const m = base.macros && base.macros[name];
+    const out = structuredClone(def);
+    if (!m) return out;
+    if (m.levelDb) {
+      const db = x < 1 ? m.levelDb[0] * (1 - x) : m.levelDb[1] * (x - 1) / Math.max(1e-9, (m.max ?? 2) - 1);
+      out.macroLevel = { ...def.macroLevel || {}, [name]: Math.pow(10, db / 20) };
+    }
+    for (const [path, zero] of Object.entries(m.neutral)) {
+      const ks = path.split(".");
+      const one = ks.reduce((o2, k) => o2?.[k], base);
+      const key2 = ks[ks.length - 1];
+      const p = ks[0] === "bell" ? BRASS_BELL[key2] : ks[0] === "body" ? BRASS_BODY[key2] : BRASS_PARAMS[key2];
+      let v = zero + x * (one - zero);
+      if (p) v = Math.min(p.max, Math.max(p.min, v));
+      let o = out;
+      for (let i = 0; i < ks.length - 1; i++) o = o[ks[i]];
+      o[key2] = v;
+    }
+    return out;
+  }
 
-  // player-latest/sound/analog.js
+  // sound/modalspec.js
+  function instrumentKind(name) {
+    if (MODAL_PATCHES[name]) return "modal";
+    if (BRASS_PATCHES[name]) return "brass";
+    return null;
+  }
+  var tableOf = (kind) => kind === "modal" ? MODAL_PATCHES : BRASS_PATCHES;
+  var paramsOf = (kind) => kind === "modal" ? MODAL_PARAMS : BRASS_PARAMS;
+  function row(name, d, value, rec) {
+    return {
+      name,
+      desc: d.desc ?? null,
+      unit: d.unit ?? null,
+      min: d.min,
+      max: d.max,
+      ...d.step ? { step: d.step } : {},
+      default: value,
+      recommended: rec || null,
+      ...d.when ? { when: d.when.map((c) => ({ ...c })) } : {}
+    };
+  }
+  function describeInstrument(instrument, def) {
+    const kind = instrumentKind(instrument);
+    if (!kind) return null;
+    const base = tableOf(kind)[instrument];
+    const cur = def || base;
+    const P = paramsOf(kind);
+    const rec = base.range || {};
+    const top = Object.keys(P).filter((k) => P[k].group !== "head" && typeof cur[k] === "number").map((k) => row(k, P[k], cur[k], rec[k]));
+    const out = {
+      instrument,
+      kind,
+      smart: Object.entries(base.macros || {}).map(([k, m]) => ({
+        name: k,
+        desc: m.desc ?? null,
+        min: m.min,
+        max: m.max,
+        default: 1
+      })),
+      params: top
+    };
+    if (kind === "modal") {
+      out.head = Object.keys(P).filter((k) => P[k].group === "head" && cur.head && typeof cur.head[k] === "number").map((k) => row(k, P[k], cur.head[k], rec["head." + k]));
+      out.body = (cur.body || []).map((pk, i) => Object.keys(MODAL_BODY).map((k) => row(k, MODAL_BODY[k], pk[k], rec[`body.${i}.${k}`])));
+    }
+    return out;
+  }
+  var num = (v) => Math.abs(v) >= 100 ? String(Math.round(v * 10) / 10) : String(+Number(v).toPrecision(4));
+  function rowText(r) {
+    const u = r.unit ? " " + r.unit : "";
+    const rec = r.recommended ? `  \u63A8\u5968 ${num(r.recommended[0])}\u301C${num(r.recommended[1])}` : "";
+    const when = r.when ? `  \u52B9\u304F\u6761\u4EF6 ${r.when.map((c) => `${c.key} ${c.gt != null ? "> " + c.gt : c.lt != null ? "< " + c.lt : "\u2260 " + c.ne}`).join(" \u304B\u3064 ")}` : "";
+    return `${r.name.padEnd(12)} ${num(r.min)}\u301C${num(r.max)}${u}${rec}  \u65E2\u5B9A ${num(r.default)}${when}`;
+  }
+  function detailText(d) {
+    const L = [];
+    const put = (title, rows) => {
+      if (rows.length) {
+        L.push(title);
+        for (const r of rows) L.push("  " + rowText(r));
+      }
+    };
+    if (d.smart.length) {
+      L.push("smart{ }");
+      for (const m of d.smart) L.push(`  ${m.name.padEnd(12)} ${num(m.min)}\u301C${num(m.max)}  \u65E2\u5B9A 1`);
+    }
+    if (d.head) put("head{ }", d.head);
+    (d.body || []).forEach((rows, i) => put(`body{ ${i + 1}{ } }`, rows));
+    put("(\u305D\u306E\u307E\u307E\u66F8\u304F\u3082\u306E)", d.params);
+    return L.join("\n");
+  }
+  function buildInstrument(tree, ctx) {
+    const head = `[ChpTnSnd] MML: \u97F3\u8272 "${ctx.name}" \u306E @${ctx.word}`;
+    const fail2 = (msg) => {
+      throw new Error(`${head}${msg}`);
+    };
+    const first = tree[0];
+    const names = [...Object.keys(MODAL_PATCHES), ...Object.keys(BRASS_PATCHES)].filter(ctx.allowed);
+    if (!first || first.value !== null) {
+      fail2(` \u306F\u3001\u6700\u521D\u306B\u5143\u306B\u3059\u308B\u697D\u5668\u306E\u540D\u524D\u3092\u66F8\u304D\u307E\u3059(${names.join(" ")})`);
+    }
+    const instrument = first.key;
+    const kind = instrumentKind(instrument);
+    if (!kind) fail2(` \u306E "${instrument}" \u3068\u3044\u3046\u697D\u5668\u306F\u3042\u308A\u307E\u305B\u3093(${names.join(" ")})`);
+    if (!ctx.allowed(instrument)) fail2(` \u306B ${instrument} \u306F\u66F8\u3051\u307E\u305B\u3093\u3002@${ctx.others}{\u2026} \u3067\u66F8\u304D\u307E\u3059`);
+    const base = tableOf(kind)[instrument];
+    const P = paramsOf(kind);
+    const list = () => "\n" + instrument + " \u3067\u66F8\u3051\u308B\u3082\u306E:\n" + detailText(describeInstrument(instrument));
+    const seen = /* @__PURE__ */ new Set();
+    const once = (path) => {
+      if (seen.has(path)) fail2(` \u306B ${path} \u304C 2 \u5EA6\u66F8\u3044\u3066\u3042\u308A\u307E\u3059`);
+      seen.add(path);
+    };
+    const check = (path, d, v, rec2) => {
+      if (typeof v !== "number") fail2(` \u306E ${path} \u306F\u6570\u3067\u66F8\u304D\u307E\u3059
+  ${rowText(row(path, d, getAt(base, path), rec2))}`);
+      if (v < d.min || v > d.max) {
+        fail2(` \u306E ${path} ${num(v)} \u306F\u7BC4\u56F2\u306E\u5916\u3067\u3059
+  ${rowText(row(path, d, getAt(base, path), rec2))}`);
+      }
+      if (d.step && Math.abs(v / d.step - Math.round(v / d.step)) > 1e-9) {
+        fail2(` \u306E ${path} ${num(v)} \u306F ${d.step} \u304D\u3056\u307F\u3067\u66F8\u304D\u307E\u3059
+  ${rowText(row(path, d, getAt(base, path), rec2))}`);
+      }
+      return v;
+    };
+    const rec = base.range || {};
+    const smart = [];
+    const direct = [];
+    for (const it of tree.slice(1)) {
+      if (it.value === null) {
+        if (instrumentKind(it.key)) fail2(` \u306E\u697D\u5668\u306E\u540D\u524D\u306F\u6700\u521D\u306B 1 \u3064\u3060\u3051\u66F8\u304D\u307E\u3059("${it.key}")`);
+        fail2(` \u306E "${it.key}" \u306B\u5024\u304C\u3042\u308A\u307E\u305B\u3093` + list());
+      }
+      if (it.key === "smart") {
+        if (!Array.isArray(it.value)) fail2(" \u306E smart \u306F smart{\u2026} \u3067\u66F8\u304D\u307E\u3059");
+        const ms = base.macros || {};
+        for (const s of it.value) {
+          const m = ms[s.key];
+          if (!m) {
+            fail2(` \u306E smart \u306B "${s.key}" \u306F\u3042\u308A\u307E\u305B\u3093` + (Object.keys(ms).length ? `(${instrument} \u306E smart: ${Object.keys(ms).join(" ")})` : `(${instrument} \u306B\u306F smart \u304C\u3042\u308A\u307E\u305B\u3093)`));
+          }
+          once("smart." + s.key);
+          if (typeof s.value !== "number" || s.value < m.min || s.value > m.max) {
+            fail2(` \u306E smart \u306E ${s.key} \u306F ${num(m.min)}\u301C${num(m.max)} \u306E\u6570\u3067\u66F8\u304D\u307E\u3059(\u65E2\u5B9A 1)`);
+          }
+          smart.push([s.key, s.value]);
+        }
+        continue;
+      }
+      if ((it.key === "bell" || it.key === "body") && kind === "brass") {
+        fail2(` \u306E ${it.key} \u306F\u66F8\u3051\u307E\u305B\u3093\u3002\u91D1\u7BA1\u306E\u30D9\u30EB\u3068\u80F4\u306F\u6DF7\u305C\u305F\u3042\u3068\u306B\u639B\u3051\u308B\u3082\u306E\u3067\u3001\u30A8\u30F3\u30B8\u30F3\u306F\u639B\u3051\u307E\u305B\u3093(\u805E\u304F\u30DA\u30FC\u30B8\u3060\u3051\u304C\u639B\u3051\u3066\u3044\u307E\u3059)\u3002\u66F8\u3044\u3066\u3082\u9CF4\u308A\u304C\u5909\u308F\u3089\u306A\u3044\u306E\u3067\u6B62\u3081\u307E\u3059`);
+      }
+      if (it.key === "head" && kind === "modal") {
+        if (!Array.isArray(it.value)) fail2(" \u306E head \u306F head{\u2026} \u3067\u66F8\u304D\u307E\u3059" + list());
+        for (const h of it.value) {
+          const d2 = P[h.key];
+          if (!d2 || d2.group !== "head" || typeof base.head[h.key] !== "number") {
+            fail2(` \u306E head \u306B "${h.key}" \u306F\u66F8\u3051\u307E\u305B\u3093` + list());
+          }
+          once("head." + h.key);
+          direct.push(["head." + h.key, check("head." + h.key, d2, h.value, rec["head." + h.key])]);
+        }
+        continue;
+      }
+      if (it.key === "body" && kind === "modal") {
+        const n = (base.body || []).length;
+        if (!n) fail2(` \u306E body \u306F\u66F8\u3051\u307E\u305B\u3093(${instrument} \u306B\u306F\u80F4\u306E\u5C71\u304C\u3042\u308A\u307E\u305B\u3093)`);
+        if (!Array.isArray(it.value)) fail2(` \u306E body \u306F body{ 1{freq \u2026} } \u306E\u3088\u3046\u306B\u756A\u53F7\u3067\u66F8\u304D\u307E\u3059(1\u301C${n})`);
+        for (const pk of it.value) {
+          const i = Number(pk.key);
+          if (!Number.isInteger(i) || i < 1 || i > n || !Array.isArray(pk.value)) {
+            fail2(` \u306E body \u306E "${pk.key}" \u306F\u8AAD\u3081\u307E\u305B\u3093\u3002\u5C71\u306F 1\u301C${n} \u306E\u756A\u53F7\u3067\u3001${n > 1 ? "2" : "1"}{freq 215} \u306E\u3088\u3046\u306B\u66F8\u304D\u307E\u3059`);
+          }
+          for (const f of pk.value) {
+            const d2 = MODAL_BODY[f.key];
+            if (!d2) fail2(` \u306E body \u306E ${i} \u306B "${f.key}" \u306F\u66F8\u3051\u307E\u305B\u3093(freq gain resonance)`);
+            const path = `body.${i - 1}.${f.key}`;
+            once(path);
+            direct.push([path, check(path, d2, f.value, rec[path])]);
+          }
+        }
+        continue;
+      }
+      const d = P[it.key];
+      if (!d || d.group === "head" || typeof base[it.key] !== "number") {
+        fail2(` \u306B "${it.key}" \u306F\u66F8\u3051\u307E\u305B\u3093` + list());
+      }
+      once(it.key);
+      direct.push([it.key, check(it.key, d, it.value, rec[it.key])]);
+    }
+    let def = structuredClone(base);
+    const apply = kind === "modal" ? applyMacro : applyBrassMacro;
+    for (const k of Object.keys(base.macros || {})) {
+      const s = smart.find((x) => x[0] === k);
+      if (s) {
+        const next = apply(def, base, k, s[1]);
+        def = { ...def, ...next, head: next.head ?? def.head };
+      }
+    }
+    for (const [path, v] of direct) setAt(def, path, v);
+    const warnings = [];
+    for (const [path] of direct) {
+      const key2 = path.split(".").pop();
+      const d = path.startsWith("body.") ? MODAL_BODY[key2] : P[key2];
+      const off = (d.when || []).filter((c) => {
+        const v = getAt(def, c.key);
+        return !(c.gt != null ? v > c.gt : c.lt != null ? v < c.lt : v !== c.ne);
+      });
+      if (off.length) {
+        warnings.push(`${head} \u306E ${path} \u306F\u52B9\u304D\u307E\u305B\u3093(${off.map((c) => `${c.key} \u304C ${c.gt != null ? c.gt + " \u3088\u308A\u5927\u304D\u3044" : c.lt != null ? c.lt + " \u3088\u308A\u5C0F\u3055\u3044" : c.ne + " \u3067\u306A\u3044"}`).join("\u3001")}\u3068\u304D\u3060\u3051\u52B9\u304D\u307E\u3059)`);
+      }
+    }
+    delete def.range;
+    delete def.macros;
+    return { kind, instrument, def, warnings };
+  }
+  function getAt(o, path) {
+    return path.split(".").reduce((x, k) => x == null ? x : x[k], o);
+  }
+  function setAt(o, path, v) {
+    const ks = path.split(".");
+    const last = ks.pop();
+    ks.reduce((x, k) => x[k], o)[last] = v;
+  }
+
+  // sound/analog.js
   var ANALOG_NODE = "mmsxx-analog";
   var ANALOG_VOICES = 16;
   var CHORUS_BASE = 0.012;
+  var DELAY_MAX = 1;
   var ANALOG_CODE = `${FILTER_CORE}
 // \u7573\u3080\u3068\u3053\u308D\u306F\u5916\u3068\u540C\u3058\u3082\u306E\u3092\u57CB\u3081\u308B\u3002\u7E2E\u3081\u305F JS \u3067\u306F\u95A2\u6570\u306E\u540D\u524D\u304C\u5909\u308F\u308B\u306E\u3067\u3001
 // \u540D\u524D\u3092\u66F8\u3044\u3066\u53D7\u3051\u53D6\u308B(sound/modal.js \u3068\u540C\u3058)
@@ -14210,6 +17759,7 @@ const B = 128;
 const CHORUS_BASE = ${CHORUS_BASE};
 // \u30B3\u30FC\u30E9\u30B9\u306E\u9045\u308C\u306E\u4E0A\u9650\u3002\u4E2D\u5FC3 + \u63FA\u308C\u5E45\u304C\u3053\u3053\u3092\u8D8A\u3048\u306A\u3044
 const CH_MAX = 0.064;
+const DELAY_MAX = ${DELAY_MAX};
 
 // \u6BB5\u5DEE\u3092\u4E38\u3081\u308B(PolyBLEP)\u3002\u4E38\u3081\u306A\u3044\u3068\u9AD8\u3044\u97F3\u3067\u6298\u308A\u8FD4\u3057\u96D1\u97F3\u304C\u51FA\u308B
 const poly = (t, dt) => {
@@ -14241,11 +17791,20 @@ class Part {
     this.lp = new LowPass();
     this.hp = new HighPass();
     this.ld = new Ladder();
+    this.bp = new BandPass();
+    this.nt = new Notch();
     // \u30B3\u30FC\u30E9\u30B9\u306E\u9045\u308C\u7DDA\u3002\u5DE6\u53F3\u3067 1 \u672C\u305A\u3064
     this.dl = new Float32Array(Math.ceil(CH_MAX * sr) + 4);
     this.dr = new Float32Array(this.dl.length);
     this.di = 0;
+    // \u30C7\u30A3\u30EC\u30A4\u306E\u9045\u308C\u7DDA\u3002\u4F7F\u3046\u30D1\u30C3\u30C1\u304C\u6765\u305F\u3068\u304D\u306B\u53D6\u308B(1 \u79D2\u3076\u3093\u3042\u308B\u306E\u3067\u3001\u8981\u3089\u306A\u3044\u58F0\u306B\u306F\u6301\u305F\u305B\u306A\u3044)
+    this.eb = null;
+    this.ew = 0;
+    this.ez = 0;
     this.bus = new Float64Array(B);
+    // \u58F0\u304C\u30B5\u30F3\u30D7\u30EB\u3054\u3068\u306B\u66F8\u304F\u3001\u3044\u307E\u306E\u9AD8\u3055(\u6ED1\u308A\u3068\u30D3\u30D6\u30E9\u30FC\u30C8\u3092\u542B\u3080)\u30020 \u306F\u66F8\u304B\u308C\u3066\u3044\u306A\u3044
+    this.hzb = new Float64Array(B);
+    this.hz = 440;
   }
 
   /** \u4F7F\u3044\u306F\u3058\u3081\u3002\u4E2D\u306E\u72B6\u614B\u306F\u5168\u90E8\u307E\u3063\u3055\u3089\u306B\u3059\u308B */
@@ -14254,20 +17813,36 @@ class Part {
     this.key = key;
     this.def = def;
     this.co = 0;
+    this.pa = 0;
+    this.pa0 = 0;
+    this.vel = 0;
+    this.fv = 1;
     this.n = 0;
     this.rel = 0;
     this.off = null;
     this.idle = 0;
-    this.f0 = def.kind === 1 ? this.hp : (def.kind === 2 ? this.ld : this.lp);
+    this.f0 = [this.lp, this.hp, this.ld, this.bp, this.nt][def.kind] || this.lp;
     this.f0.reset();
+    this.hz = 440;
     this.dl.fill(0);
     this.dr.fill(0);
     this.di = 0;
+    if (this.eb) this.eb.fill(0);
+    this.ew = 0;
+    this.ez = 0;
   }
 
-  /** \u97F3\u7B26\u304C\u6765\u305F\u3002\u30AB\u30C3\u30C8\u30AA\u30D5\u306E\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u3092\u982D\u304B\u3089\u639B\u3051\u76F4\u3059(\u30D5\u30A3\u30EB\u30BF\u306E\u72B6\u614B\u306F\u6B8B\u3059) */
-  hit(def, off) {
+  /**
+   * \u97F3\u7B26\u304C\u6765\u305F\u3002\u30AB\u30C3\u30C8\u30AA\u30D5\u306E\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u3092\u982D\u304B\u3089\u639B\u3051\u76F4\u3059(\u30D5\u30A3\u30EB\u30BF\u306E\u72B6\u614B\u306F\u6B8B\u3059)\u3002
+   * \u97F3\u91CF\u3092\u30D5\u30A3\u30EB\u30BF\u306E\u3042\u3068\u306B\u7F6E\u304F\u30D1\u30C3\u30C1\u306F\u3001\u97F3\u91CF\u306E\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u3082\u3053\u3053\u3067\u639B\u3051\u76F4\u3059\u3002
+   * \u7ACB\u3061\u4E0A\u304C\u308A\u306F\u3044\u307E\u306E\u97F3\u91CF\u304B\u3089\u59CB\u3081\u308B\u30020 \u3078\u623B\u3059\u3068\u3001\u7D9A\u3051\u3066\u5F3E\u3044\u305F\u3068\u304D\u306B\u3077\u3064\u3063\u3068\u9CF4\u308B
+   */
+  hit(def, off, vel) {
     this.def = def;
+    this.pa0 = this.pa;
+    this.vel = vel;
+    // \u5F37\u3055\u3067\u958B\u304F\u91CF\u3092\u5909\u3048\u308B\u3002fenv.velocity \u304C 1 \u306A\u3089\u3001\u958B\u304F\u91CF\u304C\u5F37\u3055\u306B\u6BD4\u4F8B\u3059\u308B
+    this.fv = 1 - def.fvel + def.fvel * vel;
     this.n = 0;
     this.rel = 0;
     this.off = off;
@@ -14299,13 +17874,42 @@ class Part {
       if (this.rel) {
         this.co += (0 - this.co) * d.kfr;
       } else if (age < d.fat) {
-        this.co = d.fa * (age / d.fat);
+        this.co = d.fa * this.fv * (age / d.fat);
       } else {
-        this.co += (d.fa * d.fsu - this.co) * d.kfd;
+        this.co += (d.fa * this.fv * d.fsu - this.co) * d.kfd;
       }
 
-      const cut = d.cutoff * Math.pow(2, this.co + d.lfoDepth * this.lfoAt(d, now));
+      let cut = d.cutoff * Math.pow(2, this.co + d.lfoDepth * this.lfoAt(d, now));
+      // ---- \u30AD\u30FC\u30C8\u30E9\u30C3\u30AD\u30F3\u30B0\u3002A4(440Hz)\u3092\u57FA\u6E96\u306B\u3001\u97F3\u306E\u9AD8\u3055\u3078\u3064\u3044\u3066\u3044\u304F ----
+      if (d.track > 0) {
+        if (this.hzb[i] > 0) this.hz = this.hzb[i];
+        cut *= Math.pow(this.hz / 440, d.track);
+      }
       let y = this.f0.step(bus[i], warp(cut, sr), d.k, d.drive);
+
+      // ---- \u97F3\u91CF\u3092\u30D5\u30A3\u30EB\u30BF\u306E\u3042\u3068\u306B\u7F6E\u304F\u30D1\u30C3\u30C1\u3002\u30B5\u30D6\u30C1\u30E3\u30F3\u30CD\u30EB\u306B 1 \u3064\u306E\u97F3\u91CF\u3067\u7D5E\u308B ----
+      // \u81EA\u5DF1\u767A\u632F\u3057\u305F\u30D5\u30A3\u30EB\u30BF\u306F\u5165\u529B\u304C\u7121\u304F\u3066\u3082\u9CF4\u308B\u306E\u3067\u3001\u3053\u3053\u3067\u7D5E\u3089\u306A\u3044\u3068\u97F3\u7B26\u3068\u95A2\u4FC2\u306A\u304F\u9CF4\u308A\u7D9A\u3051\u308B
+      if (d.post) {
+        if (this.rel) {
+          this.pa += (0 - this.pa) * d.kar;
+        } else if (age < d.aat) {
+          this.pa = this.pa0 + (1 - this.pa0) * (age / d.aat);
+        } else {
+          this.pa += (d.asu - this.pa) * d.kad;
+        }
+        y *= this.pa * this.vel * d.level;
+      }
+
+      // ---- \u30C7\u30A3\u30EC\u30A4\u3002\u8FD4\u308A\u306F\u30EB\u30FC\u30D7\u306E\u4E2D\u306E\u30ED\u30FC\u30D1\u30B9\u3092\u6BCE\u56DE\u901A\u308B\u306E\u3067\u3001\u8FD4\u308B\u305F\u3073\u306B\u6697\u304F\u306A\u308B ----
+      if (d.dlMix > 0) {
+        if (!this.eb) this.eb = new Float32Array(Math.ceil(DELAY_MAX * sr) + 4);
+        const n = this.eb.length;
+        const w = this.eb[(this.ew - d.dlLen + n) % n];
+        this.ez += (w - this.ez) * d.dlTone;
+        this.eb[this.ew] = y + this.ez * d.dlFb;
+        this.ew = (this.ew + 1) % n;
+        y += this.ez * d.dlMix;
+      }
 
       // ---- \u30B3\u30FC\u30E9\u30B9\u3002\u5DE6\u53F3\u3078\u9006\u306B\u63FA\u308C\u308B\u77ED\u3044\u9045\u308C ----
       if (d.chMix > 0) {
@@ -14333,9 +17937,9 @@ class Part {
       this.n++;
     }
     // \u58F0\u304C\u3044\u306A\u304F\u306A\u3063\u305F\u3089\u3001\u97FF\u304D\u304C\u6D88\u3048\u308B\u306E\u3092\u5F85\u3063\u3066\u7A7A\u3051\u308B\u3002
-    // \u3059\u3050\u7A7A\u3051\u308B\u3068\u3001\u30EC\u30BE\u30CA\u30F3\u30B9\u306E\u9CF4\u304D\u304C\u5207\u308C\u308B
+    // \u3059\u3050\u7A7A\u3051\u308B\u3068\u3001\u30EC\u30BE\u30CA\u30F3\u30B9\u306E\u9CF4\u304D\u3068\u30C7\u30A3\u30EC\u30A4\u306E\u8FD4\u308A\u304C\u5207\u308C\u308B
     if (live) this.idle = 0;
-    else if ((this.idle += B) > sr * 0.2) this.use = 0;
+    else if ((this.idle += B) > sr * (0.2 + d.dlTail)) this.use = 0;
   }
 }
 
@@ -14351,6 +17955,7 @@ class Voice {
   /** \u97F3\u7B26 1 \u3064\u3067\u9CF4\u308A\u306F\u3058\u3081\u308B\u3002\u524D\u306E\u97F3\u304B\u3089\u5F15\u304D\u7D99\u3050\u306E\u306F\u6ED1\u308B\u5143\u306E\u9AD8\u3055\u3060\u3051 */
   begin(def, part, t, f, vel, off, from) {
     this.on = 1;
+    this.cutT = null;
     this.def = def;
     this.part = part;
     this.t0 = t;
@@ -14381,8 +17986,12 @@ class Voice {
     const dt = 1 / sr;
     const start = Math.max(0, Math.min(B - 1, Math.round((this.t0 - t0) * sr)));
     const relAt = this.off == null ? B + 1 : Math.round((this.off - t0) * sr);
-    const peak = this.vel * d.level;
-    for (let i = start; i < B; i++) {
+    // \u97F3\u91CF\u3092\u30D5\u30A3\u30EB\u30BF\u306E\u3042\u3068\u306B\u7F6E\u304F\u30D1\u30C3\u30C1\u3067\u306F\u3001\u3053\u3053\u306E\u97F3\u91CF\u306F\u58F0\u3092\u7A7A\u3051\u308B\u6642\u671F\u3092\u6C7A\u3081\u308B\u3060\u3051\u306B\u4F7F\u3046\u3002
+    // \u5F37\u3055\u3068 level \u306F\u30B5\u30D6\u30C1\u30E3\u30F3\u30CD\u30EB\u306E\u97F3\u91CF\u304C\u639B\u3051\u308B
+    const peak = d.post ? 1 : this.vel * d.level;
+    // \u540C\u3058\u30B5\u30D6\u30C1\u30E3\u30F3\u30CD\u30EB\u306B\u6B21\u306E\u97F3\u304C\u6765\u305F\u3089\u3001\u305D\u3053\u3067\u6B62\u3081\u308B(\u30E2\u30CE\u30B7\u30F3\u30BB\u3068\u540C\u3058)
+    const end = this.cutT == null ? B : Math.max(0, Math.min(B, Math.round((this.cutT - t0) * sr)));
+    for (let i = start; i < end; i++) {
       if (!this.rel && i >= relAt) this.rel = 1;
       const age = this.n * dt;
       const now = t0 + i * dt;
@@ -14405,6 +18014,9 @@ class Voice {
         const grow = Math.min(1, (age - d.vibDelay) / 0.3);
         hz *= Math.pow(2, d.vib * grow * Math.sin(2 * Math.PI * d.vibRate * age) / 1200);
       }
+
+      // \u96E2\u3057\u305F\u3042\u3068\u306E\u58F0\u306F\u66F8\u304B\u306A\u3044\u3002\u91CD\u306A\u3063\u305F\u6B21\u306E\u97F3\u306E\u9AD8\u3055\u3092\u4E0A\u66F8\u304D\u3057\u306A\u3044\u3088\u3046\u306B
+      if (!this.rel) this.part.hzb[i] = hz;
 
       // ---- \u767A\u632F\u5668 ----
       const dtm = hz / sr;
@@ -14447,11 +18059,12 @@ class Voice {
           y = y * (1 - d.ring) + y * Math.sin(2 * Math.PI * this.pr) * d.ring;
         }
       }
-      bus[i] += y * this.amp;
+      bus[i] += (d.post ? y : y * this.amp) * d.oscLevel;
       this.n++;
     }
     // \u96E2\u3057\u305F\u3042\u3068\u3001\u805E\u3053\u3048\u306A\u3044\u3068\u3053\u308D\u307E\u3067\u843D\u3061\u305F\u3089\u7A7A\u3051\u308B
     if (this.rel && this.amp < 1e-5) this.on = 0;
+    if (end < B) this.on = 0;
   }
 }
 
@@ -14510,20 +18123,20 @@ class AnalogBank extends AudioWorkletProcessor {
    * \u305D\u306E\u30B5\u30D6\u30C1\u30E3\u30F3\u30CD\u30EB\u306E\u30D5\u30A3\u30EB\u30BF\u3002\u9375\u306F\u30D1\u30C3\u30C1\u306E\u540D\u524D\u3068\u30B5\u30D6\u30C1\u30E3\u30F3\u30CD\u30EB\u306E\u756A\u53F7\u3002
    * \u540C\u3058\u9375\u306A\u3089\u524D\u306E\u97F3\u306E\u3082\u306E\u3092\u305D\u306E\u307E\u307E\u4F7F\u3046(\u72B6\u614B\u3092\u5F15\u304D\u7D99\u3050)
    */
-  pickPart(key, def, off) {
+  pickPart(key, def, off, vel) {
     for (let i = 0; i < V; i++) {
       const p = this.parts[i];
-      if (p.use && p.key === key) { p.hit(def, off); return p; }
+      if (p.use && p.key === key) { p.hit(def, off, vel); return p; }
     }
     for (let i = 0; i < V; i++) {
       const p = this.parts[i];
-      if (!p.use) { p.open(key, def); p.hit(def, off); return p; }
+      if (!p.use) { p.open(key, def); p.hit(def, off, vel); return p; }
     }
     // \u7A7A\u304D\u304C\u7121\u3051\u308C\u3070\u3001\u3044\u3061\u3070\u3093\u9577\u304F\u97F3\u7B26\u306E\u6765\u3066\u3044\u306A\u3044\u3082\u306E\u3092\u53D6\u308A\u4E0A\u3052\u308B
     let at = 0;
     for (let i = 1; i < V; i++) if (this.parts[i].idle > this.parts[at].idle) at = i;
     this.parts[at].open(key, def);
-    this.parts[at].hit(def, off);
+    this.parts[at].hit(def, off, vel);
     return this.parts[at];
   }
 
@@ -14535,7 +18148,14 @@ class AnalogBank extends AudioWorkletProcessor {
     this.lastF[ev.p] = f;
     const vel = Math.max(0, Math.min(1, ev.v == null ? 0.8 : ev.v));
     const off = ev.d == null ? null : ev.t + ev.d;
-    const part = this.pickPart(ev.p + '/' + (ev.sc | 0), def, off);
+    const part = this.pickPart(ev.p + '/' + (ev.sc | 0), def, off, vel);
+    // \u97F3\u91CF\u3092\u30D5\u30A3\u30EB\u30BF\u306E\u3042\u3068\u306B\u7F6E\u304F\u30D1\u30C3\u30C1\u306F\u3001\u30B5\u30D6\u30C1\u30E3\u30F3\u30CD\u30EB\u306B\u97F3\u91CF\u304C 1 \u3064\u3057\u304B\u306A\u3044\u3002
+    // \u524D\u306E\u97F3\u306F\u6B21\u306E\u97F3\u306E\u982D\u3067\u6B62\u3081\u308B\u3002\u540C\u3058\u6642\u523B\u306B\u59CB\u307E\u308B\u91CD\u306D(\u30AA\u30AF\u30BF\u30FC\u30D6\u91CD\u306D\u306A\u3069)\u306F\u6B8B\u3059
+    if (def.post) {
+      for (const v of this.voices) {
+        if (v.on && v.part === part && v.t0 < ev.t - 1e-6) v.cutT = ev.t;
+      }
+    }
     this.pickVoice().begin(def, part, ev.t, f, vel, off, from);
   }
 
@@ -14555,6 +18175,7 @@ class AnalogBank extends AudioWorkletProcessor {
       const part = this.parts[i];
       if (!part.use) continue;
       part.bus.fill(0);
+      part.hzb.fill(0);
       let live = 0;
       for (let j = 0; j < V; j++) {
         const v = this.voices[j];
@@ -14585,7 +18206,7 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
 `;
   var ANALOG_PATCHES = {
     seqBass: {
-      note: "Sequenced bass. Each sixteenth note opens the ladder filter and snaps shut, with the resonance singing on top.",
+      desc: "Sequenced bass. Each sixteenth note opens the ladder filter and snaps shut, with the resonance singing on top.",
       wave: "sawtooth",
       octave: 0,
       filter: { kind: "ladder", cutoff: 150, resonance: 0.8, drive: 0.3 },
@@ -14593,8 +18214,18 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
       amp: { attack: 2e-3, decay: 0.2, sustain: 0.6, release: 0.05 },
       level: 1.358
     },
+    delayBass: {
+      desc: "Sequenced bass with a delay that fills the gaps, the trick heard on Donna Summer's I Feel Love. Play eighth notes and the single repeat lands on the sixteenth in between. The repeat is timed for 120 BPM.",
+      wave: "sawtooth",
+      octave: 0,
+      filter: { kind: "ladder", cutoff: 150, resonance: 0.7, drive: 0.3 },
+      fenv: { amount: 3.5, attack: 1e-3, decay: 0.2, sustain: 0 },
+      amp: { attack: 2e-3, decay: 0.15, sustain: 0.4, release: 0.05 },
+      delay: { mix: 0.7, time: 0.125, feedback: 0, tone: 3e3 },
+      level: 1.358
+    },
     synthBrass: {
-      note: "Synth brass. Three detuned sawtooths, the filter swelling open a little after the note starts.",
+      desc: "Synth brass. Three detuned sawtooths, the filter swelling open a little after the note starts.",
       wave: "detuned",
       octave: 0,
       filter: { kind: "ladder", cutoff: 400, resonance: 0.2, drive: 0.1 },
@@ -14604,7 +18235,7 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
       chorus: { mix: 0.5, rate: 0.5, depth: 3 }
     },
     strings: {
-      note: "Strings. A slow swell through a gentle low-pass, thickened by the chorus.",
+      desc: "Strings. A slow swell through a gentle low-pass, thickened by the chorus.",
       wave: "detuned",
       octave: 0,
       filter: { kind: "lowpass", cutoff: 700, resonance: 0.1, drive: 0 },
@@ -14614,7 +18245,7 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
       chorus: { mix: 1, rate: 0.4, depth: 4 }
     },
     pulseLead: {
-      note: "Pulse lead. A narrow pulse with a late vibrato, bright enough to cut through.",
+      desc: "Pulse lead. A narrow pulse with a late vibrato, bright enough to cut through.",
       wave: "pulse",
       octave: 0,
       filter: { kind: "lowpass", cutoff: 1800, resonance: 0.35, drive: 0.2 },
@@ -14625,7 +18256,7 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
       pitch: { vibrato: 15, rate: 5.5, delay: 0.3, glide: 0 }
     },
     noiseSnare: {
-      note: "Snare. White noise through a resonant low-pass that snaps shut.",
+      desc: "Snare. White noise through a resonant low-pass that snaps shut.",
       wave: "noise",
       octave: 0,
       filter: { kind: "lowpass", cutoff: 300, resonance: 0.5, drive: 0.2 },
@@ -14633,8 +18264,18 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
       amp: { attack: 1e-3, decay: 0.12, sustain: 0, release: 0.05 },
       level: 0.973
     },
+    laserZap: {
+      desc: "Laser zap. A ladder filter pushed past self-oscillation, its whistle diving from high to low on the filter envelope. The pitch comes from the filter, so it does not follow the note.",
+      wave: "noise",
+      octave: 0,
+      filter: { kind: "ladder", cutoff: 150, resonance: 1.15, drive: 0 },
+      fenv: { amount: 4.5, attack: 1e-3, decay: 0.35, sustain: 0 },
+      amp: { position: "afterFilter", attack: 1e-3, decay: 0.3, sustain: 0, release: 0.05 },
+      osc: { level: 0.02 },
+      level: 2.68
+    },
     noiseHat: {
-      note: "Hi-hat. White noise with the lows taken away and a very short envelope.",
+      desc: "Hi-hat. White noise with the lows taken away and a very short envelope.",
       wave: "noise",
       octave: 0,
       filter: { kind: "highpass", cutoff: 6e3, resonance: 0.2, drive: 0 },
@@ -14643,7 +18284,7 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
       level: 0.528
     },
     slowPad: {
-      note: "Pad. A slow sine on the cutoff keeps it moving while the note is held.",
+      desc: "Pad. A slow sine on the cutoff keeps it moving while the note is held.",
       wave: "detuned",
       octave: 0,
       filter: { kind: "lowpass", cutoff: 500, resonance: 0.25, drive: 0 },
@@ -14654,7 +18295,7 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
       chorus: { mix: 0.8, rate: 0.3, depth: 5 }
     },
     glideLead: {
-      note: "Glide lead. Each note slides up from the one before it, with a wide vibrato.",
+      desc: "Glide lead. Each note slides up from the one before it, with a wide vibrato.",
       wave: "sawtooth",
       octave: 0,
       filter: { kind: "ladder", cutoff: 1200, resonance: 0.45, drive: 0.25 },
@@ -14665,7 +18306,7 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
       pitch: { vibrato: 20, rate: 5, delay: 0.2, glide: 0.08 }
     },
     pwmStrings: {
-      note: "PWM strings. The pulse width keeps moving, so one oscillator sounds like two.",
+      desc: "PWM strings. The pulse width keeps moving, so one oscillator sounds like two.",
       wave: "pwm",
       octave: 0,
       filter: { kind: "lowpass", cutoff: 1400, resonance: 0.15, drive: 0 },
@@ -14676,7 +18317,7 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
       osc: { width: 0.5, pwmDepth: 0.35, pwmRate: 0.8 }
     },
     syncLead: {
-      note: "Sync lead. A sawtooth hard-synced to the note, the ratio jumping up at each attack.",
+      desc: "Sync lead. A sawtooth hard-synced to the note, the ratio jumping up at each attack.",
       wave: "sync",
       octave: 0,
       filter: { kind: "lowpass", cutoff: 2500, resonance: 0.3, drive: 0.3 },
@@ -14688,7 +18329,7 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
       osc: { sync: 3, syncEnv: 1 }
     },
     ringBell: {
-      note: "Ring bell. A sawtooth multiplied by a sine at a non-whole multiple, so it rings like metal.",
+      desc: "Ring bell. A sawtooth multiplied by a sine at a non-whole multiple, so it rings like metal.",
       wave: "ring",
       octave: 0,
       filter: { kind: "lowpass", cutoff: 3e3, resonance: 0.2, drive: 0 },
@@ -14698,8 +18339,43 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
       chorus: { mix: 0.3, rate: 0.5, depth: 3 },
       osc: { ring: 0.8, ringRatio: 1.5 }
     },
+    whistle: {
+      desc: "Whistle. White noise through a low-pass ringing just short of oscillation, the cutoff following the note. The vibrato comes in late.",
+      wave: "noise",
+      octave: 0,
+      // ラダーの山はカットオフより少し下に立つ(resonance 0.98 で 13 セント)。そのぶん上げて音程に合わせる
+      filter: { kind: "ladder", cutoff: 443.3, track: 1, resonance: 0.98, drive: 0 },
+      fenv: { amount: 0, attack: 1e-3, decay: 0.2, sustain: 0 },
+      amp: { attack: 0.06, decay: 0.3, sustain: 0.9, release: 0.15 },
+      level: 1,
+      pitch: { vibrato: 25, rate: 5, delay: 0.25, glide: 0.04 }
+    },
+    papipupe: {
+      desc: "Talking voice, after the sound in Isao Tomita's records nicknamed the Papipupe man. A closed, ringing ladder filter snaps open in 30 ms, which sounds like a P. How far it opens follows the velocity, so a hard note says pa and a soft one says pu. One note at a time.",
+      wave: "sawtooth",
+      octave: 0,
+      filter: { kind: "ladder", cutoff: 200, resonance: 0.9, drive: 0 },
+      fenv: { amount: 5, attack: 0.03, decay: 0.2, sustain: 1, velocity: 1 },
+      amp: { attack: 5e-3, decay: 0.2, sustain: 1, release: 0.08, position: "afterFilter" },
+      level: 0.84,
+      pitch: { vibrato: 20, rate: 4.5, delay: 0.35, glide: 0 },
+      // 作業中。録音と聞き比べていない。曲ごとにいろいろな使われ方をしていて、
+      // そこはまだ再現できていない。専用の記法を用意するかもしれない(2026-10-15)
+      dev: ["wip"]
+    },
+    voxHumana: {
+      desc: "Vox Humana style pad, after the Polymoog preset heard on Gary Numan's Cars and said to be on YMO's records. A pulse with a fast width wobble and a fast chorus gives the warbling, choir-like shimmer.",
+      wave: "pwm",
+      octave: 1,
+      filter: { kind: "lowpass", cutoff: 1800, resonance: 0.2, drive: 0 },
+      fenv: { amount: 0.6, attack: 0.3, decay: 0.8, sustain: 0.5 },
+      amp: { attack: 0.12, decay: 0.6, sustain: 0.85, release: 0.7 },
+      level: 0.331,
+      chorus: { mix: 0.9, rate: 4.5, depth: 3 },
+      osc: { width: 0.45, pwmDepth: 0.2, pwmRate: 5 }
+    },
     polyBrass: {
-      note: "Poly brass. Like synthBrass, written for chords: every note swells on its own.",
+      desc: "Poly brass. Like synthBrass, written for chords: every note swells on its own.",
       wave: "detuned",
       octave: 0,
       filter: { kind: "ladder", cutoff: 350, resonance: 0.25, drive: 0.1 },
@@ -14725,7 +18401,7 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
       };
     };
     const WAVES = ["sawtooth", "square", "pulse", "detuned", "noise", "pwm", "sync", "ring"];
-    const KINDS = ["lowpass", "highpass", "ladder"];
+    const KINDS = ["lowpass", "highpass", "ladder", "bandpass", "notch"];
     const N2 = 1024;
     const SHAPES = {
       sine: { make: (x) => Math.sin(2 * Math.PI * x) },
@@ -14760,25 +18436,34 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
     const ch = def.chorus || {};
     const pi = def.pitch || {};
     const os = def.osc || {};
+    const dl = def.delay || {};
     const seed = num2(def.seed, 1, 9999, 1);
     const { data, cycles } = lfoTable(lf.shape, seed);
     const depth = num2(lf.depth, 0, 4, 0);
+    const delayTail = (time, fb) => time * (1 + Math.ceil(Math.log(1e-3) / Math.log(Math.max(0.01, fb))));
     const coef = (sec) => 1 - Math.exp(-1 / (sr * Math.max(1e-3, sec) / 3));
     const kind = Math.max(0, KINDS.indexOf(String(f.kind || "lowpass")));
-    const res = num2(f.resonance, 0, 1, 0);
-    const k = kind === 2 ? 3.96 * res : Math.max(0.01, 2 - 2 * res);
+    const dlMix = num2(dl.mix, 0, 1, 0);
+    const dlTime = num2(dl.time, 0.01, 1, 0.25);
+    const dlFb = num2(dl.feedback, 0, 0.95, 0.3);
+    const post = String(am.position || "beforeFilter") === "afterFilter";
+    const res = num2(f.resonance, 0, kind === 2 && post ? 1.2 : 1, 0);
+    const k = kind === 2 ? res <= 1 ? 3.96 * res : 3.96 + (4.6 - 3.96) * (res - 1) / 0.2 : Math.max(0.01, 2 - 2 * res);
     return {
       wave: Math.max(0, WAVES.indexOf(String(def.wave || "sawtooth"))),
       oct: num2(def.octave, -2, 2, 0),
       kind,
       cutoff: num2(f.cutoff, 20, 2e4, 2e4),
+      track: num2(f.track, 0, 1, 0),
       k,
       drive: num2(f.drive, 0, 1, 0) * 4,
       fa: num2(fe.amount, 0, 6, 0),
       fat: num2(fe.attack, 1e-3, 4, 1e-3),
       fsu: num2(fe.sustain, 0, 1, 0),
+      fvel: num2(fe.velocity, 0, 1, 0),
       kfd: coef(num2(fe.decay, 1e-3, 8, 0.2)),
       kfr: coef(num2(am.release, 1e-3, 4, 0.05)),
+      post,
       aat: num2(am.attack, 1e-3, 4, 2e-3),
       asu: num2(am.sustain, 0, 1, 0.8),
       kad: coef(num2(am.decay, 1e-3, 8, 0.2)),
@@ -14790,6 +18475,12 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
       chMix: num2(ch.mix, 0, 1, 0),
       chRate: num2(ch.rate, 0.05, 8, 0.5),
       chDepth: num2(ch.depth, 0.5, 20, 3),
+      dlMix,
+      dlLen: Math.max(1, Math.round(dlTime * sr)),
+      dlFb,
+      // ループの中の 1 次のローパス。1 サンプルで寄る量
+      dlTone: 1 - Math.exp(-2 * Math.PI * num2(dl.tone, 200, 2e4, 2e4) / sr),
+      dlTail: dlMix > 0 ? delayTail(dlTime, dlFb) : 0,
       vib: num2(pi.vibrato, 0, 100, 0),
       vibRate: num2(pi.rate, 0.1, 12, 5.5),
       vibDelay: num2(pi.delay, 0, 2, 0.3),
@@ -14801,12 +18492,13 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
       syncEnv: num2(os.syncEnv, 0, 4, 0),
       ring: num2(os.ring, 0, 1, 0),
       ringRatio: num2(os.ringRatio, 0.01, 32, 1.5),
+      oscLevel: num2(os.level, 0, 1, 1),
       level: num2(def.level, 0, 4, 0.25),
       seed
     };
   }
 
-  // player-latest/sound/demotunes.js
+  // sound/demotunes.js
   var SE_SYS_PAUSE = "sys.pause";
   var SYSTEM_SE = {
     [SE_SYS_PAUSE]: [
@@ -14897,7 +18589,7 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
     BEAT_TOM_FILL
   ]);
 
-  // player-latest/sound/se.js
+  // sound/se.js
   var SE_FRAME = 1 / 60;
   var SE_WHOLE = 64;
   var SE_TEMPO = Math.round(240 / (SE_WHOLE * SE_FRAME));
@@ -14998,55 +18690,55 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
   var SE_PRESETS = {
     // いちばん素直な点。切る長さがそのまま音の長さになる
     seBeep: {
-      noteJa: "\u4F55\u3082\u7D30\u5DE5\u3057\u3066\u3044\u306A\u3044\u97F3\u3002\u66F8\u3044\u305F\u9577\u3055\u306E\u3076\u3093\u3060\u3051\u9CF4\u308B\u3002\u307E\u305A\u624B\u306B\u53D6\u308B\u3082\u306E",
-      note: "A plain tone with no shaping. Whatever length you ask for is what you get \u2014 the simplest thing to reach for.",
+      descJa: "\u4F55\u3082\u7D30\u5DE5\u3057\u3066\u3044\u306A\u3044\u97F3\u3002\u66F8\u3044\u305F\u9577\u3055\u306E\u3076\u3093\u3060\u3051\u9CF4\u308B\u3002\u307E\u305A\u624B\u306B\u53D6\u308B\u3082\u306E",
+      desc: "A plain tone with no shaping. Whatever length you ask for is what you get \u2014 the simplest thing to reach for.",
       mml: "@{pulse(50)} @e{flat} v12 o5 c1"
     },
     // 落ちる。tones.js の高さの表がフレームで刻むので、切っても途中まで落ちている
     seShot: {
-      noteJa: "7 \u30D5\u30EC\u30FC\u30E0\u3067 1 \u30AA\u30AF\u30BF\u30FC\u30D6\u843D\u3061\u308B\u3002\u6483\u3063\u305F\u97F3\u3084\u8EFD\u304F\u5F53\u305F\u3063\u305F\u97F3\u306B\u805E\u3053\u3048\u308B\u3002\u77ED\u304F\u5207\u3063\u3066\u3082\u5206\u304B\u308B",
-      note: "Pitch falls one octave over seven frames. Reads as a shot or a small hit; still recognisable when cut short.",
+      descJa: "7 \u30D5\u30EC\u30FC\u30E0\u3067 1 \u30AA\u30AF\u30BF\u30FC\u30D6\u843D\u3061\u308B\u3002\u6483\u3063\u305F\u97F3\u3084\u8EFD\u304F\u5F53\u305F\u3063\u305F\u97F3\u306B\u805E\u3053\u3048\u308B\u3002\u77ED\u304F\u5207\u3063\u3066\u3082\u5206\u304B\u308B",
+      desc: "Pitch falls one octave over seven frames. Reads as a shot or a small hit; still recognisable when cut short.",
       mml: "@{seFall} v13 o5 c1"
     },
     // 当たり。ノイズなので高さは効きにくいが、**低いほど重く**は聞こえる
     seHit: {
-      noteJa: "\u30CE\u30A4\u30BA\u3092\u6253\u697D\u5668\u306E\u5F62\u3067\u9CF4\u3089\u3059\u3002\u4F4E\u3044\u97F3\u307B\u3069\u91CD\u304F\u5F53\u305F\u3063\u305F\u3088\u3046\u306B\u805E\u3053\u3048\u308B",
-      note: "Noise with a percussive envelope. Lower notes read as heavier impacts.",
+      descJa: "\u30CE\u30A4\u30BA\u3092\u6253\u697D\u5668\u306E\u5F62\u3067\u9CF4\u3089\u3059\u3002\u4F4E\u3044\u97F3\u307B\u3069\u91CD\u304F\u5F53\u305F\u3063\u305F\u3088\u3046\u306B\u805E\u3053\u3048\u308B",
+      desc: "Noise with a percussive envelope. Lower notes read as heavier impacts.",
       mml: "@{noise} @e{percussive} v14 o4 c1"
     },
     // 取った。頭に短い下の音を置いて、上の音へ跳ねる
     seCoin: {
-      noteJa: "\u4F4E\u304F\u77ED\u3044\u97F3\u304B\u3089\u3001\u9AD8\u3044\u97F3\u3078\u8DF3\u3093\u3067\u4F38\u3070\u3059\u3002\u7269\u3092\u62FE\u3046\u97F3",
-      note: "A short low blip jumping to a held higher note. The pick-up sound.",
+      descJa: "\u4F4E\u304F\u77ED\u3044\u97F3\u304B\u3089\u3001\u9AD8\u3044\u97F3\u3078\u8DF3\u3093\u3067\u4F38\u3070\u3059\u3002\u7269\u3092\u62FE\u3046\u97F3",
+      desc: "A short low blip jumping to a held higher note. The pick-up sound.",
       mml: "@{pulse(25)} @e{flat} v13 o5 l16 g l1 > c"
     },
     // 跳ぶ。1 フレームずつ駆け上がる
     seJump: {
-      noteJa: "1 \u30D5\u30EC\u30FC\u30E0\u306B 1 \u97F3\u305A\u3064\u97F3\u968E\u3092\u99C6\u3051\u4E0A\u304C\u3063\u3066\u3001\u305D\u3053\u3067\u6B62\u307E\u308B\u3002\u8DF3\u3093\u3060\u97F3\u3084\u3001\u4E0A\u304C\u3063\u3066\u3044\u304F\u77E5\u3089\u305B",
-      note: "Runs up the scale one frame per note, then holds. Reads as a jump or a rising alert.",
+      descJa: "1 \u30D5\u30EC\u30FC\u30E0\u306B 1 \u97F3\u305A\u3064\u97F3\u968E\u3092\u99C6\u3051\u4E0A\u304C\u3063\u3066\u3001\u305D\u3053\u3067\u6B62\u307E\u308B\u3002\u8DF3\u3093\u3060\u97F3\u3084\u3001\u4E0A\u304C\u3063\u3066\u3044\u304F\u77E5\u3089\u305B",
+      desc: "Runs up the scale one frame per note, then holds. Reads as a jump or a rising alert.",
       mml: "@{pulse(12)} @e{flat} v12 o4 l64 cdefgab>cdefgab>cdefgab> l1 c"
     },
     // 力。`cde>` の繰り返し。8 ビット機の効果音でよく聞いた形
     sePower: {
-      noteJa: "cde> \u3092 1 \u30D5\u30EC\u30FC\u30E0\u306B 1 \u97F3\u305A\u3064\u7E70\u308A\u8FD4\u3057\u3066\u3001\u3053\u3060\u307E\u3092\u4ED8\u3051\u305F\u3082\u306E\u30028 \u30D3\u30C3\u30C8\u306E\u30A2\u30AF\u30B7\u30E7\u30F3\u3067\u3069\u3053\u3067\u3082\u805E\u3044\u305F\u99C6\u3051\u4E0A\u304C\u308A",
-      note: "cde> repeated one frame per note, with echo. The ladder heard all over 8-bit action games.",
+      descJa: "cde> \u3092 1 \u30D5\u30EC\u30FC\u30E0\u306B 1 \u97F3\u305A\u3064\u7E70\u308A\u8FD4\u3057\u3066\u3001\u3053\u3060\u307E\u3092\u4ED8\u3051\u305F\u3082\u306E\u30028 \u30D3\u30C3\u30C8\u306E\u30A2\u30AF\u30B7\u30E7\u30F3\u3067\u3069\u3053\u3067\u3082\u805E\u3044\u305F\u99C6\u3051\u4E0A\u304C\u308A",
+      desc: "cde> repeated one frame per note, with echo. The ladder heard all over 8-bit action games.",
       mml: "@{pulse(12)} @e{flat} @s3 v12 o3 l64 [cde>]16"
     },
     // 駄目。低いところで濁らせる
     seError: {
-      noteJa: "\u4F4E\u3044\u77E9\u5F62\u6CE2\u3092\u5F37\u304F\u305A\u3089\u3057\u3066\u91CD\u306D\u3066\u3042\u308B\u306E\u3067\u3001\u81EA\u5206\u3068\u5538\u308B\u3002\u65AD\u3089\u308C\u305F\u611F\u3058",
-      note: "Low pulse with heavy detune, so it beats against itself. Reads as a refusal.",
+      descJa: "\u4F4E\u3044\u77E9\u5F62\u6CE2\u3092\u5F37\u304F\u305A\u3089\u3057\u3066\u91CD\u306D\u3066\u3042\u308B\u306E\u3067\u3001\u81EA\u5206\u3068\u5538\u308B\u3002\u65AD\u3089\u308C\u305F\u611F\u3058",
+      desc: "Low pulse with heavy detune, so it beats against itself. Reads as a refusal.",
       mml: "@{pulse(50)} @e{flat} @d24 v13 o3 c1"
     },
     // 出る / 消える。細かく震えながら上がる
     seWarp: {
-      noteJa: "1 \u30D5\u30EC\u30FC\u30E0\u3054\u3068\u306B\u534A\u97F3\u3092\u884C\u304D\u6765\u3059\u308B\u3002\u97F3\u7A0B\u3068\u3057\u3066\u3067\u306F\u306A\u304F\u3001\u63FA\u3089\u3081\u304D\u3068\u3057\u3066\u805E\u3053\u3048\u308B\u3002\u73FE\u308C\u308B\u30FB\u6D88\u3048\u308B",
-      note: "Alternates between two semitones every frame, which shimmers rather than plays a pitch. Appearing and disappearing.",
+      descJa: "1 \u30D5\u30EC\u30FC\u30E0\u3054\u3068\u306B\u534A\u97F3\u3092\u884C\u304D\u6765\u3059\u308B\u3002\u97F3\u7A0B\u3068\u3057\u3066\u3067\u306F\u306A\u304F\u3001\u63FA\u3089\u3081\u304D\u3068\u3057\u3066\u805E\u3053\u3048\u308B\u3002\u73FE\u308C\u308B\u30FB\u6D88\u3048\u308B",
+      desc: "Alternates between two semitones every frame, which shimmers rather than plays a pitch. Appearing and disappearing.",
       mml: "@{pulse(12)} @e{flat} @s4 v11 o3 l64 [c+c]32"
     }
   };
 
-  // player-latest/sound/layerpresets.js
+  // sound/layerpresets.js
   var DETUNE_STEPS = [
     { key: "", value: "none", c: 0, en: "no detune" },
     {
@@ -15110,8 +18802,8 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
             ],
             role: "lead",
             tags: ["psg", "layer"].concat(d.c ? ["detune"] : []).concat(e.f ? ["echo"] : []),
-            noteJa: w.ja + "\u3092 " + (both ? `${d.lead}\u3001${e.mid}\u3002${d.tail}\u3002${e.tail}` : `${d.alone || e.alone}\u3002${d.tail || e.tail}`) + `\u3002\u30A8\u30D5\u30A7\u30AF\u30C8\u306E ${what} \u3068\u540C\u3058\u3053\u3068\u3092\u3001\u67A0\u3092\u98DF\u3046\u5074\u3067\u3084\u308B`,
-            note: "Two " + w.en + ", " + (both ? d.en + ", and " + e.en : d.en || e.en) + ". The same thing " + (both ? "@d and @s do together" : d.c ? "@d does" : "@s does") + ", on the side that costs voices."
+            descJa: w.ja + "\u3092 " + (both ? `${d.lead}\u3001${e.mid}\u3002${d.tail}\u3002${e.tail}` : `${d.alone || e.alone}\u3002${d.tail || e.tail}`) + `\u3002\u30A8\u30D5\u30A7\u30AF\u30C8\u306E ${what} \u3068\u540C\u3058\u3053\u3068\u3092\u3001\u67A0\u3092\u98DF\u3046\u5074\u3067\u3084\u308B`,
+            desc: "Two " + w.en + ", " + (both ? d.en + ", and " + e.en : d.en || e.en) + ". The same thing " + (both ? "@d and @s do together" : d.c ? "@d does" : "@s does") + ", on the side that costs voices."
           };
         }
       }
@@ -15120,25 +18812,25 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
   }
   function layerPairFamily() {
     return {
-      note: "Two pulses of the same width, the second detuned and/or delayed. The same thing @d and @s do, but as a voice that costs two channels.",
+      desc: "Two pulses of the same width, the second detuned and/or delayed. The same thing @d and @s do, but as a voice that costs two channels.",
       params: [
         {
           name: "width",
           default: "50",
-          note: "Pulse width of both layers, in percent.",
-          values: DUTY_STEPS.map((w) => ({ value: w.key, note: `Two ${w.en}.` }))
+          desc: "Pulse width of both layers, in percent.",
+          values: DUTY_STEPS.map((w) => ({ value: w.key, desc: `Two ${w.en}.` }))
         },
         {
           name: "detune",
           default: "wide",
-          note: "How far apart the second layer is tuned.",
-          values: [...DETUNE_STEPS].reverse().map((d) => ({ value: d.value, note: d.en }))
+          desc: "How far apart the second layer is tuned.",
+          values: [...DETUNE_STEPS].reverse().map((d) => ({ value: d.value, desc: d.en }))
         },
         {
           name: "echo",
           default: "far",
-          note: "How far behind the second layer comes in, quieter.",
-          values: [...ECHO_STEPS].reverse().map((e) => ({ value: e.value, note: e.en }))
+          desc: "How far behind the second layer comes in, quieter.",
+          values: [...ECHO_STEPS].reverse().map((e) => ({ value: e.value, desc: e.en }))
         }
       ],
       // 両方なしは、ただの矩形波(`pulse( )`)なので作らない
@@ -15163,8 +18855,8 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
       ],
       role: "perc",
       tags: ["drum", "kick", "layer"],
-      noteJa: "\u30D0\u30B9\u30C9\u30E9\u30E0\u306B\u3001\u9AD8\u3044\u30CE\u30A4\u30BA\u3092\u8584\u304F\u91CD\u306D\u305F\u3082\u306E\u3002FM \u3060\u3051\u306E\u80F4\u306F\u7DDA\u304C\u7D30\u304F\u3066\u300C\u30B3\u30C3\u300D\u3067\u7D42\u308F\u308B\u304C\u3001\u7A7A\u6C17\u304C\u4ED8\u304F\u3068\u300C\u30C9\u30C3\u300D\u306B\u306A\u308B",
-      note: "A kick with a thin layer of high noise over it. The FM body alone stops at a click; the air on top turns it into a thud."
+      descJa: "\u30D0\u30B9\u30C9\u30E9\u30E0\u306B\u3001\u9AD8\u3044\u30CE\u30A4\u30BA\u3092\u8584\u304F\u91CD\u306D\u305F\u3082\u306E\u3002FM \u3060\u3051\u306E\u80F4\u306F\u7DDA\u304C\u7D30\u304F\u3066\u300C\u30B3\u30C3\u300D\u3067\u7D42\u308F\u308B\u304C\u3001\u7A7A\u6C17\u304C\u4ED8\u304F\u3068\u300C\u30C9\u30C3\u300D\u306B\u306A\u308B",
+      desc: "A kick with a thin layer of high noise over it. The FM body alone stops at a click; the air on top turns it into a thud."
     },
     // ---- PSG どうしを重ねたものは、下で作って混ぜる ----
     // **FM の頭に PSG を短く足す。**FM の 2 オペは立ち上がりが丸く、
@@ -15193,8 +18885,8 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
       ],
       role: "lead",
       tags: ["brass", "attack", "layer"],
-      noteJa: "FM \u306E\u30D6\u30E9\u30B9\u306E\u982D\u306B\u30011 \u30AA\u30AF\u30BF\u30FC\u30D6\u4E0A\u306E\u77E9\u5F62\u6CE2\u3092\u5F37\u304F\u91CD\u306D\u305F\u3082\u306E\u3002\u306F\u3058\u3044\u305F\u3088\u3046\u306B\u7ACB\u3061\u4E0A\u304C\u3063\u3066\u3059\u3050\u843D\u3061\u3001\u308F\u305A\u304B\u306B\u6B8B\u3063\u3066\u304B\u3089 FM \u306B\u5F15\u304D\u7D99\u3050",
-      note: "FM brass with a square wave an octave above struck hard over the attack. It snaps up, drops away and leaves a trace behind before the FM takes over."
+      descJa: "FM \u306E\u30D6\u30E9\u30B9\u306E\u982D\u306B\u30011 \u30AA\u30AF\u30BF\u30FC\u30D6\u4E0A\u306E\u77E9\u5F62\u6CE2\u3092\u5F37\u304F\u91CD\u306D\u305F\u3082\u306E\u3002\u306F\u3058\u3044\u305F\u3088\u3046\u306B\u7ACB\u3061\u4E0A\u304C\u3063\u3066\u3059\u3050\u843D\u3061\u3001\u308F\u305A\u304B\u306B\u6B8B\u3063\u3066\u304B\u3089 FM \u306B\u5F15\u304D\u7D99\u3050",
+      desc: "FM brass with a square wave an octave above struck hard over the attack. It snaps up, drops away and leaves a trace behind before the FM takes over."
     }
   };
   function registerDefaultLayers() {
@@ -15207,10 +18899,751 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
     }
   }
 
-  // player-latest/sound/version.js
+  // sound/version.js
   var SOUND_VERSION = "0.31.0";
 
-  // player-latest/sound/audio.js
+  // sound/opl.js
+  var OPL_CLOCK = 3579545;
+  var OPL_CODE = `
+const CLK = ${OPL_CLOCK};
+const RATE = CLK / 72;
+${FM_TABLES_CODE}
+
+// \u901F\u3044\u523B\u307F(\u901F\u3055 13 \u3068 14)\u3002OPLL \u306B\u306F\u7121\u3044
+const EG_STEP_FAST = [
+  [1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 2, 1, 1, 1, 2],
+  [1, 2, 1, 2, 1, 2, 1, 2], [1, 2, 2, 2, 1, 2, 2, 2],
+];
+
+// \u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u306F 9 \u30D3\u30C3\u30C8\u30021 \u6BB5 0.1875dB
+const EG_MUTE = 511;
+const EG_MAX = 0x1f0;
+const ATTACK = 0, DECAY = 1, SUSTAIN = 2, RELEASE = 3;
+
+// \u30AD\u30FC\u30B9\u30B1\u30FC\u30EB\u3067\u843D\u3068\u3059\u91CF\u3002block \u3068 fnum \u306E\u4E0A 4 \u30D3\u30C3\u30C8\u3067\u5F15\u304F\u3002
+// KSL \u306E 2 \u30D3\u30C3\u30C8\u306F\u30EC\u30B8\u30B9\u30BF\u306E\u4E2D\u3067\u4E26\u3073\u304C\u9006\u306A\u306E\u3067\u3001\u5165\u308C\u66FF\u3048\u3066\u8AAD\u3080
+const TLL = new Uint16Array(128 * 4);
+for (let fnum = 0; fnum < 16; fnum++) {
+  for (let blk = 0; blk < 8; blk++) {
+    for (let kl = 0; kl < 4; kl++) {
+      const kx = ((kl & 1) << 1) | ((kl >> 1) & 1);
+      const at = ((blk << 4) | fnum) * 4 + kl;
+      if (kl === 0) { TLL[at] = 0; continue; }
+      const tmp = Math.trunc(KL[fnum] - 6 * (7 - blk));
+      TLL[at] = tmp <= 0 ? 0 : Math.trunc((tmp >> (3 - kx)) / 0.1875);
+    }
+  }
+}
+// \u30AD\u30FC\u30B9\u30B1\u30FC\u30EB\u3067\u30A8\u30F3\u30D9\u30ED\u30FC\u30D7\u304C\u901F\u304F\u306A\u308B\u3076\u3093\u3002NOTE SEL(08h \u306E bit6)\u3067\u5F15\u304F\u4F4D\u7F6E\u304C\u5909\u308F\u308B
+const RKS = new Int32Array(2 * 32 * 2);
+for (let f8 = 0; f8 < 2; f8++) {
+  for (let f9 = 0; f9 < 2; f9++) {
+    for (let blk = 0; blk < 8; blk++) {
+      const b = (blk << 2) | (f9 << 1) | f8;
+      RKS[(0 * 32 + b) * 2 + 1] = (blk << 1) + f9;
+      RKS[(0 * 32 + b) * 2 + 0] = blk >> 1;
+      RKS[(1 * 32 + b) * 2 + 1] = (blk << 1) + (f9 & f8);
+      RKS[(1 * 32 + b) * 2 + 0] = blk >> 1;
+    }
+  }
+}
+
+// \u30EC\u30B8\u30B9\u30BF\u306E\u4E0B 5 \u30D3\u30C3\u30C8 \u2192 \u30B9\u30ED\u30C3\u30C8\u30026\u30017\u300114\u300115 \u306A\u3069\u306F\u7A7A\u304D
+const SLOT_OF = [0, 2, 4, 1, 3, 5, -1, -1, 6, 8, 10, 7, 9, 11, -1, -1,
+  12, 14, 16, 13, 15, 17, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1];
+
+function newPatch() {
+  return { AM: 0, PM: 0, EG: 0, KR: 0, ML: 0, KL: 0, TL: 0, AR: 0, DR: 0, SL: 0, RR: 0, FB: 0 };
+}
+
+function newSlot(n) {
+  return {
+    number: n, type: n % 2, pgKeep: 0, patch: newPatch(),
+    pgPhase: 0, pgOut: 0, out0: 0, out1: 0,
+    egState: RELEASE, egOut: EG_MUTE, egRateH: 0, egRateL: 0, egShift: 0,
+    fnum: 0, blk: 0, blkFnum: 0, tll: 0, rks: 0, req: 0,
+  };
+}
+
+class OPL {
+  constructor() {
+    this.reg = new Uint8Array(0x100);
+    this.slot = [];
+    for (let i = 0; i < 18; i++) this.slot.push(newSlot(i));
+    this.alg = new Uint8Array(9);
+    this.slotKey = 0;
+    this.notesel = 0;
+    this.pmPhase = 0; this.amPhase = 0; this.lfoAm = 0;
+    this.amMode = 0; this.pmMode = 0;
+    this.egCounter = 0;
+    this.noise = 1; this.shortNoise = 0; this.rhythm = 0;
+  }
+  mod(ch) { return this.slot[ch << 1]; }
+  car(ch) { return this.slot[(ch << 1) | 1]; }
+
+  setFnumber(ch, fnum) {
+    for (const s of [this.car(ch), this.mod(ch)]) {
+      s.fnum = fnum;
+      s.blkFnum = (s.blkFnum & 0x1c00) | (fnum & 0x3ff);
+      s.req |= 2 | 4 | 8;
+    }
+  }
+  setBlock(ch, blk) {
+    for (const s of [this.car(ch), this.mod(ch)]) {
+      s.blk = blk;
+      s.blkFnum = ((blk & 7) << 10) | (s.blkFnum & 0x3ff);
+      s.req |= 2 | 4 | 8;
+    }
+  }
+
+  writeReg(reg, data) {
+    reg &= 0xff;
+    data &= 0xff;
+    this.reg[reg] = data;
+    if (reg === 0x08) {
+      this.notesel = (data >> 6) & 1;
+    } else if (reg >= 0x20 && reg < 0xa0) {
+      const s = SLOT_OF[reg & 0x1f];
+      if (s < 0) return;
+      const sl = this.slot[s], p = sl.patch;
+      const hi = reg & 0xe0;
+      if (hi === 0x20) {
+        p.AM = (data >> 7) & 1; p.PM = (data >> 6) & 1; p.EG = (data >> 5) & 1;
+        p.KR = (data >> 4) & 1; p.ML = data & 15;
+        sl.req |= 255;
+      } else if (hi === 0x40) {
+        p.KL = (data >> 6) & 3; p.TL = data & 63;
+        sl.req |= 255;
+      } else if (hi === 0x60) {
+        p.AR = (data >> 4) & 15; p.DR = data & 15;
+        sl.req |= 8;
+      } else {
+        p.SL = (data >> 4) & 15; p.RR = data & 15;
+        sl.req |= 8;
+      }
+    } else if (reg >= 0xa0 && reg < 0xa9) {
+      this.setFnumber(reg - 0xa0, data + ((this.reg[reg + 0x10] & 3) << 8));
+    } else if (reg >= 0xb0 && reg < 0xb9) {
+      const ch = reg - 0xb0;
+      this.setFnumber(ch, ((data & 3) << 8) + this.reg[reg - 0x10]);
+      this.setBlock(ch, (data >> 2) & 7);
+      this.updateKey();
+    } else if (reg >= 0xc0 && reg < 0xc9) {
+      const ch = reg - 0xc0;
+      this.mod(ch).patch.FB = (data >> 1) & 7;
+      this.alg[ch] = data & 1;
+    } else if (reg === 0xbd) {
+      this.updateRhythm();
+      this.updateKey();
+      this.amMode = (data >> 7) & 1;
+      this.pmMode = (data >> 6) & 1;
+    }
+  }
+
+  /** \u30EA\u30BA\u30E0\u306B\u5165\u308B\u3068\u3001\u4E0B 3 \u30C1\u30E3\u30F3\u30CD\u30EB\u304C\u6253\u697D\u5668\u306B\u306A\u308B(OPLL \u3068\u540C\u3058\u4F5C\u308A) */
+  updateRhythm() {
+    const on = (this.reg[0xbd] >> 5) & 1;
+    if (this.rhythm !== on) {
+      const t = on ? [3, 3, 3, 3] : [0, 1, 0, 1];
+      this.slot[14].type = t[0]; this.slot[14].pgKeep = on;
+      this.slot[15].type = t[1];
+      this.slot[16].type = t[2];
+      this.slot[17].type = t[3]; this.slot[17].pgKeep = on;
+    }
+    this.rhythm = on;
+  }
+
+  updateKey() {
+    let want = 0;
+    for (let ch = 0; ch < 9; ch++) if (this.reg[0xb0 + ch] & 0x20) want |= 3 << (ch * 2);
+    const r = this.reg[0xbd];
+    if ((r >> 5) & 1) {
+      if (r & 0x10) want |= 3 << 12;   // \u30D0\u30B9\u30C9\u30E9\u306F 2 \u30B9\u30ED\u30C3\u30C8
+      if (r & 0x01) want |= 1 << 14;   // \u30CF\u30A4\u30CF\u30C3\u30C8
+      if (r & 0x08) want |= 1 << 15;   // \u30B9\u30CD\u30A2
+      if (r & 0x04) want |= 1 << 16;   // \u30BF\u30E0
+      if (r & 0x02) want |= 1 << 17;   // \u30B7\u30F3\u30D0\u30EB
+    }
+    const diff = this.slotKey ^ want;
+    for (let i = 0; i < 18; i++) {
+      if (!((diff >> i) & 1)) continue;
+      if ((want >> i) & 1) this.slotOn(this.slot[i]);
+      else { this.slot[i].egState = RELEASE; this.slot[i].req |= 8; }
+    }
+    this.slotKey = want;
+  }
+
+  /** \u30AD\u30FC\u30AA\u30F3\u3002OPLL \u3068\u9055\u3063\u3066 DAMP \u3092\u631F\u307E\u305A\u3001\u3059\u3050\u4E0A\u304C\u308A\u306F\u3058\u3081\u308B */
+  slotOn(s) {
+    s.rks = RKS[(this.notesel * 32 + (s.blkFnum >> 8)) * 2 + s.patch.KR];
+    if (Math.min(15, s.patch.AR + (s.rks >> 2)) === 15) { s.egState = DECAY; s.egOut = 0; }
+    else s.egState = ATTACK;
+    if (!s.pgKeep) s.pgPhase = 0;
+    s.req |= 8;
+  }
+
+  rateOf(s) {
+    switch (s.egState) {
+      case ATTACK: return s.patch.AR;
+      case DECAY: return s.patch.DR;
+      case SUSTAIN: return s.patch.EG ? 0 : s.patch.RR;
+      case RELEASE: return s.patch.RR;
+      default: return 0;
+    }
+  }
+  commit(s) {
+    if (s.req & 2) s.tll = TLL[(s.blkFnum >> 6) * 4 + s.patch.KL] + (s.patch.TL << 2);
+    if (s.req & 4) s.rks = RKS[(this.notesel * 32 + (s.blkFnum >> 8)) * 2 + s.patch.KR];
+    if (s.req & (4 | 8)) {
+      const r = this.rateOf(s);
+      if (r === 0) {
+        s.egShift = 0; s.egRateH = 0; s.egRateL = 0;
+      } else {
+        s.egRateH = Math.min(15, r + (s.rks >> 2));
+        s.egRateL = s.rks & 3;
+        s.egShift = s.egState === ATTACK
+          ? ((0 < s.egRateH && s.egRateH < 12) ? (12 - s.egRateH) : 0)
+          : (s.egRateH < 12 ? (12 - s.egRateH) : 0);
+      }
+    }
+    s.req = 0;
+  }
+
+  stepOf(s, c, decay) {
+    const i = (c >> s.egShift) & 7;
+    switch (s.egRateH) {
+      case 0: return 0;
+      case 13: return EG_STEP_FAST[s.egRateL][i];
+      case 14: return EG_STEP_FAST[s.egRateL][i] << 1;
+      case 15: return decay ? 4 : 0;
+      default: return EG_STEP[s.egRateL][i];
+    }
+  }
+  calcEnv(s, c) {
+    const mask = (1 << s.egShift) - 1;
+    if (s.egState === ATTACK) {
+      if (0 < s.egOut && s.egRateH > 0 && (c & mask) === 0) {
+        s.egOut += (~s.egOut * this.stepOf(s, c, false)) >> 3;
+      }
+    } else if (s.egRateH > 0 && (c & mask) === 0) {
+      s.egOut = Math.min(EG_MUTE, s.egOut + this.stepOf(s, c, true));
+    }
+    if (s.egState === ATTACK) {
+      if (s.egOut === 0) { s.egState = DECAY; s.req |= 8; }
+    } else if (s.egState === DECAY) {
+      if (s.patch.SL !== 15 && (s.egOut >> 4) === s.patch.SL) { s.egState = SUSTAIN; s.req |= 8; }
+    }
+  }
+  calcPhase(s) {
+    let pm = 0;
+    if (s.patch.PM) {
+      pm = PM[(s.fnum >> 7) & 7][this.pmPhase >> 19];
+      if (!this.pmMode) pm >>= 1;
+    }
+    s.pgPhase += ((((s.fnum & 0x3ff) + pm) * ML[s.patch.ML]) << s.blk) >> 1;
+    s.pgPhase &= (1 << 20) - 1;
+    s.pgOut = s.pgPhase >> 10;
+  }
+
+  toLinear(h, s, am) {
+    if (s.egOut >= EG_MAX) return 0;
+    const att = Math.min(EG_MUTE, s.egOut + s.tll + am) << 3;
+    return expLookup(h + att);
+  }
+  calcMod(ch) {
+    const s = this.mod(ch);
+    const fb = s.patch.FB > 0 ? (s.out1 + s.out0) >> (9 - s.patch.FB) : 0;
+    const am = s.patch.AM ? this.lfoAm : 0;
+    s.out1 = s.out0;
+    s.out0 = this.toLinear(SIN[(s.pgOut + fb) & 1023], s, am);
+    return s.out0;
+  }
+  calcCar(ch, fm) {
+    const s = this.car(ch);
+    const am = s.patch.AM ? this.lfoAm : 0;
+    s.out1 = s.out0;
+    s.out0 = this.toLinear(SIN[(s.pgOut + 2 * (fm >> 1)) & 1023], s, am);
+    return s.out0;
+  }
+  /** 2 \u3064\u306E\u3064\u306A\u304E\u65B9\u30020 \u306F\u76F4\u5217\u306E FM\u30011 \u306F 2 \u3064\u3092\u8DB3\u3059\u3060\u3051 */
+  calcFm(ch) {
+    if (this.alg[ch]) return this.calcCar(ch, 0) + this.calcMod(ch);
+    return this.calcCar(ch, this.calcMod(ch));
+  }
+
+  stepNoise(n) {
+    for (let i = 0; i < n; i++) {
+      if (this.noise & 1) this.noise ^= 0x800200;
+      this.noise >>>= 1;
+    }
+  }
+  updateShortNoise() {
+    const hh = this.slot[14].pgOut, cym = this.slot[17].pgOut;
+    const h2 = (hh >> 2) & 1, h7 = (hh >> 7) & 1, h3 = (hh >> 3) & 1;
+    const c3 = (cym >> 3) & 1, c5 = (cym >> 5) & 1;
+    this.shortNoise = (h2 ^ h7) | (h3 ^ c5) | (c3 ^ c5);
+  }
+  calcTom() { const s = this.slot[16]; return this.toLinear(SIN[s.pgOut], s, 0); }
+  calcSnare() {
+    const s = this.slot[15];
+    const ph = ((this.slot[14].pgOut >> 8) & 1)
+      ? ((this.noise & 1) ? 0x300 : 0x200)
+      : ((this.noise & 1) ? 0x000 : 0x100);
+    return this.toLinear(SIN[ph], s, 0);
+  }
+  calcCym() {
+    const s = this.slot[17];
+    return this.toLinear(SIN[this.shortNoise ? 0x300 : 0x100], s, 0);
+  }
+  calcHat() {
+    const s = this.slot[14];
+    const ph = this.shortNoise
+      ? ((this.noise & 1) ? 0x2d0 : 0x234)
+      : ((this.noise & 1) ? 0x034 : 0x0d0);
+    return this.toLinear(SIN[ph], s, 0);
+  }
+
+  /** 1 \u30B5\u30F3\u30D7\u30EB(49716Hz)\u3076\u3093\u9032\u3081\u3066\u3001\u548C\u3092\u8FD4\u3059\u3002\u30CE\u30A4\u30BA\u3092\u9032\u3081\u308B\u4F4D\u7F6E\u306F OPLL \u3068\u540C\u3058 */
+  tick() {
+    this.pmPhase = (this.pmPhase + 512) & ((1 << 22) - 1);
+    this.amPhase++;
+    this.lfoAm = AM[(this.amPhase >> 6) % 210] >> (this.amMode ? 0 : 2);
+    this.updateShortNoise();
+    this.egCounter = (this.egCounter + 1) & 0xffff;
+    for (let i = 0; i < 18; i++) {
+      const s = this.slot[i];
+      if (s.req) this.commit(s);
+      this.calcEnv(s, this.egCounter);
+      this.calcPhase(s);
+    }
+    let sum = 0;
+    for (let ch = 0; ch < 6; ch++) sum += -this.calcFm(ch) >> 1;
+    if (!this.rhythm) sum += -this.calcFm(6) >> 1;
+    else sum += this.calcFm(6);                       // \u30D0\u30B9\u30C9\u30E9
+    this.stepNoise(14);
+    if (!this.rhythm) sum += -this.calcFm(7) >> 1;
+    else { sum += this.calcHat(); sum += this.calcSnare(); }
+    this.stepNoise(2);
+    if (!this.rhythm) sum += -this.calcFm(8) >> 1;
+    else { sum += this.calcTom(); sum += this.calcCym(); }
+    this.stepNoise(2);
+    return sum;
+  }
+}
+
+// ---- \u97F3\u7B26\u3092\u53D7\u3051\u3066\u3001\u30EC\u30B8\u30B9\u30BF\u3078\u5909\u63DB\u3059\u308B ----
+
+/** \u9AD8\u3055\u304B\u3089 block \u3068 fnum \u3092\u51FA\u3059\u3002fnum \u306F 512 \u4EE5\u4E0A\u306B\u5BC4\u305B\u3066\u523B\u307F\u3092\u7A3C\u3050 */
+function pitchOf(freq) {
+  for (let blk = 0; blk < 8; blk++) {
+    const fnum = Math.round(freq * 72 * (1 << (20 - blk)) / CLK);
+    if (fnum < 1024) return { blk, fnum: Math.max(1, fnum) };
+  }
+  return { blk: 7, fnum: 1023 };
+}
+
+/** \u30C1\u30E3\u30F3\u30CD\u30EB\u306E\u5909\u8ABF\u5074\u306E\u30AA\u30D5\u30BB\u30C3\u30C8(20h \u53F0\u306A\u3069\u306E\u4E0B\u4F4D)\u3002\u642C\u9001\u5074\u306F 3 \u8DB3\u3059 */
+function opOffset(ch) { return (ch % 3) + Math.floor(ch / 3) * 8; }
+
+class OplBank extends AudioWorkletProcessor {
+  constructor(o) {
+    super();
+    const q = o.processorOptions || {};
+    this.events = (q.events || []).slice().sort((a, b) => a.t - b.t);
+    this.at = 0;
+    this.chip = new OPL();
+    this.step = RATE / sampleRate;
+    this.frac = 0;
+    this.prev = 0;
+    this.cur = 0;
+    this.busy = new Float64Array(9);
+    this.off = new Float64Array(9);
+    this.cutAt = -1;
+    this.cutLen = Math.max(1, Math.round(RATE * 0.01));
+    this.port.onmessage = (e) => {
+      if (e.data && e.data.cut) { this.cut(); return; }
+      const add = e.data && e.data.add;
+      if (!add || !add.length) return;
+      this.cutAt = -1;
+      for (let i = 0; i < add.length; i++) this.events.push(add[i]);
+    };
+  }
+
+  /** \u6B62\u3081\u308B\u3002\u6E9C\u3081\u305F\u30A4\u30D9\u30F3\u30C8\u3092\u6368\u3066\u3001\u30AD\u30FC\u30AA\u30D5\u3092\u66F8\u3044\u3066\u3001\u51FA\u53E3\u3092 10 \u30DF\u30EA\u79D2\u3067\u843D\u3068\u3059 */
+  cut() {
+    this.events.length = 0;
+    this.at = 0;
+    for (let ch = 0; ch < 9; ch++) {
+      const r = this.chip.reg[0xb0 + ch];
+      if (r & 0x20) this.chip.writeReg(0xb0 + ch, r & ~0x20);
+      this.busy[ch] = 0;
+      this.off[ch] = 0;
+    }
+    if (this.cutAt < 0) this.cutAt = 0;
+  }
+
+  /** \u7A7A\u3044\u3066\u3044\u308B\u58F0\u3002\u7121\u3051\u308C\u3070\u3044\u3061\u3070\u3093\u65E9\u304F\u7A7A\u304F\u58F0 */
+  pick(now) {
+    let best = 0;
+    for (let ch = 0; ch < 9; ch++) {
+      if (this.busy[ch] <= now) return ch;
+      if (this.busy[ch] < this.busy[best]) best = ch;
+    }
+    return best;
+  }
+
+  /** \u97F3\u8272\u3092\u305D\u306E\u30C1\u30E3\u30F3\u30CD\u30EB\u3078\u66F8\u304F\u3002\u97F3\u91CF\u306F\u642C\u9001\u5074\u306E TL \u306B\u8DB3\u3059(1 \u6BB5 3dB) */
+  voice(ch, p, v) {
+    const m = opOffset(ch), c = m + 3;
+    const att = Math.max(0, Math.min(15, 15 - Math.round(v))) * 4;
+    const w = (r, d) => this.chip.writeReg(r, d);
+    w(0x20 + m, p.m[0]); w(0x20 + c, p.c[0]);
+    w(0x40 + m, p.m[1]);
+    w(0x40 + c, (p.c[1] & 0xc0) | Math.min(63, (p.c[1] & 63) + att));
+    w(0x60 + m, p.m[2]); w(0x60 + c, p.c[2]);
+    w(0x80 + m, p.m[3]); w(0x80 + c, p.c[3]);
+    w(0xc0 + ch, p.fbc);
+    // \u8DB3\u3059\u3064\u306A\u304E\u65B9\u3067\u306F\u3001\u5909\u8ABF\u5074\u3082\u97F3\u3068\u3057\u3066\u51FA\u308B\u3002\u97F3\u91CF\u3092\u4E21\u65B9\u306B\u639B\u3051\u308B
+    if (p.fbc & 1) w(0x40 + m, (p.m[1] & 0xc0) | Math.min(63, (p.m[1] & 63) + att));
+  }
+
+  process(inputs, outputs) {
+    const out = outputs[0][0];
+    const n = out.length;
+    for (let i = 0; i < n; i++) {
+      const now = currentTime + i / sampleRate;
+      for (let ch = 0; ch < 9; ch++) {
+        if (this.off[ch] > 0 && this.off[ch] <= now) {
+          const r = this.chip.reg[0xb0 + ch];
+          if (r & 0x20) this.chip.writeReg(0xb0 + ch, r & ~0x20);
+          this.off[ch] = 0;
+        }
+      }
+      while (this.at < this.events.length && this.events[this.at].t <= now) {
+        const ev = this.events[this.at++];
+        if (!ev.patch || !(ev.v > 0)) continue;
+        const ch = this.pick(now);
+        const r = this.chip.reg[0xb0 + ch];
+        if (r & 0x20) this.chip.writeReg(0xb0 + ch, r & ~0x20);
+        const { blk, fnum } = pitchOf(ev.freq);
+        this.voice(ch, ev.patch, ev.v);
+        this.chip.writeReg(0xa0 + ch, fnum & 0xff);
+        this.chip.writeReg(0xb0 + ch, 0x20 | (blk << 2) | ((fnum >> 8) & 3));
+        // \u96E2\u3057\u305F\u3042\u3068\u306E\u4F59\u97FB\u3076\u3093\u306F\u3001\u6B21\u306E\u97F3\u306B\u58F0\u3092\u8B72\u3089\u306A\u3044
+        this.busy[ch] = now + ev.dur + 0.3;
+        this.off[ch] = now + ev.dur;
+      }
+      this.frac += this.step;
+      while (this.frac >= 1) {
+        this.prev = this.cur;
+        this.cur = this.chip.tick();
+        this.frac -= 1;
+      }
+      // \u51FA\u53E3\u306E\u5272\u308A\u7B97\u306F OPLL \u3068\u540C\u3058(\u30C1\u30C3\u30D7\u306E\u751F\u306E\u5024\u306F int16 \u306E\u5E45)
+      let v = (this.prev + (this.cur - this.prev) * this.frac) / 16384;
+      if (this.cutAt >= 0) {
+        v *= Math.max(0, 1 - this.cutAt / this.cutLen);
+        this.cutAt++;
+        if (this.cutAt > this.cutLen) { this.cutAt = this.cutLen; v = 0; }
+      }
+      out[i] = v;
+    }
+    return true;
+  }
+}
+registerProcessor('mmsxx-opl', OplBank);
+`;
+  var OP_FIELDS2 = {
+    mul: {
+      at: "ml",
+      max: 15,
+      desc: "Frequency multiple, 0 to 15. 0 means half. 1 is the written pitch, 2 is an octave up. On the modulator this sets which harmonic it adds."
+    },
+    ksr: {
+      at: "kr",
+      max: 1,
+      desc: "Key scale rate, 0 or 1. With 1 the envelope runs faster for higher notes."
+    },
+    hold: {
+      at: "eg",
+      max: 1,
+      desc: "Sustaining, 0 or 1. With 1 the note holds while the key is down. With 0 it keeps falling away, like a plucked or struck instrument."
+    },
+    vibrato: {
+      at: "pm",
+      max: 1,
+      desc: "Pitch wobble, 0 or 1. The chip has one speed and two depths for all channels."
+    },
+    tremolo: {
+      at: "am",
+      max: 1,
+      desc: "Volume wobble, 0 or 1. The chip has one speed and two depths for all channels."
+    },
+    ksl: {
+      at: "kl",
+      max: 3,
+      desc: "Key scale level, 0 to 3. How much quieter the higher notes get. 0 keeps every octave at the same level."
+    },
+    tl: {
+      at: "tl",
+      max: 63,
+      desc: "Total level, 0 to 63, in steps of 0.75dB. 0 is the loudest. On the modulator larger numbers mean fewer harmonics. On the carrier it is the level of the voice, and the volume (v in MML) is taken off on top of it."
+    },
+    fb: {
+      at: "fb",
+      max: 7,
+      modOnly: true,
+      desc: "Feedback of the modulator into itself, 0 to 7. 0 is none. Larger numbers add harmonics and, at the top, break into noise. Only the modulator has it."
+    },
+    ar: {
+      at: "ar",
+      max: 15,
+      desc: "Attack rate, 0 to 15. How fast it rises. 15 is instant, 0 never starts."
+    },
+    dr: {
+      at: "dr",
+      max: 15,
+      desc: "Decay rate, 0 to 15. How fast it falls to the sustain level after the attack."
+    },
+    sl: {
+      at: "sl",
+      max: 15,
+      desc: "Sustain level, 0 to 15, in steps of 3dB. 0 is full, 15 is nearly silent. Where the decay stops."
+    },
+    rr: {
+      at: "rr",
+      max: 15,
+      desc: "Release rate, 0 to 15. How fast it falls once the key is let go."
+    }
+  };
+  var ALIASES2 = {
+    ratio: "mul",
+    harmonic: "mul",
+    depth: "tl",
+    level: "tl",
+    attack: "ar",
+    decay: "dr",
+    sustain: "sl",
+    release: "rr",
+    feedback: "fb",
+    scale: "ksl",
+    scaleRate: "ksr",
+    sustaining: "hold"
+  };
+  function fail(msg) {
+    throw new Error(`[ChpTnSnd] OPL \u306E\u97F3\u8272: ${msg}`);
+  }
+  function numOf2(v, max, key2, where) {
+    const n = v === true ? max : v === false ? 0 : Number(v);
+    if (!Number.isFinite(n) || n < 0 || n > max || n !== Math.floor(n)) {
+      fail(`${where} \u306E "${key2}" \u306F 0\u301C${max} \u306E\u6574\u6570\u3067\u3059(${v} \u3068\u66F8\u3044\u3066\u3042\u308A\u307E\u3059)`);
+    }
+    return n;
+  }
+  function readOp2(src, where, isMod) {
+    const out = { ml: 0, kr: 0, eg: 0, pm: 0, am: 0, kl: 0, tl: 0, fb: 0, ar: 0, dr: 0, sl: 0, rr: 0 };
+    for (const [key2, v] of Object.entries(src || {})) {
+      const name = ALIASES2[key2] ?? key2;
+      const f = OP_FIELDS2[name];
+      if (!f) {
+        if (name === "wave" || name === "half") fail("OPL \u306E\u6CE2\u5F62\u306F\u30B5\u30A4\u30F3\u6CE2\u3060\u3051\u3067\u3059(\u534A\u6CE2\u6574\u6D41\u306F OPLL \u306B\u3057\u304B\u3042\u308A\u307E\u305B\u3093)");
+        const all = [...Object.keys(OP_FIELDS2), ...Object.keys(ALIASES2)].sort().join(" ");
+        fail(`${where} \u306B "${key2}" \u306F\u66F8\u3051\u307E\u305B\u3093(\u66F8\u3051\u308B\u3082\u306E: ${all})`);
+      }
+      if (f.modOnly && !isMod) fail(`"${key2}" \u306F\u5909\u8ABF\u5074(mod)\u306B\u3060\u3051\u66F8\u3051\u307E\u3059`);
+      out[f.at] = numOf2(v, f.max, key2, where);
+    }
+    return out;
+  }
+  function oplVoice(spec = {}) {
+    const m = readOp2(spec.mod, "mod", true);
+    const c = readOp2(spec.car, "car", false);
+    if (spec.feedback !== void 0) m.fb = numOf2(spec.feedback, 7, "feedback", "\u3053\u306E\u97F3\u8272");
+    const con = spec.connect === void 0 ? 0 : numOf2(spec.connect, 1, "connect", "\u3053\u306E\u97F3\u8272");
+    for (const k of Object.keys(spec)) {
+      if (!["mod", "car", "feedback", "connect"].includes(k)) fail(`"${k}" \u306F\u66F8\u3051\u307E\u305B\u3093(mod car feedback connect)`);
+    }
+    const op = (o) => [
+      o.am << 7 | o.pm << 6 | o.eg << 5 | o.kr << 4 | o.ml,
+      o.kl << 6 | o.tl,
+      o.ar << 4 | o.dr,
+      o.sl << 4 | o.rr
+    ];
+    return { m: op(m), c: op(c), fbc: m.fb << 1 | con };
+  }
+  function registerOPL(name, spec, opts = {}) {
+    return registerVoice(
+      name,
+      "opl",
+      { patch: oplVoice(spec) },
+      { vsteps: 16, vcurve: "3db", ...opts }
+    );
+  }
+  var OPL_CHIP = {
+    kind: "opl",
+    node: "mmsxx-opl",
+    code: OPL_CODE,
+    // 音量はチップに任せる。外から掛けると実機と違う鳴り方になる(OPLL と同じ扱い)
+    event: (ev, wf, freq, amp, t0, t1) => ({
+      t: t0,
+      dur: Math.max(0.01, t1 - t0 - (ev.relTail || 0)),
+      freq,
+      v: ev.vol,
+      patch: wf.patch
+    })
+  };
+  registerVoiceSyntax("opl", (name, spec, opts) => registerOPL(name, spec, opts));
+
+  // sound/adpcmb.js
+  function adpcmbStep(st, n) {
+    const SCALE = [57, 57, 57, 57, 77, 102, 128, 153];
+    const d = st.diff * ((n & 7) * 2 + 1) >> 3;
+    let out = n & 8 ? st.out - d : st.out + d;
+    out = out < -32768 ? -32768 : out > 32767 ? 32767 : out;
+    let diff = st.diff * SCALE[n & 7] >> 6;
+    diff = diff < 127 ? 127 : diff > 24575 ? 24575 : diff;
+    st.out = out;
+    st.diff = diff;
+    return out;
+  }
+  var ADPCMB_CODE = adpcmbStep.toString();
+  function adpcmbState() {
+    return { out: 0, diff: 127 };
+  }
+  function decodeADPCMB(bytes) {
+    const st = adpcmbState();
+    const out = new Int16Array(bytes.length * 2);
+    for (let i = 0; i < bytes.length; i++) {
+      out[i * 2] = adpcmbStep(st, bytes[i] >> 4);
+      out[i * 2 + 1] = adpcmbStep(st, bytes[i] & 15);
+    }
+    return out;
+  }
+  function encodeADPCMB(samples) {
+    const st = adpcmbState();
+    const out = new Uint8Array(Math.ceil(samples.length / 2));
+    for (let i = 0; i < samples.length; i++) {
+      const v = Math.max(-1, Math.min(1, samples[i]));
+      const target = Math.round(v * 32767);
+      const n = pick(st, target);
+      adpcmbStep(st, n);
+      if (i & 1) out[i >> 1] |= n;
+      else out[i >> 1] = n << 4;
+    }
+    return out;
+  }
+  function pick(st, target) {
+    const sign = target < st.out ? 8 : 0;
+    const want = Math.abs(target - st.out);
+    let q = Math.round((want * 8 / st.diff - 1) / 2);
+    q = q < 0 ? 0 : q > 7 ? 7 : q;
+    let best = q, err = Infinity;
+    for (let k = Math.max(0, q - 1); k <= Math.min(7, q + 1); k++) {
+      const d = st.diff * (k * 2 + 1) >> 3;
+      const e = Math.abs(want - Math.min(d, sign ? st.out + 32768 : 32767 - st.out));
+      if (e < err) {
+        err = e;
+        best = k;
+      }
+    }
+    return sign | best;
+  }
+
+  // sound/oplpcm.js
+  var OPLPCM_DEFAULT_RATE = 8e3;
+  var OPLPCM_RATE_MIN = 3e3;
+  var OPLPCM_RATE_MAX = 16e3;
+  var HEADROOM = 2;
+  var HOLD_TO = 48e3;
+  function oplpcmRoundTrip(data, rate, fit = 1) {
+    let peak = 0;
+    for (let i = 0; i < data.length; i++) peak = Math.max(peak, Math.abs(data[i]) / HEADROOM);
+    let g = 1 / HEADROOM;
+    if (peak > 1 && fit > 0) g *= Math.pow(peak, -Math.min(1, fit));
+    const packed = encodeADPCMB(Float32Array.from(data, (v) => v * g));
+    const dec = decodeADPCMB(packed);
+    const hold = Math.max(1, Math.ceil(HOLD_TO / rate));
+    const out = new Float32Array(data.length * hold);
+    let prev = 0;
+    for (let i = 0; i < data.length; i++) {
+      const v = (dec[i] + prev) / 2 / 32768 * HEADROOM;
+      prev = dec[i];
+      out.fill(v, i * hold, (i + 1) * hold);
+    }
+    return { data: out, sampleRate: rate * hold, bytes: packed.length };
+  }
+  function registerOPLPCM(name, opts = {}, flags = {}) {
+    if (!opts.from && !opts.phrase) {
+      throw new Error("[ChpTnSnd] " + name + ": \u713C\u304F\u5143\u306E\u97F3\u8272(from)\u304B\u3001\u30D5\u30EC\u30FC\u30BA(phrase)\u304C\u3042\u308A\u307E\u305B\u3093");
+    }
+    if (opts.from && opts.phrase) {
+      throw new Error("[ChpTnSnd] " + name + ": from \u3068 phrase \u306F\u3069\u3061\u3089\u304B 1 \u3064\u3060\u3051\u66F8\u304D\u307E\u3059");
+    }
+    const want = opts.rate ?? OPLPCM_DEFAULT_RATE;
+    const rate = Math.round(Math.max(OPLPCM_RATE_MIN, Math.min(OPLPCM_RATE_MAX, Number(want) || OPLPCM_DEFAULT_RATE)));
+    if (rate !== want) {
+      warn(`[ChpTnSnd] ${name}: ADPCM \u306E\u30EC\u30FC\u30C8\u306F ${OPLPCM_RATE_MIN}\u301C${OPLPCM_RATE_MAX}Hz \u3067\u3059(${want} \u2192 ${rate})`);
+    }
+    const length = opts.length > 0 ? Number(opts.length) : 1;
+    const fit = opts.fit === void 0 ? 1 : Math.max(0, Math.min(1, Number(opts.fit)));
+    if (opts.fit !== void 0 && fit !== Number(opts.fit)) {
+      warn(`[ChpTnSnd] ${name}: @oplpcm \u306E fit \u306F 0\u301C1 \u3067\u3059(${opts.fit} \u2192 ${fit})`);
+    }
+    const what = opts.phrase ? "a phrase" : opts.from;
+    const desc = `Baked from ${what} and played as 4-bit ADPCM-B at ${rate}Hz, the way the Y8950 (MSX-AUDIO) plays samples. o4c plays it at the baked speed; other notes change the speed.` + (opts.desc ? " " + opts.desc : "");
+    const id = registerBaked(name, {
+      ...opts,
+      desc,
+      octaves: [4],
+      step: 12,
+      sampleRate: rate,
+      loop: false,
+      length,
+      ...opts.phrase ? { phrase: opts.phrase, tempo: opts.tempo } : {},
+      vsteps: 256,
+      vcurve: "linear",
+      post: (data, sr) => oplpcmRoundTrip(data, sr, fit)
+    }, flags);
+    WAVEFORMS[id].defaultEnv = 0;
+    return id;
+  }
+  registerVoiceSyntax("oplpcm", (name, spec, opts) => registerOPLPCM(name, bakeSourceOf(name, spec, "oplpcm", ["fit"]), opts));
+
+  // sound/dynpcm.js
+  var DYNPCM_DEFAULT_RATE = 44100;
+  var DYNPCM_RATE_MIN = 3e3;
+  var DYNPCM_RATE_MAX = 48e3;
+  function registerDynPCM(name, opts = {}, flags = {}) {
+    if (!opts.from && !opts.phrase) {
+      throw new Error("[ChpTnSnd] " + name + ": \u713C\u304F\u5143\u306E\u97F3\u8272(from)\u304B\u3001\u30D5\u30EC\u30FC\u30BA(phrase)\u304C\u3042\u308A\u307E\u305B\u3093");
+    }
+    if (opts.from && opts.phrase) {
+      throw new Error("[ChpTnSnd] " + name + ": from \u3068 phrase \u306F\u3069\u3061\u3089\u304B 1 \u3064\u3060\u3051\u66F8\u304D\u307E\u3059");
+    }
+    const want = opts.rate ?? DYNPCM_DEFAULT_RATE;
+    const rate = Math.round(Math.max(DYNPCM_RATE_MIN, Math.min(DYNPCM_RATE_MAX, Number(want) || DYNPCM_DEFAULT_RATE)));
+    if (rate !== want) {
+      warn(`[ChpTnSnd] ${name}: @dynpcm \u306E\u7D30\u304B\u3055\u306F ${DYNPCM_RATE_MIN}\u301C${DYNPCM_RATE_MAX}Hz \u3067\u3059(${want} \u2192 ${rate})`);
+    }
+    const length = opts.length > 0 ? Number(opts.length) : 1;
+    const what = opts.phrase ? "a phrase" : opts.from;
+    const desc = `Baked from ${what} into clean PCM at ${rate}Hz, so a stacked sound plays as one and costs one voice. o4c plays it at the baked speed; other notes change the speed.` + (opts.desc ? " " + opts.desc : "");
+    const id = registerBaked(name, {
+      ...opts,
+      desc,
+      octaves: [4],
+      step: 12,
+      sampleRate: rate,
+      loop: false,
+      length,
+      ...opts.phrase ? { phrase: opts.phrase, tempo: opts.tempo } : {}
+    }, flags);
+    WAVEFORMS[id].defaultEnv = 0;
+    return id;
+  }
+  registerVoiceSyntax("dynpcm", (name, spec, opts) => registerDynPCM(name, bakeSourceOf(name, spec, "dynpcm"), opts));
+
+  // sound/audio.js
   registerDefaultWaves();
   registerDefaultFM();
   registerDefaultBeeps();
@@ -15229,42 +19662,92 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
   registerDefaultTones();
   registerDefaultLayers();
   sealPresets();
+  var MML_PATCHES = { modal: {}, brass: {} };
   function registerModalVoices() {
-    registerFamily("model", {
-      note: "Instruments computed from scratch for every note, with no stored waveform. The timbre moves with how hard, how high and how long you play, which a wavetable cannot do. Not for real chips.",
-      params: [{
-        name: "instrument",
-        default: "piano",
-        note: "Which instrument to build.",
-        values: [...Object.entries(MODAL_PATCHES), ...Object.entries(BRASS_PATCHES)].map(([value, d]) => ({ value, note: d.note }))
-      }]
-    });
-    const ROLE = {
+    const ELECTRIC = /* @__PURE__ */ new Set(["rhodes", "fingerBass", "pickBass", "slapBass"]);
+    const MODAL_ROLE = {
       brush: "perc",
       brushSweep: "perc",
       ride: "perc",
       bass: "bass",
+      fingerBass: "bass",
+      pickBass: "bass",
+      slapBass: "bass",
+      bassSlap: "bass",
+      bassSlapHit: "perc",
+      guitar: "lead",
       piano: "lead",
       rhodes: "lead",
+      timpani: "perc",
+      timpaniRoll: "perc",
+      gong: "perc",
+      marimba: "lead",
+      vibraphone: "chord",
+      glockenspiel: "counter",
       trumpet: "lead",
       trombone: "counter",
       tenor: "lead"
     };
-    for (const [name, def] of Object.entries(MODAL_PATCHES)) {
-      registerModal(`model(${name})`, { patch: name }, { role: ROLE[name], note: def.note });
+    const all = [
+      ...Object.entries(MODAL_PATCHES).map(([name, def]) => ({ name, def, kind: "modal" })),
+      ...Object.entries(BRASS_PATCHES).map(([name, def]) => ({ name, def, kind: "brass" }))
+    ].filter(({ def }) => !def.draft);
+    const acoustic = all.filter((x) => !ELECTRIC.has(x.name));
+    const electric = all.filter((x) => ELECTRIC.has(x.name));
+    registerFamily("acoustic", {
+      desc: "Acoustic instruments, computed from scratch for every note with no stored waveform. The timbre moves with how hard, how high and how long you play, which a wavetable cannot do. Not for real chips.",
+      params: [{
+        name: "instrument",
+        default: "piano",
+        desc: "Which instrument to build.",
+        values: acoustic.map(({ name, def }) => ({ value: name, desc: def.desc }))
+      }]
+    });
+    registerFamily("electric", {
+      desc: "Electric instruments: something that vibrates, picked up and shaped by electronics. Computed for every note like the acoustic family, so the pickup barks when you play hard. Not for real chips.",
+      params: [{
+        name: "instrument",
+        default: "rhodes",
+        desc: "Which instrument to build.",
+        values: electric.map(({ name, def }) => ({ value: name, desc: def.desc }))
+      }]
+    });
+    for (const { name, def, kind } of all) {
+      const family = ELECTRIC.has(name) ? "electric" : "acoustic";
+      const reg = kind === "modal" ? registerModal : registerBrass;
+      reg(`${family}(${name})`, { patch: name }, { role: MODAL_ROLE[name], desc: def.desc });
     }
-    for (const [name, def] of Object.entries(BRASS_PATCHES)) {
-      registerBrass(`model(${name})`, { patch: name }, { role: ROLE[name], note: def.note });
+    for (const word of ["acoustic", "electric"]) {
+      const electric2 = word === "electric";
+      registerVoiceSyntax(word, (name, tree, opts) => {
+        const r = buildInstrument(tree, {
+          word,
+          name,
+          allowed: (n) => ELECTRIC.has(n) === electric2,
+          others: electric2 ? "acoustic" : "electric"
+        });
+        for (const w of r.warnings) warn(w);
+        const patch = "#" + name;
+        MML_PATCHES[r.kind][patch] = { ...r.def, from: r.instrument };
+        const reg = r.kind === "modal" ? registerModal : registerBrass;
+        reg(name, { patch }, { role: opts.role ?? MODAL_ROLE[r.instrument], overwrite: true });
+      }, { tree: true });
+    }
+    for (const kind of ["modal", "brass"]) {
+      registerVoiceDetail(kind, (w) => {
+        const own = MML_PATCHES[kind][w.patch];
+        return own ? describeInstrument(own.from, own) : describeInstrument(w.patch);
+      });
     }
   }
   function registerAnalogVoices() {
     registerFamily("analog", {
-      note: "Subtractive synth voices. One oscillator through one filter, with an envelope on the cutoff and one on the volume. The sound of an 80s analog synth, which no real chip of the era could make.",
+      desc: "Subtractive synth voices. One oscillator through one filter, with an envelope on the cutoff and one on the volume. The sound of an 80s analog synth, which no real chip of the era could make.",
       params: [{
         name: "patch",
         default: "seqBass",
-        note: "Which synth patch to use.",
-        values: Object.entries(ANALOG_PATCHES).map(([value, d]) => ({ value, note: d.note }))
+        desc: "Which synth patch to use.",
+        values: Object.entries(ANALOG_PATCHES).map(([value, d]) => ({ value, desc: d.desc }))
       }]
     });
     const ROLE = {
@@ -15279,10 +19762,15 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
       pwmStrings: "chord",
       syncLead: "lead",
       ringBell: "lead",
-      polyBrass: "chord"
+      whistle: "lead",
+      papipupe: "lead",
+      polyBrass: "chord",
+      voxHumana: "chord",
+      delayBass: "bass",
+      laserZap: "perc"
     };
     for (const [name, def] of Object.entries(ANALOG_PATCHES)) {
-      registerAnalog(`analog(${name})`, { patch: name }, { role: ROLE[name], note: def.note });
+      registerAnalog(`analog(${name})`, { patch: name }, { role: ROLE[name], desc: def.desc, dev: def.dev });
     }
   }
   var MASTER_VOL = 0.14;
@@ -15347,6 +19835,7 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
     if ((wf.special || []).includes("exact")) return 0;
     if (wf.snapDiv > 0) return wf.snapDiv;
     if (["fm", "opm", "opll", "noise", "baked", "beep", "opnaRhythm"].includes(wf.kind)) return 0;
+    if (CHIP_KINDS.has(wf.kind)) return CHIP_KINDS.get(wf.kind).snap;
     if (wf.kind === "ay" && wf.mode === "noise") return 0;
     if (wf.kind === "nes") return wf.mode === "noise" ? 0 : wf.mode === "triangle" ? 32 : 16;
     if (wf.kind === "fds") return 0;
@@ -15384,8 +19873,10 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
       options: (list) => ({
         numberOfInputs: 0,
         outputChannelCount: [2],
-        processorOptions: { events: list, patches: patchesOf(MODAL_PATCHES, compileModal) }
-      })
+        processorOptions: { events: list, patches: patchesOf({ ...MODAL_PATCHES, ...MML_PATCHES.modal }, compileModal) }
+      }),
+      // MML で作ったパッチ。音符を流し込むたびに一緒に渡す(MML_PATCHES)
+      extra: () => patchesOf(MML_PATCHES.modal, compileModal)
     },
     brass: {
       node: BRASS_NODE,
@@ -15394,12 +19885,15 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
       options: (list) => ({
         numberOfInputs: 0,
         outputChannelCount: [1],
-        processorOptions: { events: list, patches: patchesOf(BRASS_PATCHES, compileBrass) }
-      })
+        processorOptions: { events: list, patches: patchesOf({ ...BRASS_PATCHES, ...MML_PATCHES.brass }, compileBrass) }
+      }),
+      extra: () => patchesOf(MML_PATCHES.brass, compileBrass)
     },
     // チャンネルの出口のフィルタ(`@f`)。音符は取らず、入口と出口を持つ。
-    // 作るときに種類を渡すので、`options` ではなく `_chFilter` が自分で組む
+    // 作るときに種類を渡すので、`options` ではなく `_fxChain` が自分で組む
     filter: { node: "mmsxx-filter", code: FILTER_CODE },
+    // エコー。全体(`setMasterEffects`)にもチャンネル(`@f2{echo …}`)にも置く
+    echo: { node: ECHO_NODE, code: ECHO_CODE },
     // 減算方式のシンセ。コーラスが左右へ広がるので、modal と同じ 2 本で出す
     analog: {
       node: ANALOG_NODE,
@@ -15415,6 +19909,12 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
       })
     }
   };
+  var CHIP_KINDS = /* @__PURE__ */ new Map();
+  function registerChipKind(kind, spec) {
+    WORKLETS[kind] = { node: spec.node, code: spec.code };
+    CHIP_KINDS.set(kind, { event: spec.event, snap: spec.snap ?? 0 });
+  }
+  registerChipKind(OPL_CHIP.kind, OPL_CHIP);
   function patchesOf(table, compile) {
     const out = {};
     for (const [k, d] of Object.entries(table)) out[k] = compile(d);
@@ -15434,6 +19934,7 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
     if (wf.kind === "modal") return "modal";
     if (wf.kind === "brass") return "brass";
     if (wf.tone && wf.tone.duty) return "duty";
+    if (CHIP_KINDS.has(wf.kind)) return wf.kind;
     return null;
   }
   function envOf(ev) {
@@ -15717,6 +20218,17 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
     const n = Number(v);
     return Number.isFinite(n) && n >= 0 ? Math.min(8, n) : 1;
   }
+  function songFx(tracks) {
+    if (!Array.isArray(tracks)) return null;
+    const v = tracks.map((t) => t && t.meta && t.meta.fx).find((x) => Array.isArray(x) && x.length);
+    if (!v) return null;
+    try {
+      return normalizeFx(v, FILTERS);
+    } catch (e) {
+      console.warn(`[ChpTnSnd] #fx \u3092\u8AAD\u3081\u307E\u305B\u3093\u3067\u3057\u305F: ${e.message}`);
+      return null;
+    }
+  }
   function switchParts(tracks) {
     if (!tracks.length) return { grid: [], bars: [] };
     const span = Math.max(...tracks.map((t) => t.total), 0);
@@ -15775,7 +20287,7 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
   }
   var ChipTuneSound = class _ChipTuneSound {
     /**
-     * @param {AudioContext} [ctx] 外で作った AudioContext(`SimpleAudio` と同じ)。
+     * @param {AudioContext} [ctx] 外で作った AudioContext。
      *   1 枚の画面に音を出すものが 2 つ以上乗るときは、同じものを渡して使い回す。
      *   こちらは省いてもよい — 渡さなければ `unlock()` が自分で作る。
      *   ゲームが `new ChipTuneSound()` だけで鳴らしてきた口なので、そこは変えない
@@ -15811,6 +20323,11 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
       this.loopTimes = 2;
       this._loopTimesFromSong = 2;
       this._songGain = 1;
+      this._fx = [];
+      this._fxFromSong = false;
+      this._fxNodes = [];
+      this._fxHead = null;
+      this._post = null;
       this._range = null;
       this._chMute = /* @__PURE__ */ new Set();
       this._chLevel = /* @__PURE__ */ new Map();
@@ -15832,7 +20349,13 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
      * 渡されていなければ、ここで作る。土台のほうは作らない決まりだが、
      * こちらはゲームが `new ChipTuneSound()` だけで鳴らしてきた口なので、
      * そこは変えない。分け合うときは `{ ctx }` を渡す。
-     * そのあと、音源が要るものを足す(ノイズの元と、常駐の処理器)
+     * そのあと、音源が要るものを足す(ノイズの元と、常駐の処理器)。
+     *
+     * 処理器の読み込みを待つ約束を返す。`await audio.unlock()` と書けば、
+     * 1 回目の再生から処理器が揃う。待たずに鳴らすと、常駐の処理器を使う音色
+     * (analog・modal・各チップ)が鳴らず、`@f` のエフェクトも素通しになる。
+     * 2 回目からは読み終わっているので直る。1 回目だけ音が違うのはこれ(2026-10-15)
+     * @returns {Promise<void>} 常駐の処理器が全部読めたら解決する
      */
     unlock() {
       if (!this.ctx) {
@@ -15845,10 +20368,10 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
         const d = this.noiseBuffer.getChannelData(0);
         for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
       }
-      for (const kind of Object.keys(WORKLETS)) {
-        this._wkLoad(kind).catch(() => {
-        });
-      }
+      return Promise.all(Object.keys(WORKLETS).map(
+        (kind) => this._wkLoad(kind).catch(() => {
+        })
+      )).then(() => void 0);
     }
     /** いま SE が使っているノイズの数 */
     _usedNoise() {
@@ -15959,6 +20482,29 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
       return inp;
     }
     /**
+     * 重ねた中身の @gain を掛ける行き先。
+     *
+     * 掛ける値ごとに節を 1 つ作って使い回す。音ごとに作ると、常駐の処理器が
+     * 行き先の数だけ増えてしまう(`_wkPush` は行き先ごとに処理器を持つ)。
+     * 1 のときは何も挟まない
+     */
+    _gainDest(dest, gain) {
+      if (!dest || !this.ctx || !(gain >= 0) || gain === 1) return dest;
+      let bank = dest.__gain;
+      if (!bank) {
+        bank = /* @__PURE__ */ new Map();
+        dest.__gain = bank;
+      }
+      const hit = bank.get(gain);
+      if (hit) return hit;
+      const g = this.ctx.createGain();
+      g.gain.value = gain;
+      g.connect(dest);
+      g.__under = { dest, gain };
+      bank.set(gain, g);
+      return g;
+    }
+    /**
      * 出口を 2 本持つ音源の行き先。1 本目が左へ行く束、2 本目が右へ行く束。
      *
      * モノラルでは足して 1 本に戻す。ステレオでは `@p{…}` の両側へ置き、
@@ -15973,6 +20519,13 @@ registerProcessor('${ANALOG_NODE}', AnalogBank);
       if (!d || !this.ctx) return d;
       if (d.__pair) return d.__pair;
       const ctx = this.ctx;
+      if (d.__under) {
+        const g = ctx.createGain();
+        g.gain.value = d.__under.gain;
+        g.connect(this._panPair(d.__under.dest));
+        d.__pair = g;
+        return g;
+      }
       const split = ctx.createChannelSplitter(2);
       const spot = d.__spot;
       if (!spot) {
@@ -16121,7 +20674,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         sink.gain.value = 0;
         node.connect(sink);
         sink.connect(this.ctx.destination);
-        this._bus.connect(node);
+        this._post.connect(node);
         this._tap = node;
         this._tapSink = sink;
         this._tapBusy = false;
@@ -16451,45 +21004,120 @@ registerProcessor('mmsxx-tap', MmsxxTap);
      * @param {number} to 積む範囲の終わり
      */
     /**
-     * そのチャンネルの出口へ置くフィルタの節。`@f` を書いていなければ null。
+     * エフェクトの並びを節につないで返す。全体(`_fxWire`)とチャンネル(`_chFx`)で
+     * 同じものを使う。置き場所が違うだけで、作るものは同じ。
      *
-     * 種類は 1 本に 1 つ(先に書いたもの)。途中で差し替えると音が切れるので、
-     * コンパイルのところで知らせを出して 1 つに寄せている。
-     * カットオフ・レゾナンス・飽和は `_scheduleFilters` が時刻つきで動かす
+     * 処理器が読めていない段は飛ばす。黙るより、素のまま鳴るほうがよい
+     * @param {object[]} list `{kind, ...値}` の並び。前から順に通る
+     * @returns {{head:AudioNode,tail:AudioNode,nodes:AudioNode[],slots:Map}|null}
+     * @private
      */
-    _chFilter(track) {
+    _fxChain(list) {
+      const ctx = this.ctx;
+      const ready = (kind) => this._wkReady && this._wkReady.get(kind) === ctx;
+      const nodes = [];
+      const slots = /* @__PURE__ */ new Map();
+      let head = null, at = null;
+      const add = (n) => {
+        if (!head) head = n;
+        else at.connect(n);
+        nodes.push(n);
+        at = n;
+      };
+      for (const fx of list) {
+        if (FILTERS[fx.kind]) {
+          if (!ready("filter")) continue;
+          const n = new AudioWorkletNode(ctx, "mmsxx-filter", filterOptions(fx.kind, fx));
+          add(n);
+          if (fx.slot !== void 0) slots.set(fx.slot, n);
+        } else if (fx.kind === "echo") {
+          if (!ready("echo")) continue;
+          const lr = fx.cross > 0 ? { channelCount: 2, channelCountMode: "explicit", outputChannelCount: [2] } : {};
+          add(new AudioWorkletNode(ctx, ECHO_NODE, { processorOptions: fx, ...lr }));
+        } else if (fx.kind === "reverb") {
+          if (!head) add(ctx.createGain());
+          const sum = ctx.createGain();
+          const conv = ctx.createConvolver();
+          conv.normalize = false;
+          conv.buffer = reverbImpulse(ctx, fx.time);
+          const wet = ctx.createGain();
+          wet.gain.value = fx.mix;
+          at.connect(sum);
+          at.connect(conv);
+          conv.connect(wet);
+          wet.connect(sum);
+          nodes.push(conv, wet, sum);
+          at = sum;
+        }
+      }
+      return head ? { head, tail: at, nodes, slots } : null;
+    }
+    /**
+     * そのチャンネルの出口へ置くエフェクトの並び。`@f` を書いていなければ null。
+     *
+     * 番号(`@f2{…}`)は順番の札で、本数ではない。書いた番号だけを小さい順に通す。
+     * 種類は 1 台に 1 つ(先に書いたもの)。途中で差し替えると音が切れるので、
+     * コンパイルのところで知らせを出して 1 つに寄せている。
+     * フィルタのカットオフ・レゾナンス・飽和は `_scheduleFilters` が時刻つきで動かす
+     * @private
+     */
+    _chFx(track) {
       const list = track && track.filters;
       if (!list || !list.length || !this.ctx) return null;
-      const first = list.find((f) => f.kind);
-      if (!first) return null;
-      if (!this._wkReady || this._wkReady.get("filter") !== this.ctx) return null;
-      return new AudioWorkletNode(this.ctx, "mmsxx-filter", filterOptions(first.kind, first));
+      const first = /* @__PURE__ */ new Map();
+      for (const f of list) {
+        const slot = f.slot ?? 1;
+        if (f.kind && !first.has(slot)) first.set(slot, { ...f, slot });
+      }
+      if (!first.size) return null;
+      const order = [...first.keys()].sort((a, b) => a - b).map((k) => first.get(k));
+      return this._fxChain(order);
     }
     /**
      * フィルタの書き替えを積む。合図(`_scheduleCues`)と同じ範囲の切り方。
      *
-     * `@f0` は節を外さずに、素通しの端へ寄せる。外すと繋ぎ直しのところで
-     * 音が切れる。ローパスとラダーは上の端、ハイパスは下の端が素通し
+     * 動かせるのはフィルタだけ。echo と reverb は作るときに値が決まるので、
+     * 途中では変えられない(コンパイルのところで知らせを出している)。
+     *
+     * `@f0` と `@f2{off}` は節を外さずに、素通しの端へ寄せる。外すと繋ぎ直しの
+     * ところで音が切れる。ローパスとラダーは上の端、ハイパスは下の端が素通し
      */
     _scheduleFilters(track, ch, state, from, to) {
       const list = track.filters;
       if (!list || !list.length) return;
-      const node = state.chFilters && state.chFilters[ch];
-      if (!node) return;
-      const P = (name) => node.parameters.get(name);
-      const def = FILTERS[(list.find((f) => f.kind) || {}).kind] || FILTERS.lowpass;
+      const chain = state.chFilters && state.chFilters[ch];
+      if (!chain || !chain.slots || !chain.slots.size) return;
+      const kindOf = /* @__PURE__ */ new Map();
+      for (const f of list) {
+        const slot = f.slot ?? 1;
+        if (f.kind && !kindOf.has(slot)) kindOf.set(slot, f.kind);
+      }
+      const open = (node, kind, at) => {
+        const def = FILTERS[kind] || FILTERS.lowpass;
+        node.parameters.get("cutoff").setValueAtTime(
+          def === FILTERS.highpass ? def.params.cutoff.min : def.params.cutoff.max,
+          at
+        );
+        node.parameters.get("resonance").setValueAtTime(0, at);
+        node.parameters.get("drive").setValueAtTime(0, at);
+      };
       for (const f of list) {
         if (f.t < from || f.t >= to) continue;
         const at = state.base + f.t;
-        if (f.off) {
-          P("cutoff").setValueAtTime(def === FILTERS.highpass ? def.params.cutoff.min : def.params.cutoff.max, at);
-          P("resonance").setValueAtTime(0, at);
-          P("drive").setValueAtTime(0, at);
-        } else {
-          P("cutoff").setValueAtTime(f.cutoff, at);
-          P("resonance").setValueAtTime(f.resonance, at);
-          P("drive").setValueAtTime(f.drive, at);
+        if (f.off && f.all) {
+          for (const [slot2, node2] of chain.slots) open(node2, kindOf.get(slot2), at);
+          continue;
         }
+        const slot = f.slot ?? 1;
+        const node = chain.slots.get(slot);
+        if (!node) continue;
+        if (f.off) {
+          open(node, kindOf.get(slot), at);
+          continue;
+        }
+        node.parameters.get("cutoff").setValueAtTime(f.cutoff, at);
+        node.parameters.get("resonance").setValueAtTime(f.resonance, at);
+        node.parameters.get("drive").setValueAtTime(f.drive, at);
       }
     }
     _scheduleCues(track, ch, state, from, to) {
@@ -16519,7 +21147,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     /**
      * 字(`"…"`)を、聞こえる時刻に合わせて予約する。
      *
-     * 合図(`_scheduleCues`)と同じ作り。**いつ消すかは予約しない。**
+     * 合図(`_scheduleCues`)と同じ作り。いつ消すかは予約しない。
      * 出すところだけを渡して、消し方は受けた側に委ねる —
      * 時間で消すのか、次の字で入れ替えるのかは画面の都合だからです
      * (docs/DYNAMIC.md)。
@@ -16556,7 +21184,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     /**
      * 溜まった字を取り出して空にする。
      *
-     * 合図(`takeCues()`)と同じ使い方。**いつ消すかはこちらが決めない。**
+     * 合図(`takeCues()`)と同じ使い方。いつ消すかはこちらが決めない。
      * 一定時間で消すのか、次の字が来たら入れ替えるのかは、受けた側が選びます。
      *
      * ```js
@@ -16782,13 +21410,13 @@ registerProcessor('mmsxx-tap', MmsxxTap);
      *   group = 選ぶ版。sets = on にする組。渡さなかったほうは今のまま
      * @returns {object|null} `bgmGroups()` と同じ形
      */
-    selectGroups(name, pick = {}) {
+    selectGroups(name, pick2 = {}) {
       const def = this.bgmDefs.get(name);
       if (!Array.isArray(def)) return null;
       const now = this._groupOf(name);
-      const group = pick.group !== void 0 ? pick.group : now.group ?? null;
+      const group = pick2.group !== void 0 ? pick2.group : now.group ?? null;
       const same = String(group) === String(now.group ?? "");
-      const sets = pick.sets !== void 0 ? pick.sets : same ? now.sets ?? null : null;
+      const sets = pick2.sets !== void 0 ? pick2.sets : same ? now.sets ?? null : null;
       const got = groupPick(def, { group, sets });
       this._group = { song: name, group: got.group, sets: got.sets };
       const st = this.bgmState;
@@ -16913,6 +21541,11 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       if (!restart && this.bgmState && this.bgmState.name === name && !this.bgmState.fading) {
         return true;
       }
+      const needs = Array.isArray(tracks) ? this._bakeNeeds(tracks) : [];
+      if (needs.length) {
+        this._bakeAll(needs).then(() => this.startBGM(name, { ...opts, restart: true }));
+        return true;
+      }
       this._waitSwitch = null;
       if (this._switchTimer) {
         clearTimeout(this._switchTimer);
@@ -16950,6 +21583,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       }
       hushForJingle();
       this.bgmVoices = tracks.length;
+      this._applySongFx(tracks);
       state.groupOff = new Set(this.bgmGroups(name)?.silent ?? []);
       this._pump(tracks, loop, state, gain, () => this.bgmState === state);
       return true;
@@ -16988,11 +21622,11 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       state.chGains = tracks.map((t, i) => {
         const g = this.ctx.createGain();
         g.gain.value = this._chVol(state, i);
-        const f = this._chFilter(t);
+        const f = this._chFx(t);
         state.chFilters[i] = f;
         if (f) {
-          g.connect(f);
-          f.connect(gain);
+          g.connect(f.head);
+          f.tail.connect(gain);
         } else {
           g.connect(gain);
         }
@@ -17255,6 +21889,10 @@ registerProcessor('mmsxx-tap', MmsxxTap);
      * 少しずつずれていき、しかも「書き出したときだけ変」という
      * 一番気づきにくい形で出る。以前 game/wavexport.js がそれで消えている。
      *
+     * チャンネルごとの出口の分け方も揃える。常駐の処理器は出口ごとに 1 つ作られるので、
+     * 出口をまとめると全チャンネルが 1 つの処理器の声を取り合い、足りないぶんが消える。
+     * 書き出しだけ出口を共有していて、アナログ音源の音が消えていた(2026-10-15)。
+     *
      * 先読み(`_pump`)は通さない。あれは非力な端末で引っかからないための刻みで、
      * 計算するだけの書き出しには要らない。まるごと一度に積む。
      *
@@ -17297,7 +21935,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         throw new Error("[ChpTnSnd] OfflineAudioContext \u304C\u3042\u308A\u307E\u305B\u3093(\u66F8\u304D\u51FA\u3057\u306B\u306F\u30D6\u30E9\u30A6\u30B6\u304C\u8981\u308A\u307E\u3059\u3002\u753B\u9762\u306F\u7121\u304F\u3066\u304B\u307E\u3044\u307E\u305B\u3093)");
       }
       if (String(opts.group ?? "") === "ALL") return this._renderChain(name, opts);
-      const tail = Math.max(0, opts.tail ?? 0.5);
+      const tail = Math.max(0, opts.tail ?? Math.max(0.5, fxTail(songFx(def) || this._fx)));
       const rate = opts.sampleRate ?? 44100;
       const channels = opts.channels ?? 1;
       const cut = songParts(def, {
@@ -17318,6 +21956,9 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         bus: this._bus,
         master: this._master,
         noise: this.noiseBuffer,
+        fxNodes: this._fxNodes,
+        fxHead: this._fxHead,
+        post: this._post,
         waveCache: this._waveCache,
         pulseCache: this._pulseCache,
         modCache: this._modCache,
@@ -17327,6 +21968,8 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         muted: this._muted,
         spatial: this.spatial,
         songGain: this._songGain,
+        fx: this._fx,
+        fxFromSong: this._fxFromSong,
         regLog: this._regLog,
         opllFixed: this._opllFixed
       };
@@ -17334,6 +21977,9 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         this.ctx = ctx;
         this._bus = null;
         this._master = null;
+        this._fxNodes = [];
+        this._fxHead = null;
+        this._post = null;
         this._waveCache = null;
         this._pulseCache = null;
         this._modCache = null;
@@ -17343,27 +21989,29 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         this._keepSec = 0;
         this._muted = false;
         this._songGain = songGain(def);
+        this._applySongFx(def);
         this._regLog = typeof opts.regs === "function";
         this._opllFixed = !!opts.opllFixed;
         const rand = seededRandom(opts.seed ?? 1);
         this.noiseBuffer = ctx.createBuffer(1, rate, rate);
         const d = this.noiseBuffer.getChannelData(0);
         for (let i = 0; i < rate; i++) d[i] = rand() * 2 - 1;
+        await this._bakeAll(this._bakeNeeds(def));
         for (const kind of this._wkKinds(def)) await this._wkLoad(kind);
+        for (const kind of this._fxKinds()) await this._wkLoad(kind);
         const dest = this._out();
         const nodes = [];
         let at = 0;
         const filts = [];
         const outs = def.map((t, i) => {
           const v = this.trackVolume(i);
-          const f = this._chFilter(t);
+          const f = this._chFx(t);
           if (f) filts[i] = f;
-          if (v === 1 && !f) return dest;
           const g = ctx.createGain();
           g.gain.value = v;
           if (f) {
-            g.connect(f);
-            f.connect(dest);
+            g.connect(f.head);
+            f.tail.connect(dest);
           } else {
             g.connect(dest);
           }
@@ -17413,6 +22061,9 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         this.ctx = saved.ctx;
         this._bus = saved.bus;
         this._master = saved.master;
+        this._fxNodes = saved.fxNodes;
+        this._fxHead = saved.fxHead;
+        this._post = saved.post;
         this.noiseBuffer = saved.noise;
         this._waveCache = saved.waveCache;
         this._pulseCache = saved.pulseCache;
@@ -17422,6 +22073,8 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         this._keepSec = saved.keepSec;
         this._muted = saved.muted;
         this._songGain = saved.songGain;
+        this._fx = saved.fx;
+        this._fxFromSong = saved.fxFromSong;
         this.spatial = saved.spatial;
         this._regLog = saved.regLog;
         this._opllFixed = saved.opllFixed;
@@ -17951,10 +22604,12 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       this._wkCut();
       for (const f of s.chFilters || []) {
         if (!f) continue;
-        try {
-          f.disconnect();
-          f.port.postMessage({ stop: true });
-        } catch (e) {
+        for (const n of f.nodes) {
+          try {
+            n.disconnect();
+            if (n.port) n.port.postMessage({ stop: true });
+          } catch (e) {
+          }
         }
       }
       try {
@@ -18452,40 +23107,131 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       if (!wf || wf.kind !== "baked") throw new Error("[ChpTnSnd] " + name + " \u306F\u713C\u3051\u308B\u97F3\u8272\u3067\u306F\u3042\u308A\u307E\u305B\u3093");
       if (wf.baked) return wf.baked.length;
       if (wf.baking) return 0;
+      if (wf.phrase) return this._bakePhrase(wf);
       const srcIndex = findWave(wf.from);
       if (srcIndex < 0) throw new Error("[ChpTnSnd] " + name + ": \u5143\u306E\u97F3\u8272\u304C\u3042\u308A\u307E\u305B\u3093");
       wf.baking = true;
       try {
         const src = WAVEFORMS[srcIndex];
-        const patch = src.patch || (src.kind === "fm" ? { ops: [
+        const patch = src.patch && Array.isArray(src.patch.ops) ? bakeOps(src.patch) : src.kind === "fm" ? { ops: [
           { ratio: src.ratio, sl: src.sustain, ar: src.attack, dr: src.decay },
           // 搬送側。焼くときはエンベロープを持たせないので、鳴りっぱなしとして数える
           { ratio: 1, sl: 1, ar: 0, dr: 0 }
-        ] } : { ops: [{ ratio: 1, sl: 1, ar: 5e-3, dr: 0.05 }] });
+        ] } : { ops: [{ ratio: 1, sl: 1, ar: 5e-3, dr: 0.05 }] };
         const plan = bakePlan(patch, {
           sampleRate: wf.sampleRate,
           octaves: wf.octaves,
           step: wf.step,
-          minLoop: wf.minLoop
+          minLoop: wf.minLoop,
+          loop: wf.loop,
+          length: wf.length
         });
         const baked = [];
         for (const job of plan.jobs) {
           const need = job.attackSamples + job.loopSamples;
           const tail = Math.ceil(wf.sampleRate * 0.2);
           const data = await this._renderTone(srcIndex, job.bakedFreq, need + tail, wf.sampleRate);
-          baked.push({
+          const k = {
             note: job.note,
             bakedFreq: job.bakedFreq,
             attack: job.attackSamples,
             loop: job.loopSamples,
-            data: data.slice(0, need)
-          });
+            data: data.slice(0, need),
+            rate: wf.sampleRate
+          };
+          if (wf.post) {
+            const got = wf.post(k.data, wf.sampleRate);
+            const r = got.sampleRate / wf.sampleRate;
+            k.data = got.data;
+            k.rate = got.sampleRate;
+            k.attack = Math.round(k.attack * r);
+            k.loop = Math.round(k.loop * r);
+          }
+          baked.push(k);
         }
         wf.baked = baked;
         wf.plan = plan;
         return baked.length;
       } finally {
         wf.baking = false;
+      }
+    }
+    /**
+     * MML のフレーズを焼く(registerBaked の phrase)。
+     *
+     * 使い捨ての player でフレーズだけを鳴らして波形にし、1 つの音として持つ。
+     * o4c で書いたとおりに鳴り、ほかの高さは読む速さで動かす(サンプラーと同じ)。
+     * 後ろの無音は切る。大きさは、v15 で鳴らしたときに元のフレーズと揃うように割り戻す。
+     */
+    async _bakePhrase(wf) {
+      const OAC = globalThis.OfflineAudioContext || globalThis.webkitOfflineAudioContext;
+      if (!OAC) throw new Error("[ChpTnSnd] \u713C\u304F\u306B\u306F\u30D6\u30E9\u30A6\u30B6\u304C\u8981\u308A\u307E\u3059");
+      wf.baking = true;
+      try {
+        const tmp = new _ChipTuneSound({ maxVoices: this.maxVoices });
+        tmp.defineBGM("__phrase__", [`t${wf.tempo} ${wf.phrase}`], {});
+        const buf = await tmp.renderBGM("__phrase__", {
+          loops: 1,
+          tail: 0.5,
+          sampleRate: wf.sampleRate,
+          channels: 1,
+          seed: 1,
+          mute: []
+        });
+        let data = buf ? buf.getChannelData(0) : new Float32Array(1);
+        let end = data.length;
+        while (end > 1 && Math.abs(data[end - 1]) < 1e-4) end--;
+        data = data.slice(0, end);
+        for (let i = 0; i < data.length; i++) data[i] /= MASTER_VOL;
+        const k = {
+          note: 60,
+          bakedFreq: 440 * Math.pow(2, (60 - 69) / 12),
+          attack: data.length,
+          loop: 0,
+          data,
+          rate: wf.sampleRate
+        };
+        if (wf.post) {
+          const got = wf.post(k.data, wf.sampleRate);
+          k.attack = Math.round(k.attack * got.sampleRate / wf.sampleRate);
+          k.data = got.data;
+          k.rate = got.sampleRate;
+        }
+        wf.baked = [k];
+        return 1;
+      } finally {
+        wf.baking = false;
+      }
+    }
+    /**
+     * 曲が使う焼く音色のうち、まだ焼けていないものの名前。
+     * 焼けなかったもの(bakeFailed)は数えない。元の音色で鳴らす
+     */
+    _bakeNeeds(tracks) {
+      const out = /* @__PURE__ */ new Set();
+      const look = (i, seen) => {
+        if (seen.has(i)) return;
+        seen.add(i);
+        const w = WAVEFORMS[i];
+        if (!w) return;
+        if (w.kind === "layer") {
+          for (const m of w.layers) look(m.wave, seen);
+          return;
+        }
+        if (w.kind === "baked" && !w.baked && !w.bakeFailed) out.add(w.name);
+      };
+      for (const t of tracks || []) for (const e of t.events || []) look(e.wave, /* @__PURE__ */ new Set());
+      return [...out];
+    }
+    /** 焼けていない音色を焼く。焼けなかったものには印を付けて、二度と待たない */
+    async _bakeAll(names) {
+      for (const n of names) {
+        try {
+          await this.bakeVoice(n);
+        } catch (e) {
+          const w = WAVEFORMS[findWave(n)];
+          if (w) w.bakeFailed = true;
+        }
       }
     }
     /**
@@ -18506,8 +23252,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       tmp.noiseBuffer = ctx.createBuffer(1, sampleRate, sampleRate);
       const d = tmp.noiseBuffer.getChannelData(0);
       for (let i = 0; i < sampleRate; i++) d[i] = rand() * 2 - 1;
-      const kind = tmp._wkKindOf(waveIndex);
-      if (kind) await tmp._wkLoad(kind);
+      for (const kind of tmp._wkKindsOf(waveIndex)) await tmp._wkLoad(kind);
       const dest = tmp._out();
       const nodes = [];
       const sec = samples / sampleRate;
@@ -18522,10 +23267,13 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         vibrato: 0,
         echo: null
       };
-      tmp._playVoice(ev, freq, 1, 0, sec, dest, nodes, false);
+      const amp = ampAt(ev, 1);
+      tmp._playVoice(ev, freq, amp, 0, sec, dest, nodes, false);
       tmp._wkFlushAll(nodes);
       const buf = await ctx.startRendering();
-      return buf.getChannelData(0);
+      const data = buf.getChannelData(0);
+      if (amp > 0) for (let i = 0; i < data.length; i++) data[i] /= amp;
+      return data;
     }
     /** 焼いた波形を、いまの context の AudioBuffer に直す(使い回す) */
     _pcmBuffer(wf, k) {
@@ -18533,7 +23281,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       const key2 = wf.name + "#" + k.note;
       const hit = this._pcmCache.get(key2);
       if (hit && hit.ctx === this.ctx) return hit.buf;
-      const buf = this.ctx.createBuffer(1, k.data.length, wf.sampleRate);
+      const buf = this.ctx.createBuffer(1, k.data.length, k.rate || wf.sampleRate);
       buf.getChannelData(0).set(k.data);
       this._pcmCache.set(key2, { ctx: this.ctx, buf });
       return buf;
@@ -18558,9 +23306,10 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       const src = ctx.createBufferSource();
       src.buffer = this._pcmBuffer(wf, best);
       if (best.loop > 0) {
+        const sr = best.rate || wf.sampleRate;
         src.loop = true;
-        src.loopStart = best.attack / wf.sampleRate;
-        src.loopEnd = (best.attack + best.loop) / wf.sampleRate;
+        src.loopStart = best.attack / sr;
+        src.loopEnd = (best.attack + best.loop) / sr;
       }
       const rate = (f) => f / best.bakedFreq;
       src.playbackRate.value = rate(freq);
@@ -18678,7 +23427,8 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       list.sort((a, b) => a.t - b.t);
       let node = bank.node.get(dest);
       if (node) {
-        node.port.postMessage({ add: list });
+        const extra = WORKLETS[kind].extra ? WORKLETS[kind].extra() : null;
+        node.port.postMessage(extra && Object.keys(extra).length ? { patches: extra, add: list } : { add: list });
         return node;
       }
       const spec = WORKLETS[kind];
@@ -18731,9 +23481,16 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     /** そのトラックに混ざっている処理器を全部集める */
     _wkKinds(tracks) {
       const need = /* @__PURE__ */ new Set();
+      for (const fx of songFx(tracks) || []) {
+        if (FILTERS[fx.kind]) need.add("filter");
+        else if (fx.kind === "echo") need.add("echo");
+      }
       for (const t of tracks) {
         for (const e of t.events) this._wkKindsOf(e.wave, need);
-        if (t.filters && t.filters.length) need.add("filter");
+        for (const f of t.filters || []) {
+          if (FILTERS[f.kind]) need.add("filter");
+          else if (f.kind === "echo") need.add("echo");
+        }
       }
       return need;
     }
@@ -19461,19 +24218,32 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       const ctx = this.ctx;
       if (ev.fade) {
         const w = WAVEFORMS[ev.wave] || {};
-        const pass = w.kind === "layer" || w.kind === "opll" || w.kind === "opm" || w.kind === "ay" || w.kind === "nes" || w.kind === "fds" || w.kind === "scc" || w.kind === "pce" || w.kind === "opnaRhythm" || w.kind === "baked" && !w.baked || w.tone && w.tone.duty || (ev.vsteps ?? w.vsteps) > 0 && !envOf(ev).table && !(w.tone && w.tone.vol);
+        const pass = w.kind === "layer" || w.kind === "opll" || w.kind === "opm" || w.kind === "ay" || w.kind === "nes" || w.kind === "fds" || w.kind === "scc" || w.kind === "pce" || w.kind === "opnaRhythm" || CHIP_KINDS.has(w.kind) || w.kind === "baked" && !w.baked || w.tone && w.tone.duty || (ev.vsteps ?? w.vsteps) > 0 && !envOf(ev).table && !(w.tone && w.tone.vol);
         if (!pass) ({ dest, ev } = this._fadeDest(ev, t0, t1, dest));
       }
       const wfa = WAVEFORMS[ev.wave];
       if (wfa && (wfa.kind === "modal" || wfa.kind === "brass" || wfa.kind === "analog")) {
-        if (ev.legato) return;
         const to = WORKLETS[wfa.kind].buses === 2 ? this._panPair(dest) : dest;
+        if (ev.legato) {
+          if (wfa.kind === "modal" && ev.tieId != null) {
+            this._wkPush("modal", to, { t: t0, p: wfa.patch, f: freq, v: Math.max(0, Math.min(1, (ev.vol ?? 0) / 15)), sl: ev.tieId, nf: 1 });
+          }
+          return;
+        }
         this._wkPush(wfa.kind, to, {
           t: t0,
           p: wfa.patch,
           f: freq,
+          // スラーの続きが、どの弦を動かすかを探すための番号
+          ...wfa.kind === "modal" && ev.tieId != null ? { tie: ev.tieId } : {},
+          // ポルタメント(`c*e`)。鳴っている弦を、音符の長さ(gate)をかけて滑らせる。半音の数で渡す
+          ...wfa.kind === "modal" && ev.glide > 0 ? { gs: 12 * Math.log2(ev.glide / ev.freq), gl: Math.max(0.01, ev.gate ?? t1 - t0) } : {},
           v: Math.max(0, Math.min(1, (ev.vol ?? 0) / 15)),
           d: Math.max(1e-3, ev.tieSpan ?? t1 - t0),
+          // ロールの終わりの強さ(生音の区間の `@to`)。始まりの v から少しずつ変える
+          ...ev.rollTo != null ? { v2: Math.max(0, Math.min(1, ev.rollTo / 15)) } : {},
+          // 右ペダルを踏んでいる区間(時計の秒)。生音の区間の `@ped`。同じパッチの声すべてに効く
+          ...ev.pedals && ev.pedBase != null ? { pd: ev.pedals.map(([a, b]) => [ev.pedBase + a, ev.pedBase + b]) } : {},
           // サブチャンネルの番号。和音の中の何番目か(書いた順)。
           // フィルタをサブチャンネル 1 本につき 1 台持たせるのに使う。
           // 重ねたもの(オクターブ重ね・デチューン・エコーの写し)は元の音と
@@ -19518,10 +24288,10 @@ registerProcessor('mmsxx-tap', MmsxxTap);
           this._playVoice(
             { ...ev, wave: m.wave, env: e },
             f,
-            amp * m.gain,
+            amp,
             t0 + d,
             t1 + d,
-            dest,
+            this._gainDest(dest, m.gain),
             nodes,
             tune
           );
@@ -19537,6 +24307,11 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         if (at >= 0) {
           return this._playVoice({ ...ev, wave: at }, freq, amp, t0, t1, dest, nodes, tune);
         }
+        return;
+      }
+      const wfx = WAVEFORMS[ev.wave];
+      if (wfx && CHIP_KINDS.has(wfx.kind)) {
+        this._wkPush(wfx.kind, dest, CHIP_KINDS.get(wfx.kind).event(ev, wfx, freq, amp, t0, t1));
         return;
       }
       const wfo = WAVEFORMS[ev.wave];
@@ -19742,7 +24517,8 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         const tail = tailOf(ev, end - start);
         const t1 = when + (end - off) + tail;
         const amp = ampFor(ev);
-        const e2 = tail > 0 ? { ...ev, relTail: tail } : ev;
+        let e2 = tail > 0 ? { ...ev, relTail: tail } : ev;
+        if (ev.pedals) e2 = { ...e2, pedBase: when - off };
         this._playVoice(e2, ev.freq, amp, t0, t1, dest, nodes, tune);
         this._extraVoices(e2, track.ch, amp, t0, t1, dest, nodes, tune);
       }
@@ -19759,6 +24535,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         const t1 = t0 + Math.max(0.01, ev.gate) + tail;
         const amp = ampFor(ev);
         if (tail > 0) ev = { ...ev, relTail: tail };
+        if (ev.pedals) ev = { ...ev, pedBase: when };
         const d = this._panFor(dest, ev.pos);
         this._playVoice(ev, ev.freq, amp, t0, t1, d, nodes, tune);
         this._extraVoices(ev, track.ch, amp, t0, t1, d, nodes, tune);
@@ -19816,10 +24593,116 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         this._master.connect(this.ctx.destination);
         this._bus = this.ctx.createGain();
         this._bus.gain.value = 1;
-        this._bus.connect(this._master);
+        this._post = this.ctx.createGain();
+        this._post.connect(this._master);
+        this._fxWire();
         if (this._keepSec > 0) this._startTap(this._keepSec);
       }
       return this._bus;
+    }
+    /**
+     * 全体に掛けるエフェクトを決める。曲の出口の手前に、並べた順に通す。
+     * 鳴らすときと書き出し(`renderBGM`)の両方に効く。
+     *
+     * 種類はフィルタ(`lowpass` `highpass` `ladder` `bandpass` `notch`)と
+     * `echo` と `reverb`。何を渡せるかは `describeMasterEffects()` が返す。
+     * 空の並びを渡すと外れる。
+     *
+     *     await audio.setMasterEffects([
+     *       { kind: 'highpass', cutoff: 80 },
+     *       { kind: 'echo', time: 0.25, feedback: 0.4, mix: 0.3 },
+     *       { kind: 'reverb', time: 1.5, mix: 0.2 },
+     *     ]);
+     *
+     * 掛け直すと、エコーとリバーブの響きはそこで切れる。
+     * @param {object[]} list `{kind, ...値}` の並び。書いていない値は既定になる
+     * @returns {Promise<object[]>} 値を埋めたあとの並び
+     */
+    async setMasterEffects(list) {
+      this._fx = normalizeFx(list, FILTERS);
+      this._fxFromSong = false;
+      if (this.ctx) {
+        for (const kind of this._fxKinds()) {
+          await this._wkLoad(kind).catch(() => {
+          });
+        }
+        if (this._bus) this._fxWire();
+      }
+      return this.masterEffects();
+    }
+    /** いま全体に掛けているエフェクト(値は埋めてある) */
+    masterEffects() {
+      return this._fx.map((fx) => ({ ...fx }));
+    }
+    /**
+     * 全体に掛けられるエフェクトの一覧。種類ごとに説明(note)と、
+     * 値の範囲・既定・説明(params)を持つ
+     * @returns {Object<string,{desc:string,params:object}>}
+     */
+    describeMasterEffects() {
+      const out = {};
+      for (const [kind, def] of Object.entries({ ...FILTERS, ...MASTER_FX })) {
+        out[kind] = { desc: def.desc, params: JSON.parse(JSON.stringify(def.params)) };
+      }
+      return out;
+    }
+    /**
+     * 曲が `#fx` を書いていれば、それを全体のエフェクトにする。
+     *
+     * 書いていない曲へ替えたときは、前の曲が掛けたものだけを外す。
+     * 画面が `setMasterEffects()` で掛けたものは残す — あちらは曲ではなく
+     * その場の鳴らし方なので、曲を替えただけで消えると押し直しになる
+     *
+     * @param {object[]} tracks
+     * @private
+     */
+    _applySongFx(tracks) {
+      const list = songFx(tracks);
+      if (!list && !this._fxFromSong) return;
+      this._fx = list || [];
+      this._fxFromSong = !!list;
+      if (this._bus) this._fxWire();
+    }
+    /** 全体のエフェクトが使う処理器の種類 @private */
+    _fxKinds() {
+      const need = /* @__PURE__ */ new Set();
+      for (const fx of this._fx) {
+        if (FILTERS[fx.kind]) need.add("filter");
+        if (fx.kind === "echo") need.add("echo");
+      }
+      return need;
+    }
+    /**
+     * 溜める段(`_bus`)からエフェクトのあとの段(`_post`)までを、エフェクトの並びで
+     * つなぎ直す。前の節は外して止める。止めないと処理器が動き続ける(sound/filter.js)
+     * @private
+     */
+    _fxWire() {
+      for (const n of this._fxNodes) {
+        try {
+          n.disconnect();
+        } catch (e) {
+        }
+        if (n.port) n.port.postMessage({ stop: true });
+      }
+      this._fxNodes = [];
+      if (this._fxHead) {
+        try {
+          this._bus.disconnect(this._fxHead);
+        } catch (e) {
+        }
+      }
+      this._fxHead = null;
+      const chain = this._fxChain(this._fx);
+      if (chain) {
+        this._bus.connect(chain.head);
+        this._fxHead = chain.head;
+        this._fxNodes = chain.nodes;
+        chain.tail.connect(this._post);
+      } else {
+        this._bus.connect(this._post);
+        this._fxHead = this._post;
+      }
     }
     /**
      * 音を消す / 戻す。曲は止めずに出口を閉じるだけなので、
@@ -19936,10 +24819,10 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out;
   }
 
-  // player-latest/tool/ui/version.js
+  // tool/ui/version.js
   var PLAYER_VERSION = "1.0.0";
 
-  // player-latest/tool/core/tomml.js
+  // tool/core/tomml.js
   var NAMES = ["c", "c+", "d", "d+", "e", "f", "f+", "g", "g+", "a", "a+", "b"];
   var LENS = [
     [16, "1"],
@@ -20019,35 +24902,187 @@ registerProcessor('mmsxx-tap', MmsxxTap);
     return out.join("\n\n");
   }
 
-  // player-latest/tool/core/wav.js
+  // tool/core/wav.js
   function writeWAV(samples, rate = 44100) {
-    const n = samples.length;
-    const out = new Uint8Array(44 + n * 2);
+    const each = samples.length && typeof samples[0] === "object" ? samples : [samples];
+    const ch = each.length;
+    const n = each[0].length;
+    const size = n * ch * 2;
+    const out = new Uint8Array(44 + size);
     const dv = new DataView(out.buffer);
     const put = (at, s) => {
       for (let i = 0; i < s.length; i++) out[at + i] = s.charCodeAt(i);
     };
     put(0, "RIFF");
-    dv.setUint32(4, 36 + n * 2, true);
+    dv.setUint32(4, 36 + size, true);
     put(8, "WAVE");
     put(12, "fmt ");
     dv.setUint32(16, 16, true);
     dv.setUint16(20, 1, true);
-    dv.setUint16(22, 1, true);
+    dv.setUint16(22, ch, true);
     dv.setUint32(24, rate, true);
-    dv.setUint32(28, rate * 2, true);
-    dv.setUint16(32, 2, true);
+    dv.setUint32(28, rate * ch * 2, true);
+    dv.setUint16(32, ch * 2, true);
     dv.setUint16(34, 16, true);
     put(36, "data");
-    dv.setUint32(40, n * 2, true);
+    dv.setUint32(40, size, true);
     for (let i = 0; i < n; i++) {
-      const v = Math.max(-1, Math.min(1, samples[i]));
-      dv.setInt16(44 + i * 2, Math.round(v * 32767), true);
+      for (let c = 0; c < ch; c++) {
+        const v = Math.max(-1, Math.min(1, each[c][i]));
+        dv.setInt16(44 + (i * ch + c) * 2, Math.round(v * 32767), true);
+      }
     }
     return out;
   }
 
-  // player-latest/tool/ui/player.js
+  // tool/core/check/loudness.js
+  var SHELF = { f0: 1681.974450955533, gainDb: 3.999843853973347, q: 0.7071752369554196 };
+  var HIGHPASS = { f0: 38.13547087602444, q: 0.5003270373238773 };
+  function shelfCoeffs(rate) {
+    const k = Math.tan(Math.PI * SHELF.f0 / rate);
+    const vh = Math.pow(10, SHELF.gainDb / 20);
+    const vb = Math.pow(vh, 0.4996667741545416);
+    const a0 = 1 + k / SHELF.q + k * k;
+    return {
+      b0: (vh + vb * k / SHELF.q + k * k) / a0,
+      b1: 2 * (k * k - vh) / a0,
+      b2: (vh - vb * k / SHELF.q + k * k) / a0,
+      a1: 2 * (k * k - 1) / a0,
+      a2: (1 - k / SHELF.q + k * k) / a0
+    };
+  }
+  function highpassCoeffs(rate) {
+    const k = Math.tan(Math.PI * HIGHPASS.f0 / rate);
+    const a0 = 1 + k / HIGHPASS.q + k * k;
+    return {
+      b0: 1,
+      b1: -2,
+      b2: 1,
+      a1: 2 * (k * k - 1) / a0,
+      a2: (1 - k / HIGHPASS.q + k * k) / a0
+    };
+  }
+  function biquad(x, c) {
+    const y = new Float32Array(x.length);
+    let x1 = 0, x2 = 0, y1 = 0, y2 = 0;
+    for (let i = 0; i < x.length; i++) {
+      const v = c.b0 * x[i] + c.b1 * x1 + c.b2 * x2 - c.a1 * y1 - c.a2 * y2;
+      x2 = x1;
+      x1 = x[i];
+      y2 = y1;
+      y1 = v;
+      y[i] = v;
+    }
+    return y;
+  }
+  var lkfs = (z) => z > 0 ? -0.691 + 10 * Math.log10(z) : -Infinity;
+  var mean = (a) => a.reduce((s, v) => s + v, 0) / a.length;
+  function integratedLoudness(channels, rate) {
+    if (!channels.length || !channels[0].length) return -Infinity;
+    const shelf = shelfCoeffs(rate);
+    const hp = highpassCoeffs(rate);
+    const weighted = channels.map((c) => biquad(biquad(c, shelf), hp));
+    const block = Math.round(rate * 0.4);
+    const step = Math.round(rate * 0.1);
+    const n = weighted[0].length;
+    if (n < block) return -Infinity;
+    const zs = [];
+    for (let start = 0; start + block <= n; start += step) {
+      let z = 0;
+      for (const w of weighted) {
+        let sum = 0;
+        for (let i = start; i < start + block; i++) sum += w[i] * w[i];
+        z += sum / block;
+      }
+      zs.push(z);
+    }
+    const loud = zs.filter((z) => lkfs(z) > -70);
+    if (!loud.length) return -Infinity;
+    const gate = lkfs(mean(loud)) - 10;
+    const used = loud.filter((z) => lkfs(z) > gate);
+    if (!used.length) return -Infinity;
+    return lkfs(mean(used));
+  }
+  var OVERSAMPLE = 4;
+  var HALF_TAPS = 16;
+  var taps = null;
+  function interpolationTaps() {
+    if (taps) return taps;
+    taps = [];
+    for (let phase = 0; phase < OVERSAMPLE; phase++) {
+      const h = new Float64Array(HALF_TAPS * 2 + 1);
+      for (let k = -HALF_TAPS; k <= HALF_TAPS; k++) {
+        const t = k - phase / OVERSAMPLE;
+        const sinc = t === 0 ? 1 : Math.sin(Math.PI * t) / (Math.PI * t);
+        const p = (k + HALF_TAPS) / (HALF_TAPS * 2);
+        const win = 0.42 - 0.5 * Math.cos(2 * Math.PI * p) + 0.08 * Math.cos(4 * Math.PI * p);
+        h[k + HALF_TAPS] = sinc * win;
+      }
+      taps.push(h);
+    }
+    return taps;
+  }
+  function truePeak(channels) {
+    const h = interpolationTaps();
+    let peak = 0;
+    for (const x of channels) for (let i = 0; i < x.length; i++) {
+      const a = Math.abs(x[i]);
+      if (a > peak) peak = a;
+    }
+    if (peak === 0) return 0;
+    const near = peak * 0.25;
+    let found = peak;
+    for (const x of channels) {
+      for (let i = HALF_TAPS; i < x.length - HALF_TAPS; i++) {
+        if (Math.abs(x[i]) < near) continue;
+        for (let phase = 1; phase < OVERSAMPLE; phase++) {
+          const t = h[phase];
+          let v = 0;
+          for (let k = -HALF_TAPS; k <= HALF_TAPS; k++) v += t[k + HALF_TAPS] * x[i + k];
+          const a = Math.abs(v);
+          if (a > found) found = a;
+        }
+      }
+    }
+    return found;
+  }
+  var toDb = (v) => v > 0 ? 20 * Math.log10(v) : -Infinity;
+  function measureLoudness(channels, rate) {
+    let peak = 0, clipped = 0;
+    for (const c of channels) {
+      for (let i = 0; i < c.length; i++) {
+        const a = Math.abs(c[i]);
+        if (a > peak) peak = a;
+        if (a >= 1) clipped++;
+      }
+    }
+    return {
+      lufs: integratedLoudness(channels, rate),
+      peakDb: toDb(peak),
+      truePeakDb: toDb(truePeak(channels)),
+      clipped
+    };
+  }
+
+  // tool/core/check/fit.js
+  var FIT_TARGET = { lufs: -14, peak: -1 };
+  var SONG_TARGET = { lufs: -16, peak: -1 };
+  var MAX_GAIN = 8;
+  function fitGain(level, target = {}) {
+    const wantLufs = target.lufs ?? FIT_TARGET.lufs;
+    const wantPeak = target.peak ?? FIT_TARGET.peak;
+    if (!Number.isFinite(level.lufs) || !Number.isFinite(level.truePeakDb)) {
+      return { gain: 1, db: 0, by: "peak", wantDb: 0, roomDb: 0 };
+    }
+    const wantDb = wantLufs - level.lufs;
+    const roomDb = wantPeak - level.truePeakDb;
+    const db = Math.min(wantDb, roomDb);
+    const by = wantDb <= roomDb ? "lufs" : "peak";
+    const gain = Math.min(MAX_GAIN, Math.max(0, 10 ** (db / 20)));
+    return { gain, db, by, wantDb, roomDb };
+  }
+
+  // tool/ui/player.js
   var COPYRIGHT = "2026 harayoki";
   var PLAYER_CSS = `
 .mmsxx-player{ font-family:var(--mono); font-size:13px; line-height:1.55; color:var(--ink); }
@@ -20463,7 +25498,12 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         <label class="pick" data-p="looplbl">Main loops
           <select data-p="loops"></select>
         </label>
+        <button type="button" class="sw" data-p="stereo" aria-pressed="true"
+                title="Export the WAV in stereo. Turn it off for mono.">Stereo</button>
         <button type="button" data-p="wav" title="Export WAV">&darr; WAV</button>
+        <button type="button" data-p="level"
+                title="Measure the loudness and suggest a #gain. It does not change the sound"
+                >Level</button>
         <button type="button" data-p="mml" title="Export MML">&darr; MML</button>
         <button type="button" class="sw" data-p="showmml" aria-pressed="false"
                 aria-expanded="false" title="Show the MML this player was given"
@@ -20606,7 +25646,9 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       copy: $("copy"),
       out: $("out"),
       wav: $("wav"),
+      stereo: $("stereo"),
       mml: $("mml"),
+      level: $("level"),
       showmml: $("showmml"),
       src: $("src"),
       srcwrap: $("srcwrap"),
@@ -20839,8 +25881,8 @@ registerProcessor('mmsxx-tap', MmsxxTap);
         el.sets.appendChild(lab);
       }
     }
-    function pickGroups(pick) {
-      groups = audio.selectGroups(NAME, pick) || groups;
+    function pickGroups(pick2) {
+      groups = audio.selectGroups(NAME, pick2) || groups;
       drawGroups();
       drawChannels();
       draw();
@@ -20952,12 +25994,12 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       drawChannels();
     });
     function laneRow(t) {
-      const row = document.createElement("span");
-      row.className = "lanes";
+      const row2 = document.createElement("span");
+      row2.className = "lanes";
       const of = document.createElement("span");
       of.className = "of";
       of.textContent = t.name || `ch${t.ch + 1}`;
-      row.appendChild(of);
+      row2.appendChild(of);
       for (const lane of t.lanes) {
         const b = document.createElement("button");
         b.type = "button";
@@ -20970,9 +26012,9 @@ registerProcessor('mmsxx-tap', MmsxxTap);
           audio.muteLane(t.ch, lane.name);
           draw();
         });
-        row.appendChild(b);
+        row2.appendChild(b);
       }
-      return row;
+      return row2;
     }
     const LOOPS = [["1", 1], ["2", 2], ["3", 3], ["4", 4], ["8", 8], ["Endless", Infinity]];
     function drawLoops() {
@@ -21195,6 +26237,7 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       if (document.activeElement !== el.abTo) el.abTo.value = abTo.toFixed(3);
       if (document.activeElement !== el.loops) el.loops.value = String(audio.loopTimes);
       el.wav.disabled = busy || !Number.isFinite(audio.loopTimes) || total <= 0;
+      el.level.disabled = el.wav.disabled;
       if (takes.length) {
         const now = audio.takesOf(NAME);
         for (const b of el.takes.querySelectorAll("button")) {
@@ -21289,6 +26332,59 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       URL.revokeObjectURL(wavURL);
       wavURL = null;
     }
+    async function measureLevel(target = SONG_TARGET) {
+      if (busy || !Number.isFinite(audio.loopTimes)) return null;
+      busy = true;
+      quit = false;
+      root.classList.add("busy");
+      el.veil.hidden = false;
+      el.barfill.style.width = "0%";
+      el.pct.textContent = "0%";
+      say("Measuring\u2026");
+      audio.stopBGM();
+      try {
+        const buf = await audio.renderBGM(NAME, {
+          loops: 1,
+          onProgress: (v) => {
+            const pct = Math.round(v * 100);
+            el.barfill.style.width = `${pct}%`;
+            el.pct.textContent = `${pct}%`;
+          },
+          stop: () => quit
+        });
+        if (!buf) {
+          say("Measuring cancelled.");
+          return null;
+        }
+        const level = measureLoudness([buf.getChannelData(0)], buf.sampleRate);
+        const fit = fitGain(level, target);
+        const now = Number(audio.bgmInfo(NAME)?.meta?.gain ?? 1) || 1;
+        const got = {
+          seconds: buf.duration,
+          lufs: level.lufs,
+          peakDb: level.peakDb,
+          truePeakDb: level.truePeakDb,
+          clipped: level.clipped,
+          target: { ...target },
+          gainNow: now,
+          gainFactor: fit.gain,
+          gainWrite: Math.round(now * fit.gain * 100) / 100,
+          by: fit.by
+        };
+        const line = `${got.lufs.toFixed(1)} LUFS / ${got.truePeakDb.toFixed(2)} dBTP \u2192 #gain ${got.gainWrite} (x${fit.gain.toFixed(2)}, ${fit.by === "lufs" ? "target" : "ceiling"})`;
+        console.info("[player] " + line, got);
+        say(line);
+        return got;
+      } catch (e) {
+        say(String(e && e.message ? e.message : e), "err");
+        return null;
+      } finally {
+        busy = false;
+        root.classList.remove("busy");
+        el.veil.hidden = true;
+        draw();
+      }
+    }
     async function toWAV() {
       if (busy || !Number.isFinite(audio.loopTimes)) return;
       dropWAV();
@@ -21304,6 +26400,8 @@ registerProcessor('mmsxx-tap', MmsxxTap);
       try {
         const buf = await audio.renderBGM(NAME, {
           loops: ab ? 1 : audio.loopTimes,
+          // 左右に分けて焼くか。定位とエフェクトの広がりは 2 本のときだけ出る
+          channels: el.stereo.getAttribute("aria-pressed") === "true" ? 2 : 1,
           onProgress: (v) => {
             const pct = Math.round(v * 100);
             el.barfill.style.width = `${pct}%`;
@@ -21316,15 +26414,16 @@ registerProcessor('mmsxx-tap', MmsxxTap);
           return;
         }
         const rate = buf.sampleRate;
-        let data2 = buf.getChannelData(0);
+        let chans2 = Array.from({ length: buf.numberOfChannels }, (_, c) => buf.getChannelData(c));
         if (ab) {
           const a0 = Math.max(0, Math.floor(ab.from * rate));
-          const a1 = Math.min(data2.length, Math.ceil(ab.to * rate));
-          data2 = data2.slice(a0, a1);
+          const a1 = Math.min(buf.length, Math.ceil(ab.to * rate));
+          chans2 = chans2.map((d) => d.slice(a0, a1));
         }
+        const data2 = chans2[0];
         const meta = audio.bgmInfo(NAME)?.meta ?? {};
         const name = String(meta.title || "mmsxx").replace(/[\\/:*?"<>|]/g, "_");
-        const blob = new Blob([writeWAV(data2, rate)], { type: "audio/wav" });
+        const blob = new Blob([writeWAV(chans2, rate)], { type: "audio/wav" });
         const url = URL.createObjectURL(blob);
         const secs = (data2.length / rate).toFixed(1);
         if (!inFrame) {
@@ -21580,6 +26679,9 @@ ${v}`).join("\n\n").trim();
         handle.addEventListener("pointerup", up);
       });
     }
+    el.stereo.addEventListener("click", () => {
+      el.stereo.setAttribute("aria-pressed", String(el.stereo.getAttribute("aria-pressed") !== "true"));
+    });
     el.rept.addEventListener("click", () => {
       audio.ignoreSongLoop = !audio.ignoreSongLoop;
       draw();
@@ -21610,6 +26712,9 @@ ${v}`).join("\n\n").trim();
     });
     el.wav.addEventListener("click", () => {
       toWAV();
+    });
+    el.level.addEventListener("click", () => {
+      measureLevel();
     });
     el.cancel.addEventListener("click", () => {
       quit = true;
@@ -21702,6 +26807,11 @@ ChipTuneSound ${SOUND_VERSION}
       audio,
       /** 鳴らしはじめる。止めてあるだけなら続きから */
       play,
+      /**
+       * 曲の大きさを測って、揃える倍率を返す(音は変えない)。
+       * 既定の合わせ先は −16 LUFS / −1 dBTP。コンソールにも 1 行出る
+       */
+      measure: (target) => measureLevel(target),
       /** その場で凍らせる。`play()` で続きから鳴る */
       pause: () => {
         audio.pauseBGM();
@@ -21810,9 +26920,7 @@ ChipTuneSound ${SOUND_VERSION}
     };
   }
 
-  // player-latest/entry.js
-  registerExtraWaves();
-  registerDefaultTones();
+  // .work/_samples_player_entry.mjs
   window.MMSXX = window.MMSXX || {};
   window.MMSXX.sound = { ...audio_exports, ...mml_exports, ...tones_exports, mountPlayer, PLAYER_CSS, PLAYER_VERSION, player: { mount: mountPlayer, CSS: PLAYER_CSS, version: PLAYER_VERSION } };
 })();
