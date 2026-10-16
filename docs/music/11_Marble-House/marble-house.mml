@@ -6,7 +6,7 @@
 #meter 4/4
 #copyright 2026 harayoki
 #license CC BY 4.0
-#gain 2
+#gain 2.886575 measured
 #looptimes 1
 #voice ms89newmarbleHat = @adsr{0.001,0.040,0,0.010}
 #voice ms89newmarbleOpenHat = @adsr{0.001,0.18,0,0.025}

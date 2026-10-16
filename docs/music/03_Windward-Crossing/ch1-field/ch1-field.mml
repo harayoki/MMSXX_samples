@@ -12,6 +12,7 @@
 // 元曲と同じフィールド用三角波リード。三角波は音量を変えられないためエコーなし。
 #bundle fieldLeadDry = @{wcFieldLead} @s0
 
+#gain 1.510000 measured
 #ch 主旋律
 #role lead
 #label フィールド

@@ -41,6 +41,7 @@
 // dim・9th・強いジャズテンションは使わず、明るい循環感を優先する。
 
 
+#gain 1.560000 measured
 #ch アルペジオ
 #role arp
 $vp1_bar2 = { @{vpArp} @m0 @e{vpFlat} q7 v6.756 d16 f+16 a16 > d16 < c+16 e16 a16 > c+16 < b16 d16 f+16 > b16 < a16 d16 f+16 a16 }

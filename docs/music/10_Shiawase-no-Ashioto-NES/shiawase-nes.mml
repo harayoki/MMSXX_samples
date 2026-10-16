@@ -15,6 +15,7 @@
 #about 本編3周でメロディ、対旋律、ベースが主役を交代し、後奏でフェードアウトするNES 4声アレンジ。
 #looptimes 1
 
+#gain 1.170000 measured
 #ch 矩形波 1
 t108 l8 @{nesPulse(50)} @e{soft} q7 v11 o5 @fade{15,0}
 #label LOOP

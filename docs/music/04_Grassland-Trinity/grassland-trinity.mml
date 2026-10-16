@@ -14,6 +14,7 @@
 #title 草原のトリニティ
 #version 2.3
 #about アクションRPGの草原BGMをイメージ。ファミコン4音に限定。
+#gain 1.380000 measured
 #ch メロディ
 #role lead
 t140 q5

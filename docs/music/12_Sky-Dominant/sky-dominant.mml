@@ -7,6 +7,7 @@
 #voice mellow1 = @{nesPulse(12)} @e{soft}
 #voice mellow2 = @{nesPulse(25)} @e{soft}
 
+#gain 1.400000 measured
 #ch Bass
 t108 q8 v12 @{nesTriangle} @e{flat}
 #label intro

@@ -38,6 +38,7 @@ $LOOP_END = { 1 }
 #bundle ptChordHeld    = @{ptChord} @e{ptHeld}
 #bundle ptHarmonyHeld  = @{ptHarmony} @e{ptHeld}
 #bundle ptBaseVoice    = @{pulse(50)} @e{flat}
+#gain 1.967221 measured
 #ch メロディ
 #role lead
 // パート 1 — メロディ。
