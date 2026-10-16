@@ -4,7 +4,7 @@
 #version 1.01
 #about ゲームのエンディング向けのやさしい曲です。ジャズのルールをPOPSでなぞっています。
 #looptimes 2
-#gain 0.85
+#gain 2.430000 measured
 
 #ch メロディ
 t108 l8 @{sine} @e{soft} q7 v13 o5 @fade{15,0}

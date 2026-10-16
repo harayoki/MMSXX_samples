@@ -19,6 +19,7 @@ $LOOP_END = { 1 }
 // @e{ptPercussive} は打楽器向けに減衰時間を調整。
 #bundle ptChipVoice  = @{ptChipPulse} @e{ptPercussive}
 #bundle ptNoiseVoice = @{noise(white)} @e{ptPercussive}
+#gain 1.235691 measured
 #ch メロディ
 #role lead
 // パート 1 — メロディ

@@ -13,6 +13,7 @@
 #bundle exploreSnare = @{noise(white)} @e{tap} @o+1
 #bundle exploreHat = @{noise(hiss)} @e{snap} @o+2
 
+#gain 1.433402 measured
 #ch 主旋律 A
 #role lead
 t120 q7 v11 @{pulse(25)} @e{gradual}

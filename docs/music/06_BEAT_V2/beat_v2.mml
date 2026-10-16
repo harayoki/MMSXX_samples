@@ -17,6 +17,7 @@
 #bundle beatBrassTop = @{opllTrumpet} @e{soft}
 #chord  brass        = @{beatBrassLow} ブラス1, @{beatBrassMid} ブラス2, @{beatBrassTop} ブラス3
 
+#gain 2.599895 measured
 #ch ベース1
 t152 q7 v13 l8 @{beatBass1} [o2 d a o3 d o2 a f a d o3 c o2 d a o3 d o2 a f a d o3 c o2 b- f o3 b- o2 f d f b- a
   o2 c g o3 c o2 g e g c b- o2 d a o3 d o2 a f a d o3 c o2 d a o3 d o2 a f a d o3 c o2 g d g d b- d g f o2 a e a
