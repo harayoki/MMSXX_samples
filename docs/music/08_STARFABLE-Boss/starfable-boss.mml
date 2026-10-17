@@ -12,10 +12,10 @@
 // 168 BPM。Intro → 8小節×3回 → Finale。全体約43.81秒。
 // 裏メロとベース補強は交互に発音し、矩形波2を共用する。
 // ベース補強は控えめに。フェードイン中は休み、三角波の音量は固定。
-#gain 1.840000 measured
+#gain 1.700000 measured
 #ch 主旋律
 #role lead
-t168 q8 v10.478 l4 @{pulse(12)} @e{sfSoft} @m5 @d12
+t168 q8 v10.478 l4 @{pulse(12)} @e{sfSoft} @m{35,8} @d12
 #label Intro
 @fade{0,0} @fade{15,10.666666666667}
 o5 v10.478 d6 o4 v10.478 b-4 v10.478 a4 o4 v9.526 g+4 v8.574 a4 v8.574 b-4 v8.574 a4 o4 v8.574 d1

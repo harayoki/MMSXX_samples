@@ -52,15 +52,15 @@ $RESET = { o4 l4 t120 v15 q7 p3 @{pulse(50)} @e{flat} @d0 @m0 @o0 }
 #ch 主旋律
 #role lead
 // 戦闘の主旋律。勝利・敗退までを担当します。
-$sound2 = { @m0 t152 @{battleLead} @m1 v10.984 q6 o4 }
-$sound3 = { @m0 t152 @{battleLead} @m1 v10.984 q6 o5 }
-$sound4 = { @m0 t152 @{battleLead} @m1 v14.122 q6 o5 }
-$sound5 = { @m0 t152 @{battleLead} @m1 v12.553 q7 o5 }
-$sound6 = { @m0 t132 @{battleLead} @m1 v14.122 q6 o5 }
-$sound7 = { @m0 t96 @{fieldLeadDry} @m1 v14.122 q6 o5 }
-$sound8 = { @m0 t96 @{fieldLeadDry} @m1 v14.122 q6 o4 }
+$sound2 = { @m0 t152 @{battleLead} @m{7,5.6} v10.984 q6 o4 }
+$sound3 = { @m0 t152 @{battleLead} @m{7,5.6} v10.984 q6 o5 }
+$sound4 = { @m0 t152 @{battleLead} @m{7,5.6} v14.122 q6 o5 }
+$sound5 = { @m0 t152 @{battleLead} @m{7,5.6} v12.553 q7 o5 }
+$sound6 = { @m0 t132 @{battleLead} @m{7,5.6} v14.122 q6 o5 }
+$sound7 = { @m0 t96 @{fieldLeadDry} @m{7,5.6} v14.122 q6 o5 }
+$sound8 = { @m0 t96 @{fieldLeadDry} @m{7,5.6} v14.122 q6 o4 }
 $encounter = {
-$RESET @m0 t152 @{battleLead} @m1 v14.122 q6 o4 b-16 c+16 e16 g16 b-16 o5 c+16 e16 g16 b-8 g8 e8 c+8 $sound4 e16 g16
+$RESET @m0 t152 @{battleLead} @m{7,5.6} v14.122 q6 o4 b-16 c+16 e16 g16 b-16 o5 c+16 e16 g16 b-8 g8 e8 c+8 $sound4 e16 g16
   a16 b-16 a8 e8 c+4 o4 a8 r8
 }
 $good = {
@@ -82,7 +82,7 @@ $RESET $sound4 r8 a8 o6 d4 o5 a8 r8 f8 e8 $sound4 d8. f16 a8 d8 r8 a8 f4 | $soun
   e8 a4 g8 r8 e8 c+8 $sound4 a8. g16 e8 c+8 r8 e8 a4 |
 }
 $win = {
-$RESET $sound6 d8 f+16 a16 o6 d4 o5 a8 b8 o6 d4 @m0 t132 @{battleLead} @m1 v14.122 q6 o6 d8 o5 b8 g4 a8 b8 o6 d4
+$RESET $sound6 d8 f+16 a16 o6 d4 o5 a8 b8 o6 d4 @m0 t132 @{battleLead} @m{7,5.6} v14.122 q6 o6 d8 o5 b8 g4 a8 b8 o6 d4
   $sound6 c+8 e8 a4 g8 e8 c+4 $sound6 d2 r2
 }
 $lose = {

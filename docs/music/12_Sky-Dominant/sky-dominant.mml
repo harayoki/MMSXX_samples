@@ -73,7 +73,7 @@ o2f16. r32 o2b8. r16
 
 
 #ch Melody A
-t108 q7 @{mellow1} @m{3,5.2,12}
+t108 q7 @{mellow1} @m{21,5.2,12}
 // Intro (2 bars)
 r2.
 q7
@@ -87,7 +87,7 @@ v1.1 o6e8
 @{nesPulse(50)} @e{piano} @m0 q7
 r16
 v5.6 o5e16 & o5g16 & o5c16
-@{mellow1} @e{soft} @m{3,5.2,12}
+@{mellow1} @e{soft} @m{21,5.2,12}
 // C7
 q6
 v1.61 o5e8
@@ -97,7 +97,7 @@ v2.16 o6e8
 @{nesPulse(50)} @e{piano} @m0 q7
 r16
 v5.6 o5g16 & o5e16 & o6c16
-@{mellow1} @e{soft} @m{3,5.2,12}
+@{mellow1} @e{soft} @m{21,5.2,12}
 // Fm / suspension
 q6
 v2.73 o5g+8
@@ -107,7 +107,7 @@ v3.32 o6c8
 @{nesPulse(50)} @e{piano} @m0 q7
 r16
 v5.6 o5f16 & o5g+16 & o5c16
-@{mellow1} @e{soft} @m{3,5.2,12}
+@{mellow1} @e{soft} @m{21,5.2,12}
 // Fm7
 q7
 v3.92 o5f8
@@ -116,7 +116,7 @@ v4.32 o6c4
 @{nesPulse(50)} @e{piano} @m0 q7
 r16
 v5.6 o5f16 & o6c16 & o5g+16
-@{mellow1} @e{soft} @m{3,5.2,12}
+@{mellow1} @e{soft} @m{21,5.2,12}
 // Bb
 q6
 v5.12 o5f8
@@ -241,7 +241,7 @@ v3.32 o3a8
 @{nesPulse(50)} @e{piano} @m0 q7
 r16
 v5.6 o5a16 & o6e16 & o6c16
-@{mellow1} @e{soft} @m{3,5.2,12}
+@{mellow1} @e{soft} @m{21,5.2,12}
 // D
 q6
 v2.73 o3f+8
@@ -251,7 +251,7 @@ v2.16 o3a8
 @{nesPulse(50)} @e{piano} @m0 q7
 r16
 v5.6 o5d16 & o5f+16 & o5d16
-@{mellow1} @e{soft} @m{3,5.2,12}
+@{mellow1} @e{soft} @m{21,5.2,12}
 // D7sus4 → D7
 q7
 v1.61 o2a8
@@ -260,7 +260,7 @@ v1.27 o3g4
 @{nesPulse(50)} @e{piano} @m0 q7
 r16
 v5.6 o5f+16 & o5d16 & o5a16
-@{mellow1} @e{soft} @m{3,5.2,12}
+@{mellow1} @e{soft} @m{21,5.2,12}
 // G → Bdim / suspension
 q6
 v0.64 o3d8
@@ -270,11 +270,11 @@ v0.25 o3f8
 @{nesPulse(50)} @e{piano} @m0 q7
 r16
 v5.6 o5d16 & o4b16 & o5d16
-@{mellow1} @e{soft} @m{3,5.2,12}
+@{mellow1} @e{soft} @m{21,5.2,12}
 
 
 #ch Melody B
-t108 q7 @{mellow2} @m{3,4.6,12}
+t108 q7 @{mellow2} @m{21,4.6,12}
 // Intro (2 bars)
 r2.
 q7
@@ -338,7 +338,7 @@ v3.32 o3d+8
 @{nesPulse(50)} @e{piano} @m0 q7
 r16
 v5.6 o5g16 & o5d+16 & o5a+16
-@{mellow2} @e{soft} @m{3,4.6,12}
+@{mellow2} @e{soft} @m{21,4.6,12}
 // Abm
 q6
 v2.73 o3d+8
@@ -348,7 +348,7 @@ v2.16 o2b8
 @{nesPulse(50)} @e{piano} @m0 q7
 r16
 v5.6 o5d+16 & o4g+16 & o4b16
-@{mellow2} @e{soft} @m{3,4.6,12}
+@{mellow2} @e{soft} @m{21,4.6,12}
 // Abm7
 q6
 v1.61 o3g+8
@@ -358,7 +358,7 @@ v1.1 o2g+8
 @{nesPulse(50)} @e{piano} @m0 q7
 r16
 v5.6 o5g+16 & o6d+16 & o5b16
-@{mellow2} @e{soft} @m{3,4.6,12}
+@{mellow2} @e{soft} @m{21,4.6,12}
 // Db / suspension
 q6
 v0.64 o3c+8
@@ -368,7 +368,7 @@ v0.25 o2g+8
 @{nesPulse(50)} @e{piano} @m0 q4
 r16
 v5.6 o5f16 & o5g+16 & o5c+16
-@{mellow2} @e{soft} @m{3,4.6,12}
+@{mellow2} @e{soft} @m{21,4.6,12}
 // Db7 → Fdim
 q6
 v0.0 o6c+8
@@ -378,7 +378,7 @@ v0.25 o5g+8
 @{nesPulse(50)} @e{piano} @m0 q7
 r16
 v5.6 o5g+16 & o5f16 & o5b16
-@{mellow2} @e{soft} @m{3,4.6,12}
+@{mellow2} @e{soft} @m{21,4.6,12}
 // Gb
 q7
 v0.64 o5a+8
@@ -387,7 +387,7 @@ v0.94 o5c+4
 @{nesPulse(50)} @e{piano} @m0 q7
 r16
 v5.6 o5f+16 & o4a+16 & o5c+16
-@{mellow2} @e{soft} @m{3,4.6,12}
+@{mellow2} @e{soft} @m{21,4.6,12}
 // F#7sus4 → F#7
 q6
 v1.61 o6c+8
@@ -397,7 +397,7 @@ v2.16 o5c+8
 @{nesPulse(50)} @e{piano} @m0 q7
 r16
 v5.6 o5f+16 & o6c+16 & o5a+16
-@{mellow2} @e{soft} @m{3,4.6,12}
+@{mellow2} @e{soft} @m{21,4.6,12}
 // Bm / suspension
 q6
 v2.73 o5f+8
@@ -407,7 +407,7 @@ v3.32 o5d8
 @{nesPulse(50)} @e{piano} @m0 q7
 r16
 v5.6 o5d16 & o4b16 & o5d16
-@{mellow2} @e{soft} @m{3,4.6,12}
+@{mellow2} @e{soft} @m{21,4.6,12}
 // Bm7
 q6
 v3.92 o5f+8
@@ -417,7 +417,7 @@ v4.52 o5d8
 @{nesPulse(50)} @e{piano} @m0 q7
 r16
 v5.6 o5f+16 & o6d16 & o5b16
-@{mellow2} @e{soft} @m{3,4.6,12}
+@{mellow2} @e{soft} @m{21,4.6,12}
 // E
 q6
 v5.12 o5e8

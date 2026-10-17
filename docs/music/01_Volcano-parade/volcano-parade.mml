@@ -9,7 +9,7 @@
 
 // vpBassは計算済み32サンプルを上の #wave で定義。生成元: scripts/volcano_bass_wave.cjs。
 // 音色定義はMMLとエンジン内蔵音色のみ。曲固有のJS音色登録は不要。
-// 主旋律は pulse(50) と @m{5,6,18}。他の音色へ切り替える際に @m0。
+// 主旋律は pulse(50) と @m{35,6,18}。他の音色へ切り替える際に @m0。
 //   @{saw}      アルペジオとハモリのパート用ののこぎり波。
 //   @{opllHarpsichord} 合いの手。比較で3番目だった内蔵OPLLチェンバロ。硬いアタック。
 //   @{opllpTomTom} 合いの手に重ねる内蔵OPLLPタム。音階を聞かせる。
@@ -138,30 +138,30 @@ $vp1_bar28
 
 #ch メロディ
 #role lead
-$vp2_bar2 = { @{vpLeadVoice} @m{5,6,18} q8 v11.367 f+2 @{pulse(50)} @m0 @e{flat} e4 d4 }
-$vp2_bar3 = { @{vpLeadVoice} @m{5,6,18} q8 v11.367 c+2 @{pulse(50)} @m0 @e{flat} b4 r4 }
-$vp2_bar4 = { @{vpLeadVoice} @m{5,6,18} q8 v9.825 d2 @{pulse(50)} @m0 @e{flat} e4 f+4 }
+$vp2_bar2 = { @{vpLeadVoice} @m{35,6,18} q8 v11.367 f+2 @{pulse(50)} @m0 @e{flat} e4 d4 }
+$vp2_bar3 = { @{vpLeadVoice} @m{35,6,18} q8 v11.367 c+2 @{pulse(50)} @m0 @e{flat} b4 r4 }
+$vp2_bar4 = { @{vpLeadVoice} @m{35,6,18} q8 v9.825 d2 @{pulse(50)} @m0 @e{flat} e4 f+4 }
 $vp2_bar5 = { r1 }
-$vp2_bar6 = { @{vpLeadVoice} @m{5,6,18} q8 v11.367 a2 @{pulse(50)} @m0 @e{flat} g4 f+4 }
-$vp2_bar7 = { @{vpLeadVoice} @m{5,6,18} q8 v9.825 e2 @{pulse(50)} @m0 @e{flat} d4 r4 }
-$vp2_bar8 = { @{vpLeadVoice} @m{5,6,18} q8 v11.367 a2 @{pulse(50)} @m0 @e{flat} g4 f4 }
-$vp2_bar9 = { @{vpLeadVoice} @m{5,6,18} q8 v9.825 g2 @{pulse(50)} @m0 @e{flat} e4 r4 }
-$vp2_bar10 = { @{vpLeadVoice} @m{5,6,18} q8 v10.359 f2 @{pulse(50)} @m0 @e{flat} a4 g4 }
-$vp2_bar11 = { @{vpLeadVoice} @m{5,6,18} q8 v10.872 d2 @{pulse(50)} @m0 @e{flat} f4 r4 }
-$vp2_bar12 = { @{vpLeadVoice} @m{5,6,18} q8 v10.359 a+2 @{pulse(50)} @m0 @e{flat} a4 g4 }
-$vp2_bar13 = { @{vpLeadVoice} @m{5,6,18} q8 v10.872 g2 @{pulse(50)} @m0 @e{flat} c4 a+4 }
-$vp2_bar14 = { @{vpLeadVoice} @m{5,6,18} q8 v11.367 c+2 @{pulse(50)} @m0 @e{flat} e4 g4 }
-$vp2_bar15 = { @{vpLeadVoice} @m{5,6,18} q8 v10.872 b2 @{pulse(50)} @m0 @e{flat} a4 g4 }
-$vp2_bar16 = { @{vpLeadVoice} @m{5,6,18} q8 v11.367 c+2 @{pulse(50)} @m0 @e{flat} e4 a4 }
-$vp2_bar17 = { @{vpLeadVoice} @m{5,6,18} q8 v10.359 a2 @{pulse(50)} @m0 @e{flat} c+4 b4 }
-$vp2_bar18 = { @{vpLeadVoice} @m{5,6,18} q8 v11.367 d2 @{pulse(50)} @m0 @e{flat} f+4 a4 }
-$vp2_bar19 = { @{vpLeadVoice} @m{5,6,18} q8 v10.872 g2 @{pulse(50)} @m0 @e{flat} b4 > e4 < }
-$vp2_bar20 = { @{vpLeadVoice} @m{5,6,18} q8 v11.367 > d2 @{pulse(50)} @m0 @e{flat} c+4 b4 < }
-$vp2_bar21 = { @{vpLeadVoice} @m{5,6,18} q8 v10.872 a2 @{pulse(50)} @m0 @e{flat} c+4 e4 }
-$vp2_bar22 = { @{vpLeadVoice} @m{5,6,18} q8 v11.367 g2 @{pulse(50)} @m0 @e{flat} e4 c+4 }
+$vp2_bar6 = { @{vpLeadVoice} @m{35,6,18} q8 v11.367 a2 @{pulse(50)} @m0 @e{flat} g4 f+4 }
+$vp2_bar7 = { @{vpLeadVoice} @m{35,6,18} q8 v9.825 e2 @{pulse(50)} @m0 @e{flat} d4 r4 }
+$vp2_bar8 = { @{vpLeadVoice} @m{35,6,18} q8 v11.367 a2 @{pulse(50)} @m0 @e{flat} g4 f4 }
+$vp2_bar9 = { @{vpLeadVoice} @m{35,6,18} q8 v9.825 g2 @{pulse(50)} @m0 @e{flat} e4 r4 }
+$vp2_bar10 = { @{vpLeadVoice} @m{35,6,18} q8 v10.359 f2 @{pulse(50)} @m0 @e{flat} a4 g4 }
+$vp2_bar11 = { @{vpLeadVoice} @m{35,6,18} q8 v10.872 d2 @{pulse(50)} @m0 @e{flat} f4 r4 }
+$vp2_bar12 = { @{vpLeadVoice} @m{35,6,18} q8 v10.359 a+2 @{pulse(50)} @m0 @e{flat} a4 g4 }
+$vp2_bar13 = { @{vpLeadVoice} @m{35,6,18} q8 v10.872 g2 @{pulse(50)} @m0 @e{flat} c4 a+4 }
+$vp2_bar14 = { @{vpLeadVoice} @m{35,6,18} q8 v11.367 c+2 @{pulse(50)} @m0 @e{flat} e4 g4 }
+$vp2_bar15 = { @{vpLeadVoice} @m{35,6,18} q8 v10.872 b2 @{pulse(50)} @m0 @e{flat} a4 g4 }
+$vp2_bar16 = { @{vpLeadVoice} @m{35,6,18} q8 v11.367 c+2 @{pulse(50)} @m0 @e{flat} e4 a4 }
+$vp2_bar17 = { @{vpLeadVoice} @m{35,6,18} q8 v10.359 a2 @{pulse(50)} @m0 @e{flat} c+4 b4 }
+$vp2_bar18 = { @{vpLeadVoice} @m{35,6,18} q8 v11.367 d2 @{pulse(50)} @m0 @e{flat} f+4 a4 }
+$vp2_bar19 = { @{vpLeadVoice} @m{35,6,18} q8 v10.872 g2 @{pulse(50)} @m0 @e{flat} b4 > e4 < }
+$vp2_bar20 = { @{vpLeadVoice} @m{35,6,18} q8 v11.367 > d2 @{pulse(50)} @m0 @e{flat} c+4 b4 < }
+$vp2_bar21 = { @{vpLeadVoice} @m{35,6,18} q8 v10.872 a2 @{pulse(50)} @m0 @e{flat} c+4 e4 }
+$vp2_bar22 = { @{vpLeadVoice} @m{35,6,18} q8 v11.367 g2 @{pulse(50)} @m0 @e{flat} e4 c+4 }
 $vp2_bar23 = { @{vpPulseSoft} @m0 q8 v8.059 d1 }
-$vp2_bar24 = { @{vpLeadVoice} @m{5,6,18} q8 v8.059 < a2 @{pulse(50)} @m0 @e{flat} g4 r4 > }
-$vp2_bar25 = { @{vpLeadVoice} @m{5,6,18} q8 v7.397 < e2 r2 > }
+$vp2_bar24 = { @{vpLeadVoice} @m{35,6,18} q8 v8.059 < a2 @{pulse(50)} @m0 @e{flat} g4 r4 > }
+$vp2_bar25 = { @{vpLeadVoice} @m{35,6,18} q8 v7.397 < e2 r2 > }
 $vp2_bar26 = { @{vpPulseSoft} @m0 q8 v10.359 a8. f+16 d8 e8 f+4 e8 c+8 }
 t135 o5 l16
 @{vpPulseSoft} @m0 q8 v9.266 d8. f+16 a8 > d8 < a4 f+8 e8
@@ -225,7 +225,7 @@ $vp2_bar24
 $vp2_bar25
 $vp2_bar5
 $vp2_bar26
-@{vpLeadVoice} @m{5,6,18} q8 v9.266 d2 d8 q8 d4.*>d &d4 <
+@{vpLeadVoice} @m{35,6,18} q8 v9.266 d2 d8 q8 d4.*>d &d4 <
 
 #ch ベース
 #role bass
