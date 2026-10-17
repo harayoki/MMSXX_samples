@@ -15,24 +15,24 @@
 #gain 1.840000 measured
 #ch 主旋律
 #role lead
-t168 q8 v7.484 l4 @{pulse(12)} @e{sfSoft} @m5 @d12
+t168 q8 v10.478 l4 @{pulse(12)} @e{sfSoft} @m5 @d12
 #label Intro
 @fade{0,0} @fade{15,10.666666666667}
-o5 v7.484 d6 o4 v7.484 b-4 v7.484 a4 o4 v6.804 g+4 v6.124 a4 v6.124 b-4 v6.124 a4 o4 v6.124 d1
+o5 v10.478 d6 o4 v10.478 b-4 v10.478 a4 o4 v9.526 g+4 v8.574 a4 v8.574 b-4 v8.574 a4 o4 v8.574 d1
 #label Main
 @fade{15,0}
 // 8小節でv8からv12へ膨らみ、v8へ戻る
-[o4 v5.443 d4 v5.443 f4 v5.443 e-4 v6.124 d4 o4 v6.124 a2 v6.124 g+4 v6.124 a4 o4 v6.804 b-4 v7.484 a4 v7.484 g4 v7.484 f4 o4 v7.484 d2 r2 o4 v8.165 d4 v8.165 f4 v8.165 a4 >v7.484 c4< o4 >v7.484 d2< v7.484 b-4 v7.484 a4 o4 v6.804 g+4 v6.124 a4 v6.124 b-4 v6.124 a4 o4 v6.124 d1]3
+[o4 v7.620 d4 v7.620 f4 v7.620 e-4 v8.574 d4 o4 v8.574 a2 v8.574 g+4 v8.574 a4 o4 v9.526 b-4 v10.478 a4 v10.478 g4 v10.478 f4 o4 v10.478 d2 r2 o4 v11.431 d4 v11.431 f4 v11.431 a4 >v10.478 c4< o4 >v10.478 d2< v10.478 b-4 v10.478 a4 o4 v9.526 g+4 v8.574 a4 v8.574 b-4 v8.574 a4 o4 v8.574 d1]3
 
 
 #label Finale
 @fade{0,16}
 // 元のメロディ後半を保ってフェードアウト
-o4 v8.165 d4 v8.165 f4 v8.165 a4 >v7.484 c4< o4 >v7.484 d2< v7.484 b-4 v7.484 a4 o4 v6.804 g+4 v6.124 a4 v6.124 b-4 v6.124 a4 o4 v6.124 d1
+o4 v11.431 d4 v11.431 f4 v11.431 a4 >v10.478 c4< o4 >v10.478 d2< v10.478 b-4 v10.478 a4 o4 v9.526 g+4 v8.574 a4 v8.574 b-4 v8.574 a4 o4 v8.574 d1
 
 #ch 裏メロ
 #role counter
-t168 q7 v4.763 @{pulse(25)} @e{sfFlat}
+t168 q7 v7.621 @{pulse(25)} @e{sfFlat}
 #label Intro
 @fade{0,0} @fade{15,10.666666666667}
 q8 r64 o5d8&o5d192 r32 r192 o4b-6&o4b-32&o4b-192 r24 r192 o4a6&o4a32&o4a192 r24 r192 o4g+24&o4g+192 r64 o4g+24&o4g+192 r64 o4g+24&o4g+192 r64 o4g+64 r24 r192 o4a24&o4a192 r64 o4a24&o4a192 r64 o4a24&o4a192 r64 o4a64 r24 r192 o4b-24&o4b-192 r64 o4b-24&o4b-192 r64 o4b-24&o4b-192 r64 o4b-64 r24 r192 o4a24&o4a192 r64 o4a24&o4a192 r64 o4a24&o4a192 r64 o4a64 r24 r192 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r8
