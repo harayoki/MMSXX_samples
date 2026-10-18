@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Chrono etude #1 | MMSXX Samples DEV</title>
+  <meta name="description" content="Chrono etude #1。112 BPM、8チャンネル、40小節のオリジナルMML曲。MMSXX公式PLAYERで試聴・編集できます。">
+  <link rel="stylesheet" href="../music-page.css">
+</head>
+<body>
+<main class="music-page" id="chrono-etude-1">
+  <nav class="music-top-nav" aria-label="ページナビゲーション"><a href="../" aria-label="1階層上へ" title="1階層上へ"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V4M5.5 10.5 12 4l6.5 6.5"/></svg></a></nav>
+  <div class="music-player" id="chrono-etude-player"></div>
+  <p class="music-status text-small text-muted" data-music-status aria-live="polite">PLAYERを読み込み中です。</p>
+  <div class="music-credits">
+    <p class="text-small text-muted">MMLはこの場で編集できます。Music, artwork and MML:
+      <a href="https://creativecommons.org/licenses/by/4.0/" rel="license">CC BY 4.0</a>.
+      <a href="./chrono-etude-bg.png" data-music-image="chrono-etude-bg.png">Cover art</a>.
+    </p>
+  </div>
+  <div class="music-editor">
+    <textarea placeholder="LOADING" aria-label="MMLソース" id="chrono-etude-src"
+      data-music-background="chrono-etude-bg.png"
+      rows="24" spellcheck="false" disabled></textarea>
+  </div>
+  <div class="music-credits">
+    <p class="text-small text-muted">JavaScript source is not covered by CC BY 4.0. Redistribution is prohibited.</p>
+    <p class="text-small text-muted">Editor: <a href="https://codemirror.net/">CodeMirror 6</a> (MIT License).</p>
+  </div>
+</main>
+<script src="../music-page.js" data-song="13_Chrono-Etude-1"></script>
+</body>
+</html>

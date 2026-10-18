@@ -1,0 +1,118 @@
+#title Chrono etude #1
+#version 1.0-dev
+#about 112 BPM。40小節。Dを基準にsus4コードを移動する8パートのエチュード。
+#copyright 2026 harayoki
+#license CC BY 4.0 (music and MML source)
+
+// Chrono etude #1
+//
+#gain 1.15
+#fx reverb 1.6 @mix 0.12
+
+// いくつかのチャンネルにフィルタによるエコー(@f2)設定あり。@sのエコーはチャンネルを複製して擬似エコー処理を行うものなので今回は使わない。
+
+// コード進行
+// すべてSUS4。キーはD。
+//  イントロ	Ⅰsus4 Ⅲsus4
+//  A	Ⅰsus4 Ⅲsus4 Ⅰsus4 Ⅲsus4
+//  B	Ⅱsus4 Ⅰsus4 Ⅱsus4 Ⅶsus4
+//  アウトロ	Ⅰsus4 Ⅰsus4
+
+#ch リード
+t112 @{analog::pulseLead} q7 v8 @f2{echo @l 8 @feedback 0.55 @mix 0.45 @tone 4000}
+$a1 = { o6c4. o5a8 o5g2 r4 o5e8 o5g8 o5a2 }
+$a2 = { o6e-4. o6c8 o5b-2 r4 o6c8 o6e-8 o6f2 }
+$a3 = { o6d4 o6c8 o5a8 o5g4 o5e4 o5g2. r4 }
+$a = { $a1 $a2 $a3 o5g4 o5b-4 o6c4 o6e-4 o6c1 }
+$a2nd = { $a1 $a2 o6e4. o6d8 o6c2 o5a4 o5g4 o5a2 o5b-2 o5g2 o5f1 }
+$a4th = { $a1 $a2 $a3 o5g4 o5b-4 o6c2 o5f1 }
+$b = { o6e-2. o6c+4 o6f1 o6c+2. o5b4 o5a-1 o6e-4 o6f4 o6a-2 o6f4 o6e-4 o6c+2 o5g2 o5f2 o5d1 }
+[r1]4
+#label LOOP
+$a $a2nd $b $a4th
+#label OUTRO
+[r1]4
+
+#ch ストリングス
+t112 @{analog::strings} q8 v4
+$d7 = { 'o3a o4c o4e o4g'1 }
+$f7 = { 'o4c o4e- o4g o4b-'1 }
+$eb7 = { 'o3b- o4c+ o4f o4a-'1 }
+$db7 = { 'o3a- o3b o4e- o4f+'1 }
+$c7 = { 'o3g o3b- o4d o4f'1 }
+$a = { $d7 $d7 $f7 $f7 $d7 $d7 $f7 $f7 }
+$b = { $eb7 $eb7 $db7 $db7 $eb7 $eb7 $c7 $c7 }
+$d7 $d7 $f7 $f7
+#label LOOP
+$a $a $b $a
+#label OUTRO
+[$d7]4
+
+#ch 鍵盤
+t112 @{analog::polyBrass} q8 v4 @f2{echo @l 8 @feedback 0.35 @mix 0.22 @tone 4000}
+$d7 = { 'o4a o5c o5e o5g'4 r8 'o4a o5c o5e o5g'8 r4 'o4a o5c o5e o5g'8. r16 }
+$f7 = { 'o5c o5e- o5g o5b-'4 r8 'o5c o5e- o5g o5b-'8 r4 'o5c o5e- o5g o5b-'8. r16 }
+$eb7 = { 'o4b- o5c+ o5f o5a-'4 r8 'o4b- o5c+ o5f o5a-'8 r4 'o4b- o5c+ o5f o5a-'8. r16 }
+$db7 = { 'o4a- o4b o5e- o5f+'4 r8 'o4a- o4b o5e- o5f+'8 r4 'o4a- o4b o5e- o5f+'8. r16 }
+$c7 = { 'o4g o4b- o5d o5f'4 r8 'o4g o4b- o5d o5f'8 r4 'o4g o4b- o5d o5f'8. r16 }
+$a = { $d7 $d7 $f7 $f7 $d7 $d7 $f7 $f7 }
+$b = { $eb7 $eb7 $db7 $db7 $eb7 $eb7 $c7 $c7 }
+$d7 $d7 $f7 $f7
+#label LOOP
+$a $a $b $a
+#label OUTRO
+$d7 $d7 $d7 'o4a o5c o5e o5g'1
+
+#ch ハープ
+t112 @{analog::ringBell} q6 v4 @f2{echo @l 8 @feedback 0.5 @mix 0.42 @tone 4000}
+$b1 = { o5e-8 o5f8 o5a-8 o5b-8 o6c+8 o6e-8 o6f8 o6a-8 o6b-8 o6a-8 o6f8 o6e-8 o6c+8 o5b-8 o5a-8 o5f8 }
+$b2 = { o5c+8 o5e-8 o5f+8 o5a-8 o5b8 o6c+8 o6e-8 o6f+8 o6a-8 o6f+8 o6e-8 o6c+8 o5b8 o5a-8 o5f+8 o5e-8 }
+$b3 = { o5c8 o5d8 o5f8 o5g8 o5b-8 o6c8 o6d8 o6f8 o6g8 o6f8 o6d8 o6c8 o5b-8 o5g8 o5f8 o5d8 }
+$fin = { o5d8 o5e8 o5g8 o5a8 o6c8 o6d8 o6e8 o6g8 o6a8 o6g8 o6e8 o6d8 o6c8 o5a8 o5g8 o5e8 }
+[r1]4
+#label LOOP
+[r1]16 $b1 $b2 $b1 $b3 [r1]8
+#label OUTRO
+$fin $fin
+
+#ch ベース
+t112 @{analog::seqBass} q7 v4
+$d7 = { o2d2&o2d8 o2a4. o2d4. o2c4 o2a4. }
+$f7 = { o2f2&o2f8 o3c4. o2f4. o2e-4 o3c4. }
+$eb7 = { o2e-2&o2e-8 o2b-4. o2e-4. o2c+4 o2b-4. }
+$a = { $d7 $f7 $d7 $f7 }
+$b = { $eb7 o2c+2&o2c+8 o2a-4. o2c+4. o1b4 o2a-4. $eb7 o2c2&o2c8 o2g4. o2c4. o1b-4 o2g4. }
+$d7 $f7
+#label LOOP
+$a $a $b $a
+#label OUTRO
+$d7 o2d1&o2d1
+
+#ch シェイカー
+t112 @{analog::noiseHat} q7
+$sh = { [v4 o4c8 v6 o4c8]4 }
+[$sh]4
+#label LOOP
+[$sh]32
+#label OUTRO
+[$sh]3 r1
+
+#ch スネア
+// 時計の秒針の音が深く響いているイメージ。
+// 112ms の値は SFC の エコー処理の設定値のひとつらしい。曲のテンポに合わせたいなら @l 16 とかく。
+t112 @{analog::noiseSnare} q7 v7 @f2{echo 0.112 @feedback 0.8 @mix 0.7 @tone 4000}
+$sn = { [r4 o4c4]4 }
+[r1]4
+#label LOOP
+[$sn]16
+#label OUTRO
+[r1]4
+
+#ch キック
+t112 @{opll::kick} q7 v15
+$kk = { [o2c4 r4. o2c8 r4]2 }
+[r1]4
+#label LOOP
+[$kk]16
+#label OUTRO
+[r1]3 o2c1
