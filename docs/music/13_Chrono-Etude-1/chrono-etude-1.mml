@@ -1,12 +1,12 @@
 #title Chrono etude #1
 #version 1.0-dev
-#about 112 BPM。40小節。Dを基準にsus4コードを移動する8パートのエチュード。
+#about おしゃれコード進行＋深いエコー＋響くスネア クロノトリガーぽい雰囲気でました？
 #copyright 2026 harayoki
 #license CC BY 4.0 (music and MML source)
 
 // Chrono etude #1
 //
-#gain 1.15
+#gain 1.16 measured
 #fx reverb 1.6 @mix 0.12
 
 // いくつかのチャンネルにフィルタによるエコー(@f2)設定あり。@sのエコーはチャンネルを複製して擬似エコー処理を行うものなので今回は使わない。
