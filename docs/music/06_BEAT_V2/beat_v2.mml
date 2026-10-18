@@ -6,15 +6,15 @@
 // OPLL打楽器はo4c基準。0.28以降も従来の実際の音程を維持する。
 #bundle beatBass1  = @{waveRamp} @e{piano} @s{8,2}
 #bundle beatBass2  = @{triangle} @e{flat}
-#bundle beatKick   = @{opllKick} @e{percussive},   @{noise} v11 @e{snap} @o-2
-#bundle beatSnare  = @{opllSnare} @e{percussive},  @{noise} v10 @e{tap}
-#bundle beatHatOff = @{noise(hiss)} @o+3 @e{snap},       @{opllCymbal} v4 q2 @e{snap}
-#bundle beatHatOn  = @{noise(hiss)} @o+3 @e{percussive}, @{opllCymbal} v4 q2 @e{snap}
-#bundle beatTom    = @{opllTom} @e{percussive}
-#bundle beatTomLow = @{opllTom} @e{percussive}
-#bundle beatBrassLow = @{opllHorn} @e{soft}
-#bundle beatBrassMid = @{opllTrumpet} @e{soft}
-#bundle beatBrassTop = @{opllTrumpet} @e{soft}
+#bundle beatKick   = @{opll::kick} @e{percussive},   @{noise} v11 @e{snap} @o-2
+#bundle beatSnare  = @{opll::snare} @e{percussive},  @{noise} v10 @e{tap}
+#bundle beatHatOff = @{noise(hiss)} @o+3 @e{snap},       @{opll::cymbal} v4 q2 @e{snap}
+#bundle beatHatOn  = @{noise(hiss)} @o+3 @e{percussive}, @{opll::cymbal} v4 q2 @e{snap}
+#bundle beatTom    = @{opll::tom} @e{percussive}
+#bundle beatTomLow = @{opll::tom} @e{percussive}
+#bundle beatBrassLow = @{opll::horn} @e{soft}
+#bundle beatBrassMid = @{opll::trumpet} @e{soft}
+#bundle beatBrassTop = @{opll::trumpet} @e{soft}
 #chord  brass        = @{beatBrassLow} ブラス1, @{beatBrassMid} ブラス2, @{beatBrassTop} ブラス3
 
 #gain 2.599895 measured

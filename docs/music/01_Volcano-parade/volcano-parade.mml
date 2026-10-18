@@ -11,8 +11,8 @@
 // 音色定義はMMLとエンジン内蔵音色のみ。曲固有のJS音色登録は不要。
 // 主旋律は pulse(50) と @m{35,6,18}。他の音色へ切り替える際に @m0。
 //   @{saw}      アルペジオとハモリのパート用ののこぎり波。
-//   @{opllHarpsichord} 合いの手。比較で3番目だった内蔵OPLLチェンバロ。硬いアタック。
-//   @{opllpTomTom} 合いの手に重ねる内蔵OPLLPタム。音階を聞かせる。
+//   @{opll::harpsichord} 合いの手。比較で3番目だった内蔵OPLLチェンバロ。硬いアタック。
+//   @{opll::opllpTomTom} 合いの手に重ねる内蔵OPLLPタム。音階を聞かせる。
 //   @{vpBass}   ベース。三角波に、ローパスを通した矩形波を混ぜている。
 //   @{noise(white)}    ハイハット。o4 の a で鳴らすと白色ノイズになる。
 // 音量・裏拍アクセント・主旋律と重なるアルペジオの抑制は、各音のvへ移行済み。
@@ -29,10 +29,10 @@
 #bundle vpPulseSoft  = @{pulse(50)} @e{vpSoft}
 #bundle vpBassVoice  = @{vpBass} @e{vpFlat}
 // チェンバロは元の1オクターブ上を基準に、5度上・さらに1オクターブ上を重ねる。
-#bundle vpPianoVoice = @{opllHarpsichord} @e{vpPercussive} @o+1, @{opllHarpsichord} @e{vpPercussive} @o+1 @d700, @{opllHarpsichord} @e{vpPercussive} @o+2
+#bundle vpPianoVoice = @{opll::harpsichord} @e{vpPercussive} @o+1, @{opll::harpsichord} @e{vpPercussive} @o+1 @d700, @{opll::harpsichord} @e{vpPercussive} @o+2
 #bundle vpSawSoft    = @{saw} @e{vpSoft}
 #bundle vpHatVoice   = @{noise(white)} @e{vpPercussive}
-#bundle vpTomVoice   = @{opllpTomTom} @e{vpPercussive}
+#bundle vpTomVoice   = @{opll::opllpTomTom} @e{vpPercussive}
 // Powered by mmsxx-mml-studio (engine license undecided; redistribution currently prohibited).
 // K005289 arpeggio — MIDI ch.1 rhythm/contour, reharmonized
 // アルペジオは合成音色で7セント上・音量60%の層を重ねる。

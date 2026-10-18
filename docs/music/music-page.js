@@ -97,6 +97,12 @@
   (async () => {
     try {
       // Preserve script execution order without depending on download timing.
+      // Official sound 0.41.0 MIN split: core first, then chip extensions.
+      // Pico PLAYER UI remains the official 1.0.0 implementation.
+      const splitParts = ['', '-opll', '-opm', '-opna', '-acoustic', '-analog'];
+      for (const part of splitParts) {
+        await load(MusicAssets.shared('engine/0.41.0/mmsxx-sound-0.41.0' + part + '.js'));
+      }
       await load(MusicAssets.shared('player-engine.js'));
       const style = document.createElement('style');
       style.textContent = MMSXX.sound.player.CSS;

@@ -22,12 +22,12 @@
 #bundle ms89newdanceArp = @{sccSine} @e{tap}
 #bundle ms89newdanceHat = @{noise(hiss)} @e{snap} q0
 #bundle ms89newdanceOpenHat = @{ayNoise} @e{ms89newmarbleOpenHat} q0 @o5
-#voice ms89newmarbleKickLoud = @{opllKick(low)}, @{opllKick(low)} @gain{0.4}
+#voice ms89newmarbleKickLoud = @{opll::kick(low)}, @{opll::kick(low)} @gain{0.4}
 #drum B = @{ms89newmarbleKickLoud} v15 !kick キック
-#drum S = @{opllSnare} v11 !snare スネア
+#drum S = @{opll::snare} v11 !snare スネア
 #drum H = @{ms89newdanceHat} v5 クローズハット
 #drum O = @{noise(hiss)} v6 オープンハット
-#drum C = @{opllCymbal} v6 シンバル
+#drum C = @{opll::cymbal} v6 シンバル
 
 #voice ms89dropEnv = @adsr{0.001,0.045,0,0.003}
 #voice ms89kickDrop = @{ayTone} @e{ms89dropEnv} @pitch{0,-600,-1200,-1800}
@@ -50,7 +50,7 @@
 #voice breakShakeEnv = @adsr{0.008,0.035,0,0.012}
 #bundle breakShake = @{ayNoise} @e{breakShakeEnv}
 #drum I = @{ms89newmarbleKickLoud} v15 !kick イントロキック
-#drum J = @{opllSnare} v15 !snare イントロスネア
+#drum J = @{opll::snare} v15 !snare イントロスネア
 #drum K = @{ms89newdanceHat} v10 イントロハット
 #drum L = @{ms89newdanceHat} v8 イントロハット弱
 #drum M = @{ms89newdanceHat} v9 イントロハット中
@@ -313,7 +313,7 @@ r1 |
 r1 |
 r1 |
 #ch Hook (FM)
-t128 @{opllChopBass} v8 q4 o3 l8
+t128 @{opll::chopBass} v8 q4 o3 l8
 $dm = { g*a32&a8&a32 r16 >c< r a4 r4 }
 $fm = { >b-*c32&c8&c32 r16 e- r c4< r4 }
 r1 |
@@ -342,7 +342,7 @@ r1 |
 r1 |
 r1 |
 r1 |
-t128 @{opllChopBass} v8 q4 o3 l8
+t128 @{opll::chopBass} v8 q4 o3 l8
 r1 |
 $dm |
 r1 |
@@ -372,7 +372,7 @@ r1 |
 r1 |
 r1 |
 #ch Hook-attack (FM)
-t128 @{opllChopBass} @d7 v11 q1 o3 l8
+t128 @{opll::chopBass} @d7 v11 q1 o3 l8
 $dm = { q2 g*a32 q1 r8 r32 r16 >c16< r16 r a16 r16 r8 r4 }
 $fm = { q2 >b-*c32 q1 r8 r32 r16 e-16 r16 r c16< r16 r8 r4 }
 r1 |
@@ -401,7 +401,7 @@ r1 |
 r1 |
 r1 |
 r1 |
-t128 @{opllChopBass} @d7 v11 q1 o3 l8
+t128 @{opll::chopBass} @d7 v11 q1 o3 l8
 r1 |
 $dm |
 r1 |
@@ -492,7 +492,7 @@ r1 |
 r1 |
 r1 |
 #ch Bass-support (FM)
-t128 @{opllAcousticBass} @e{sccms89newsccBassBodyEnv} v9 q5 o2 l16
+t128 @{opll::acousticBass} @e{sccms89newsccBassBodyEnv} v9 q5 o2 l16
 $d = { r d d8 r8 d8 r d r8 a8 r8 }
 $b = { r b- b-8 r8 b-8 r b- r8 f8 r8 }
 $f = { r f f8 r8 f8 r f r8 c8 r8 }
@@ -523,7 +523,7 @@ r1 |
 r1 |
 r1 |
 r1 |
-t128 @{opllAcousticBass} @e{sccms89newsccBassBodyEnv} v9 q5 o2 l16
+t128 @{opll::acousticBass} @e{sccms89newsccBassBodyEnv} v9 q5 o2 l16
 $d |
 $d |
 $b |
@@ -543,7 +543,7 @@ r f f8 r8 f8 f4 r4 |
 
 
 #label OUTRO
-t128 @{opllAcousticBass} @e{sccms89newsccBassBodyEnv} v9 q5 o2 l16
+t128 @{opll::acousticBass} @e{sccms89newsccBassBodyEnv} v9 q5 o2 l16
 $f |
 $f |
 $x |
