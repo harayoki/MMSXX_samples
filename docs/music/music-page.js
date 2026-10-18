@@ -7,7 +7,16 @@
   const published = root.origin === 'https://harayoki.github.io' &&
     root.pathname === '/MMSXX_samples/music/';
   const mediaRoot = new URL('https://media.githubusercontent.com/media/harayoki/MMSXX_samples/refs/heads/main/docs/music/');
-  const song = path => new URL(path, songRoot).href;
+  const song = path => {
+    const url = new URL(path, songRoot);
+    // A page may opt into cache-busting its own PLAYER script and MML.
+    // Other songs keep their existing paths and cache behavior.
+    if (entry.dataset.assetVersion &&
+        (path === 'player.js' || /\.mml(?:\.txt)?$/i.test(path))) {
+      url.searchParams.set('v', entry.dataset.assetVersion);
+    }
+    return url.href;
+  };
   const image = path => published
     ? new URL(entry.dataset.song.replace(/\/$/, '') + '/' + path, mediaRoot).href
     : song(path);
