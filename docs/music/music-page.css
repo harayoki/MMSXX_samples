@@ -343,3 +343,64 @@ body {
     min-width: 9rem;
   }
 }
+
+/* Fixed, read-only MML excerpt, independent of the editor. */
+.music-mml-preview {
+  position: relative;
+  display: block;
+  margin: 0;
+  width: 100%;
+  min-width: 0;
+  min-height: 160px;
+  aspect-ratio: 16 / 9;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  color: #fff;
+  background-color: #181818;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas,
+    "BIZ UDGothic", "Noto Sans Mono CJK JP", "Source Han Mono", "MS Gothic",
+    Osaka-Mono, monospace;
+  font-size: .875rem;
+  line-height: 1.45;
+  white-space: pre;
+  text-shadow: 0 0 2px rgba(0,0,0,.95), 0 0 5px rgba(0,0,0,.75),
+    0 1px 2px rgba(0,0,0,.9);
+  user-select: none;
+  -webkit-user-select: none;
+  pointer-events: none;
+}
+.music-mml-preview code {
+  position: absolute;
+  inset: 10px;
+  display: block;
+  overflow: hidden;
+  font: inherit;
+  white-space: inherit;
+  /* Fade the glyphs (including syntax colors), not the cover artwork. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 35%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 35%, transparent 100%);
+  user-select: none;
+  -webkit-user-select: none;
+}
+.music-mml-preview code > span {
+  display: block;
+  max-width: 100%;
+  min-height: 1.45em;
+  overflow: hidden;
+  white-space: pre;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.music-mml-preview .mml-preview-directive {
+  color: var(--mml-system);
+  font-weight: 600;
+}
+.music-mml-preview .mml-preview-comment {
+  color: #b8b8b8;
+  font-style: italic;
+}

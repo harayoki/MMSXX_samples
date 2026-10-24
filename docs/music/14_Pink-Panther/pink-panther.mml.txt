@@ -1,0 +1,185 @@
+#title Pink Panther - MSX OPLL arrange
+#version 0.89
+#about 原曲：Henry Mancini 
+// 音量はMMLのvへ移行（振幅2倍相当、v15で上限）。JS・#gainによる増幅は使わない。
+
+#voice psgJazzPiano = @adsr{0.002, 0.34, 0, 0.05}
+#voice psgKickDrop = @{pulse(50)} @pitch{900, 300, 0}
+#voice kickPsgTap = @adsr{0.001, 0.054, 0, 0.005}
+
+// ドラム文字：K=キック S=通常スネア N=ノイズ付きスネア
+// H=通常ハイハット O=ノイズ付きハイハット C=通常シンバル X=ノイズ付きシンバル T=タム
+// 補強ノイズのq0は、各エンベロープの固定減衰時間で鳴らすため。
+#bundle snareNoise = @{opll::snare}, @{noise(white)} @e{tap} q0 v4 @o2
+#bundle hatNoise = @{opll::hat}, @{noise(white)} @e{percussive} q0 v3 @o2
+#bundle cymbalNoise = @{opll::cymbal}, @{noise(white)} @e{percussive} q0 v6 @o2
+#bundle kickPsgBlend = @{opll::kick}, @{psgKickDrop} @e{kickPsgTap} q0 v10 @o-2
+#drum K = @{kickPsgBlend} v8 キック＋PSG
+#drum S = @{opll::snare} v8 通常スネア
+#drum N = @{snareNoise} v8 スネア＋ノイズ
+#drum H = @{opll::hat} v10 通常ハイハット
+#drum O = @{hatNoise} v10 ハイハット＋ノイズ
+#drum C = @{opll::cymbal} v8 通常シンバル
+#drum X = @{cymbalNoise} v8 シンバル＋ノイズ
+#drum Y = @{cymbalNoise} v8 強いシンバル＋ノイズ
+#drum T = @{opll::tom} v8 タム
+
+#bundle bassBlend = @{opll::acousticBass}, @{opll::synthBass} v12
+#bundle bassBlendSoft = @{opll::acousticBass}, @{opll::synthBass} v9
+
+// 主旋律を3音で重ねる。5度上は-4cent、同音補強は+5cent。
+#bundle brassLead = @{opll::horn}, @{opll::trumpet} @d696 v12, @{opll::trumpet} @d5 v13
+#bundle brassLeadEnd = @{opll::horn}, @{opll::trumpet} @d696 v8, @{opll::trumpet} @d5 v12
+
+#ch ブラス主旋律（3音バンドル）
+// 繰り返しフレーズ（音色・音量・開始オクターブは下の演奏部で指定）
+$lead_a = {
+  q6 d+12 e12 r3 f+12 g12 r3 d+12 e12 r12 f+12 g12 r12 > c12 < b12 r12 e12 g12 r12 b12 q7 @fade{10.75,1.75000000} a+2 @fade{15,0} r12 q6 a12 g12
+  e12 d12 q7 @fade{10.75,2.62500000} e2. @fade{15,0} r12 r6 q6 d+12 e12 r3 f+12 g12 r3 d+12 e12 r12 f+12 g12 r12 > c12 < b12 r12 g12 b12 r12 >
+  e12 q7 @fade{10.75,5.25000000} d+1. @fade{15,0} r4 r6 < q6 d+12 e12 r3 f+12 g12 r3 d+12 e12 r12 f+12 g12 r12 > c12 < b12 r12 e12 g12 r12 b12
+  q7 @fade{10.75,1.75000000} a+2 @fade{15,0} r12 q6 a12 g12 e12 d12 q7 @fade{10.75,2.62500000} e2. @fade{15,0} r12 r2
+}
+$lead_b = {
+  q7 b6 q6 a12 q7 g6 q6 e12 a+24 q7 a8. r48 q6 a+24 q7 a8. r48 q6 a+24 q7 a8. r48 q6 a+24 q7 a8. r48 q6 g12 e12 d12 q7 e6 @fade{10.75,5.25000000} e1. @fade{15,0} r12 q6 g12 e12
+  d12 q7 e6 @fade{10.75,5.25000000} e1. @fade{15,0} r12 q6 g12 e12 d12 q7 e6 @fade{10.75,3.50000000} e1 @fade{15,0} r3 r6
+}
+
+t125 l96 q7 @{brassLead} @e{flat} r64 r2 r6 o3 v13.5 q6 g+12 a12 r12 a+12 q7 @fade{10.75,5.25000000} b1. @fade{15,0} r12 r12 q6 g+12 a12 r12 a+12 q7 @fade{10.75,5.25000000} b1. @fade{15,0}
+r12 r12 q6 a+12 a12 r12 g+12 q7 @fade{10.75,5.25000000} g1. @fade{15,0} r12 r12 q6 g+12 a12 r12 a+12 q7 @fade{10.75,5.25000000} b1. @fade{15,0} r12 r3 v13.5 $lead_a > q7 e6 q6 d12 < $lead_b >
+$lead_a q7 e6 q6 d12 < $lead_b $lead_a > q7 e6 q6 d12 < $lead_b $lead_a > q7 e6 q6 d12 < q7 b6 q6 a12 q7 g6 q6 e12 a+24*a &a8. r48
+a+24*a &a8. r48 a+24*a &a8. r48 a+24*a &a8. r48 g12 e12 d12 q7 e6 @fade{10.75,5.25000000} e1. @fade{15,0} r12 q6 g12 e12 d12 q7 e6 @fade{10.75,5.25000000} e1. @fade{15,0} r12 q6 g12
+e12 d12 q7 e6 @fade{10.75,3.50000000} e1 @fade{15,0} r12 r4 >> @{brassLeadEnd} v13.5 @fade{10.75,5.25000000} f+1. @fade{15,0} r2 r8 r16 r24 r192
+
+#ch PSG2 ピアノ 主旋律
+// 主旋律の1オクターブ上。2周目の音域上昇には追従せず、同じ音域を保つ。
+// 上ハモリと同じタイミングに加え、4連フレーズも主旋律に合わせる。
+// イントロ・エンディングは休み。最後の4連は主旋律と同じポルタメント。
+$psg2_head = {
+q6 d+12 e12 r3 f+12 g12 r3 d+12 e12 r12 f+12 g12 r12 > c12 < b12 r12 e12 g12 r12 b12 q7 a+2 r12 q6
+a12 g12 e12 d12 q7 e2. r4 q6 d+12 e12 r3 f+12 g12 r3 d+12 e12 r12 f+12 g12 r12 > c12 < b12 r12 g12
+b12 r12 > e12 q7 d+1&d+2 r4. r24 < q6 d+12 e12 r3 f+12 g12 r3 d+12 e12 r12 f+12 g12 r12 > c12 < b12
+r12 e12 g12 r12 b12 q7 a+2 r12 q6 a12 g12 e12 d12 q7 e2. r2 r12 > q6 e6 d12 < b6 a12 g6 e12
+}
+$psg2_tail = {
+q6 g12
+e12 d12 e6 q7 e1&e2 r12 q6 g12 e12 d12 e6 q7 e1&e2 r12 q6 g12 e12 d12 e6 q7 e1
+}
+$psg2_four = { [q6 a+24 q7 a8. r48]4 }
+$psg2_four_slide = { [q6 a+24*a &a8. r48]4 }
+$psg2_lead_a = { $psg2_head $psg2_four $psg2_tail }
+$psg2_lead_end = { $psg2_head $psg2_four_slide $psg2_tail }
+
+
+t125 l96 @{pulse(50)} @e{psgJazzPiano} @m0 v8.2 o4
+// 本編3周目以降に演奏。イントロ・1〜2周目・エンディングは休み。
+[r1]8 r2 r3 r12 r64
+[r1]40 // 本編1〜2周目
+$psg2_lead_a r2 // 本編3周目
+$psg2_lead_end r1 r1 r2 r16 r192
+
+#ch PSGピアノ メロディ上ハモリ
+// 元の発音位置・長さのまま、主旋律の3度上から、さらに1オクターブ上。
+$piano_harmony_a = {
+q6 f+12 g12 r3 a12 b12 r3 f+12 g12 r12 a12 b12 r12 > e12 d12
+r12 < g12 b12 r12 > d12 q7 d2 r12 q6 c12 < b12 g12 f+12
+q7 g2. r4 q6 f+12 g12 r3 a12 b12 r3 f+12 g12 r12 a12 b12 r12
+> e12 d12 r12 < b12 > d12 r12 g12 q7 f+1&f+2 r4. r24 < q6 f+12
+g12 r3 a12 b12 r3 f+12 g12 r12 a12 b12 r12 > e12 d12 r12 <
+g12 b12 r12 > d12 q7 d2 r12 q6 c12 < b12 g12 f+12 q7 g2.
+r2 r12 > q6 g6 f+12 d6 c12 < b6 g12 r1 b12 g12 f+12 g6 q7
+g1&g2 r12 q6 b12 g12 f+12 g6 q7 g1&g2 r12 q6 b12 g12 f+12 g6 q7
+g1
+}
+$piano_harmony_b = {
+> q6 f+12 g12 r3 a12 b12 r3 f+12 g12 r12 a12 b12 r12 > e12
+d12 r12 < g12 b12 r12 > d12 q7 d2 r12 q6 c12 < b12 g12
+f+12 q7 g2. r4 q6 f+12 g12 r3 a12 b12 r3 f+12 g12 r12 a12 b12
+r12 > e12 d12 r12 < b12 > d12 r12 g12 q7 f+1&f+2 r4. r24 < q6
+f+12 g12 r3 a12 b12 r3 f+12 g12 r12 a12 b12 r12 > e12 d12 r12
+< g12 b12 r12 > d12 q7 d2 r12 q6 c12 < b12 g12 f+12 q7
+g2. r2 r12 q6 g6 f+12 d6 c12 < b6 g12 r1 b12 g12 f+12 g6 q7
+g1&g2 r12 q6 b12 g12 f+12 g6 q7 g1&g2 r12 q6 b12 g12 f+12 g6 q7
+g1
+}
+
+t125 l96 @{pulse(50)} @e{psgJazzPiano} @m0 v5.5 o4
+// 本編3周目以降に演奏。イントロ・1〜2周目・エンディングは休み。
+[r1]8 r2 r3 r12 r64
+[r1]40 // 本編1〜2周目
+$piano_harmony_a r2 // 本編3周目
+$piano_harmony_a r1 r1 r2 r16 r192
+
+#ch 合いの手クラリネット
+// 主旋律の節目にだけ返す。旋律末尾の G-E-D-E と次の D#-E を受ける。
+$reply_turn = { g12 e12 d12 e12 }
+$reply_pickup = { b12 > d12 d+12 < }
+
+t125 l96 q7 @{opll::clarinet} @e{flat}
+o3 v8.818 q7
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r2 r4 r64
+$reply_turn
+r1 r1 r1 r1 r1 r1 r1 r4 r8 r24
+$reply_pickup
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+> $reply_turn <
+r1 r1 r1 r1 r1 r1 r1 r2 r4 r16 r192
+
+#ch ブラス副旋律
+// 繰り返しフレーズ（音色・音量・開始オクターブは下の演奏部で指定）
+$counter_a = {
+  q6 d+12 e12 r3 f+12 g12 r3 d+12 e12 r12 f+12 g12 r12 > c12 < b12 r12 e12 g12 r12 b12 q7 @fade{10.75,1.75000000} a+2 @fade{15,0} r12 q6 a12 g12
+  e12 d12 q7 @fade{10.75,2.62500000} e2. @fade{15,0} r12 r6 q6 d+12 e12 r3 f+12 g12 r3 d+12 e12 r12 f+12 g12 r12 > c12 < b12 r12 g12 b12 r12 >
+  e12 q7 @fade{10.75,5.25000000} d+1. @fade{15,0} r4 r6 < q6 d+12 e12 r3 f+12 g12 r3 d+12 e12 r12 f+12 g12 r12 > c12 < b12 r12 e12 g12 r12 b12
+  q7 @fade{10.75,1.75000000} a+2 @fade{15,0} r12 q6 a12 g12 e12 d12 q7 @fade{10.75,2.62500000} e2. @fade{15,0} r12 r2 > e6 q6 d12 < q7 b6 q6 a12 q7 g6 q6 e12
+}
+
+
+t125 l96 q7 @e{flat} r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r2. r6
+@{opll::trumpet} o3 v13.228 $counter_a q6 a+24 q7 a8. r48
+q6 a+24 q7 a8. r48 q6 a+24 q7 a8. r48 q6 a+24 q7 a8. r48 q6 g12 e12 d12 q7 e6 @fade{10.75,3.50000000} e1 @fade{15,0} r12 r2 q6 g12 e12 d12 q7 e6 @fade{10.75,3.50000000} e1 @fade{15,0} r12 r2 q6 g12 e12 d12
+q7 e6 @fade{10.75,3.50000000} e1 @fade{15,0} r12 r4. r24 > $counter_a q6 a+24*a &a8. r48 a+24*a &a8. r48 a+24*a &a8. r48 a+24*a &a8. r48 g12
+e12 d12 q7 e6 @fade{10.75,3.50000000} e1 @fade{15,0} r12 r2 q6 g12 e12 d12 q7 e6 @fade{10.75,3.50000000} e1 @fade{15,0} r12 r2 q6 g12 e12 d12 q7 e6 @fade{10.75,3.50000000} e1 @fade{15,0} r12 r4 > v10.288 @fade{10.75,3.50000000} d+1 @fade{15,0} r4
+
+#ch ベース
+// 繰り返しフレーズ（音色・音量・開始オクターブは下の演奏部で指定）
+$bass_a = {
+  r12 r12 q6 c+12 d12 r12 d+12 q7 e4 r4 < b4 r4 > e2 r12 r12 q6 d+12 d12 r12 c+12 q7 c4 r4 < g4 r4 > c2 r12 r12
+  q6 c+12 d12 r12 d+12 q7 e4 r4 < b4 r4 > e2 r12 r12 q6 d12 d+12 r12 e12 q7 f4 r4 c4 r4 f2 r12 r12 q6 c+12 d12 r12
+  d+12 q7 e4 r4 < b4 r4 > e2 r12 r12 q6 d+12 d12 r12 c+12 q7 c4 r4 < g4 r4 > c2 r12 r12 q6 c+12 d12 r12 d+12 e12
+  r1. r4. r24 q7 e4 r4 < b4 r4 > e2 r12 r12 q6 d+12 d12 r12 c+12 q7 c4 r4 < g4 r4 > c2 r12 r12 q6 c+12 d12 r12
+  d+12 q7 e4 r4 < b4 r4 >
+}
+
+t125 l96 q6 @{bassBlend} @e{flat} r2 r6 o2 v15 @{bassBlend} c+12 d12 r12 d+12 q7 e1. r12 r12 q6 c+12 d12
+r12 d+12 q7 e1. r12 r12 q6 d+12 d12 r12 c+12 q7 c1. r12 r12 q6 c+12 d12 r12 d+12 q7 e1. $bass_a q7 e2 $bass_a q7 e2 $bass_a
+q7 e2 $bass_a q7 e4 < b4 q6 e8 r8 > v14.697 @{bassBlendSoft} q7 e1. r2.
+
+#ch ドラム
+t125 v15 q7 @o-1 @e{flat}
+$drum_a = { KO . . . v9 H v15 . NH . . . O . O . . . v9 H v15 . NH . . . KO . }
+$drum_b = { KO . . . v9 H v15 . NH . . . O . KO . . . v9 H v15 . NH . . . O . }
+$drum_c = { KO . . . v9 H v15 . NH . . . O . O . . . K . NH . . . KO . }
+$drum_d = { KO . . . v9 H v15 . NH . . . O . O . . . K . KH . . . KO . }
+$drum_e = { KX . . . . . . . . . . . . . . . . . . . . . K . }
+$drum_f = { K . . . . . N . . . . . . . . . . . N . . . K . }
+$drum_g = { . . . . . . . . . . . . . . . . . . . . . . . . }
+
+$drum_intro = { . . . . . . . . . . . . . . . . . . . . . . K . }
+$drum_fill = { KO . . . . . K . . . . . K . . T T T YT . . . . . }
+
+@{drums 24}{
+$drum_intro | $drum_a | $drum_a | $drum_a | $drum_a | $drum_a | $drum_a | $drum_a |
+$drum_a | $drum_b | $drum_c | $drum_b | $drum_d | $drum_b | $drum_d | $drum_b |
+$drum_d | $drum_b | $drum_d | $drum_b | $drum_d | $drum_e | $drum_f | $drum_a |
+$drum_a | $drum_a | $drum_a | $drum_a | $drum_a | $drum_b | $drum_c | $drum_b |
+$drum_d | $drum_b | $drum_d | $drum_b | $drum_d | $drum_b | $drum_d | $drum_b |
+$drum_d | $drum_e | $drum_f | $drum_a | $drum_a | $drum_a | $drum_a | $drum_a |
+$drum_a | $drum_b | $drum_c | $drum_b | $drum_d | $drum_b | $drum_d | $drum_b |
+$drum_d | $drum_b | $drum_d | $drum_b | $drum_d | $drum_e | $drum_f | $drum_a |
+$drum_a | $drum_a | $drum_a | $drum_a | $drum_a | $drum_b | $drum_c | $drum_b |
+$drum_d | $drum_b | $drum_d | $drum_b | $drum_d | $drum_b | $drum_d | $drum_b |
+$drum_d | $drum_e | $drum_f | $drum_a | $drum_a | $drum_a | $drum_a | $drum_a |
+$drum_fill | $drum_g | $drum_g |
+}
+
+
