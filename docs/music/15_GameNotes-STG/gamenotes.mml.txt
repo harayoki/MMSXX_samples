@@ -1,0 +1,894 @@
+#title Gradius Stage1 アレンジ
+#version 2.72
+#about アナログシンセの仕組みでグラっぽい音色（非波形メモリ）をMMLサウンドエンジンで作成。最初からデチューンやオクターブ重ねが入ったクリアな音色です。リバーブ等フィルタのテストもかねてSTAGE1の曲を作成していたらアレンジバージョンが出来上がりました。ドラムも似非TR-808音源を作って使っています。[ステレオ対応]
+#tempo 134
+#meter 4/4
+#gain 0.95
+#looptimes 1
+
+#ch Lead
+#role lead
+$edge_lead = { @{gamenotes::grdsSt1::edgeLead} }
+$common_lead_12 = {
+// v2.54：LEADの全vを元の80%に変更（曲内ダイナミクスは維持）。
+@p{0,0,1} t134 v9.36 q7 l16  $edge_lead o4 v7.44 g4 $edge_lead o4 g8. $edge_lead o5 c16 o5 f8 o5 e4 o5 c8 $edge_lead o5 v8.08 g8. $edge_lead o4 a+16 $edge_lead o4 a+4. $edge_lead o4 g16 o4 g+16 o4 a+16 o5 d+16 o5 f16 o5 g16 $edge_lead o5 v8.72 c8. o4 a8. $edge_lead o5 c4 o5 f8 o4 a16 o4 b16 o5 c16 o5 d16 o5 v9.12 d+8 o5 c16 o4 g+8 o5 d+8 o5 c16 o5 f8 o5 d16 o4 a+8 o5 d16 o5 f8 o4 v9.36 g4 $edge_lead o4 g8. $edge_lead o5 c16 o5 f8 o5 e4 o5 c8 $edge_lead o5 g8. $edge_lead o4 a+16 $edge_lead o4 a+4. $edge_lead o4 g16 o4 g+16 o4 a+16 o5 d+16 o5 f16 o5 g16 o5 a8 o5 c16 $edge_lead o5 c8. $edge_lead o5 f8 o5 g8 o5 a4 o5 f8 $edge_lead o5 d8. $edge_lead o5 g2. & o5 g16 $edge_lead o5 c8. o5 d+8. $edge_lead o5 g+2 & o5 g+8 $edge_lead o4 a+8. o5 d8. $edge_lead o5 d+2 & o5 d+8 $edge_lead o4 a16 o4 a+16 o5 c16 $edge_lead o5 f4 & o5 f16 $edge_lead o4 b16 o5 c16 o5 d16 $edge_lead o5 g4 & o5 g16 $edge_lead o5 c16 o5 d16 o5 d+16 $edge_lead o5 g+4 & o5 g+16 $edge_lead o5 d16 o5 d+16 o5 f16 $edge_lead o5 a+16 o5 a+8 $edge_lead o6 c2 & o6 c8
+}
+$lap13_Lead = {
+$common_lead_12  $edge_lead o5 b2
+}
+$lap14_Lead = {
+$common_lead_12  r2
+// 2巡目14小節：C6を保持せず、元のC6→B5下降でGに解決。
+$edge_lead o5 b2 & o5 b8 r8 r4
+}
+
+#label Round1
+// 1巡目の冒頭4小節：LEADの音量を約84%から100%へ緩やかに戻す。元の音符/v値は変更しない。
+@fade{12.6,0}
+@fade{15,16}
+$lap13_Lead
+#label Round2
+@fade{15,0}
+$lap14_Lead
+#label Round3
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+#label Fill-3to4
+// 3→4巡フィルイン：1小節（4拍）
+r1
+#label Round4
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 
+// 4→5巡間の2拍フィルイン。4巡目の13小節は元のまま
+#label Fill-4to5
+// 第5巡前フィル：1小節（他パートは休止）
+r1
+#label Round5
+@fade{15,0} // 第5巡：フェードを完全解除、2巡目と同じ基準音量に戻す
+$lap14_Lead
+#label OUTRO
+// 5巡目のGsus4→Gを残してFsus4→Fへ。原D案の旋律を＋3半音で移調。
+@p{0,0,1} t134 q7 l16 @{gamenotes::grdsSt1::edgeLead}
+v9.36 $edge_lead o5 a+2 & o5 a+8 r4.
+v9.36 $edge_lead o5 a2 & o5 a8 r4.
+r1 r1 r1 r1
+
+#ch Lead-Harmony
+#role chord
+$lap13_LeadLowHarmony = {
+@p{-0.35,0,1} t134 q7 l16 @{gamenotes::grdsSt1::harmony}
+// 1〜4小節：休止（元版と同じ）
+r1 r1 r1 r1
+// 5〜8小節：LEADの各音の開始時刻・音長・q7を一致。低音ハモリの音色と音量は前版維持。
+// 05小節：③ 安定したコードトーン
+v2.50 o4 e4 o4 e8. o4 g16 o4 a8 o4 g4 o4 e8
+// 06小節：③ 安定したコードトーン
+v3.15 o4 a+8. o4 g16 o4 g4. o4 d+16 o4 d+16 o4 g16 o4 a+16 o4 a+16 o4 a+16
+// 07小節：③ 安定したコードトーン
+v3.15 o5 c8 o4 a16 o4 a8. o5 c8 o5 c8 o5 c4 o4 a8
+// 08小節：③ 安定したコードトーン
+v3.15 o4 g8. o5 d2. & o5 d16
+// 9〜13小節：休止
+r1 r1 r1 r1 r1
+}
+$lap14_LeadLowHarmony = {
+$lap13_LeadLowHarmony
+// 14小節目も1巡目と同じ担当分担に戻す。低音解決はBassの刻みで行う。
+r1
+}
+
+#label Round1
+$lap13_LeadLowHarmony
+#label Round2
+$lap14_LeadLowHarmony
+#label Round3
+$lap13_LeadLowHarmony
+#label Fill-3to4
+// 3→4巡フィルイン：1小節（4拍）
+r1
+#label Round4
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 
+// 4→5巡間の2拍フィルイン。4巡目の13小節は元のまま
+#label Fill-4to5
+// 第5巡前フィル：1小節（他パートは休止）
+r1
+#label Round5
+$lap14_LeadLowHarmony
+#label OUTRO
+// 3小節目頭、E♭→A♭ の解決で A♭メジャーを一撃。比較ページと同じ転回形 C-E♭-A♭。
+@p{0,0,1} t134 q7 v8 @{gamenotes::grdsSt1::edgeLead} @e{soft}
+r1 r1
+'o4 c o4 d+ o4 g+'1
+r1 r1 r1
+
+#ch Bass
+#role bass
+$lap13_Bass = {
+@p{0,0,1} t134 q6 l16
+// シチュエーションA（1〜8小節）：ファンク。16分裏拍の独立したベースライン。
+@{gamenotes::grdsSt1::octaveBass}
+// 01小節
+v12.07 o2 c8 r16 v10.96 o3 c16 v11.98 o3 g16 r16 v12.07 o2 c16 v9.61 o3 c16 r16 v10.96 o3 g16 v12.07 o2 c8 r16 v11.47 o3 c16 v12.07 o2 c8
+// 02小節
+v12.78 o2 d+8 r16 v11.61 o3 d+16 v12.69 o3 a+16 r16 v12.78 o2 d+16 v10.17 o3 d+16 r16 v11.61 o3 a+16 v12.78 o2 d+8 r16 v12.15 o3 d+16 v12.78 o2 d+8
+// 03小節
+v13.49 o2 f8 r16 v12.25 o3 f16 v13.39 o3 c16 r16 v13.49 o2 f16 v10.73 o3 f16 r16 v12.25 o3 c16 v13.49 o2 f8 r16 v12.82 o3 f16 v13.49 o2 f8
+// 04小節
+v13.92 o2 g+8 r16 v12.64 o3 g+16 v13.82 o3 d+16 r16 v13.92 o2 g+16 v11.07 o3 g+16 r16 v12.64 o3 f16 v13.92 o2 a+8 r16 v13.23 o3 a+16 v13.92 o2 a+8
+// 05小節
+v14.2 o2 c8 r16 v12.9 o3 c16 v14.1 o3 g16 r16 v14.2 o2 c16 v11.3 o3 c16 r16 v12.9 o3 g16 v14.2 o2 c8 r16 v13.5 o3 c16 v14.2 o2 c8
+// 06小節
+v14.2 o2 d+8 r16 v12.9 o3 d+16 v14.1 o3 a+16 r16 v14.2 o2 d+16 v11.3 o3 d+16 r16 v12.9 o3 a+16 v14.2 o2 d+8 r16 v13.5 o3 d+16 v14.2 o2 d+8
+// 07小節
+v14.2 o2 f8 r16 v12.9 o3 f16 v14.1 o3 c16 r16 v14.2 o2 f16 v11.3 o3 f16 r16 v12.9 o3 c16 v14.2 o2 f8 r16 v13.5 o3 f16 v14.2 o2 f8
+// 08小節
+v14.2 o2 g8 r16 v12.9 o3 g16 v14.1 o3 d16 r16 v14.2 o2 g16 v11.3 o3 g16 r16 v12.9 o3 d16 v14.2 o2 g8 r16 v13.5 o3 g16 v14.2 o2 g8
+// シチュエーションB1（9〜10小節）：原曲寄り。4拍の頭を8分で踏み、オクターブと5度を細く返す。
+// 拍頭の音型を維持し、tightBassを2声ユニゾンで重ねる。
+@{gamenotes::grdsSt1::tightBass} q7
+// 09小節：G♯2→G♯3→D♯3。最後の拍だけ原曲型16分×4でB2へ接続。
+v12.6 o2 g+8 v11.2 o3 g+16 v9.9 o3 d+16
+v12.6 o2 g+8 v11.2 o3 g+16 v9.9 o3 d+16
+v12.6 o2 g+8 v11.2 o3 g+16 v9.9 o3 d+16
+v12.6 o2 g+16 v11.2 o3 g+16 v9.9 o3 d+16 v11.2 o3 g+16
+// 10小節：D♯2→D♯3→B2。最後の拍に16分型を戻す。
+v12.6 o2 d+8 v11.2 o3 d+16 v9.9 o2 b16
+v12.6 o2 d+8 v11.2 o3 d+16 v9.9 o2 b16
+v12.6 o2 d+8 v11.2 o3 d+16 v9.9 o2 b16
+v12.6 o2 d+16 v11.2 o3 d+16 v9.9 o2 b16 v11.2 o3 d+16
+// B2はv2.7のファンクベースへそのまま戻す。
+@{gamenotes::grdsSt1::octaveBass} q6
+// シチュエーションB2（11〜13小節）：ファンクの刻みを発展。スイングなし。
+// 11小節
+v14.3 o2 f8 r16 v12.9 o3 c16 r16 v14.1 o2 f8 r16 v11.3 o3 f16 r16 v14.3 o2 g16 r16 v12.9 o3 d8 r16 v14.1 o2 g16
+// 12小節
+v14.3 o2 g+8 r16 v12.9 o3 d+16 r16 v14.1 o2 g+16 r16 v11.3 o3 g+16 r16 v14.3 o2 a+8 r16 v12.9 o3 f16 r16 v14.3 o2 a+8
+// 13小節：ドンタン・ドンタン｜ドンタタ・ドンタタ。前半は上のG3を16分裏へ少し後ろ倒し、後半は通常の16分連打。
+v14.3 o2 g8 r16 v13.2 o3 g16 v14.3 o2 g8 r16 v13.2 o3 g16 v14.3 o2 g8 v13.2 o3 g16 v11.6 o3 g16 v14.3 o2 g8 v13.2 o3 g16 v11.6 o3 g16
+}
+$lap14_Bass = {
+$lap13_Bass
+// 2巡目14小節：低音側のC→B着地。主旋律は下降させない。
+// 2巡目14小節：ベースを1巡目13小節と同じG2/G3の刻みに戻す。
+@{gamenotes::grdsSt1::octaveBass} q6
+v14.3 o2 g8 r16 v13.2 o3 g16 v14.3 o2 g8 r16 v13.2 o3 g16 v14.3 o2 g8 v13.2 o3 g16 v11.6 o3 g16 v14.3 o2 g8 v13.2 o3 g16 v11.6 o3 g16
+}
+
+#label Round1
+$lap13_Bass
+#label Round2
+$lap14_Bass
+#label Round3
+$lap13_Bass
+#label Fill-3to4
+// 3→4巡フィルイン：1小節（4拍）
+r1
+#label Round4
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 
+// 4→5巡間の2拍フィルイン。4巡目の13小節は元のまま
+#label Fill-4to5
+// 第5巡前：既存の矩形波50%＋25%による16分16音と同時演奏。
+// 低音も半音階13音＋末尾3音（C# D D#）で16音。音長は全て16分。
+// 入力指定 @e2～@e8 は現行Sound 0.44.0では未対応なので段階的なvに置換。
+@p{0,0,1} t134 q7 l16 @{gamenotes::grdsSt1::octaveBass}
+v5 o2 c16 v5.8 d-16 d16 v6.6 e-16 e16 v7.4 f16 g-16 v8.2 g16 a-16 v9.0 a16 b-16 v9.8 b16 o3 c16 v10.6 d-16 d16 e-16
+#label Round5
+$lap14_Bass
+#label OUTRO
+@p{0,0,1} t134 q6 l16 @{gamenotes::grdsSt1::octaveBass}
+// 最初の2小節はFの16分刻み。3小節目でA♭に着地、残りは休符。
+v14.3 o2 f8 r16 v13.2 o3 f16 v14.3 o2 f8 r16 v13.2 o3 f16 v14.3 o2 f8 v13.2 o3 f16 v11.6 o3 f16 v14.3 o2 f8 v13.2 o3 f16 v11.6 o3 f16
+v14.3 o2 f8 r16 v13.2 o3 f16 v14.3 o2 f8 r16 v13.2 o3 f16 v14.3 o2 f8 v13.2 o3 f16 v11.6 o3 f16 v14.3 o2 f8 v13.2 o3 f16 v11.6 o3 f16
+v11 o2 g+1 r1 r1 r1
+
+#ch Bass Tight
+#role bass
+$lap13_BassB1TightDouble = {
+// B1(9〜10小節)専用。同音重ねを維持しながら副ベースの音量を控えめに調整。
+// 9〜10小節は2音をユニゾンで重ねる。11小節以降は追加しない。
+@p{0.15,0,1} t134 q7 l16 @{gamenotes::grdsSt1::tightBass}
+// 01〜08小節休み
+r1 r1 r1 r1 r1 r1 r1 r1
+// 09小節
+v9.1.1.6 o2 g+8 v9.1.1 o3 g+16 v9.1 o3 d+16
+v9.1.1.6 o2 g+8 v9.1.1 o3 g+16 v9.1 o3 d+16
+v9.1.1.6 o2 g+8 v9.1.1 o3 g+16 v9.1 o3 d+16
+v9.1.1.6 o2 g+16 v9.1.1 o3 g+16 v9.1 o3 d+16 v9.1.1 o3 g+16
+// 10小節
+v9.1.1.6 o2 d+8 v9.1.1 o3 d+16 v9.1 o2 b16
+v9.1.1.6 o2 d+8 v9.1.1 o3 d+16 v9.1 o2 b16
+v9.1.1.6 o2 d+8 v9.1.1 o3 d+16 v9.1 o2 b16
+v9.1.1.6 o2 d+16 v9.1.1 o3 d+16 v9.1 o2 b16 v9.1.1 o3 d+16
+// 11〜13小節休み
+r1 r1 r1
+}
+$lap14_BassB1TightDouble = {
+$lap13_BassB1TightDouble
+// 2巡目14小節：低音側のC→B着地。主旋律は下降させない。
+r1
+}
+
+#label Round1
+$lap13_BassB1TightDouble
+#label Round2
+$lap14_BassB1TightDouble
+#label Round3
+$lap13_BassB1TightDouble
+#label Fill-3to4
+// 3→4巡フィルイン：1小節（4拍）
+r1
+#label Round4
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 
+// 4→5巡間の2拍フィルイン。4巡目の13小節は元のまま
+#label Fill-4to5
+// 第5巡前フィル：1小節（他パートは休止）
+r1
+#label Round5
+$lap14_BassB1TightDouble
+#label OUTRO
+r1 r1 r1 r1
+r1 r1
+
+#ch Arp-Harmony
+#role arp
+$arp_fall_a = { o5 c16 o4 b16 o4 a16 o4 g16 }
+$arp_rise_a = { o4 f16 o4 g16 o4 a16 o4 b16 }
+$arp_fall_b = { o5 c16 o4 a+16 o4 g+16 o4 g16 }
+$arp_rise_b = { o4 f16 o4 g16 o4 g+16 o4 a+16 }
+$lap13_ArpeggioHarmony = {
+// 原曲の4音型。左右の定位と小節別vは呼び出し側に残す。
+
+@p{-0.43,0,1} t134 l16 q7 @{gamenotes::grdsSt1::arpeggio} @f{echo 0.20 @feedback 0.43 @mix 0.34 @tone 4200 @cross 0}
+// 原曲のA区間アルペジオを1〜7小節で16分音符連続演奏。8小節以降は別CHの乾いたバッキング／後半ハモリへ。
+// 5〜7小節目は低音ハモリとハモリアルペジオを重ね、8小節目だけ2声コードバッキング。
+// 01小節 — 連続16分16音。非常に小さく開始し4音ごとに段階的増量。
+v1.89 q7 l16 @p{-0.58,0,1} $arp_fall_a v2.43 @p{0.58,0,1} $arp_rise_a v2.97 @p{-0.58,0,1} $arp_fall_a v3.51 @p{0.58,0,1} $arp_rise_a
+// 02小節 — 4音ごとに増量。
+v3.96 q7 l16 @p{-0.58,0,1} $arp_fall_b v4.32 @p{0.58,0,1} $arp_rise_b v4.77 @p{-0.58,0,1} $arp_fall_b v5.22 @p{0.58,0,1} $arp_rise_b
+// 03小節 — 4音ごとに増量。
+v5.58 q7 l16 @p{-0.58,0,1} $arp_fall_a v5.94 @p{0.58,0,1} $arp_rise_a v6.3 @p{-0.58,0,1} $arp_fall_a v6.66 @p{0.58,0,1} $arp_rise_a
+// 04小節 — 4音ごとに増量、最後はv7.74。
+v6.93 q7 l16 @p{-0.58,0,1} $arp_fall_b v7.2 @p{0.58,0,1} $arp_rise_b v7.47 @p{-0.58,0,1} o5 c16 o5 d16 o5 d+16 o5 d16 v7.74 @p{0.58,0,1} o5 c16 o4 a+16 o4 g+16 o4 a+16
+// 05小節 — 16分音符16個（連続）
+v6.03 q7 l16 @p{-0.58,0,1} $arp_fall_a @p{0.58,0,1} $arp_rise_a @p{-0.58,0,1} $arp_fall_a @p{0.58,0,1} $arp_rise_a
+// 06小節 — 16分音符16個（連続）
+v6.21 q7 l16 @p{-0.58,0,1} $arp_fall_b @p{0.58,0,1} $arp_rise_b @p{-0.58,0,1} $arp_fall_b @p{0.58,0,1} $arp_rise_b
+// 07小節 — 16分音符16個（連続）
+v6.3 q7 l16 @p{-0.58,0,1} $arp_fall_a @p{0.58,0,1} $arp_rise_a @p{-0.58,0,1} $arp_fall_a @p{0.58,0,1} o4 f16 o4 g16 o4 a16 o4 f16
+// 08〜13小節：エコー付きCHは休符
+r1 r1 r1 r1 r1 r1
+}
+$lap13_ArpeggioHarmonyRound3 = {
+// 原曲の4音型。左右の定位と小節別vは呼び出し側に残す。
+
+@p{-0.43,0,1} t134 l16 q7 @{gamenotes::grdsSt1::arpeggio} @f{echo 0.20 @feedback 0.43 @mix 0.40 @tone 4200 @cross 0}
+// 原曲のA区間アルペジオを1〜7小節で16分音符連続演奏。8小節以降は別CHの乾いたバッキング／後半ハモリへ。
+// 5〜7小節目は低音ハモリとハモリアルペジオを重ね、8小節目だけ2声コードバッキング。
+// 01小節 — 連続16分16音。非常に小さく開始し4音ごとに段階的増量。
+v7.74 q7 l16 @p{-0.58,0,1} $arp_fall_a v7.74 @p{0.58,0,1} $arp_rise_a v7.74 @p{-0.58,0,1} $arp_fall_a v7.74 @p{0.58,0,1} $arp_rise_a
+// 02小節 — 4音ごとに増量。
+v7.74 q7 l16 @p{-0.58,0,1} $arp_fall_b v7.74 @p{0.58,0,1} $arp_rise_b v7.74 @p{-0.58,0,1} $arp_fall_b v7.74 @p{0.58,0,1} $arp_rise_b
+// 03小節 — 4音ごとに増量。
+v7.74 q7 l16 @p{-0.58,0,1} $arp_fall_a v7.74 @p{0.58,0,1} $arp_rise_a v7.74 @p{-0.58,0,1} $arp_fall_a v7.74 @p{0.58,0,1} $arp_rise_a
+// 04小節 — 4音ごとに増量、最後はv7.74。
+v7.74 q7 l16 @p{-0.58,0,1} $arp_fall_b v7.74 @p{0.58,0,1} $arp_rise_b v7.74 @p{-0.58,0,1} o5 c16 o5 d16 o5 d+16 o5 d16 v7.74 @p{0.58,0,1} o5 c16 o4 a+16 o4 g+16 o4 a+16
+// 05小節 — 16分音符16個（連続）
+v7.74 q7 l16 @p{-0.58,0,1} $arp_fall_a @p{0.58,0,1} $arp_rise_a @p{-0.58,0,1} $arp_fall_a @p{0.58,0,1} $arp_rise_a
+// 06小節 — 16分音符16個（連続）
+v7.74 q7 l16 @p{-0.58,0,1} $arp_fall_b @p{0.58,0,1} $arp_rise_b @p{-0.58,0,1} $arp_fall_b @p{0.58,0,1} $arp_rise_b
+// 07小節 — 16分音符16個（連続）
+v7.74 q7 l16 @p{-0.58,0,1} $arp_fall_a @p{0.58,0,1} $arp_rise_a @p{-0.58,0,1} $arp_fall_a @p{0.58,0,1} o4 f16 o4 g16 o4 a16 o4 f16
+// 08〜13小節：エコー付きCHは休符
+r1 r1 r1 r1 r1
+// 13小節：Gsus4(C) → G(B) をこの1小節で解決。ここではフェードしない。
+@p{-0.55,0,1} v7.74 [o4 g16 o5 c16 d16 g16 @p{0.55,0,1} o5 g16 d16 c16 o4 g16]1
+@p{-0.55,0,1} v7.74 [o4 g16 b16 o5 d16 g16 @p{0.55,0,1} o5 g16 d16 o4 b16 g16]1
+}
+
+$lap14_ArpeggioHarmony = {
+// 原曲の4音型。左右の定位と小節別vは呼び出し側に残す。
+@p{-0.43,0,1} t134 l16 q7 @{gamenotes::grdsSt1::arpeggio} @f{echo 0.20 @feedback 0.43 @mix 0.40 @tone 4200 @cross 0}
+// 原曲のA区間アルペジオを1〜7小節で16分音符連続演奏。8小節以降は別CHの乾いたバッキング／後半ハモリへ。
+// 5〜7小節目は低音ハモリとハモリアルペジオを重ね、8小節目だけ2声コードバッキング。
+// 01小節 — 連続16分16音。非常に小さく開始し4音ごとに段階的増量。
+v7.74 q7 l16 @p{-0.58,0,1} $arp_fall_a v7.74 @p{0.58,0,1} $arp_rise_a v7.74 @p{-0.58,0,1} $arp_fall_a v7.74 @p{0.58,0,1} $arp_rise_a
+// 02小節 — 4音ごとに増量。
+v7.74 q7 l16 @p{-0.58,0,1} $arp_fall_b v7.74 @p{0.58,0,1} $arp_rise_b v7.74 @p{-0.58,0,1} $arp_fall_b v7.74 @p{0.58,0,1} $arp_rise_b
+// 03小節 — 4音ごとに増量。
+v7.74 q7 l16 @p{-0.58,0,1} $arp_fall_a v7.74 @p{0.58,0,1} $arp_rise_a v7.74 @p{-0.58,0,1} $arp_fall_a v7.74 @p{0.58,0,1} $arp_rise_a
+// 04小節 — 4音ごとに増量、最後はv7.74。
+v7.74 q7 l16 @p{-0.58,0,1} $arp_fall_b v7.74 @p{0.58,0,1} $arp_rise_b v7.74 @p{-0.58,0,1} o5 c16 o5 d16 o5 d+16 o5 d16 v7.74 @p{0.58,0,1} o5 c16 o4 a+16 o4 g+16 o4 a+16
+// 05小節 — 16分音符16個（連続）
+v7.74 q7 l16 @p{-0.58,0,1} $arp_fall_a @p{0.58,0,1} $arp_rise_a @p{-0.58,0,1} $arp_fall_a @p{0.58,0,1} $arp_rise_a
+// 06小節 — 16分音符16個（連続）
+v7.74 q7 l16 @p{-0.58,0,1} $arp_fall_b @p{0.58,0,1} $arp_rise_b @p{-0.58,0,1} $arp_fall_b @p{0.58,0,1} $arp_rise_b
+// 07小節 — 16分音符16個（連続）
+v7.74 q7 l16 @p{-0.58,0,1} $arp_fall_a @p{0.58,0,1} $arp_rise_a @p{-0.58,0,1} $arp_fall_a @p{0.58,0,1} o4 f16 o4 g16 o4 a16 o4 f16
+// 08〜13小節：エコー付きCHは休符
+r1 r1 r1 r1 r1
+// 2巡目13〜14小節：Gsus4→Gに沿った従来型4音アルペジオ。ここから最終音までフェード。
+@p{-0.45,0,1} t134 q7 l16 @{gamenotes::grdsSt1::arpeggio} v5.6
+@p{-0.55,0,1} [o4 g16 o5 c16 d16 g16 @p{0.55,0,1} o5 g16 d16 c16 o4 g16]2
+@p{-0.55,0,1} [o4 g16 b16 o5 d16 g16 @p{0.55,0,1} o5 g16 d16 o4 b16 g16]2
+}
+
+#label Round1
+// 冒頭は完全な無音から2小節で徐々に上げる。頂点は従来の約87%。
+@fade{0,0}
+@fade{13,8}
+$lap13_ArpeggioHarmony
+#label Round2
+@fade{15,0}
+$lap14_ArpeggioHarmony
+#label Round3
+$lap13_ArpeggioHarmonyRound3
+#label Fill-3to4
+// 3→4巡フィルイン：1小節（4拍）
+r1
+#label Round4
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 
+// 4→5巡間の2拍フィルイン。4巡目の13小節は元のまま
+#label Fill-4to5
+#voice fillArpDual5025 = @{pulse(50)} @gain{0.65}, @{pulse(25)} @gain{0.65}
+
+// ユーザー指定のC→高音Cまで13音を順番どおりに弾き、その後C♯5→D5→E♭5を追加。16分音符×16音＝1小節。
+@p{-0.45,0,1} t134 q7 l16 @{fillArpDual5025}
+v5.0 o4 c16 v5.5 d-16 d16 v6.0 e-16 e16 v6.5 f16 g-16 v7.0 g16 a-16 v7.5 a16 b-16 v8.0 b16 o5 c16 v8.5 d-16 d16 e-16
+#label Round5
+$lap14_ArpeggioHarmony
+#label OUTRO
+@p{-0.55,0,1} t134 q7 l16 @{gamenotes::grdsSt1::arpeggio} v7.5
+// 1: Fsus4 = F B♭ C, 2: F = F A C。5巡目のGsus4→Gから続く。
+@p{-0.55,0,1} [o4 f16 o4 a+16 o5 c16 o5 f16 @p{0.55,0,1} o5 f16 o5 c16 o4 a+16 o4 f16]2
+@p{-0.55,0,1} [o4 f16 o4 a16 o5 c16 o5 f16 @p{0.55,0,1} o5 f16 o5 c16 o4 a16 o4 f16]2
+// 3: A♭メジャー（A♭ C E♭）解決。3〜6小節のアルペジオを4小節でフェード。
+@p{-0.55,0,1} @fade{0,16}
+@p{-0.55,0,1} r16 r16 o5 d+16 o5 g+16 @p{0.55,0,1} o5 g+16 o5 d+16 o5 c16 o4 g+16
+@p{-0.55,0,1} [o4 g+16 o5 c16 o5 d+16 o5 g+16 @p{0.55,0,1} o5 g+16 o5 d+16 o5 c16 o4 g+16]1
+@p{-0.55,0,1} [o4 g+16 o5 c16 o5 d+16 o5 g+16 @p{0.55,0,1} o5 g+16 o5 d+16 o5 c16 o4 g+16]2
+@p{-0.55,0,1} [o4 g+16 o5 c16 o5 d+16 o5 g+16 @p{0.55,0,1} o5 g+16 o5 d+16 o5 c16 o4 g+16]2
+@p{-0.55,0,1} [o4 g+16 o5 c16 o5 d+16 o5 g+16 @p{0.55,0,1} o5 g+16 o5 d+16 o5 c16 o4 g+16]2
+
+#ch Arp-Post
+#role harmony
+$lap13_ArpeggioPost = {
+// エコーなし専用CH。MMSXX @f のEchoは途中でオフにできないため物理CHを分離。
+@p{-0.43,0,1} t134 l16 q7 @{gamenotes::grdsSt1::arpeggio} @f0
+// 01〜07小節：ここは主アルペジオだけが担当
+r1 r1 r1 r1 r1 r1 r1 
+// 08小節 — コードバッキング。独立CHのため最初からエコーなし。
+v7 o5 d8 r16 v8 o5 c16 r16 v8 o4 b8 r16 v9 o4 a8 r16 v10 o4 g16 v11 o4 b8 v12 o5 d16 v12 o5 g16
+// 後半：ハモリB1／対旋律B2（エコーなし）。
+// B1はエコーなし。B2副旋律はv2.5へ完全復帰（v2.6の16分休符・裏拍追加を撤回）。
+v11.7 q7 l16 @{gamenotes::grdsSt1::harmony} o5 d+8. o5 c8. @{gamenotes::grdsSt1::harmony} o5 d+4. @{gamenotes::grdsSt1::harmony} o5 c16 o5 d16 o5 d+8 @{gamenotes::grdsSt1::harmony} o5 d8. o4 a+8. @{gamenotes::grdsSt1::harmony} o4 g2 & o4 g8 @{gamenotes::grdsSt1::harmony} o5 c8. o4 a8. @{gamenotes::grdsSt1::harmony} o5 c16 o5 c16 @{gamenotes::grdsSt1::harmony} o5 d8. o4 b8. @{gamenotes::grdsSt1::harmony} o5 d16 o5 d16 @{gamenotes::grdsSt1::harmony} o5 d+8. o5 c8. @{gamenotes::grdsSt1::harmony} o5 d+16 o5 f16 @{gamenotes::grdsSt1::harmony} o5 f8. o5 d8. @{gamenotes::grdsSt1::harmony} o5 g1 & o5 g8
+}
+$lap14_ArpeggioPost = {
+$lap13_ArpeggioPost
+// 2巡目14小節：1巡目13小節の対旋律Gを継承し、主旋律が孤立しないようにする。
+v11.7 q7 l16 @{gamenotes::grdsSt1::harmony} o5 g1
+}
+
+#label Round1
+$lap13_ArpeggioPost
+#label Round2
+$lap14_ArpeggioPost
+#label Round3
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+#label Fill-3to4
+// 3→4巡フィルイン：1小節（4拍）
+r1
+#label Round4
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 
+// 4→5巡間の2拍フィルイン。4巡目の13小節は元のまま
+#label Fill-4to5
+// 第5巡前フィル：1小節（他パートは休止）
+r1
+#label Round5
+$lap14_ArpeggioPost
+#label OUTRO
+@p{-0.43,0,1} t134 q7 l16 @{gamenotes::grdsSt1::harmony} @f0
+// Fsus4のB♭→FのAへ解決（既存D案と同じ拍位置）。
+v8 o4 a+1
+v8 o4 a1
+r1 r1 r1 r1
+
+#ch Arp-Second
+#role chord
+$lap13_ArpeggioSecond = {
+@p{0.48,0,1} t134 l16 q7 @{gamenotes::grdsSt1::arpeggio} @f0
+// 01小節
+r1
+// 02小節
+r1
+// 03小節
+r1
+// 04小節
+r1
+// 05小節：上声アルペジオを休止。高音コードの短いバッキングへ交代。
+r1
+// 06小節
+r1
+// 07小節
+r1
+// 08小節：2音コードバッキング。v2.21と完全同一（音程・リズム・音量）。
+v4.7 q5 l16 o4 c8 r16 v4.7 o4 c16 r8 v5.5 o4 c8 v6.3 o4 d8 r16 v6.3 o4 d16 v7.1 o4 d8 v7.1 o4 d16 v7.1 o4 d16
+
+@f0
+r1
+r1
+r1
+r1
+r1
+}
+$lap14_ArpeggioSecond = {
+$lap13_ArpeggioSecond
+// 2巡目14小節：低音側のC→B着地。主旋律は下降させない。
+r1
+}
+
+#label Round1
+$lap13_ArpeggioSecond
+#label Round2
+$lap14_ArpeggioSecond
+#label Round3
+$lap13_ArpeggioSecond
+#label Fill-3to4
+// 3→4巡フィルイン：1小節（4拍）
+r1
+#label Round4
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 
+// 4→5巡間の2拍フィルイン。4巡目の13小節は元のまま
+#label Fill-4to5
+// 第5巡前フィル：1小節（他パートは休止）
+r1
+#label Round5
+$lap14_ArpeggioSecond
+#label OUTRO
+r1 r1 r1 r1
+r1 r1
+
+#ch HighChord
+#role chord
+$lap13_HighChord = {
+// v2.36：HighChord (G / D / CB) を公式MML和音記法に統合。音量は和音の制限で整数丸め。
+// 発音位置・音程・音長は維持。3CHの個別定位は和音全体で共通化。
+@p{0.45,0,1} t134 q2 o6 l16 @{gamenotes::grdsSt1::arpeggio} @f0
+// 01〜02小節
+r1 r1
+// 03小節：2打・左右交互
+l16 r4 r8 @p{-0.75,0,1} 'v4 o5 a v4 o6 c v5 o6 f'8 r4 r8 @p{0.75,0,1} 'v4 o5 a v4 o6 c v5 o6 f'8
+// 04小節：2打・左右交互
+l16 r4 r8 @p{0.75,0,1} 'v4 o5 g+ v4 o6 c v5 o6 d+'8 r4 r8 @p{-0.75,0,1} 'v4 o5 a+ v4 o6 d v5 o6 f'8
+@p{0.45,0,1}
+// 05小節：3声コード刻み4打
+l16 r8 'v4 o5 g v4 o6 c v5 o6 d'8 r16 'v4 o5 g v3 o6 c v4 o6 d'8 r8. 'v4 o5 g v4 o6 c v5 o6 d'8 r8 'v4 o5 g v4 o6 c v4 o6 d'8
+// 06小節：3声コード刻み4打
+l16 r8 'v4 o5 g v4 o6 a+ v5 o6 d+'8 r16 'v4 o5 g v3 o6 a+ v4 o6 d+'8 r8. 'v4 o5 g v4 o6 a+ v5 o6 d+'8 r8 'v4 o5 g v4 o6 a+ v4 o6 d+'8
+// 07小節：3声コード刻み4打
+l16 r8 'v4 o5 a v4 o6 c v5 o6 f'8 r16 'v4 o5 a v3 o6 c v4 o6 f'8 r8. 'v4 o5 a v4 o6 c v5 o6 f'8 r8 'v4 o5 a v4 o6 c v4 o6 f'8
+// 08小節：2声コードバッキング優先、09〜12小節休符
+r1 r1 r1 r1 r1
+// 13小節：C系2打→B系2打
+l16 r8 'v5 o6 c v5 o6 d v6 o6 g'8 r16 'v4 o6 c v4 o6 d v5 o6 g'8 r8. 'v5 o5 b v5 o6 d v6 o6 g'8 r8 'v4 o5 b v4 o6 d v6 o6 g'8
+}
+$hc_C = {
+// 05小節：3声コード刻み4打
+l16 r8 'v4 o5 g v4 o6 c v5 o6 d'8 r16 'v4 o5 g v3 o6 c v4 o6 d'8 r8. 'v4 o5 g v4 o6 c v5 o6 d'8 r8 'v4 o5 g v4 o6 c v4 o6 d'8
+}
+$hc_Eb = {
+// 06小節：3声コード刻み4打
+l16 r8 'v4 o5 g v4 o6 a+ v5 o6 d+'8 r16 'v4 o5 g v3 o6 a+ v4 o6 d+'8 r8. 'v4 o5 g v4 o6 a+ v5 o6 d+'8 r8 'v4 o5 g v4 o6 a+ v4 o6 d+'8
+}
+$hc_F = {
+// 07小節：3声コード刻み4打
+l16 r8 'v4 o5 a v4 o6 c v5 o6 f'8 r16 'v4 o5 a v3 o6 c v4 o6 f'8 r8. 'v4 o5 a v4 o6 c v5 o6 f'8 r8 'v4 o5 a v4 o6 c v4 o6 f'8
+}
+$hc_AbBb = {
+// 04小節：後半と同じ4打バックビート。AbからBbへ2打ずつ移行。
+ l16 r8 'v4 o5 g+ v4 o6 c v5 o6 d+'8 r16 'v4 o5 g+ v3 o6 c v4 o6 d+'8 r8. 'v4 o5 a+ v4 o6 d v5 o6 f'8 r8 'v4 o5 a+ v4 o6 d v4 o6 f'8
+}
+$hc_intro12 = {
+// v2.36：HighChord (G / D / CB) を公式MML和音記法に統合。音量は和音の制限で整数丸め。
+// 発音位置・音程・音長は維持。3CHの個別定位は和音全体で共通化。
+@p{0.45,0,1} t134 q2 o6 l16 @{gamenotes::grdsSt1::arpeggio} @f0
+// 01〜04小節：5〜7小節の高音バッキングを冒頭から。各小節4打。
+$hc_C
+$hc_Eb
+$hc_F
+$hc_AbBb
+// 05小節：3声コード刻み4打
+l16 r8 'v4 o5 g v4 o6 c v5 o6 d'8 r16 'v4 o5 g v3 o6 c v4 o6 d'8 r8. 'v4 o5 g v4 o6 c v5 o6 d'8 r8 'v4 o5 g v4 o6 c v4 o6 d'8
+// 06小節：3声コード刻み4打
+l16 r8 'v4 o5 g v4 o6 a+ v5 o6 d+'8 r16 'v4 o5 g v3 o6 a+ v4 o6 d+'8 r8. 'v4 o5 g v4 o6 a+ v5 o6 d+'8 r8 'v4 o5 g v4 o6 a+ v4 o6 d+'8
+// 07小節：3声コード刻み4打
+l16 r8 'v4 o5 a v4 o6 c v5 o6 f'8 r16 'v4 o5 a v3 o6 c v4 o6 f'8 r8. 'v4 o5 a v4 o6 c v5 o6 f'8 r8 'v4 o5 a v4 o6 c v4 o6 f'8
+// 08小節：2声コードバッキング優先、09〜12小節休符
+r1 r1 r1 r1 r1
+}
+
+$lap13_HighChordRound3 = {
+$hc_intro12
+// 13小節：C系2打→B系2打
+l16 r8 'v5 o6 c v5 o6 d v6 o6 g'8 r16 'v4 o6 c v4 o6 d v5 o6 g'8 r8. 'v5 o5 b v5 o6 d v6 o6 g'8 r8 'v4 o5 b v4 o6 d v6 o6 g'8
+}
+
+$lap14_HighChord = {
+$hc_intro12
+// 13小節：C系2打→B系2打
+l16 r8 'v5 o6 c v5 o6 d v6 o6 g'8 r16 'v4 o6 c v4 o6 d v5 o6 g'8 r8. 'v5 o6 c v5 o6 d v6 o6 g'8 r8 'v4 o6 c v4 o6 d v6 o6 g'8
+// 2巡目14小節：G-B-Dの正しい長3度(B)を戻す。C→Bは13→14小節にまたがる。
+l16 r8 'v5 o5 b v5 o6 d v6 o6 g'8 r16 'v4 o5 b v4 o6 d v5 o6 g'8 r8. 'v5 o5 b v5 o6 d v6 o6 g'8 r8 'v4 o5 b v4 o6 d v6 o6 g'8
+}
+
+#label Round1
+$lap13_HighChord
+#label Round2
+$lap14_HighChord
+#label Round3
+$lap13_HighChordRound3
+#label Fill-3to4
+// 3→4巡フィルイン：1小節（4拍）
+r1
+#label Round4
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 
+// 4→5巡間の2拍フィルイン。4巡目の13小節は元のまま
+#label Fill-4to5
+// 第5巡前フィル：1小節（他パートは休止）
+r1
+#label Round5
+$lap14_HighChord
+#label OUTRO
+@p{0.45,0,1} t134 q2 o5 l16 @{gamenotes::grdsSt1::arpeggio} @f0
+// 原D案と同じ4打のリズムでFsus4→F。
+l16 r8 'v5 o5 f v5 o5 a+ v6 o6 c'8 r16 'v4 o5 f v4 o5 a+ v5 o6 c'8 r8. 'v5 o5 f v5 o5 a+ v6 o6 c'8 r8 'v4 o5 f v4 o5 a+ v6 o6 c'8
+l16 r8 'v5 o5 f v5 o5 a v6 o6 c'8 r16 'v4 o5 f v4 o5 a v5 o6 c'8 r8. 'v5 o5 f v5 o5 a v6 o6 c'8 r8 'v4 o5 f v4 o5 a v6 o6 c'8
+r1 r1 r1 r1
+
+#ch Kick
+#role perc
+$kick_bar = { a4 r4 a4 r4 }
+$lap13_TR808Kick = {
+// B r B r：全13小節の1拍目と3拍目。低音の尾を抑えるためdecayを0.30秒に短縮。
+// 公式0.44.0は合成音色の #bundle を禁止するため、ピッチを持つこのキックだけ通常MML。
+@p{0,0,1} t134 q9 l4 v11.5 @{tr808::bassDrum(decay: 0.30)} o1
+[$kick_bar]13
+}
+$lap14_TR808Kick = {
+$lap13_TR808Kick
+// 2巡目14小節：低音側のC→B着地。主旋律は下降させない。
+$kick_bar
+}
+
+#label Round1
+$lap13_TR808Kick
+#label Round2
+$lap14_TR808Kick
+#label Round3
+$lap13_TR808Kick
+#label Fill-3to4
+// 3→4巡フィルイン：1小節（4拍）
+@p{0,0,1} t134 q9 l8 v10.5 @{tr808::bassDrum(decay: 0.30)} o1 a8 r8 a8 a8 a8 r8 a8 a8
+#label Round4
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 
+// 4→5巡間の2拍フィルイン。4巡目の13小節は元のまま
+#label Fill-4to5
+@p{0,0,1} t134 q9 l8 v11.4 @{tr808::bassDrum(decay: 0.30)} o1 a8 r8 a8 a8 a4 a8 a8
+#label Round5
+$lap14_TR808Kick
+#label OUTRO
+@p{0,0,1} t134 q9 l4 v10 @{tr808::bassDrum(decay: 0.30)} o1 [$kick_bar]2 r1 r1
+r1 r1
+
+#ch Snare
+#role perc
+$sn_standard = { . . . . S . . . . . . . S . . . }
+$sn_regular = { . . . . S . . . . . . . . . S . }
+$sn_early_harmony = { . . s . S . . . . . s . . . S . }
+$sn_harmony = { . . s . . . S . . . s . . . S . }
+$sn_busy = { . . s . . . S s . . s . . . S s }
+$sn_end = { . . s . . . S . . . s s . . S s }
+$sn_rest = { . . . . . . . . . . . . . . . . }
+#drum S = @{tr808::snareDrum} v9.5 Offbeat Snare
+#drum s = @{tr808::snareDrum} v5.5 Light Snare Hit
+$lap13_TR808Snare = {
+// 1〜8小節：強打の半分を通常のスネアの2拍頭へ戻し、残りは従来の4拍裏を維持。
+// 5〜8小節の小さな1拍裏・3拍裏の追い打ちは残す。9〜13小節は旧パターンを使用。
+// Sound 0.44.0 + TR-808 ADDON v0.2.0、ドラム記法。
+ // 2拍目・4拍目の正拍
+ // 2拍目正拍・4拍目裏拍（従来）
+
+@p{-0.2,0,1} t134 q9
+@{drums 16}{
+v15
+// 01〜02小節：通常の2拍・4拍の正拍。03〜04小節は元の2拍頭・4拍裏へ戻す。
+[$sn_standard |]2
+[$sn_regular |]2
+// 05〜08小節：低音ハモリ区間（強打は2拍頭+4拍裏、弱打は従来どおり）
+[$sn_early_harmony |]4
+// 09〜10小節：ハモリ追い打ち（2小節）
+[$sn_busy |]2
+// 11〜12小節：後半ハモリ（2小節）
+[$sn_harmony |]2
+// 13小節：後半ハモリ区間
+$sn_end
+}
+}
+$lap13_TR808SnareRound3 = {
+// 1〜8小節：強打の半分を通常のスネアの2拍頭へ戻し、残りは従来の4拍裏を維持。
+// 5〜8小節の小さな1拍裏・3拍裏の追い打ちは残す。9〜13小節は旧パターンを使用。
+// Sound 0.44.0 + TR-808 ADDON v0.2.0、ドラム記法。
+ // 2拍目・4拍目の正拍
+ // 2拍目正拍・4拍目裏拍（従来）
+
+@p{-0.2,0,1} t134 q9
+@{drums 16}{
+v15
+// 01〜02小節：通常の2拍・4拍の正拍。03〜04小節は元の2拍頭・4拍裏へ戻す。
+[$sn_early_harmony |]4
+// 05〜08小節：低音ハモリ区間（強打は2拍頭+4拍裏、弱打は従来どおり）
+[$sn_early_harmony |]4
+// 09〜10小節：ハモリ追い打ち（2小節）
+[$sn_busy |]2
+// 11〜12小節：後半ハモリ（2小節）
+[$sn_harmony |]2
+// 13小節：後半ハモリ区間
+$sn_end
+}
+}
+
+$lap14_TR808Snare = {
+// 1〜8小節：強打の半分を通常のスネアの2拍頭へ戻し、残りは従来の4拍裏を維持。
+// 5〜8小節の小さな1拍裏・3拍裏の追い打ちは残す。9〜13小節は旧パターンを使用。
+// Sound 0.44.0 + TR-808 ADDON v0.2.0、ドラム記法。
+@p{-0.2,0,1} t134 q9
+@{drums 16}{
+v15
+// 01〜04小節：2拍頭 + 4拍裏（従来2拍裏/4拍裏の半分を正拍へ移動）
+[$sn_early_harmony |]4
+// 05〜08小節：低音ハモリ区間（強打は2拍頭+4拍裏、弱打は従来どおり）
+[$sn_early_harmony |]4
+// 09〜10小節：ハモリ追い打ち（2小節）
+[$sn_busy |]2
+// 11〜12小節：後半ハモリ（2小節）
+[$sn_harmony |]2
+// 13小節：後半ハモリ区間
+$sn_end
+}
+// 2巡目14小節：1巡目13小節のフィル型を継承。
+@{drums 16}{ $sn_end }
+}
+
+#label Round1
+// 1巡目の冒頭4小節：スネアだけを約80%から100%へ滑らかに戻す。
+@fade{12,0}
+@fade{15,16}
+$lap13_TR808Snare
+#label Round2
+@fade{15,0}
+$lap14_TR808Snare
+#label Round3
+$lap13_TR808SnareRound3
+#label Fill-3to4
+// 3→4巡フィルイン：1小節（4拍）
+@p{-0.2,0,1} t134 q9 @{drums 16}{ v13 . . s . S . s S . s . S s S s S }
+#label Round4
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 
+// 4→5巡間の2拍フィルイン。4巡目の13小節は元のまま
+#label Fill-4to5
+@p{-0.2,0,1} t134 q9 @{drums 16}{ v13 s . s s S . S S s . S . s S S S }
+#label Round5
+@fade{15,0} // 第5巡：フェードを完全解除、2巡目と同じ基準音量に戻す
+$lap14_TR808Snare
+#label OUTRO
+@p{-0.2,0,1} t134 q9 @{drums 16}{ v11 [$sn_end |]2 $sn_rest | $sn_rest }
+r1 r1
+
+#ch Harmony-Accents
+#role perc
+$accents_rest = { . . . . . . . . . . . . . . . . }
+#drum S = @{trial::brushTap} v6 Brush Tap
+#drum s = @{trial::brushTap} v2.7 Soft Brush
+#drum T = @{trial::mutedTom} v4 Muted Tom
+$lap13_HarmonyAccents = {
+@p{-0.32,0,1} t134 q7
+@{drums 16}{
+v10
+// 01〜08小節：全休止
+[$accents_rest |]8
+// 09小節 / B1のハモリ音符の発音に同期
+. . s . . S . . . s . . . S . .
+|
+// 10小節 / B1のハモリ音符の発音に同期
+. . s . . . S . . . s . . S . .
+|
+// 11小節 / 休み
+. . s . . S . . . s . . S . . .
+|
+// 12小節 / 休み
+. . . s . . S . . . s . . S . .
+|
+// 13小節 / 休み
+. . s . . . S . . s . . . . . .
+}
+}
+$lap14_HarmonyAccents = {
+$lap13_HarmonyAccents
+// 2巡目14小節：1巡目13小節のブラシ／タム系アクセントを継承。
+@{drums 16}{ . . s . . . S . . s . . . . . . }
+}
+
+#label Round1
+$lap13_HarmonyAccents
+#label Round2
+$lap14_HarmonyAccents
+#label Round3
+$lap13_HarmonyAccents
+#label Fill-3to4
+// 3→4巡フィルイン：1小節（4拍）
+@p{-0.32,0,1} t134 q7 @{drums 16}{ v11 . T . . . T T T . T . . T . T T }
+#label Round4
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 
+// 4→5巡間の2拍フィルイン。4巡目の13小節は元のまま
+#label Fill-4to5
+@p{-0.32,0,1} t134 q7 @{drums 16}{ v12 . . T . . T . T . T . T . T T T }
+#label Round5
+$lap14_HarmonyAccents
+#label OUTRO
+@p{-0.32,0,1} t134 q7 @{drums 16}{ v7 [$accents_rest |]2 }
+r1 r1
+r1 r1
+
+#ch Handclap
+#role perc
+$clap_rest = { . . . . . . . . . . . . . . . . }
+#drum C = @{tr808::handclap} v8 Soft Handclap
+
+// 1・2巡目はL（原v8より約15%弱）、5巡目／5巡目前フィルはH（約19%強）。
+#drum L = @{tr808::handclap} v6.8 Quiet Handclap
+#drum H = @{tr808::handclap} v9.5 Strong Handclap
+
+$lap13_TR808Handclap = {
+// v2.56：後半ハモリ直前の8小節目だけ。別の合いの手「タン・タン・タタ」。
+// r2 l16 c8. c8. c c と等価。最初2拍休み、3拍頭/3拍a/4拍&/4拍aで鳴らす。
+// 他の12小節は完全休止。手拍子音色・v8・パン・ドラム記法は前版のまま。
+
+@p{0.23,0,1} t134 q9
+@{drums 16}{
+v15
+// 01〜07小節：休止
+[$clap_rest |]7
+// 08小節：3拍目からタン・タン・タタ（4打）
+. . . . . . . . C . . C . . C C
+|
+// 09〜12小節：休止
+[$clap_rest |]4
+// 13小節：休止
+$clap_rest
+}
+}
+$lap14_TR808Handclap = {
+// v2.56：後半ハモリ直前の8小節目だけ。別の合いの手「タン・タン・タタ」。
+// r2 l16 c8. c8. c c と等価。最初2拍休み、3拍頭/3拍a/4拍&/4拍aで鳴らす。
+// 他の12小節は完全休止。手拍子音色・v8・パン・ドラム記法は前版のまま。
+@p{0.23,0,1} t134 q9
+@{drums 16}{
+v15
+// 01〜07小節：休止
+[$clap_rest |]7
+// 08小節：3拍目からタン・タン・タタ（4打）
+. . . . . . . . C . . C . . C C
+|
+// 09〜12小節：休止
+[$clap_rest |]4
+// 13小節：休止
+$clap_rest
+}
+// 2巡目14小節：低音側のC→B着地。主旋律は下降させない。
+@{drums 16}{ $clap_rest }
+}
+
+#label Round1
+@p{0.23,0,1} t134 q9 @{drums 16}{ v15 [$clap_rest |]7 . . . . . . . . L . . L . . L L | [$clap_rest |]4 $clap_rest }
+#label Round2
+@p{0.23,0,1} t134 q9 @{drums 16}{ v15 [$clap_rest |]7 . . . . . . . . L . . L . . L L | [$clap_rest |]4 $clap_rest }
+@{drums 16}{ $clap_rest }
+#label Round3
+$lap13_TR808Handclap
+#label Fill-3to4
+// 3→4巡フィルイン：1小節（4拍）
+@p{0.23,0,1} t134 q9 @{drums 16}{ v13 C . . . . C . . C . . C . C . C }
+#label Round4
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 
+// 4→5巡間の2拍フィルイン。4巡目の13小節は元のまま
+#label Fill-4to5
+@p{0.23,0,1} t134 q9 @{drums 16}{ v15 H . . H . . H H . . H . H . H H }
+#label Round5
+@p{0.23,0,1} t134 q9 @{drums 16}{ v15 [$clap_rest |]7 . . . . . . . . H . . H . . H H | [$clap_rest |]4 $clap_rest }
+@{drums 16}{ $clap_rest }
+#label OUTRO
+@p{0.23,0,1} t134 q9 @{drums 16}{ [$clap_rest |]2 }
+r1 r1
+r1 r1
+
+#ch Original Lead
+#role lead
+$rlead = { @{gamenotes::grdsSt1::edgeLead} }
+#label Round1
+@f0 // 第4巡までフィルタOFF（4巡以外のヒス漏れ防止）
+t134
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 
+#label Round2
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 
+#label Round3
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+#label Fill-3to4
+// 3→4巡フィルイン：1小節（4拍）
+r1
+#label Round4
+@f{wavestep 32 @bits 8} // 4巡目：SCC風wavestep → マスターHP500Hz（Tape無し）
+t134 v8.0 q7 l16  $rlead o4 g4 $rlead o4 g8. $rlead o5 c16 o5 f8 o5 e4 o5 c8 $rlead o5 g8. $rlead o4 a+16 $rlead o4 a+4. $rlead o4 g16 o4 g+16 o4 a+16 o5 d+16 o5 f16 o5 g16 $rlead o5 c8. o4 a8. $rlead o5 c4 o5 f8 o4 a16 o4 b16 o5 c16 o5 d16 o5 d+8 o5 c16 o4 g+8 o5 d+8 o5 c16 o5 f8 o5 d16 o4 a+8 o5 d16 o5 f8 o4 g4 $rlead o4 g8. $rlead o5 c16 o5 f8 o5 e4 o5 c8 $rlead o5 g8. $rlead o4 a+16 $rlead o4 a+4. $rlead o4 g16 o4 g+16 o4 a+16 o5 d+16 o5 f16 o5 g16 o5 a8 o5 c16 $rlead o5 c8. $rlead o5 f8 o5 g8 o5 a4 o5 f8 $rlead o5 d8. $rlead o5 g2. & o5 g16 $rlead o5 c8. o5 d+8. $rlead o5 g+2 & o5 g+8 $rlead o4 a+8. o5 d8. $rlead o5 d+2 & o5 d+8 $rlead o4 a16 o4 a+16 o5 c16 $rlead o5 f4 & o5 f16 $rlead o4 b16 o5 c16 o5 d16 $rlead o5 g4 & o5 g16 $rlead o5 c16 o5 d16 o5 d+16 $rlead o5 g+4 & o5 g+16 $rlead o5 d16 o5 d+16 o5 f16 $rlead o5 a+16 o5 a+8 $rlead o6 c2 & o6 c8 $rlead o5 b2
+// 4→5巡間の2拍フィルイン。4巡目の13小節は元のまま
+#label Fill-4to5
+@f0 // 5巡目前にwavestepをOFF
+// 第5巡前フィル：1小節（他パートは休止）
+r1
+#label Round5
+@f0 // 5巡目に持ち越さない
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 
+#label OUTRO
+r1 r1 r1 r1
+r1 r1
+
+#ch Original Bass
+#role bass
+#label Round1
+@f0 // 第4巡までフィルタOFF（4巡以外のヒス漏れ防止）
+t134
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 
+#label Round2
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 
+#label Round3
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+#label Fill-3to4
+// 3→4巡フィルイン：1小節（4拍）
+r1
+#label Round4
+@f{wavestep 32 @bits 8} // 4巡目：SCC風wavestep → マスターHP500Hz（Tape無し）
+t134 v8.0 q7 l16  @{gamenotes::grdsSt1::octaveBass} o2 c8 o3 c16 o3 c16 o2 c8 o3 c16 o3 c16 o2 c8 o3 c16 o3 c16 o2 c8 o3 c16 o3 c16 o2 d+8 o3 d+16 o3 d+16 o2 d+8 o3 d+16 o3 d+16 o2 d+8 o3 d+16 o3 d+16 o2 d+8 o3 d+16 o3 d+16 o2 f8 o3 f16 o3 f16 o2 f8 o3 f16 o3 f16 o2 f8 o3 f16 o3 f16 o2 f8 o3 f16 o3 f16 o2 g+8 o3 g+16 o3 g+16 o2 g+8 o3 g+16 o3 g+16 o2 a+8 o3 a+16 o3 a+16 o2 a+8 o3 a+16 o3 a+16 o2 c8 o3 c16 o3 c16 o2 c8 o3 c16 o3 c16 o2 c8 o3 c16 o3 c16 o2 c8 o3 c16 o3 c16 o2 d+8 o3 d+16 o3 d+16 o2 d+8 o3 d+16 o3 d+16 o2 d+8 o3 d+16 o3 d+16 o2 d+8 o3 d+16 o3 d+16 o2 f8 o3 f16 o3 f16 o2 f8 o3 f16 o3 f16 o2 f8 o3 f16 o3 f16 o2 f8 o3 f16 o3 f16 o2 g8 o3 g16 o3 g16 o2 g8 o3 g16 o3 g16 o2 g8 o3 g16 o3 g16 o2 g8 o3 g16 o3 g16 @{gamenotes::grdsSt1::tightBass} o2 g+16 o3 g+16 o3 d+16 o3 g+16 o2 g+16 o3 g+16 o3 d+16 o3 g+16 o2 g+16 o3 g+16 o3 d+16 o3 g+16 o2 g+16 o3 g+16 o3 d+16 o3 g+16 o2 d+16 o3 d+16 o2 b16 o3 d+16 o2 d+16 o3 d+16 o2 b16 o3 d+16 o2 d+16 o3 d+16 o2 b16 o3 d+16 o2 d+16 o3 d+16 o2 b16 o3 d+16 o2 f16 o3 f16 o3 c16 o3 f16 o2 f16 o3 f16 o3 c16 o3 f16 o2 g16 o3 g16 o3 d16 o3 g16 o2 g16 o3 g16 o3 d16 o3 g16 o2 g+16 o3 g+16 o3 d+16 o3 g+16 o2 g+16 o3 g+16 o3 d+16 o3 g+16 o2 a+16 o3 a+16 o3 f16 o3 a+16 o2 a+16 o3 a+16 o3 f16 o3 a+16 o2 g8 o3 g16 o3 g16 o2 g8 o3 g16 o3 g16 o2 g8 o3 g16 o3 g16 o2 g8 o3 g16 o3 g16
+// 4→5巡間の2拍フィルイン。4巡目の13小節は元のまま
+#label Fill-4to5
+@f0 // 5巡目前にwavestepをOFF
+// 第5巡前フィル：1小節（他パートは休止）
+r1
+#label Round5
+@f0 // 5巡目に持ち越さない
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 
+#label OUTRO
+r1 r1 r1 r1
+r1 r1
+
+#ch Original Arp
+#role arp
+$rharm = { @{gamenotes::grdsSt1::harmony} }
+#label Round1
+@f0 // 第4巡までフィルタOFF（4巡以外のヒス漏れ防止）
+t134
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 
+#label Round2
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 
+#label Round3
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+#label Fill-3to4
+// 3→4巡フィルイン：1小節（4拍）
+r1
+#label Round4
+t134 v8.0 q7 l16 @pitch{+8,0} @{gamenotes::grdsSt1::arpeggio} o5 c16 o4 b16 o4 a16 o4 g16 o4 f16 o4 g16 o4 a16 o4 b16 o5 c16 o4 b16 o4 a16 o4 g16 o4 f16 o4 g16 o4 a16 o4 b16 o5 c16 o4 a+16 o4 g+16 o4 g16 o4 f16 o4 g16 o4 g+16 o4 a+16 o5 c16 o4 a+16 o4 g+16 o4 g16 o4 f16 o4 g16 o4 g+16 o4 a+16 o5 c16 o4 b16 o4 a16 o4 g16 o4 f16 o4 g16 o4 a16 o4 b16 o5 c16 o4 b16 o4 a16 o4 g16 o4 f16 o4 g16 o4 a16 o4 b16 o5 c16 o4 a+16 o4 g+16 o4 g16 o4 f16 o4 g16 o4 g+16 o4 a+16 o5 c16 o5 d16 o5 d+16 o5 d16 o5 c16 o4 a+16 o4 g+16 o4 a+16 o5 c16 o4 b16 o4 a16 o4 g16 o4 f16 o4 g16 o4 a16 o4 b16 o5 c16 o4 b16 o4 a16 o4 g16 o4 f16 o4 g16 o4 a16 o4 b16 o5 c16 o4 a+16 o4 g+16 o4 g16 o4 f16 o4 g16 o4 g+16 o4 a+16 o5 c16 o4 a+16 o4 g+16 o4 g16 o4 f16 o4 g16 o4 g+16 o4 a+16 o5 c16 o4 b16 o4 a16 o4 g16 o4 f16 o4 g16 o4 a16 o4 b16 o5 c16 o4 b16 o4 a16 o4 g16 o4 f16 o4 g16 o4 a16 o4 f16 o5 d16 o5 c16 o4 b16 o4 a16 o4 g16 o4 a16 o4 b16 o5 c16 o5 d16 o5 c16 o4 b16 o4 a16 o4 g16 o4 b16 o5 d16 o5 g16 $rharm o5 d+8. o5 c8. $rharm o5 d+4. $rharm o5 c16 o5 d16 o5 d+8 $rharm o5 d8. o4 a+8. $rharm o4 g2 & o4 g8 $rharm o5 c8. o4 a8. $rharm o5 c16 o5 c16 $rharm o5 d8. o4 b8. $rharm o5 d16 o5 d16 $rharm o5 d+8. o5 c8. $rharm o5 d+16 o5 f16 $rharm o5 f8. o5 d8. $rharm o5 g1 & o5 g8
+// 4→5巡間の2拍フィルイン。4巡目の13小節は元のまま
+#label Fill-4to5
+@f0 // 5巡目前にwavestepをOFF
+// 第5巡前フィル：1小節（他パートは休止）
+r1
+#label Round5
+@f0 // 5巡目に持ち越さない
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 
+#label OUTRO
+r1 r1 r1 r1
+r1 r1
