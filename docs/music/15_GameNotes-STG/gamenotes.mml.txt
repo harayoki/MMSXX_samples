@@ -681,61 +681,6 @@ $lap14_TR808Snare
 @p{-0.2,0,1} t134 q9 @{drums 16}{ v11 [$sn_end |]2 $sn_rest | $sn_rest }
 r1 r1
 
-#ch Harmony-Accents
-#role perc
-$accents_rest = { . . . . . . . . . . . . . . . . }
-#drum S = @{trial::brushTap} v6 Brush Tap
-#drum s = @{trial::brushTap} v2.7 Soft Brush
-#drum T = @{trial::mutedTom} v4 Muted Tom
-$lap13_HarmonyAccents = {
-@p{-0.32,0,1} t134 q7
-@{drums 16}{
-v10
-// 01〜08小節：全休止
-[$accents_rest |]8
-// 09小節 / B1のハモリ音符の発音に同期
-. . s . . S . . . s . . . S . .
-|
-// 10小節 / B1のハモリ音符の発音に同期
-. . s . . . S . . . s . . S . .
-|
-// 11小節 / 休み
-. . s . . S . . . s . . S . . .
-|
-// 12小節 / 休み
-. . . s . . S . . . s . . S . .
-|
-// 13小節 / 休み
-. . s . . . S . . s . . . . . .
-}
-}
-$lap14_HarmonyAccents = {
-$lap13_HarmonyAccents
-// 2巡目14小節：1巡目13小節のブラシ／タム系アクセントを継承。
-@{drums 16}{ . . s . . . S . . s . . . . . . }
-}
-
-#label Round1
-$lap13_HarmonyAccents
-#label Round2
-$lap14_HarmonyAccents
-#label Round3
-$lap13_HarmonyAccents
-#label Fill-3to4
-// 3→4巡フィルイン：1小節（4拍）
-@p{-0.32,0,1} t134 q7 @{drums 16}{ v11 . T . . . T T T . T . . T . T T }
-#label Round4
-r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 
-// 4→5巡間の2拍フィルイン。4巡目の13小節は元のまま
-#label Fill-4to5
-@p{-0.32,0,1} t134 q7 @{drums 16}{ v12 . . T . . T . T . T . T . T T T }
-#label Round5
-$lap14_HarmonyAccents
-#label OUTRO
-@p{-0.32,0,1} t134 q7 @{drums 16}{ v7 [$accents_rest |]2 }
-r1 r1
-r1 r1
-
 #ch Handclap
 #role perc
 $clap_rest = { . . . . . . . . . . . . . . . . }

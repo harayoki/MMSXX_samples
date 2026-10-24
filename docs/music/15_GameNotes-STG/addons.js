@@ -1,38 +1,13 @@
-// GameNotes grdsSt1 + trial percussion + TR-808 addon, using the official 0.46.0 APIs.
+// GameNotes grdsSt1 + TR-808 addon, using the official 0.46.0 APIs.
 // Rebuilt from the v2.71.30 PLAYER sound definitions; no replacement synthesizer.
 import { registerAddon, listAddons } from '../runtime/sound-0.46.0/sound/addon.js';
 import { registerAnalogPatch, ANALOG_PATCHES } from '../runtime/sound-0.46.0/sound/analog.js';
-import { registerLayer, registerAnalog, WAVEFORMS } from '../runtime/sound-0.46.0/sound/mml.js';
+import { registerLayer, WAVEFORMS } from '../runtime/sound-0.46.0/sound/mml.js';
 
 const E={analog:{ANALOG_PATCHES},core:{'mml.js':{WAVEFORMS}},listAddons};
 const d = registerAnalogPatch, i = registerLayer;
 registerAddon({id:"gamenotes::grdsSt1",version:"1.0.0",desc:"An arcade-game-inspired synthesizer voice set. Detuned and octave-stacked sounds are built into the presets, so no additional tracks are required. The instruments are rebuilt as clean, low-noise synth sounds.",needs:["analog"],engine:">=0.41.0",voices:["gamenotes::grdsSt1::edgeLead","gamenotes::grdsSt1::octaveBass","gamenotes::grdsSt1::arpeggio","gamenotes::grdsSt1::tightBass","gamenotes::grdsSt1::harmony"]},()=>{let l={filter:{kind:"lowpass",cutoff:9e3,resonance:0,drive:0}},o=(r,a,n=.23)=>({attack:.005,hold:r,decay:a,sustain:n,release:.045}),x=[1,.9644,.2595,.5882,.468,.4044,.4943,.3027],m=[.32,.1439,.1619,.9,.112,.066,.063,.311],g=r=>({partials:r.map((a,n)=>({ratio:n+1,level:a,attack:.004,t60:8}))}),s=(r,a,n,S,A,u,v,E={})=>registerAnalogPatch(r,{wave:a,octave:0,osc:n,...l,amp:S,level:A},{role:u,desc:v,...E});s("gamenotes::grdsSt1::edgeLeadSquare","square",{},o(.11,1.3),.185*10/12,"lead","50% square-wave component of edgeLead"),s("gamenotes::grdsSt1::edgeLeadPulse","partials",g(x),o(.11,1),.105*11/12,"lead","8-partial complex-pulse approximation for edgeLead"),registerLayer("gamenotes::grdsSt1::edgeLead",{role:"lead",genre:["arcade"],tags:["approx"],gm:80,desc:"A strong melodic lead combining a 50% square wave and a complex pulse-wave approximation with detuning.",layers:[{wave:"gamenotes::grdsSt1::edgeLeadSquare",gain:1},{wave:"gamenotes::grdsSt1::edgeLeadPulse",gain:1,cents:12}]}),s("gamenotes::grdsSt1::octaveBassSquare","square",{},o(0,.7,.22),.185*10/12,"bass","Square-wave component for octaveBass"),registerLayer("gamenotes::grdsSt1::octaveBass",{role:"bass",genre:["arcade"],tags:["approx"],gm:38,desc:"A thick bass layering two 50% square waves one octave apart.",layers:[{wave:"gamenotes::grdsSt1::octaveBassSquare",gain:1},{wave:"gamenotes::grdsSt1::octaveBassSquare",gain:1,semi:12}]}),s("gamenotes::grdsSt1::arpeggio","partials",g(m),o(0,1.05),.17,"arp","A bright arpeggio made with an eight-partial approximation of the descending pulse wave.",{genre:["arcade"],tags:["approx"],gm:81}),s("gamenotes::grdsSt1::tightBass","square",{},o(0,.6,.22),.185*10/12,"bass","A short, articulate bass using a 50% square wave with a fast decay.",{genre:["arcade"],tags:["approx"],gm:39}),s("gamenotes::grdsSt1::harmonyPulse25","pulse",{width:.25},o(.11,1.05),.185,"counter","25% pulse-wave harmony component"),s("gamenotes::grdsSt1::harmonySquare50","square",{},o(.11,1.45),.185*11/12,"counter","50% square-wave harmony component"),registerLayer("gamenotes::grdsSt1::harmony",{role:"counter",genre:["arcade"],tags:["approx"],gm:80,desc:"Harmony or countermelody combining 25% and 50% square waves one octave apart.",layers:[{wave:"gamenotes::grdsSt1::harmonyPulse25",gain:1},{wave:"gamenotes::grdsSt1::harmonySquare50",gain:1,semi:12}]})});
 
-{
-  const add=(name,patch,desc)=>{
-    ANALOG_PATCHES[name]=patch;
-    registerAnalog(name,{patch:name},{role:'perc',desc});
-  };
-  // 柔らかいシェイカー。シャープなノイズアタックを抑え、空気の成分だけを薄く残す。
-  add('trial::jazzSoftShaker',{
-    wave:'noise',octave:0,level:0.72,
-    filter:{kind:'highpass',cutoff:4500,resonance:0.06,drive:0},
-    amp:{attack:0.008,decay:0.09,sustain:0,release:0.03}
-  },'Very soft analog shaker, lightly brushed noise');
-  // ジャズのブラシ風。ノイズを弱めて少し丸める（PCMなし）。
-  add('trial::brushTap',{
-    wave:'noise',octave:0,level:0.65,
-    filter:{kind:'bandpass',cutoff:2700,resonance:0.10,drive:0},
-    amp:{attack:0.006,decay:0.10,sustain:0,release:0.035}
-  },'Soft brushed snare-like noise tap');
-  // 低く柔らかいタム。連打部分も主張しすぎない音量にする。
-  add('trial::mutedTom',{
-    wave:'sine',octave:-1,level:0.64,
-    filter:{kind:'lowpass',cutoff:680,resonance:0.01,drive:0},
-    amp:{attack:0.006,decay:0.13,sustain:0,release:0.045}
-  },'Muted low analog tom for soft jazz accents');
-
-}
 
 {
   const META={dev:['wip'],tags:['approx']};
