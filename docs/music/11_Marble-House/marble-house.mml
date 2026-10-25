@@ -7,7 +7,7 @@
 #copyright 2026 harayoki
 #license CC BY 4.0
 #gain 2.886575 measured
-#looptimes 1
+
 #voice ms89newmarbleHat = @adsr{0.001,0.040,0,0.010}
 #voice ms89newmarbleOpenHat = @adsr{0.001,0.18,0,0.025}
 #voice ms89newbassBite = @adsr{0.001,0.028,0.45,0.002}
@@ -57,6 +57,7 @@
 
 #voice introDim = @{sccms89newsccMarbleEP} @e{ms89newchordShort} @d0, @{sccms89newsccMarbleEP} @e{ms89newchordShort} @d1500, @{sccms89newsccMarbleEP} @e{ms89newchordShort} @d1900, @{sccms89newsccMarbleEP} @e{ms89newchordShort} @d2600
 #ch Drums (FM＋NOISE)
+#looptimes 1
 t128 q8 v13
 $beat = { B! . O . B!S! . O . B! . O . B!S! H O H }
 $drop = { B!C . O . B!S! . O . B! . O . B!S! H O H }
@@ -136,7 +137,7 @@ $b = { r b- b-8 r8 b-8 r b- r8 f8 r8 }
 $f = { r f f8 r8 f8 r f r8 c8 r8 }
 $x = { r c+ c+8 r8 c+8 r c+ r8 g+8 r8 }
 r1 |
-#label LOOP
+// LOOP（曲全体の共通ラベルは先頭パートに定義）
 $d |
 $d |
 $b |
@@ -180,7 +181,7 @@ $x |
 r f f8 r8 f8 f4 r4 |
 
 
-#label OUTRO
+// OUTRO（曲全体の共通ラベルは先頭パートに定義）
 t128 @{ms89newdanceBass} v8 q5 o2 l16
 $f |
 $f |
@@ -197,7 +198,7 @@ $b = { @{ms89newchordB} r c r16 c8. r4 c r }
 $f = { @{ms89newchordF} r c r16 c8. r4 c r }
 $x = { @{ms89newchordX} r c r16 c8. r4 c r }
 r1 |
-#label LOOP
+// LOOP（曲全体の共通ラベルは先頭パートに定義）
 $d |
 $d |
 $b |
@@ -241,7 +242,7 @@ $x |
 @{ms89newchordF} r c r16 c8. c4 r4 |
 
 
-#label OUTRO
+// OUTRO（曲全体の共通ラベルは先頭パートに定義）
 t128 @{ms89newchordD} v6 q7 o4 l8
 $f |
 $f |
@@ -258,7 +259,7 @@ $b = { b- r >f< r >a< r >c< r r4 >f8< r8 }
 $f = { f r >c< r >e-< r >g< r r4 >c8< r8 }
 $x = { c+ r g+ r >c< r >e-< r r4 g+8 r8 }
 r1 |
-#label LOOP
+// LOOP（曲全体の共通ラベルは先頭パートに定義）
 $d |
 $d |
 $b |
@@ -302,7 +303,7 @@ $x |
 f r >c< r >e-< r >g< r f4 r4 |
 
 
-#label OUTRO
+// OUTRO（曲全体の共通ラベルは先頭パートに定義）
 t128
 r1 |
 r1 |
@@ -317,7 +318,7 @@ t128 @{opll::chopBass} v8 q4 o3 l8
 $dm = { g*a32&a8&a32 r16 >c< r a4 r4 }
 $fm = { >b-*c32&c8&c32 r16 e- r c4< r4 }
 r1 |
-#label LOOP
+// LOOP（曲全体の共通ラベルは先頭パートに定義）
 r1 |
 $dm |
 r1 |
@@ -361,7 +362,7 @@ r1 |
 >c4< r4 r2 |
 
 
-#label OUTRO
+// OUTRO（曲全体の共通ラベルは先頭パートに定義）
 t128
 r1 |
 r1 |
@@ -376,7 +377,7 @@ t128 @{opll::chopBass} @d7 v11 q1 o3 l8
 $dm = { q2 g*a32 q1 r8 r32 r16 >c16< r16 r a16 r16 r8 r4 }
 $fm = { q2 >b-*c32 q1 r8 r32 r16 e-16 r16 r c16< r16 r8 r4 }
 r1 |
-#label LOOP
+// LOOP（曲全体の共通ラベルは先頭パートに定義）
 r1 |
 $dm |
 r1 |
@@ -420,7 +421,7 @@ q2 >b-*c32 q1 r8 r32 r16 e-16 r16 r c16 r16 r e-16 r16 r< |
 >c16< r16 r8 r4 r2 |
 
 
-#label OUTRO
+// OUTRO（曲全体の共通ラベルは先頭パートに定義）
 t128
 r1 |
 r1 |
@@ -437,7 +438,7 @@ $b = { r c r16 c8. r4 c r }
 $f = { r g r16 g8. r4 g r }
 $x = { r e- r16 e-8. r4 e- r }
 r1 |
-#label LOOP
+// LOOP（曲全体の共通ラベルは先頭パートに定義）
 $d |
 $d |
 $b |
@@ -481,7 +482,7 @@ $x |
 @{ms89chordPSG} r g r16 g8. g4 r4 |
 
 
-#label OUTRO
+// OUTRO（曲全体の共通ラベルは先頭パートに定義）
 t128 @{ms89chordPSG} v6 q7 o4 l8
 $f |
 $f |
@@ -498,7 +499,7 @@ $b = { r b- b-8 r8 b-8 r b- r8 f8 r8 }
 $f = { r f f8 r8 f8 r f r8 c8 r8 }
 $x = { r c+ c+8 r8 c+8 r c+ r8 g+8 r8 }
 r1 |
-#label LOOP
+// LOOP（曲全体の共通ラベルは先頭パートに定義）
 $d |
 $d |
 $b |
@@ -542,7 +543,7 @@ $x |
 r f f8 r8 f8 f4 r4 |
 
 
-#label OUTRO
+// OUTRO（曲全体の共通ラベルは先頭パートに定義）
 t128 @{opll::acousticBass} @e{sccms89newsccBassBodyEnv} v9 q5 o2 l16
 $f |
 $f |
@@ -558,7 +559,7 @@ $beat = { @{ms89kickDrop} o3 c r r r @{ms89kickDrop} o3 c r r r @{ms89kickDrop} 
 $drop = { @{ms89kickDrop} o3 c r r r @{ms89kickDrop} o3 c r r r @{ms89kickDrop} o3 c r r r @{ms89kickDrop} o3 c r r r }
 $turn = { @{ms89kickDrop} o3 c r r r @{ms89kickDrop} o3 c r r r @{ms89kickDrop} o3 c r r r @{ms89kickDrop} o3 c r @{ms89snareDrop} o4 c r }
 r1 |
-#label LOOP
+// LOOP（曲全体の共通ラベルは先頭パートに定義）
 $drop |
 $beat |
 $beat |
@@ -602,7 +603,7 @@ $turn |
 @{ms89kickDrop} o3 c r r r @{ms89kickDrop} o3 c r r r @{ms89kickDrop} o3 c r r r @{ms89kickDrop} o3 c r r r |
 
 
-#label OUTRO
+// OUTRO（曲全体の共通ラベルは先頭パートに定義）
 t128 v8 q4 l16
 $beat |
 $beat |
@@ -616,7 +617,7 @@ $beat |
 #ch EP echo melody (FM)
 t128 @{breakEpMelody} v7 q4 o4 l16
 r1 |
-#label LOOP
+// LOOP（曲全体の共通ラベルは先頭パートに定義）
 r1 |
 r1 |
 r1 |
@@ -658,7 +659,7 @@ r1 |
 r1 |
 r1 |
 r1 |
-#label OUTRO
+// OUTRO（曲全体の共通ラベルは先頭パートに定義）
 r1 |
 r1 |
 r1 |
@@ -671,7 +672,7 @@ r1 |
 #ch EP echo upper chord (FM)
 t128 @{breakRhodesFM} @d805 v7 q8 o4
 r1 |
-#label LOOP
+// LOOP（曲全体の共通ラベルは先頭パートに定義）
 r1 |
 r1 |
 r1 |
@@ -713,7 +714,7 @@ r1 |
 r1 |
 r1 |
 r1 |
-#label OUTRO
+// OUTRO（曲全体の共通ラベルは先頭パートに定義）
 r1 |
 r1 |
 r1 |

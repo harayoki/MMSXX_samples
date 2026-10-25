@@ -50,6 +50,10 @@
 // 再生設定：ここだけ編集すれば全4パートへ反映されます。
 // 回数は 0＝省略、1以上＝指定回数です。
 // 単独再生は、目的の曲以外をすべて0にしてください。
+
+
+#gain 1.324661 measured
+#ch 主旋律
 $INTRO_COUNT = { 1 } // イントロ
 $FIELD_COUNT = { 2 } // 草原
 $ENCOUNTER_COUNT = { 1 } // エンカウント
@@ -93,9 +97,6 @@ $ORDER = {
 
 // 各曲の先頭で状態を初期化。その後、曲固有の設定を指定します。
 $RESET = { o4 l4 t120 v15 q7 p3 @{pulse(50)} @e{flat} @d0 @m0 @s0 @o0 }
-
-#gain 1.324661 measured
-#ch 主旋律
 #role lead
 // 音色・テンポ・音量の共通設定。音符は下のフレーズ／各曲に記述。
 $sound1 = { @m0 t112 @{fieldLeadDry} @m{7,5.6} v15 q5 o5 }
@@ -168,6 +169,49 @@ $RESET $phrase1 $phrase2 $phrase3 $phrase4 @s0
 $ORDER
 
 #ch ベース
+$INTRO_COUNT = { 1 } // イントロ
+$FIELD_COUNT = { 2 } // 草原
+$ENCOUNTER_COUNT = { 1 } // エンカウント
+$GOOD_COUNT = { 1 } // 通常戦闘（有利）
+$BAD_COUNT = { 2 } // 不利
+$CRISIS_COUNT = { 2 } // 大ピンチ
+$WIN_COUNT = { 1 } // 勝利
+$FIELD_SHORT_COUNT = { 1 } // 短い草原
+$ENCOUNTER_AGAIN_COUNT = { 1 } // 2度目のエンカウント
+$BAD_AGAIN_COUNT = { 2 } // 2度目の不利
+$CRISIS_AGAIN_COUNT = { 2 } // 2度目の大ピンチ
+$LOSE_COUNT = { 1 } // 敗北
+
+// 演奏順も全パート共通。順番を変える場合はこの定義を編集します。
+$ORDER = {
+// イントロ（表示用。ラベルは主旋律にのみ定義）
+[$intro]$INTRO_COUNT
+// フィールド（表示用。ラベルは主旋律にのみ定義）
+[$field]$FIELD_COUNT
+// エンカウント（表示用。ラベルは主旋律にのみ定義）
+[$encounter]$ENCOUNTER_COUNT
+// 戦闘 A（表示用。ラベルは主旋律にのみ定義）
+[$good]$GOOD_COUNT
+// 戦闘 B（表示用。ラベルは主旋律にのみ定義）
+[$bad]$BAD_COUNT
+// 戦闘 C（表示用。ラベルは主旋律にのみ定義）
+[$crisis]$CRISIS_COUNT
+// 勝利（表示用。ラベルは主旋律にのみ定義）
+[$win]$WIN_COUNT
+// フィールド（後半）（表示用。ラベルは主旋律にのみ定義）
+[$fieldShort]$FIELD_SHORT_COUNT
+// エンカウント（後半）（表示用。ラベルは主旋律にのみ定義）
+[$encounter]$ENCOUNTER_AGAIN_COUNT
+// 戦闘 B（後半）（表示用。ラベルは主旋律にのみ定義）
+[$bad]$BAD_AGAIN_COUNT
+// 戦闘 C（後半）（表示用。ラベルは主旋律にのみ定義）
+[$crisis]$CRISIS_AGAIN_COUNT
+// 敗北（表示用。ラベルは主旋律にのみ定義）
+[$lose]$LOSE_COUNT
+}
+
+// 各曲の先頭で状態を初期化。その後、曲固有の設定を指定します。
+$RESET = { o4 l4 t120 v15 q7 p3 @{pulse(50)} @e{flat} @d0 @m0 @s0 @o0 }
 #role bass
 // 音色・テンポ・音量の共通設定。音符は下のフレーズ／各曲に記述。
 $sound1 = { @m0 t112 @{fieldBass} v15 q6 o1 }
@@ -258,6 +302,49 @@ $RESET $phrase4 $phrase5 $phrase6 $phrase7
 $ORDER
 
 #ch 副旋律
+$INTRO_COUNT = { 1 } // イントロ
+$FIELD_COUNT = { 2 } // 草原
+$ENCOUNTER_COUNT = { 1 } // エンカウント
+$GOOD_COUNT = { 1 } // 通常戦闘（有利）
+$BAD_COUNT = { 2 } // 不利
+$CRISIS_COUNT = { 2 } // 大ピンチ
+$WIN_COUNT = { 1 } // 勝利
+$FIELD_SHORT_COUNT = { 1 } // 短い草原
+$ENCOUNTER_AGAIN_COUNT = { 1 } // 2度目のエンカウント
+$BAD_AGAIN_COUNT = { 2 } // 2度目の不利
+$CRISIS_AGAIN_COUNT = { 2 } // 2度目の大ピンチ
+$LOSE_COUNT = { 1 } // 敗北
+
+// 演奏順も全パート共通。順番を変える場合はこの定義を編集します。
+$ORDER = {
+// イントロ（表示用。ラベルは主旋律にのみ定義）
+[$intro]$INTRO_COUNT
+// フィールド（表示用。ラベルは主旋律にのみ定義）
+[$field]$FIELD_COUNT
+// エンカウント（表示用。ラベルは主旋律にのみ定義）
+[$encounter]$ENCOUNTER_COUNT
+// 戦闘 A（表示用。ラベルは主旋律にのみ定義）
+[$good]$GOOD_COUNT
+// 戦闘 B（表示用。ラベルは主旋律にのみ定義）
+[$bad]$BAD_COUNT
+// 戦闘 C（表示用。ラベルは主旋律にのみ定義）
+[$crisis]$CRISIS_COUNT
+// 勝利（表示用。ラベルは主旋律にのみ定義）
+[$win]$WIN_COUNT
+// フィールド（後半）（表示用。ラベルは主旋律にのみ定義）
+[$fieldShort]$FIELD_SHORT_COUNT
+// エンカウント（後半）（表示用。ラベルは主旋律にのみ定義）
+[$encounter]$ENCOUNTER_AGAIN_COUNT
+// 戦闘 B（後半）（表示用。ラベルは主旋律にのみ定義）
+[$bad]$BAD_AGAIN_COUNT
+// 戦闘 C（後半）（表示用。ラベルは主旋律にのみ定義）
+[$crisis]$CRISIS_AGAIN_COUNT
+// 敗北（表示用。ラベルは主旋律にのみ定義）
+[$lose]$LOSE_COUNT
+}
+
+// 各曲の先頭で状態を初期化。その後、曲固有の設定を指定します。
+$RESET = { o4 l4 t120 v15 q7 p3 @{pulse(50)} @e{flat} @d0 @m0 @s0 @o0 }
 #role counter
 // 打楽器と同時に鳴らない位置だけを担当します。フィールドでは主旋律の隙間を薄く補完します。
 $battle = { @m0 t152 q6 @{counterLead} v6.276 }
@@ -306,6 +393,49 @@ $RESET $fieldReply1 $fieldReply2 $fieldReply3 $fieldReply4
 $ORDER
 
 #ch ドラム
+$INTRO_COUNT = { 1 } // イントロ
+$FIELD_COUNT = { 2 } // 草原
+$ENCOUNTER_COUNT = { 1 } // エンカウント
+$GOOD_COUNT = { 1 } // 通常戦闘（有利）
+$BAD_COUNT = { 2 } // 不利
+$CRISIS_COUNT = { 2 } // 大ピンチ
+$WIN_COUNT = { 1 } // 勝利
+$FIELD_SHORT_COUNT = { 1 } // 短い草原
+$ENCOUNTER_AGAIN_COUNT = { 1 } // 2度目のエンカウント
+$BAD_AGAIN_COUNT = { 2 } // 2度目の不利
+$CRISIS_AGAIN_COUNT = { 2 } // 2度目の大ピンチ
+$LOSE_COUNT = { 1 } // 敗北
+
+// 演奏順も全パート共通。順番を変える場合はこの定義を編集します。
+$ORDER = {
+// イントロ（表示用。ラベルは主旋律にのみ定義）
+[$intro]$INTRO_COUNT
+// フィールド（表示用。ラベルは主旋律にのみ定義）
+[$field]$FIELD_COUNT
+// エンカウント（表示用。ラベルは主旋律にのみ定義）
+[$encounter]$ENCOUNTER_COUNT
+// 戦闘 A（表示用。ラベルは主旋律にのみ定義）
+[$good]$GOOD_COUNT
+// 戦闘 B（表示用。ラベルは主旋律にのみ定義）
+[$bad]$BAD_COUNT
+// 戦闘 C（表示用。ラベルは主旋律にのみ定義）
+[$crisis]$CRISIS_COUNT
+// 勝利（表示用。ラベルは主旋律にのみ定義）
+[$win]$WIN_COUNT
+// フィールド（後半）（表示用。ラベルは主旋律にのみ定義）
+[$fieldShort]$FIELD_SHORT_COUNT
+// エンカウント（後半）（表示用。ラベルは主旋律にのみ定義）
+[$encounter]$ENCOUNTER_AGAIN_COUNT
+// 戦闘 B（後半）（表示用。ラベルは主旋律にのみ定義）
+[$bad]$BAD_AGAIN_COUNT
+// 戦闘 C（後半）（表示用。ラベルは主旋律にのみ定義）
+[$crisis]$CRISIS_AGAIN_COUNT
+// 敗北（表示用。ラベルは主旋律にのみ定義）
+[$lose]$LOSE_COUNT
+}
+
+// 各曲の先頭で状態を初期化。その後、曲固有の設定を指定します。
+$RESET = { o4 l4 t120 v15 q7 p3 @{pulse(50)} @e{flat} @d0 @m0 @s0 @o0 }
 // DRUMS用の音程と強弱。C4を基準に元の各打楽器の高さへ移す。
 #bundle wcDrumsKick = @{wcKickPulse} @e{wcKickEnv} @s0 @o-2, @{noise(white)} @e{wcKickNoiseEnv} @s0 @o-2 v4
 #bundle wcDrumsSnare = @{noise(white)} @e{wcDrumEnv} @s0 @d900

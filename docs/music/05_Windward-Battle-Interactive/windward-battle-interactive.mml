@@ -46,10 +46,11 @@
 #bundle drumNoise    = @{noise(white)} @e{wcDrumEnv}
 
 // 各曲の先頭で状態を初期化。その後、曲固有の設定を指定します。
-$RESET = { o4 l4 t120 v15 q7 p3 @{pulse(50)} @e{flat} @d0 @m0 @o0 }
 
 #gain 1.779396 measured
 #ch 主旋律
+$RESET = { o4 l4 t120 v15 q7 p3 @{pulse(50)} @e{flat} @d0 @m0 @o0 }
+
 #role lead
 // 戦闘の主旋律。勝利・敗退までを担当します。
 $sound2 = { @m0 t152 @{battleLead} @m{7,5.6} v10.984 q6 o4 }
@@ -109,6 +110,8 @@ $lose |
 #takes
 
 #ch ベース
+$RESET = { o4 l4 t120 v15 q7 p3 @{pulse(50)} @e{flat} @d0 @m0 @o0 }
+
 #role bass
 // 戦闘時は専用矩形波、エンカウントと勝敗では三角波を使います。
 $sound2 = { @m0 t152 @{fieldBass} v15 q6 o1 }
@@ -166,9 +169,9 @@ $RESET $sound4 d8 r8 @{fieldArp} v7.846 q5 o4 d16 o4 f16 o4 a16 o5 d16 @{fieldBa
   @{fieldArp} v7.846 q5 o4 c+16 o4 e16 o4 g16 o4 a16 @{fieldBass} v15 q6 o2 e8 r8 @{fieldArp} v7.846 q5 o4 a16 o4 g16 o4
   e16 o4 c+16 @m0 t96 @{fieldBass} v15 q6 o2 d2 r2
 }
-#label エンカウント
+// エンカウント（曲全体の共通ラベルは先頭パートに定義）
 $encounter
-#label LOOP
+// LOOP（曲全体の共通ラベルは先頭パートに定義）
 #takes 戦闘曲 restart
 #take 戦闘 A
 $good
@@ -177,7 +180,7 @@ $good
 #take 戦闘 C
 [$crisis]2
 #takes
-#label OUTRO
+// OUTRO（曲全体の共通ラベルは先頭パートに定義）
 #switch 0
 #takes 結末
 #take 勝利
@@ -187,6 +190,8 @@ $lose |
 #takes
 
 #ch 副旋律
+$RESET = { o4 l4 t120 v15 q7 p3 @{pulse(50)} @e{flat} @d0 @m0 @o0 }
+
 #role counter
 // ドラムの休符位置だけを担当します。
 $battle = { @m0 t152 q6 @{counterLead} v6.276 }
@@ -214,9 +219,9 @@ $RESET $fullFD $fullFD | $fullFD $fullFD | $fullAG $fullCsAs | $fullCsA $fullCsA
 }
 $win = { $RESET t132 [r1]4 }
 $lose = { $RESET t96 [r1]4 }
-#label エンカウント
+// エンカウント（曲全体の共通ラベルは先頭パートに定義）
 $encounter
-#label LOOP
+// LOOP（曲全体の共通ラベルは先頭パートに定義）
 #takes 戦闘曲 restart
 #take 戦闘 A
 $good
@@ -225,7 +230,7 @@ $good
 #take 戦闘 C
 [$crisis]2
 #takes
-#label OUTRO
+// OUTRO（曲全体の共通ラベルは先頭パートに定義）
 #switch 0
 #takes 結末
 #take 勝利
@@ -235,6 +240,8 @@ $lose |
 #takes
 
 #ch ドラム
+$RESET = { o4 l4 t120 v15 q7 p3 @{pulse(50)} @e{flat} @d0 @m0 @o0 }
+
 // DRUMS用の音程と強弱。C4を基準に元の各打楽器の高さへ移す。
 #bundle wcDrumsKick = @{wcKickPulse} @e{wcKickEnv} @s0 @o-2, @{noise(white)} @e{wcKickNoiseEnv} @s0 @o-2 v4
 #bundle wcDrumsSnare = @{noise(white)} @e{wcDrumEnv} @s0 @d900
@@ -260,9 +267,9 @@ $bad = { $RESET [$battleDrums2]4 }
 $crisis = { $RESET [$battleDrums2]4 }
 $win = { $RESET [$winDrums]3 $endingKick132 }
 $lose = { $RESET [$loseDrums]3 $endingKick96 }
-#label エンカウント
+// エンカウント（曲全体の共通ラベルは先頭パートに定義）
 $encounter
-#label LOOP
+// LOOP（曲全体の共通ラベルは先頭パートに定義）
 #takes 戦闘曲 restart
 #take 戦闘 A
 $good
@@ -271,7 +278,7 @@ $good
 #take 戦闘 C
 [$crisis]2
 #takes
-#label OUTRO
+// OUTRO（曲全体の共通ラベルは先頭パートに定義）
 #switch 0
 #takes 結末
 #take 勝利

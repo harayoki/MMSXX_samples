@@ -12,7 +12,7 @@
 
 // この数値を直すと本編のループ回数が変わります（1以上）。
 // イントロとエンディングは1回ずつ。全パート共通で、再生とWAVの両方に適用。
-$LOOP_END = { 1 }
+
 #title Pocket Tunnel
 #version 5.5
 // 全体音量はMMLのvで指定（上限15）。JSによる曲別増幅は使わない。
@@ -40,6 +40,7 @@ $LOOP_END = { 1 }
 #bundle ptBaseVoice    = @{pulse(50)} @e{flat}
 #gain 1.967221 measured
 #ch メロディ
+$LOOP_END = { 1 }
 #role lead
 // パート 1 — メロディ。
 // イントロ
@@ -74,6 +75,7 @@ d8 o5 c4 r4
 @s0 q8 o5 c20 r80 o5 e20 r80 o5 g20 r80 o6 c10 r16 r40 o5 b20 r80 o5 g20 r80 o5 f10 r40 o5 d10 r40
 o4 b8 & b20 r16 r80 o6 c2 & c8 & c20 r4 r16 r80
 #ch アルペジオ／合いの手
+$LOOP_END = { 1 }
 #role arp
 // パート 2 — アルペジオ／合いの手。
 // イントロ
@@ -100,6 +102,7 @@ g16 o3 e16 o3 c16 o3 e16 o4 c16 o3 g16 ]2
 // エンディング
 r1 r1
 #ch ベース
+$LOOP_END = { 1 }
 #role bass
 // パート 3 — ベース。
 // イントロ
@@ -127,6 +130,7 @@ e16 o2 g8 o2 c8
 // エンディング
 @{ptBassHeld} v10.182 q8 o3 c4 & c16 & c80 r8 r20 o2 g4 & g16 & g80 r8 r20 o2 c2 & c8 & c20 r4 r16 r80
 #ch ドラム
+$LOOP_END = { 1 }
 #role perc
 // 16分刻み。楽器ごとの強弱と発音長は定義にまとめる。
 #bundle ptKickQ2 = @{ptKick} @e{ptDecay} @o-3 @d553 q2 @s0
@@ -172,6 +176,7 @@ r1
 @{drums 20}{ E } r4 r5
 @{drums 20}{ E } r2 r4 r5
 #ch 和音 1
+$LOOP_END = { 1 }
 #role chord
 // パート 7 — 和音 1。
 // イントロ
@@ -205,6 +210,7 @@ v6.479 o3 c5 & c80 & c400 r8 r32 r320 r1600 v5.554 o3 c10 & c200 r8 r50 o3 c4 & 
 // エンディング
 v6.479 o4 c4 & c16 & c80 r8 r20 o3 b4 & b16 & b80 r8 r20 o4 c2 & c8 & c20 r4 r16 r80
 #ch 和音 1 上声
+$LOOP_END = { 1 }
 #role chord
 // パート 7 — 和音 1（同時発音の追加声部 1）。
 // イントロ
@@ -217,6 +223,7 @@ t120 o4 l4 q8 @{ptBaseVoice} v12.959 @d0 @m0 @s0 @o0 @p{0,0,0} [ r1 r1 r1 r1 ]6
 @{ptChordHeld} v6.479 @d0 @s0 q8 o4 e4 & e16 & e80 r8 r20 o4 d4 & d16 & d80 r8 r20 o4 e2 & e8 & e20 r4
 r16 r80
 #ch 和音 1 最高声
+$LOOP_END = { 1 }
 #role chord
 // パート 7 — 和音 1（同時発音の追加声部 2）。
 // イントロ
@@ -229,6 +236,7 @@ t120 o4 l4 q8 @{ptBaseVoice} v12.959 @d0 @m0 @s0 @o0 @p{0,0,0} [ r1 r1 r1 r1 ]6
 @{ptChordHeld} v6.479 @d0 @s0 q8 o4 g4 & g16 & g80 r8 r20 o4 f4 & f16 & f80 r8 r20 o4 g2 & g8 & g20 r4
 r16 r80
 #ch 和音 2
+$LOOP_END = { 1 }
 #role chord
 // パート 8 — 和音 2。
 // イントロ
@@ -262,6 +270,7 @@ v6.479 o3 e5 & e80 & e400 r8 r32 r320 r1600 v5.554 o3 e10 & e200 r8 r50 o3 e4 & 
 // エンディング
 r2 r4 r8 r20 r100 r1 r16 r400
 #ch 和音 3
+$LOOP_END = { 1 }
 #role chord
 // パート 9 — 和音 3。
 // イントロ
@@ -295,6 +304,7 @@ v6.479 o3 g5 & g80 & g400 r8 r32 r320 r1600 v5.554 o3 g10 & g200 r8 r50 o3 g4 & 
 // エンディング
 r2 r4 r8 r20 r100 r1 r16 r400
 #ch ハモリ
+$LOOP_END = { 1 }
 #role harmony
 // パート 10 — ハモリ。
 // イントロ

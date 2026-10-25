@@ -33,12 +33,12 @@ o4 v11.431 d4 v11.431 f4 v11.431 a4 >v10.478 c4< o4 >v10.478 d2< v10.478 b-4 v10
 #ch 裏メロ
 #role counter
 t168 q7 v7.621 @{pulse(25)} @e{sfFlat}
-#label Intro
+// Intro（曲全体の共通ラベルは先頭パートに定義）
 @fade{0,0} @fade{15,10.666666666667}
 q8 r64 o5d8&o5d192 r32 r192 o4b-6&o4b-32&o4b-192 r24 r192 o4a6&o4a32&o4a192 r24 r192 o4g+24&o4g+192 r64 o4g+24&o4g+192 r64 o4g+24&o4g+192 r64 o4g+64 r24 r192 o4a24&o4a192 r64 o4a24&o4a192 r64 o4a24&o4a192 r64 o4a64 r24 r192 o4b-24&o4b-192 r64 o4b-24&o4b-192 r64 o4b-24&o4b-192 r64 o4b-64 r24 r192 o4a24&o4a192 r64 o4a24&o4a192 r64 o4a24&o4a192 r64 o4a64 r24 r192 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r8
 q7
 
-#label Main
+// Main（曲全体の共通ラベルは先頭パートに定義）
 @fade{15,0}
 // 矩形波2を短いベース補強へ譲る
 q8 [
@@ -46,7 +46,7 @@ o4d16 r64 o4d32&o4d64 r64 o4d32&o4d64 r64 o4d64 r32 r64 o4f32&o4f64 r64 o4f32&o4
 ]3
 q7
 
-#label Finale
+// Finale（曲全体の共通ラベルは先頭パートに定義）
 @fade{0,16}
 q8 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d64 r24 r192 o4f24&o4f192 r64 o4f24&o4f192 r64 o4f24&o4f192 r64 o4f64 r24 r192 o4a24&o4a192 r64 o4a24&o4a192 r64 o4a24&o4a192 r64 o4a64 r24 r192 o5c24&o5c192 r64 o5c24&o5c192 r64 o5c24&o5c192 r64 o5c64 r24 r192 o5d24&o5d192 r64 o5d24&o5d192 r64 o5d24&o5d192 r64 o5d24&o5d192 r64 o5d24&o5d192 r64 o5d24&o5d192 r64 o5d24&o5d192 r16 r64 o4b-24&o4b-192 r64 o4b-24&o4b-192 r64 o4b-24&o4b-192 r64 o4b-64 r24 r192 o4a24&o4a192 r64 o4a24&o4a192 r64 o4a24&o4a192 r64 o4a64 r24 r192 o4g+24&o4g+192 r64 o4g+24&o4g+192 r64 o4g+24&o4g+192 r64 o4g+64 r24 r192 o4a24&o4a192 r64 o4a24&o4a192 r64 o4a24&o4a192 r64 o4a64 r24 r192 o4b-24&o4b-192 r64 o4b-24&o4b-192 r64 o4b-24&o4b-192 r64 o4b-64 r24 r192 o4a24&o4a192 r64 o4a24&o4a192 r64 o4a24&o4a192 r64 o4a64 r24 r192 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r64 o4d24&o4d192 r8
 q7
@@ -54,12 +54,12 @@ q7
 #ch ベース補強
 #role bass
 t168 q7 v6.124 @{pulse(25)} @e{sfFlat}
-#label Intro
+// Intro（曲全体の共通ラベルは先頭パートに定義）
 // フェードイン中は補強を休ませる。
 @fade{0,0}
 r1 r1 r2 r6
 
-#label Main
+// Main（曲全体の共通ラベルは先頭パートに定義）
 @fade{7.5,42.666666666667}
 // 矩形波2。32分音符、5度位置は休符
 [
@@ -72,7 +72,7 @@ r16 v5.512 o2c32  r32 v5.512 o2c32  r32 v5.512 o2c32  r32 v5.512 o2c32  r32 v5.5
 r16 v6.124 o2e-32  r32 v6.124 o2e-32  r32 v6.124 o2e-32  r32 v6.736 o2e-32  r32 v6.736 o2e-32  r32 v6.736 o2e-32  r32 v6.736 o2e-32  r32 r16 v6.736 o2e-32  r32 v6.736 o2e-32  r32 v6.736 o2e-32  r32 v6.736 o2e-32  r32 v6.736 o2e-32  r32 v6.736 o2e-32  r32 v6.736 o2e-32  r32
 r16 v6.736 o2d32  r32 v6.736 o2d32  r32 v6.736 o2d32  r32 v6.736 o2d32  r32 v6.736 o2d32  r32 v6.736 o2d32  r32 v6.736 o2d32  r32 r16 v6.736 o2d32  r32 v6.736 o2d32  r32 v6.736 o2d32  r32 r4
 ]3
-#label Finale
+// Finale（曲全体の共通ラベルは先頭パートに定義）
 @fade{0,16}
 v4.899 o2d32 r48 r192 r192 v4.899 o2d32 r48 r192 r192 v4.899 o2d32 r48 r192 r192 v4.899 o2d32 r48 r192 r192 v4.899 o2d32 r48 r192 r192 v4.899 o2d32 r48 r192 r192 v4.899 o2d32 r48 r192 r192 v4.899 o2d32 r48 r192 r192 v4.899 o2d32 r48 r192 r192 v4.899 o2d32 r48 r192 r192 v4.899 o2d32 r48 r192 r192 v4.899 o2d32 r48 r192 r192 v5.512 o2d32 r48 r192 r192 v5.512 o2d32 r48 r192 r192 v5.512 o2d32 r48 r192 r192 v5.512 o2d32 r48 r192 r192 v5.512 o2c32 r48 r192 r192 v5.512 o2c32 r48 r192 r192 v5.512 o2c32 r48 r192 r192 v5.512 o2c32 r48 r192 r192 v5.512 o2c32 r48 r192 r192 v5.512 o2c32 r48 r192 r192 v5.512 o2c32 r48 r192 r192 v5.512 o2c32 r48 r192 r192 v5.512 o2c32 r48 r192 r192 v5.512 o2c32 r48 r192 r192 v5.512 o2c32 r48 r192 r192 v5.512 o2c32 r48 r192 r192 v5.512 o2c32 r48 r192 r192 v5.512 o2c32 r48 r192 r192 v5.512 o2c32 r48 r192 r192 v5.512 o2c32 r48 r192 r192 v6.124 o2e-32 r48 r192 r192 v6.124 o2e-32 r48 r192 r192 v6.124 o2e-32 r48 r192 r192 v6.124 o2e-32 r48 r192 r192 v6.736 o2e-32 r48 r192 r192 v6.736 o2e-32 r48 r192 r192 v6.736 o2e-32 r48 r192 r192 v6.736 o2e-32 r48 r192 r192 v6.736 o2e-32 r48 r192 r192 v6.736 o2e-32 r48 r192 r192 v6.736 o2e-32 r48 r192 r192 v6.736 o2e-32 r48 r192 r192 v6.736 o2e-32 r48 r192 r192 v6.736 o2e-32 r48 r192 r192 v6.736 o2e-32 r48 r192 r192 v6.736 o2e-32 r48 r192 r192 v6.736 o2d32 r48 r192 r192 v6.736 o2d32 r48 r192 r192 v6.736 o2d32 r48 r192 r192 v6.736 o2d32 r48 r192 r192 v6.736 o2d32 r48 r192 r192 v6.736 o2d32 r48 r192 r192 v6.736 o2d32 r48 r192 r192 v6.736 o2d32 r48 r192 r192 v6.736 o2d32 r48 r192 r192 v6.736 o2d32 r48 r192 r192 v6.736 o2d32 r48 r192 r192 v6.736 o2d32 r48 r192 r192 v6.736 o2d32 r48 r192 r192 v6.736 o2d32 r48 r192 r192 v6.736 o2d32 r48 r192 r192 v6.736 o2d32 r48 r192 r192
 
@@ -80,12 +80,12 @@ v4.899 o2d32 r48 r192 r192 v4.899 o2d32 r48 r192 r192 v4.899 o2d32 r48 r192 r192
 #role bass
 t168 q6 v10.206 @{nesTriangle} @e{flat}
 // 16分音符q6。各音の残り2/8は無音。高音合の手なし
-#label Intro
+// Intro（曲全体の共通ラベルは先頭パートに定義）
 q6 r6 r4 r4
 q6
 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16
 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16
-#label Main
+// Main（曲全体の共通ラベルは先頭パートに定義）
 [
 o2a16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2a16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16
 o2a16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2a16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16
@@ -98,7 +98,7 @@ o2a16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2a16 o2d16 o2d16 o2d16 o2d16 o2
 ]3
 
 
-#label Finale
+// Finale（曲全体の共通ラベルは先頭パートに定義）
 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16
 o2c16 o2c16 o2c16 o2c16 o2c16 o2c16 o2c16 o2c16 o2c16 o2c16 o2c16 o2c16 o2c16 o2c16 o2c16 o2c16
 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16 o2e-16
@@ -107,13 +107,13 @@ o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2
 #ch タム
 #role drums
 t168 q7 v7.484 @{seFall} @e{snap}
-#label Intro
+// Intro（曲全体の共通ラベルは先頭パートに定義）
 @fade{0,0} @fade{15,10.666666666667}
 r1 r1 r2 r6
-#label Main
+// Main（曲全体の共通ラベルは先頭パートに定義）
 @fade{15,0}
 [r1 r1 r1 r1 r1 r1 r1 r2 r4 o3g16 o3f16 o3d8]3
-#label Finale
+// Finale（曲全体の共通ラベルは先頭パートに定義）
 @fade{0,16}
 r1 r1 r1 r1
 
@@ -125,13 +125,13 @@ r1 r1 r1 r1
 #drum S = @{sfNoiseSnare} v9 スネア
 #drum H = @{sfNoiseHat} v5 ハット
 t168 q8
-#label Intro
+// Intro（曲全体の共通ラベルは先頭パートに定義）
 @fade{0,0} @fade{15,10.666666666667}
 r24
 @{drums 16}{
 v8 S v8 H v8 K v9 H v9 S v9 H v7 K v9 H v9 S v9 H v8 K v10 H v10 S v10 H v8 K v10 H v10 S v10 H v9 K v10 H v10 S v10 H v9 K v10 H v10 S v10 H v10 K v10 H v10 S v10 H v9 K v10 H v10 S v10 H v10 K v10 H v10 S v10 H v9 K v10 H v10 S v10 H
 }
-#label Main
+// Main（曲全体の共通ラベルは先頭パートに定義）
 @fade{15,0}
 @{drums 16}{
 
@@ -160,7 +160,7 @@ v7 K v8 H v8 S v8 H v7 K v8 H v8 S v8 H v8 K v9 H v9 S v9 H v7 K v9 H v9 S v9 H
 v8 K v10 H v10 S v10 H v8 K v10 H v10 S v10 H v9 K v10 H v10 S v10 H v9 K v10 H v10 S v10 H
 v10 K v10 H v10 S v10 H v9 K v10 H v10 S v10 H v10 K v10 H v10 S v10 H v9 K v10 H v10 S v10 H
 }
-#label Finale
+// Finale（曲全体の共通ラベルは先頭パートに定義）
 @fade{0,16}
 t168 @{drums 16}{
 v7 K v7 H v7 S v7 H v6 K v7 H v7 S v7 H v7 K v7 H v7 S v7 H v7 K v8 H v8 S v8 H

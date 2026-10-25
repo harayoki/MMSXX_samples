@@ -51,12 +51,12 @@ $p9={ $tone o5 f8 q5 }
 #ch 対旋律
 #role counter
 t140 q8
-#label Intro
+// Intro（曲全体の共通ラベルは先頭パートに定義）
 @{pulse(25)} @e{piano} v8 q6 o4 f4 r4 d4 r4 @{pulse(12)} @e{flat} r4 c4 o3 a4 r4 q8
-#label LOOP
-#label 出発
+// LOOP（曲全体の共通ラベルは先頭パートに定義）
+// 出発（曲全体の共通ラベルは先頭パートに定義）
 $p17 $p15 $p20 $p18 $p22
-#label 遠望
+// 遠望（曲全体の共通ラベルは先頭パートに定義）
 $p17 $p3 $p20 $p2 @{pulse(25)} @e{fieldBody} v8 o4 b-64&b-256&b-1024&b-8192 r64 $p25 $p16 $p1 @{pulse(25)}
 @e{fieldBody} v8 o4 f+16&f+256&f+1024&f+8192 r32 $p16 $p2 $p24 $p26 $p19 $p1 @{pulse(25)}
 @e{fieldBody} v8 o4 b-16&b-256&b-1024&b-8192 r32 @{pulse(25)} @e{fieldBody} v8 o4 f+16&f+32 r32 $p2
@@ -65,9 +65,9 @@ v8 o5 c16&c256&c1024&c8192 r32 @{pulse(12)} @e{flat} v8 o4 a32&a64 r64 @{pulse(1
 $p23 $p4 $p2 @{pulse(25)} @e{fieldBody} v8 o4 e64&e256&e1024&e8192 r64 $p26 $p16 $p1 @{pulse(25)}
 @e{fieldBody} v8 o4 f+64&f+256&f+1024&f+8192 r64 $p19 $p16 $p2 @{pulse(25)} @e{fieldBody} v8 o4
 e8&e32&e256&e1024&e8192 r16 $p1 $p24 $p27 $p22
-#label 飛翔
+// 飛翔（曲全体の共通ラベルは先頭パートに定義）
 $p18 $p3 $p20
-#label OUTRO
+// OUTRO（曲全体の共通ラベルは先頭パートに定義）
 $p17 $p15 r16 $p1 @{pulse(12)} @e{flat} v8 o4 g+8&g+32&g+256&g+1024&g+8192 r16 $p13 $p19 $p19 $p16 @{pulse(25)}
 @e{fieldBody} v8 o5 c+16&c+32 r32 $p16 $p27 @{pulse(12)} @e{flat} v8 o4 f+16&f+32 r32 $p21 @{pulse(25)}
 @e{fieldBody} v8 o5 c32&c64 r64 @{pulse(25)} @e{fieldBody} v8 o5 d+16&d+32 $p4 $p25 @{pulse(25)}
@@ -137,17 +137,17 @@ $p27={ @{pulse(12)} @e{flat} v8 o4 b-16&b-32 r32 }
 #ch ベース
 #role bass
 t140 q8
-#label Intro
+// Intro（曲全体の共通ラベルは先頭パートに定義）
 $tone q8 o2 b-2 f4 b-4 f2 c4 f4 q8
-#label LOOP
-#label 出発
+// LOOP（曲全体の共通ラベルは先頭パートに定義）
+// 出発（曲全体の共通ラベルは先頭パートに定義）
 $p8 $p1 $p6 $tone o2 g8 $p7
-#label 遠望
+// 遠望（曲全体の共通ラベルは先頭パートに定義）
 $p1 $p1 $p1 $p5 $p7 $p9 $p9 $p9 $p9 $p9 $tone o2 e16 $tone o2 e16 $tone o2 f+8 $p9 $p2 $p2 $p2 $p2 $tone o3 c16
 $tone o3 c16 $tone o2 a8 $p2 $tone o2 a8 $p9 $p9 $p9 $p9 $tone o2 f+8 $p1 $tone o2 f+8 $p9 $p7
-#label 飛翔
+// 飛翔（曲全体の共通ラベルは先頭パートに定義）
 $p4 $p1 $p6 $tone o2 g8 $p7
-#label OUTRO
+// OUTRO（曲全体の共通ラベルは先頭パートに定義）
 $p8 $p1 $tone o3 c+16 $tone o3 c+16 $p1 $p2 $p1 $tone o3 f+8 $tone o3 c+8 $tone o3 f+8 $tone o3 c+8 $tone o3 d+8
 $p1 $tone o3 f8 $tone o3 c8 $p1 $tone o3 f8 $tone o2 b-2 r4
 
@@ -168,16 +168,16 @@ $p9={ $tone o2 e8 }
 #ch ドラム
 #role noise
 t140 q8
-#label Intro
+// Intro（曲全体の共通ラベルは先頭パートに定義）
 $tone @e{percussive} v4 q3 o2 f+4 r4 f+4 r4 f+4 r4 v5 f+8 r8 v4 f+16 f+16 v6 f+8 q8
-#label LOOP
-#label 出発
+// LOOP（曲全体の共通ラベルは先頭パートに定義）
+// 出発（曲全体の共通ラベルは先頭パートに定義）
 $p8 $p8
-#label 遠望
+// 遠望（曲全体の共通ラベルは先頭パートに定義）
 $p8 $p8
-#label 飛翔
+// 飛翔（曲全体の共通ラベルは先頭パートに定義）
 $p8
-#label OUTRO
+// OUTRO（曲全体の共通ラベルは先頭パートに定義）
 $p8 $p4 $p7 $p7 $p7 $p6 $p6 $p5 r16 r64 $tone @e{fieldHit} v6 o4 c32&c64 r2 r4 r8 r16 r64
 
 $tone={@{noise(white)}}

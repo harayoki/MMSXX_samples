@@ -1,7 +1,6 @@
 #title BEAT_V2
 #version 2.8
 #about 2オペのFM音源をかっこよくするテスト曲。80年代の雰囲気で。コード進行記述MMLとドラム専用MMLも活用してソースを短くしました。
-#label 開始
 
 // OPLL打楽器はo4c基準。0.28以降も従来の実際の音程を維持する。
 #bundle beatBass1  = @{waveRamp} @e{piano} @s{8,2}
@@ -19,6 +18,7 @@
 
 #gain 2.599895 measured
 #ch ベース1
+#label 開始
 t152 q7 v13 l8 @{beatBass1} [o2 d a o3 d o2 a f a d o3 c o2 d a o3 d o2 a f a d o3 c o2 b- f o3 b- o2 f d f b- a
   o2 c g o3 c o2 g e g c b- o2 d a o3 d o2 a f a d o3 c o2 d a o3 d o2 a f a d o3 c o2 g d g d b- d g f o2 a e a
   e o3 c o2 e a g]2

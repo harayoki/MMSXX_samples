@@ -23,22 +23,12 @@
   window.MusicAssets = Object.freeze({
     song, image, shared: path => new URL(path, root).href
   });
-  /**
-   * 現行の `#ch` でチャンネルを分ける。
-   * サンプル曲は先頭に共通マクロを置くため、エンジン標準の splitVoices と違い、
-   * 最初の #ch より前を各チャンネルへそのまま渡す。
-   */
+  // Pico PLAYER 1.4.0 expects an MML array, while SOUND 0.55.0
+  // defines a BGM from one *complete* MML document. Do not copy global
+  // #about / #title / #fx directives to every channel again.
   function splitMML(text) {
-    const lines = String(text ?? '').split(/\r?\n/);
-    const marks = lines.map((line, index) =>
-      /^\s*#\s*ch(?:\s|$)/i.test(line) ? index : -1
-    ).filter(index => index >= 0);
-    if (!marks.length) return String(text ?? '').trim() ? [String(text)] : [];
-    const head = lines.slice(0, marks[0]);
-    return marks.map((at, index) =>
-      [...head, ...lines.slice(at, marks[index + 1] ?? lines.length)]
-        .join('\n').trim()
-    ).filter(Boolean);
+    const source = String(text ?? '');
+    return source.trim() ? [source] : [];
   }
   /**
    * Read-only excerpt for songs that do not expose a public MML editor.
@@ -152,19 +142,19 @@
   }
   (async () => {
     try {
-      // Official 0.46.0 sound modules + official Pico PLAYER 1.4.0.
+      // Official 0.55.0 sound modules + official Pico PLAYER 1.4.0.
       // The source release uses native ES modules; the attached min-split ZIP
       // is the matching browser-script build of the same sound version.
       const map = document.createElement('script');
       map.type = 'importmap';
       map.textContent = JSON.stringify({
-        imports: { '#sound/': MusicAssets.shared('runtime/sound-0.46.0/sound/') }
+        imports: { '#sound/': MusicAssets.shared('runtime/sound-0.55.0/sound/') }
       });
       document.head.appendChild(map);
       const [soundModule, mmlModule, tonesModule, uiModule] = await Promise.all([
-        import(MusicAssets.shared('runtime/sound-0.46.0/sound/all.js')),
-        import(MusicAssets.shared('runtime/sound-0.46.0/sound/mml.js')),
-        import(MusicAssets.shared('runtime/sound-0.46.0/sound/tones.js')),
+        import(MusicAssets.shared('runtime/sound-0.55.0/sound/all.js')),
+        import(MusicAssets.shared('runtime/sound-0.55.0/sound/mml.js')),
+        import(MusicAssets.shared('runtime/sound-0.55.0/sound/tones.js')),
         import(MusicAssets.shared('runtime/player-1.4.0/tool/ui/player.js')),
       ]);
       // Existing song player.js scripts use the legacy namespace API.
@@ -184,15 +174,33 @@
         try { return localStorage.getItem(playerOpenKey) === 'true'; }
         catch { return false; }
       };
+      // Player 1.4.0 passes an array to defineBGM; SOUND 0.55.0
+      // requires a single MML document. Adapt at the page boundary only.
+      const asPlayerMML = value => {
+        if (Array.isArray(value)) {
+          if (!value.length) return [];
+          return [mmlModule.joinVoices(value)];
+        }
+        const source = String(value ?? '');
+        return source.trim() ? [source] : [];
+      };
       const mountWithStoredOpen = (root, options = {}) => {
         const { forceOpen = false, ...playerOptions } = options;
+        const audio = playerOptions.audio || new soundModule.ChipTuneSound();
+        const defineBGM = audio.defineBGM.bind(audio);
+        audio.defineBGM = (name, mml, config) =>
+          defineBGM(name, Array.isArray(mml) ? mmlModule.joinVoices(mml) : mml, config);
         const player = originalMount(root, {
           ...playerOptions,
+          audio,
+          mml: asPlayerMML(playerOptions.mml),
           open: forceOpen || readPlayerOpen(),
           // The site has its own MML editor. Display and download are
           // independent PLAYER options (showMml / saveMml).
           showMml: false,
         });
+        const originalSetMML = player.setMML.bind(player);
+        player.setMML = value => originalSetMML(asPlayerMML(value));
         const toggle = root.querySelector('[data-p="open"]');
         if (!forceOpen) toggle?.addEventListener('click', () => {
           try { localStorage.setItem(playerOpenKey, toggle.getAttribute('aria-expanded')); }

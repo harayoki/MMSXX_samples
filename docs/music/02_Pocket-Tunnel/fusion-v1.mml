@@ -5,7 +5,7 @@
 
 // この数値を直すと本編のループ回数が変わります（1以上）。
 // イントロとエンディングは1回ずつ。全パート共通で、再生とWAVの両方に適用。
-$LOOP_END = { 1 }
+
 #title Pocket Tunnel
 #version 5.3
 // 全体音量はMMLのvで指定（上限15）。JSによる曲別増幅は使わない。
@@ -21,6 +21,7 @@ $LOOP_END = { 1 }
 #bundle ptNoiseVoice = @{noise(white)} @e{ptPercussive}
 #gain 1.235691 measured
 #ch メロディ
+$LOOP_END = { 1 }
 #role lead
 // パート 1 — メロディ
 // イントロ
@@ -49,6 +50,7 @@ o5 q7 e16 g16 > c16 r16 < g16 e16 d8 c4 r4
 #label エンディング
 o5 v15 q5 g8 f16 d16 r8 c8 < b8 g8 f8 r8 o5 q7 e8 g8 a8 > c8 q8 v14.079 c2
 #ch 伴奏
+$LOOP_END = { 1 }
 #role arp
 // パート 2 — 伴奏
 // イントロ
@@ -74,6 +76,7 @@ r8 o4 g8 o4 d16 o3 a+16 r8 o3 f8 r8 o3 e16 o3 a16 o4 d8 r8 o4 g8 o4 d16 o3 a16 r
 // エンディング
 v8.448 r8 o3 f16 o3 b16 o4 d8 r8 o4 g8 o4 d16 o3 b16 r8 o3 f8 o3 e8 o3 a8 o4 d8 o4 g8 r2
 #ch ベース
+$LOOP_END = { 1 }
 #role bass
 // パート 3 — ベース
 // イントロ
@@ -96,6 +99,7 @@ c+8
 // エンディング
 o2 v15 q6 c+8 r16 c+16 g+8 r8 o3 c+8 o2 g+8 c+8 c8 o2 q8 c1
 #ch キック
+$LOOP_END = { 1 }
 #role perc
 // パート 4 — キック
 // イントロ
@@ -108,6 +112,7 @@ t120 o2 l8 q1 @{ptChipVoice} @d0 @m0 @o0 @p{0,0,0} [ v15 c8 r8 r8 v14.079 c8 v15
 // エンディング
 v15 c8 r8 r8 v14.079 c8 v15 c8 r16 v12.672 c16 r8 v15 c8 c8 r8 r2 r4
 #ch スネア
+$LOOP_END = { 1 }
 #role perc
 // パート 5 — スネア
 // イントロ
@@ -121,6 +126,7 @@ v15 c8 r8 r4 v15 c8 r8 r4 v15 c8 r8 r4 v15 c8 r8 r8 v7.04 c16 v9.856 c16 v15 c8 
 // エンディング
 r4 v15 c8 r8 r4 v15 c8 r8 r1
 #ch ハイハット
+$LOOP_END = { 1 }
 #role perc
 // パート 6 — ハイハット
 // イントロ
@@ -133,6 +139,7 @@ a16 v9.856 a8 ]24
 // エンディング
 v7.04 a8 v9.856 a8 v4.224 a8 v9.856 a8 v7.04 a8 v9.856 a8 v4.224 a16 v7.04 a16 v9.856 a8 v7.04 a8 r8 r2 r4
 #ch 和音 1
+$LOOP_END = { 1 }
 #role chord
 // パート 7 — 和音
 // イントロ
@@ -151,6 +158,7 @@ r8 o3 f8 r4 o3 f8 r8 q6 r8 o3 f4 o3 f8 r8 o3 f4 r8 q6 o3 e4 r8 o3 e8 r4 o3 e8 r8
 // エンディング
 v12.672 q6 r8 o3 f4 o3 f8 r8 o3 f4 r8 q8 o3 e1
 #ch 和音 2
+$LOOP_END = { 1 }
 #role chord
 // パート 8 — 和音
 // イントロ
@@ -169,6 +177,7 @@ q6 o3 a4 r8 o3 a8 r4 o3 a8 r8
 // エンディング
 v12.672 q6 r8 o3 b4 o3 b8 r8 o3 b4 r8 q8 o3 a1
 #ch 和音 3
+$LOOP_END = { 1 }
 #role chord
 // パート 9 — 和音
 // イントロ
@@ -187,6 +196,7 @@ q6 o4 d4 r8 o4 d8 r4 o4 d8 r8
 // エンディング
 v12.672 q6 r8 o4 d4 o4 d8 r8 o4 d4 r8 q8 o4 d1
 #ch 和音 4
+$LOOP_END = { 1 }
 #role chord
 // パート 10 — 和音
 // イントロ

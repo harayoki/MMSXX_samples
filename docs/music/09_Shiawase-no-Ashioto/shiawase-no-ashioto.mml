@@ -3,10 +3,11 @@
 #title シアワセノアシオト
 #version 1.01
 #about ゲームのエンディング向けのやさしい曲です。ジャズのルールをPOPSでなぞっています。
-#looptimes 2
+
 #gain 2.430000 measured
 
 #ch メロディ
+#looptimes 2
 t108 l8 @{sine} @e{soft} q7 v13 o5 @fade{15,0}
 #label LOOP
 r4 d10. f10 a4 g10. f10 | e2. r10. c10 | a4&a10. g10 a4 >c4< | a2 r4 f10. g10 |
@@ -28,7 +29,7 @@ f4&f10. d10 f4 a4 | g2 f4 e-4 | e4&e10. c10 e4 g4 | f+2 a4 >c4< |
 b-4 a10. g10 f4 d4 | e4 g4 b-4 g4 | f1 | r2 r4 c10. e10 |
 #ch 対旋律
 t108 @{sine} @e{pad} q8 v13 @fade{9,0}
-#label LOOP
+// LOOP（曲全体の共通ラベルは先頭パートに定義）
 o4 f2. g4 | o4 e1 | o4 e2 c2 | o4 d2 e2 |
 o4 f2. d4 | o4 e2 g2 | o4 g2 f+2 | o4 f2 e2 |
 o4 d1 | o4 d-1 | o4 c1 | o4 c1 |
@@ -41,14 +42,14 @@ o4 f2. g4 | o4 e1 | o4 e2 c2 | o4 d2 e2 |
 o4 f2. d4 | o4 e2 g2 | o4 g2 f+2 | o4 f2 e2 |
 o4 d1 | o4 d-1 | o4 c1 | o4 c1 |
 @fade{9,16,g0.5} o3 b-1 | o3 b-1 | o3 a1 | o3 b-2 o4 e2 |
-#label OUTRO
+// OUTRO（曲全体の共通ラベルは先頭パートに定義）
 @fade{0,64} o4 f2. g4 | o4 e1 | o4 e2 c2 | o4 d2 e2 |
 o4 f2. d4 | o4 e2 g2 | o4 g2 f+2 | o4 f2 e2 |
 o4 d1 | o4 d-1 | o4 c1 | o4 c1 |
 o3 b-1 | o3 b-1 | o3 a1 | o3 b-2 o4 e2 |
 #ch アルペジオ
 t108 l8 @{sine} @e{pluck} q6 v13 @fade{6,0}
-#label LOOP
+// LOOP（曲全体の共通ラベルは先頭パートに定義）
 o4 g10. b-10 >d10. f10 g10. f10 d10.< b-10 | o4 c10. e10 g10. b-10 >c10.< b-10 g10. e10 | o4 f10. a10 >c10. e10 f10. e10 c10.< a10 | o4 d10. f10 a10. >c10 d10. c10< a10. f10 |
 o4 g10. b-10 >d10. f10 g10. f10 d10.< b-10 | o4 c10. e10 g10. b-10 >c10.< b-10 g10. e10 | o4 a10. >c10 e10. g10< o4 d10. f+10 a10. >c10< | o4 g10. b-10 >d10. f10< o4 c10. e10 g10. b-10 |
 o3 b-10. >d10 f10. a10 b-10. a10 f10. d10< | o4 e-10. g10 b-10. >d-10 e-10. d-10< b-10. g10 | o4 a10. >c10 e10. g10 a10. g10 e10. c10< | o4 d10. f+10 a10. >c10 d10. c10< a10. f+10 |
@@ -61,14 +62,14 @@ o3 g10. b-10 >d10. f10 g10. f10 d10.< b-10 | o3 c10. e10 g10. b-10 >c10.< b-10 g
 o3 g10. b-10 >d10. f10 g10. f10 d10.< b-10 | o3 c10. e10 g10. b-10 >c10.< b-10 g10. e10 | o3 a10. >c10 e10. g10< o3 d10. f+10 a10. >c10< | o3 g10. b-10 >d10. f10< o3 c10. e10 g10. b-10 |
 o2 b-10. >d10 f10. a10 b-10. a10 f10. d10< | o3 e-10. g10 b-10. >d-10 e-10. d-10< b-10. g10 | o3 a10. >c10 e10. g10 a10. g10 e10. c10< | o3 d10. f+10 a10. >c10 d10. c10< a10. f+10 |
 @fade{6,16,g0.5} o3 g10. b-10 >d10. f10 g10. f10 d10.< b-10 | o3 c10. e10 g10. b-10 >c10.< b-10 g10. e10 | o3 f10. a10 >c10. d10 f10. d10 c10.< a10 | o3 c10. e10 g10. b-10 >c10.< b-10 g10. e10 |
-#label OUTRO
+// OUTRO（曲全体の共通ラベルは先頭パートに定義）
 @fade{0,64} o4 g10. b-10 >d10. f10 g10. f10 d10.< b-10 | o4 c10. e10 g10. b-10 >c10.< b-10 g10. e10 | o4 f10. a10 >c10. e10 f10. e10 c10.< a10 | o4 d10. f10 a10. >c10 d10. c10< a10. f10 |
 o4 g10. b-10 >d10. f10 g10. f10 d10.< b-10 | o4 c10. e10 g10. b-10 >c10.< b-10 g10. e10 | o4 a10. >c10 e10. g10< o4 d10. f+10 a10. >c10< | o4 g10. b-10 >d10. f10< o4 c10. e10 g10. b-10 |
 o3 b-10. >d10 f10. a10 b-10. a10 f10. d10< | o4 e-10. g10 b-10. >d-10 e-10. d-10< b-10. g10 | o4 a10. >c10 e10. g10 a10. g10 e10. c10< | o4 d10. f+10 a10. >c10 d10. c10< a10. f+10 |
 o4 g10. b-10 >d10. f10 g10. f10 d10.< b-10 | o4 c10. e10 g10. b-10 >c10.< b-10 g10. e10 | o4 f10. a10 >c10. d10 f10. d10 c10.< a10 | o4 c10. e10 g10. b-10 >c10.< b-10 g10. e10 |
 #ch ベース
 t108 l4 @{sine} @e{piano} q7 v14 @fade{13,0}
-#label LOOP
+// LOOP（曲全体の共通ラベルは先頭パートに定義）
 o2 g a b- b | o3 c e g e | o3 f e d c | o3 d f a a- |
 o3 g f d o2 b- | o3 c d e o2 b- | o2 a o3 e d o2 a | o2 g o3 d c o2 b |
 o2 b- o3 d f d | o2 e- g b- a- | o2 a o3 c e c | o3 d o2 a f+ a |
@@ -81,14 +82,14 @@ o3 g4 b-4 o4 d4 o3 b-10. b10 | o4 c4 o3 g4 e4 g10. e10 | o3 f4 a4 o4 c4 o3 a10. 
 o3 g4 f4 d4 o2 b-10. b10 | o3 c4 d4 e4 g10. b-10 | o3 a4 o4 c4 o3 d4 f+4 | o3 g4 b-4 c4 e10. a10 |
 o3 b-4 o4 d4 f4 e10. e-10 | o4 e-4 o3 b-4 g4 g10. a-10 | o3 a4 o4 c4 e4 c10. c+10 | o4 d4 o3 a4 f+4 a10. a-10 |
 @fade{13,16,g2} o3 g4 b-4 o4 d4 o3 b-10. b10 | o4 c4 o3 b-4 g4 g10. e10 | o3 f4 a4 o4 c4 d4 | o3 c4 o2 b-4 a4 a-4 |
-#label OUTRO
+// OUTRO（曲全体の共通ラベルは先頭パートに定義）
 @fade{0,64} o2 g a b- b | o3 c e g e | o3 f e d c | o3 d f a a- |
 o3 g f d o2 b- | o3 c d e o2 b- | o2 a o3 e d o2 a | o2 g o3 d c o2 b |
 o2 b- o3 d f d | o2 e- g b- a- | o2 a o3 c e c | o3 d o2 a f+ a |
 o2 g b- o3 d o2 b- | o3 c o2 b- g e | o2 f a o3 c d | o3 c o2 b- a a- |
 #ch スネア
 t108 @{noise(white)} @e{snap} q8 v9 o5 @fade{0,0}
-#label LOOP
+// LOOP（曲全体の共通ラベルは先頭パートに定義）
 r1 | r1 | r1 | r1 |
 r1 | r1 | r1 | r1 |
 @fade{10,96} r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c10. v6 c10 v9 |
@@ -101,14 +102,14 @@ r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c10. v6 c10 v9 |
 r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c10. v6 c10 v9 |
 r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c10. v6 c10 v9 |
 r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c10. v6 c10 v9 |
-#label OUTRO
+// OUTRO（曲全体の共通ラベルは先頭パートに定義）
 @fade{0,64} r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c10. v6 c10 v9 |
 r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c10. v6 c10 v9 |
 r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c10. v6 c10 v9 |
 r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c10. v6 c10 v9 |
 #ch ぴろろろ
 t108 @{sine} @e{pluck} q6 v6
-#label LOOP
+// LOOP（曲全体の共通ラベルは先頭パートに定義）
 r1 | r1 | r1 | r1 |
 r1 | r1 | r1 | r1 |
 r1 | r1 | r1 | r1 |
@@ -121,7 +122,7 @@ r1 | r1 | r1 | r2. o6 f24 d24 c24 o5 a24 f24 d24 |
 r1 | r1 | r1 | r2. o6 e24 c24 o5 b-24 g24 e24 c24 |
 r1 | r1 | r1 | r2. o6 f+24 d24 c24 o5 a24 f+24 d24 |
 r1 | r1 | r1 | r2. o6 e24 c24 o5 b-24 g24 e24 c24 |
-#label OUTRO
+// OUTRO（曲全体の共通ラベルは先頭パートに定義）
 r1 | r1 | r1 | r1 |
 r1 | r1 | r1 | r1 |
 r1 | r1 | r1 | r1 |

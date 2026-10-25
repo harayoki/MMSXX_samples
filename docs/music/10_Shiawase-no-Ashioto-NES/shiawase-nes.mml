@@ -13,10 +13,10 @@
 
 #title シアワセノアシオト NES（TEST）
 #about 本編3周でメロディ、対旋律、ベースが主役を交代し、後奏でフェードアウトするNES 4声アレンジ。
-#looptimes 1
 
 #gain 1.170000 measured
 #ch 矩形波 1
+#looptimes 1
 t108 l8 @{nesPulse(50)} @e{soft} q7 v11 o5 @fade{15,0}
 #label LOOP
 r4 d10. f10 a4 g10. f10 | e2. r10. c10 | a4&a10. g10 a4 >c4< | a2 r4 f10. g10 |
@@ -39,7 +39,7 @@ b-4 a10. g10 f4 d4 | e4 g4 b-4 g4 | f1 | r2 r4 c10. e10 |
 
 #ch 矩形波 2
 t108 @{nesPulse(25)} @e{pad} q8 v8 @fade{15,0}
-#label LOOP
+// LOOP（曲全体の共通ラベルは先頭パートに定義）
 o4 f2. g4 | o4 e1 | o4 e2 c2 | o4 d2 e2 |
 o4 f2. d4 | o4 e2 g2 | o4 g2 f+2 | o4 f2 e2 |
 o4 d1 | o4 d-1 | o4 c1 | o4 c1 |
@@ -52,7 +52,7 @@ l8 @e{pluck} q6 o3 g10. b-10 >d10. f10 g10. f10 d10.< b-10 | o3 c10. e10 g10. b-
 o3 g10. b-10 >d10. f10 g10. f10 d10.< b-10 | o3 c10. e10 g10. b-10 >c10.< b-10 g10. e10 | o3 a10. >c10 e10. g10< o3 d10. f+10 a10. >c10< | o3 g10. b-10 >d10. f10< o3 c10. e10 v4 o6 e24 c24 o5 b-24 g24 e24 c24 v8 |
 o2 b-10. >d10 f10. a10 b-10. a10 f10. d10< | o3 e-10. g10 b-10. >d-10 e-10. d-10< b-10. g10 | o3 a10. >c10 e10. g10 a10. g10 e10. c10< | o3 d10. f+10 a10. >c10 d10. c10< v4 o6 f+24 d24 c24 o5 a24 f+24 d24 v8 |
 o3 g10. b-10 >d10. f10 g10. f10 d10.< b-10 | o3 c10. e10 g10. b-10 >c10.< b-10 g10. e10 | o3 f10. a10 >c10. d10 f10. d10 c10.< a10 | o3 c10. e10 g10. b-10 >c10.< b-10 v4 o6 e24 c24 o5 b-24 g24 e24 c24 v8 |
-#label OUTRO
+// OUTRO（曲全体の共通ラベルは先頭パートに定義）
 @fade{0,64} @e{pad} q8 o4 f2. g4 | o4 e1 | o4 e2 c2 | o4 d2 e2 |
 o4 f2. d4 | o4 e2 g2 | o4 g2 f+2 | o4 f2 e2 |
 o4 d1 | o4 d-1 | o4 c1 | o4 c1 |
@@ -60,7 +60,7 @@ o3 b-1 | o3 b-1 | o3 a1 | o3 b-2 o4 e2 |
 
 #ch 三角波
 t108 l4 @{nesTriangle} @e{flat} q7 v15
-#label LOOP
+// LOOP（曲全体の共通ラベルは先頭パートに定義）
 o2 g a b- b | o3 c e g e | o3 f e d c | o3 d f a a- |
 o3 g f d o2 b- | o3 c d e o2 b- | o2 a o3 e d o2 a | o2 g o3 d c o2 b |
 o2 b- o3 d f d | o2 e- g b- a- | o2 a o3 c e c | o3 d o2 a f+ a |
@@ -73,7 +73,7 @@ o3 g4 b-4 o4 d4 o3 b-10. b10 | o4 c4 o3 g4 e4 g10. e10 | o3 f4 a4 o4 c4 o3 a10. 
 o3 g4 f4 d4 o2 b-10. b10 | o3 c4 d4 e4 g10. b-10 | o3 a4 o4 c4 o3 d4 f+4 | o3 g4 b-4 c4 e10. a10 |
 o3 b-4 o4 d4 f4 e10. e-10 | o4 e-4 o3 b-4 g4 g10. a-10 | o3 a4 o4 c4 e4 c10. c+10 | o4 d4 o3 a4 f+4 a10. a-10 |
 o3 g4 b-4 o4 d4 o3 b-10. b10 | o4 c4 o3 b-4 g4 g10. e10 | o3 f4 a4 o4 c4 d4 | o3 c4 o2 b-4 a4 a-4 |
-#label OUTRO
+// OUTRO（曲全体の共通ラベルは先頭パートに定義）
 o2 g a b- b | o3 c e g e | o3 f e d c | o3 d f a a- |
 o3 g f d o2 b- | o3 c d e o2 b- | o2 a o3 e d o2 a | o2 g o3 d c o2 b |
 o2 b-2 o3 d2 | o2 e-2 b-2 | o2 a2 o3 e2 | o3 d2 o2 a2 |
@@ -81,7 +81,7 @@ o2 g1 | o3 c1 | o2 f1 | r1 |
 
 #ch ノイズ
 t108 @{nesNoise(long)} @e{snap} q8 v6 o5 @fade{0,0}
-#label LOOP
+// LOOP（曲全体の共通ラベルは先頭パートに定義）
 r1 | r1 | r1 | r1 |
 r1 | r1 | r1 | r1 |
 @fade{10,96} r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c10. v4 c10 v6 |
@@ -94,7 +94,7 @@ r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c10. v4 c10 v6 |
 r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c10. v4 c10 v6 |
 r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c10. v4 c10 v6 |
 r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c10. v4 c10 v6 |
-#label OUTRO
+// OUTRO（曲全体の共通ラベルは先頭パートに定義）
 @fade{0,64} r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c10. v4 c10 v6 |
 r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c10. v4 c10 v6 |
 r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c4 | r4 c4 r4 c10. v4 c10 v6 |
