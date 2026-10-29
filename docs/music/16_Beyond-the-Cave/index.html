@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Beyond the Cave</title>
+  <meta name="description" content="Beyond the Cave - PSG・SCC・OPLLを使ったMMLサンプル。">
+  <link rel="stylesheet" href="../music-page.css">
+  <style>#beyond-the-cave { --blue: #5277c1; }</style>
+</head>
+<body>
+<main class="music-page" id="beyond-the-cave">
+  <nav class="music-top-nav" aria-label="ページナビゲーション"><a href="../" aria-label="1階層上へ" title="1階層上へ"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V4M5.5 10.5 12 4l6.5 6.5"/></svg></a></nav>
+  <div class="music-player" id="beyond-the-cave-player"></div>
+  <p class="music-status text-small text-muted" data-music-status aria-live="polite">読み込み中…</p>
+  <div class="music-credits">
+    <p class="text-small text-muted">MMLはこの場で編集できます。Music, artwork, MML and exports:
+      <a href="https://creativecommons.org/licenses/by/4.0/" rel="license">CC BY 4.0</a>.
+      <a href="./bg.png" data-music-image="bg.png">Cover art</a>.</p>
+  </div>
+  <div class="music-editor">
+    <textarea data-music-background="bg.png" id="beyond-the-cave-src" aria-label="MMLソース" rows="24" spellcheck="false" disabled>LOADING</textarea>
+  </div>
+  <div class="music-credits">
+    <p class="text-small text-muted">JavaScript source is not covered by CC BY 4.0. Redistribution is prohibited.</p>
+    <p class="text-small text-muted">Editor: <a href="https://codemirror.net/">CodeMirror 6</a> (MIT License).</p>
+  </div>
+</main>
+<script src="../music-page.js" data-song="16_Beyond-the-Cave"></script>
+</body>
+</html>

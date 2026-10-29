@@ -1,0 +1,477 @@
+#title Beyond the Cave (MSX MUSIC)
+#about PSG/OPLL/SCCをフルに使ったMSX実機ドライバの検証曲。
+#about MSXFAN/MSXマガジンにユーザーが投稿したような曲をイメージしてます。
+#meta key D minor / 150 BPM / intro 2 bars + A 8 bars + B 8 bars, then outro 2 bars
+
+#wave soft     = @bits{8} 0 41/128 76/128 100/128 112/128 112/128 102/128 89/128 75/128 64/128 56/128 51/128 47/128 40/128 30/128 16/128 0 -16/128 -30/128 -40/128 -47/128 -51/128 -56/128 -64/128 -75/128 -89/128 -102/128 -112/128 -112/128 -100/128 -76/128 -41/128
+#wave strings  = @bits{8} 0 63/128 103/128 112/128 98/128 77/128 63/128 58/128 53/128 42/128 25/128 8/128 0 0 4/128 4/128 0 -4/128 -4/128 0 0 -8/128 -25/128 -42/128 -53/128 -58/128 -63/128 -77/128 -98/128 -112/128 -103/128 -63/128
+#wave brass    = @bits{8} 0 84/128 112/128 89/128 63/128 61/128 67/128 59/128 42/128 36/128 38/128 34/128 21/128 12/128 12/128 11/128 0 -11/128 -12/128 -12/128 -21/128 -34/128 -38/128 -36/128 -42/128 -59/128 -67/128 -61/128 -63/128 -89/128 -112/128 -84/128
+#wave bass     = @bits{8} -112/128 -85/128 -60/128 -39/128 -22/128 -11/128 -4/128 -1/128 0 1/128 4/128 11/128 22/128 39/128 60/128 85/128 112/128 111/128 108/128 101/128 90/128 73/128 52/128 27/128 0 -27/128 -52/128 -73/128 -90/128 -101/128 -108/128 -111/128
+
+// ===== エンベロープ =====
+#voice envSing = @adsr{0.005, 0, 1, 0.75}   // 離すと 3 フレームで 1 段ずつ下がる
+#voice envPad  = @adsr{0.67, 0, 1, 1}       // 40 フレームかけて立ち上がる
+
+// ===== 音色 =====
+
+#voice psgChirp = @{ayTone} @role{arp} @pitch{-50, -25, -13, 0} @vol{15, 14, 13, 12, 11, 10, 9, 8, 7, 6}
+
+#voice psgHarmony = @{ayTone} @role{counter} @vol{15, 15, 15, 15, 14, 14, 14, 14, 13, 13, 13, 13, 12, 12, 12, 12, 11, 11, 11, 11, 10}
+
+// ベースの頭の「コッ」。もとは PSG のミキサで音と雑音を同時に出していたので、
+// 2 つ重ねた合成音色にしています。雑音の周期(もとの N3)はその数のままです。
+#voice psgClickTone  = @{ayTone}  @vol{15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0}
+#voice psgClickNoise = @{ayNoise(period: 3)} @vol{15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0}
+#voice psgClick = @{psgClickTone}, @{psgClickNoise} @gain{0.7}
+
+// ドラムに重ねる雑音。もとは PSG のノイズ周期を 2 つ使い分けていました
+// (N1 = R6 1、N4 = R6 2)。その数をそのまま書いています
+#voice psgNoiseFine   = @{ayNoise(period: 1)} @role{noise} @vol{15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0}
+#voice psgNoiseCoarse = @{ayNoise(period: 2)} @role{noise} @vol{15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0}
+
+// A の主役。@slide は片道の高さ移動で、もとの @s+2,6(2 半音下から 6 フレームで
+// 定位置へ)がこれに当たります。しゃくる音だけ Scoop のほうへ替えています。
+#voice sccSing      = @{brass} @role{lead} @vol{15, 15, 15, 15, 15, 15, 15, 15, 14, 14, 14, 14, 14, 14, 14, 14, 13, 13, 13, 13, 13, 13, 13, 13, 12}
+#voice sccSingScoop = @{sccSing} @slide{-200, 6}
+
+// ベース。頭で高さが跳ねて 4 フレームで戻る(もとの bass-pop)
+#voice sccBass = @{bass} @e{envSing} @role{bass} @slide{100, 4}
+
+// 和音。SCC-4 と SCC-5 は実機では波形を共有する場合がありすが、ここでは SCC-5 には soft を当てています
+#voice padSoft    = @{soft}    @e{envPad} @role{chord}
+#voice padStrings = @{strings} @e{envPad} @role{chord}
+
+// 鐘。もとの OPLL ユーザー音色(レジスタ 00h..07h = 27 21 18 07 F0 F3 24 13)
+#voice bell = @opll{ bytes{39, 33, 24, 7, 240, 243, 36, 19} }
+
+// 裏打ちのスタッカート
+#voice fmStac = @{opll::piano} @vol{15, 13, 11, 9, 7, 6, 5, 4}
+
+// タム。囲みの中では高さを変えられないので、別のチャンネルに置いています
+#voice fmTom = @{opll::tom} @role{perc}
+
+// B の主役。しゃくる音だけこちらへ替えています
+#voice fmLeadScoop = @{opll::trumpet} @slide{-200, 6}
+
+// ===== ドラム(もとは OPLL のリズムモード)=====
+#drum B = @{opll::kick(mid)} v15  kick
+#drum b = @{opll::kick(mid)} v12  kick (soft)
+#drum S = @{opll::snare} v15 snare
+#drum s = @{opll::snare} v14 snare (14)
+#drum n = @{opll::snare} v12 snare (12)
+#drum m = @{opll::snare} v10 snare (10)
+#drum k = @{opll::snare} v9  snare (9)
+#drum H = @{opll::hat} v11 hat
+#drum h = @{opll::hat} v10 hat (10)
+#drum g = @{opll::hat} v9  hat (9)
+#drum f = @{opll::hat} v8  hat (8)
+#drum C = @{opll::cymbal} v15 cymbal
+#drum c = @{opll::cymbal} v14 cymbal (14)
+
+
+#ch psg1 // psg: FM の下のきらきら(16 分のアルペジオ)
+  t150 @{psgChirp}
+  r1
+  r1
+#label LOOP
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  v8 o4 f16 a16 > c16 f16 c16 < a16 > c16 f16 < f16 a16 > c16 f16 c16 < a16 > c16 f16
+  < e16 g16 > c16 e16 c16 < g16 > c16 e16 < e16 g16 > c16 e16 c16 < g16 > c16 e16
+  < d16 f16 a16 > d16 < a16 f16 a16 > d16 < d16 f16 a16 > d16 < a16 f16 a16 > d16
+  < d16 f16 a+16 > d16 < a+16 f16 a+16 > d16 < d16 f16 a+16 > d16 < a+16 f16 a+16 > d16
+  < d16 g16 a+16 > d16 < a+16 g16 a+16 > d16 < d16 g16 a+16 > d16 < a+16 g16 a+16 > d16
+  < e16 g16 a16 > c+16 < a16 g16 a16 > c+16 < e16 g16 a16 > c+16 < a16 g16 a16 > c+16
+  < d16 f16 a16 > d16 < a16 f16 a16 > d16 < d16 f16 a16 > d16 < a16 f16 a16 > d16
+  < e16 a16 > c+16 e16 c+16 < a16 > c+16 e16 < e16 a16 > c+16 e16 c+16 < a16 > c+16 e16
+#label OUTRO
+  r1
+  r1
+
+#ch psg2 // psg: 主役の下のハモり
+  t150 @{psgHarmony} @d+13
+  r1
+  r1
+  v8 o4 f4. a8 a4 a8 > d8
+  < a4. a8 a4 a4
+  a+4. f8 f4 f8 f8
+  g2 > c4 e4
+  d4. < a8 a4 f4
+  a4 a8 > d8 d4 f4
+  f4. f8 e4. c8
+  e2 c+4 < a4
+  f4 a4 > c2
+  c4. < g8 g4 e4
+  f4. f8 a4 a4
+  > d2 < a+4 f4
+  d4 g4 a+4 > d4
+  c+4. < a8 > c+4 e4
+  d4. < a8 a4 > f4
+  c+4 < a4 a2
+  v10 g1
+  f2. r4
+
+#ch psg3 // psg: ベースの頭の「コッ」
+  t150 @{psgClick}
+  v6 o3 d32 r16. > d32 r16. < d32 r16. v7 > d32 r16. < d32 r16. > d32 r16. v8 < d32 r16. > d32 r16.
+  < d32 r16. v9 > d32 r16. < d32 r16. > d32 r16. v10 < d32 r16. > d32 r16. < d32 r16. v11 > d32 r16.
+  < d32 r16. > d32 r16. < d32 r16. > d32 r16. < d32 r16. > d32 r16. < d32 r16. > d32 r16.
+  < d32 r16. > d32 r16. < d32 r16. > d32 r16. < d32 r16. > d32 r16. < d32 r16. > d32 r16.
+  < d32 r16. > d32 r16. < d32 r16. > d32 r16. < d32 r16. > d32 r16. < d32 r16. > d32 r16.
+  < c32 r16. > c32 r16. < c32 r16. > c32 r16. < c32 r16. > c32 r16. < c32 r16. > c32 r16.
+  < d32 r16. > d32 r16. < d32 r16. > d32 r16. < d32 r16. > d32 r16. < d32 r16. > d32 r16.
+  < d32 r16. > d32 r16. < d32 r16. > d32 r16. < d32 r16. > d32 r16. < d32 r16. > d32 r16.
+  < d32 r16. > d32 r16. < d32 r16. > d32 r16. < c32 r16. > c32 r16. < c32 r16. > c32 r16.
+  < c+32 r16. > c+32 r16. < c+32 r16. > c+32 r16. < c+32 r16. > c+32 r16. < c+32 r16. > c+32 r16.
+  < c32 r16. > c32 r16. < c32 r16. > c32 r16. < c32 r16. > c32 r16. < c32 r16. > c32 r16.
+  < c32 r16. > c32 r16. < c32 r16. > c32 r16. < c32 r16. > c32 r16. < c32 r16. > c32 r16.
+  < d32 r16. > d32 r16. < d32 r16. > d32 r16. < d32 r16. > d32 r16. < d32 r16. > d32 r16.
+  < d32 r16. > d32 r16. < d32 r16. > d32 r16. < d32 r16. > d32 r16. < d32 r16. > d32 r16.
+  < d32 r16. > d32 r16. < d32 r16. > d32 r16. < d32 r16. > d32 r16. < d32 r16. > d32 r16.
+  < c+32 r16. > c+32 r16. < c+32 r16. > c+32 r16. < c+32 r16. > c+32 r16. < c+32 r16. > c+32 r16.
+  < d32 r16. > d32 r16. < d32 r16. > d32 r16. < d32 r16. > d32 r16. < d32 r16. > d32 r16.
+  < c+32 r16. > c+32 r16. < c+32 r16. > c+32 r16. < c+32 r16. > c+32 r16. < c+32 r16. > c+32 r16.
+  < a32 r16. a32 r16. a32 r16. a32 r16. a32 r16. a32 r16. a32 r16. a32 r16.
+  d32 r2. r8. r32
+
+#ch psgNoise // psg: ドラムに小さく重ねる白い雑音
+  t150 @{psgNoiseFine}
+  r16 r16 v5 @{psgNoiseFine} c16 r16 c16 r16 c16 r16 r16 r16 c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 c16
+  v5 @{psgNoiseFine} c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 r16 v5 @{psgNoiseFine} c16 v7 @{psgNoiseCoarse} c16 c16 c16 r16 r16 r16 r16 c16 c16
+  v5 @{psgNoiseFine} c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 r16 v5 @{psgNoiseFine} c16 r16 c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 r16 v5 @{psgNoiseFine} c16 c16
+  @{psgNoiseFine} c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 r16 v5 @{psgNoiseFine} c16 r16 c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 r16 v5 @{psgNoiseFine} c16 c16
+  @{psgNoiseFine} c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 r16 v5 @{psgNoiseFine} c16 r16 c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 r16 v5 @{psgNoiseFine} c16 c16
+  @{psgNoiseFine} c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 r16 v5 @{psgNoiseFine} c16 r16 c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 r16 v5 @{psgNoiseFine} c16 c16
+  @{psgNoiseFine} c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 r16 v5 @{psgNoiseFine} c16 r16 c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 r16 v5 @{psgNoiseFine} c16 c16
+  @{psgNoiseFine} c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 r16 v5 @{psgNoiseFine} c16 r16 c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 r16 v5 @{psgNoiseFine} c16 c16
+  @{psgNoiseFine} c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 r16 v5 @{psgNoiseFine} c16 r16 c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 r16 v5 @{psgNoiseFine} c16 c16
+  @{psgNoiseFine} c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 r16 v5 @{psgNoiseFine} c16 r16 r16 r16 r16 r16 r16 r16 v7 @{psgNoiseCoarse} c16 c16
+  v5 @{psgNoiseFine} c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 r16 v5 @{psgNoiseFine} c16 r16 c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 r16 v5 @{psgNoiseFine} c16 c16
+  @{psgNoiseFine} c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 r16 v5 @{psgNoiseFine} c16 r16 c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 r16 v5 @{psgNoiseFine} c16 c16
+  @{psgNoiseFine} c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 r16 v5 @{psgNoiseFine} c16 r16 c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 r16 v5 @{psgNoiseFine} c16 c16
+  @{psgNoiseFine} c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 r16 v5 @{psgNoiseFine} c16 r16 c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 r16 v5 @{psgNoiseFine} c16 c16
+  @{psgNoiseFine} c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 r16 v5 @{psgNoiseFine} c16 r16 c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 r16 v5 @{psgNoiseFine} c16 c16
+  @{psgNoiseFine} c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 r16 v5 @{psgNoiseFine} c16 r16 c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 r16 v5 @{psgNoiseFine} c16 c16
+  @{psgNoiseFine} c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 r16 v5 @{psgNoiseFine} c16 r16 c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 r16 v5 @{psgNoiseFine} c16 c16
+  @{psgNoiseFine} c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 r16 v5 @{psgNoiseFine} c16 r16 r16 r16 r16 r16 r16 r16 v7 @{psgNoiseCoarse} c16 c16
+  v5 @{psgNoiseFine} c16 r16 c16 r16 v7 @{psgNoiseCoarse} c16 r16 v5 @{psgNoiseFine} c16 r16 r16 r16 r16 r16 r16 r16 v7 @{psgNoiseCoarse} c16 c16
+  r16 r16 r16 r16 r16 r16 r16 r16 r16 r16 r16 r16 r16 r16 r16 r16
+
+#ch scc1 // scc: A の主役
+  t150 @{sccSing} @m{20, 5.5, 14}
+  r1
+  r1
+  v13 o4 @{sccSingScoop} a4. @{sccSing} > d8 d4 e8 f8
+  e4. d8 c4 d4
+  d4. c8 < a+4 a8 a+8
+  > c2 e4 g4
+  @{sccSingScoop} f4. @{sccSing} e8 d4 < a4
+  > d4 e8 f8 g4 a4
+  a+4. a8 g4. e8
+  a2 e4 c+4
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  e4 c+4 < a4 > c+4
+  d2. r4
+
+#ch scc2 // scc: そのこだま(16 分遅れ)
+  t150 @{sccSing} @m{20, 5.5, 14} @d-13
+  r1
+  r1
+  v5 o5 c+16 < a4. > d8 d4 e8 f16
+  f16 e4. d8 c4 d8.
+  d16 d4. c8 < a+4 a8 a+16
+  a+16 > c2 e4 g8.
+  g16 f4. e8 d4 < a8.
+  a16 > d4 e8 f8 g4 a8.
+  a16 a+4. a8 g4. e16
+  e16 a2 e4 c+8.
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+
+#ch scc3 // scc: A のベース
+  t150 @{sccBass}
+  r1
+  r1
+  v11 o2 d16. r32 > d16. r32 < d16. r32 > d16. r32 < d16. r32 > d16. r32 < d16. r32 > d16. r32
+  < d16. r32 > d16. r32 < d16. r32 > d16. r32 < d16. r32 > d16. r32 < d16. r32 > d16. r32
+  < d16. r32 > d16. r32 < d16. r32 > d16. r32 < d16. r32 > d16. r32 < d16. r32 > d16. r32
+  < c16. r32 > c16. r32 < c16. r32 > c16. r32 < c16. r32 > c16. r32 < c16. r32 > c16. r32
+  < d16. r32 > d16. r32 < d16. r32 > d16. r32 < d16. r32 > d16. r32 < d16. r32 > d16. r32
+  < d16. r32 > d16. r32 < d16. r32 > d16. r32 < d16. r32 > d16. r32 < d16. r32 > d16. r32
+  < d16. r32 > d16. r32 < d16. r32 > d16. r32 < c16. r32 > c16. r32 < c16. r32 > c16. r32
+  < c+16. r32 > c+16. r32 < c+16. r32 > c+16. r32 < c+16. r32 > c+16. r32 < c+16. r32 > c+16. r32
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  < a16. r32 a16. r32 a16. r32 a16. r32 a16. r32 a16. r32 a16. r32 a16. r32
+  d8 r2. r8
+
+#ch scc4 // scc: 和音
+  t150 @{padSoft}
+  r1
+  r1
+  @{padSoft}
+  v5 o3 a2 a2
+  a2 a2
+  a+2 a+2
+  > c2 c2
+  < a2 a2
+  a2 a2
+  a+2 > c2
+  c+2 c+2
+  @{padStrings}
+  v3 < a2 a2
+  > c2 c2
+  < a2 a2
+  a+2 a+2
+  a+2 a+2
+  a2 a2
+  a2 a2
+  > c+2 c+2
+  v6 < a1
+  a2. r4
+
+#ch scc5 // scc: 和音
+  t150 @{padSoft}
+  r1
+  r1
+  v5 o4 d2 d2
+  d2 d2
+  d2 d2
+  e2 e2
+  d2 d2
+  d2 d2
+  d2 e2
+  e2 e2
+  v3 c2 c2
+  e2 e2
+  d2 d2
+  d2 d2
+  d2 d2
+  c+2 c+2
+  d2 d2
+  e2 e2
+  @{padSoft}
+  v6 c+1
+  d2. r4
+
+#ch fm1 // fm: A は SCC の 1 オクターブ下で重ね / B は主役
+  t150 @{opll::horn} @m{20, 5.5, 14}
+  r1
+  r1
+  @{opll::horn}
+  v12 o3 a4. > d8 d4 e8 f8
+  e4. d8 c4 d4
+  d4. c8 < a+4 a8 a+8
+  > c2 e4 g4
+  f4. e8 d4 < a4
+  > d4 e8 f8 g4 a4
+  a+4. a8 g4. e8
+  a2 e4 c+4
+  @{opll::trumpet}
+  v13 @{fmLeadScoop} a4 @{opll::trumpet} > c4 f2
+  e4. d8 c4 < g4
+  a4. a+8 > c4 d4
+  f2 d4 < a+4
+  @{fmLeadScoop} g4 @{opll::trumpet} a+4 > d4 g4
+  e4. c+8 e4 g4
+  f4. e8 d4 a4
+  e4 d4 c+2
+  v12 e4 c+4 < a4 > c+4
+  d2. r4
+
+#ch fm2 // fm: 裏打ちのスタッカート
+  t150 @{fmStac}
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  r8 v10 o3 a12 r6 a12 r6 a12 r6 a12 r24
+  r8 > c12 r6 c12 r6 c12 r6 c12 r24
+  r8 < a12 r6 a12 r6 a12 r6 a12 r24
+  r8 a+12 r6 a+12 r6 a+12 r6 a+12 r24
+  r8 a+12 r6 a+12 r6 a+12 r6 a+12 r24
+  r8 a12 r6 a12 r6 a12 r6 a12 r24
+  r8 a12 r6 a12 r6 a12 r6 a12 r24
+  r8 a12 r6 a12 r6 a12 r6 a12 r24
+  r8 v11 a12 r6 a12 r6 a12 r6 a12 r24
+  a12 r2. r6
+
+#ch fm3 // fm: 同
+  t150 @{fmStac}
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  r8 v10 o4 c12 r6 c12 r6 c12 r6 c12 r24
+  r8 e12 r6 e12 r6 e12 r6 e12 r24
+  r8 d12 r6 d12 r6 d12 r6 d12 r24
+  r8 d12 r6 d12 r6 d12 r6 d12 r24
+  r8 d12 r6 d12 r6 d12 r6 d12 r24
+  r8 c+12 r6 c+12 r6 c+12 r6 c+12 r24
+  r8 d12 r6 d12 r6 d12 r6 d12 r24
+  r8 c+12 r6 c+12 r6 c+12 r6 c+12 r24
+  r8 v11 c+12 r6 c+12 r6 c+12 r6 c+12 r24
+  d12 r2. r6
+
+#ch fm4 // fm: 同
+  t150 @{fmStac}
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  r8 v10 o4 f12 r6 f12 r6 f12 r6 f12 r24
+  r8 g12 r6 g12 r6 g12 r6 g12 r24
+  r8 f12 r6 f12 r6 f12 r6 f12 r24
+  r8 f12 r6 f12 r6 f12 r6 f12 r24
+  r8 g12 r6 g12 r6 g12 r6 g12 r24
+  r8 e12 r6 e12 r6 e12 r6 e12 r24
+  r8 f12 r6 f12 r6 f12 r6 f12 r24
+  r8 e12 r6 e12 r6 e12 r6 e12 r24
+  r8 v11 e12 r6 e12 r6 e12 r6 e12 r24
+  f12 r2. r6
+
+#ch fm5 // fm: 前奏と B のベース
+  t150 @{opll::synthBass}
+  v4 o2 d16. r32 > d16. r32 v5 < d16. r32 v6 > d16. r32 < d16. r32 v7 > d16. r32 < d16. r32 v8 > d16. r32
+  < d16. r32 v9 > d16. r32 v10 < d16. r32 > d16. r32 v11 < d16. r32 > d16. r32 v12 < d16. r32 > d16. r32
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  v13 < c16. r32 > c16. r32 < c16. r32 > c16. r32 < c16. r32 > c16. r32 < c16. r32 > c16. r32
+  < c16. r32 > c16. r32 < c16. r32 > c16. r32 < c16. r32 > c16. r32 < c16. r32 > c16. r32
+  < d16. r32 > d16. r32 < d16. r32 > d16. r32 < d16. r32 > d16. r32 < d16. r32 > d16. r32
+  < d16. r32 > d16. r32 < d16. r32 > d16. r32 < d16. r32 > d16. r32 < d16. r32 > d16. r32
+  < d16. r32 > d16. r32 < d16. r32 > d16. r32 < d16. r32 > d16. r32 < d16. r32 > d16. r32
+  < c+16. r32 > c+16. r32 < c+16. r32 > c+16. r32 < c+16. r32 > c+16. r32 < c+16. r32 > c+16. r32
+  < d16. r32 > d16. r32 < d16. r32 > d16. r32 < d16. r32 > d16. r32 < d16. r32 > d16. r32
+  < c+16. r32 > c+16. r32 < c+16. r32 > c+16. r32 < c+16. r32 > c+16. r32 < c+16. r32 > c+16. r32
+  v14 < a16. r32 a16. r32 a16. r32 a16. r32 a16. r32 a16. r32 a16. r32 a16. r32
+  d8 r2. r8
+
+#ch fm6 // fm: 重ね(A はバイオリン / B は鐘)
+  t150 @{opll::violin} @m{25, 1.1}
+  r1
+  r1
+  @{opll::violin}
+  v7 o5 a4. > d8 d4 e8 f8
+  e4. d8 c4 d4
+  d4. c8 < a+4 a8 a+8
+  > c2 e4 g4
+  f4. e8 d4 < a4
+  > d4 e8 f8 g4 a4
+  a+4. a8 g4. e8
+  a2 e4 c+4
+  @{bell}
+  v9 o4 a4 > c4 f2
+  e4. d8 c4 < g4
+  a4. a+8 > c4 d4
+  f2 d4 < a+4
+  g4 a+4 > d4 g4
+  e4. c+8 e4 g4
+  f4. e8 d4 a4
+  e4 d4 c+2
+  r1
+  r1
+
+#ch drums // fm: ドラム。もとは OPLL のリズムモードでした
+  t150 q8
+  @{drums 16}{
+  v13
+  B . g . h . g . B . g . h . n s |
+  BH . g . SH . g k n m . . . . BS S |
+  // ここから本編
+  BHc . g . SH . g . BH . g b SH . g f |
+  BH . g . SH . g . BH . g b SH . g f |
+  BH . g . SH . g . BH . g b SH . g f |
+  BH . g . SH . g . BH . g b SH . g f |
+  BH . g . SH . g . BH . g b SH . g f |
+  BH . g . SH . g . BH . g b SH . g f |
+  BH . g . SH . g . BH . g b SH . g f |
+  BH . g . SH . g . . . . . . . S S |
+  BHc . g . SH . g . BH . g b SH . g f |
+  BH . g . SH . g . BH . g b SH . g f |
+  BH . g . SH . g . BH . g b SH . g f |
+  BH . g . SH . g . BH . g b SH . g f |
+  BH . g . SH . g . BH . g b SH . g f |
+  BH . g . SH . g . BH . g b SH . g f |
+  BH . g . SH . g . BH . g b SH . g f |
+  BH . g . SH . g . . . . . . . S S |
+  // ここから後奏
+  BH . g . SH . g . . . . . . . S S |
+  BC . . . . . . . . . . . . . . . |
+  }
+
+#ch toms // fm: タムの回し。高さが動くので、囲みではなくこちらに置いています
+  t150 @{fmTom} o2
+  r1
+  r16 r16 r16 r16 r16 r16 r16 r16 r16 r16 v13 o2 a16 v11 o2 a16 v13 o2 f16 v12 o2 d16 r16 r16
+  // ここから本編
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  r16 r16 r16 r16 r16 r16 r16 r16 v13 o2 g16 v11 o2 g16 v13 o2 e16 v11 o2 e16 v13 o2 c16 v12 o2 c16 r16 r16
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  r1
+  r16 r16 r16 r16 r16 r16 r16 r16 v13 o2 g16 v11 o2 g16 v13 o2 e16 v11 o2 e16 v13 o2 c16 v12 o2 c16 r16 r16
+  // ここから後奏
+  r16 r16 r16 r16 r16 r16 r16 r16 v13 o2 g16 v11 o2 g16 v13 o2 e16 v11 o2 e16 v13 o2 c16 v12 o2 c16 r16 r16
+  r1
