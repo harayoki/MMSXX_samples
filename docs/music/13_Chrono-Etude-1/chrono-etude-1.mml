@@ -1,5 +1,5 @@
 #title Chrono etude #1
-#version 1.1-dev-fx055
+#version 1.4-dev-snare061
 #about おしゃれコード進行＋深いエコー＋響くスネア クロノトリガーぽい雰囲気でました？
 #copyright 2026 harayoki
 #license CC BY 4.0 (music and MML source)
@@ -9,7 +9,7 @@
 #gain 1.16 measured
 #fx hall = reverb 1.6 @mix 0.12
 
-// FX 0.55: リバーブはマスターへ、各パートのエコーは名前付きチェーンへ移行。@s による音符複製は使わない。
+// FX 0.61: リバーブはマスターへ、各パートのエコーは名前付きチェーンへ移行。@s による音符複製は使わない。
 
 // コード進行
 // すべてSUS4。キーはD。
@@ -19,7 +19,7 @@
 //  アウトロ	Ⅰsus4 Ⅰsus4
 
 #ch リード
-t112 @{analog::pulseLead} q7 v8 @fxmasterchain{hall} @fxchain{echo} @fx{echo @l 8 @feedback 0.55 @mix 0.45 @tone 4000}
+t112 @{analog::pulseLead} q7 v8 @fxmasterchain{hall} @fxchain{echo} @fx{echo @l 8 @feedback 0.55 @mix 0.45 @highcut 4000}
 $a1 = { o6c4. o5a8 o5g2 r4 o5e8 o5g8 o5a2 }
 $a2 = { o6e-4. o6c8 o5b-2 r4 o6c8 o6e-8 o6f2 }
 $a3 = { o6d4 o6c8 o5a8 o5g4 o5e4 o5g2. r4 }
@@ -49,7 +49,7 @@ $a $a $b $a
 [$d7]4
 
 #ch 鍵盤
-t112 @{analog::polyBrass} q8 v4 @fxchain{echo} @fx{echo @l 8 @feedback 0.35 @mix 0.22 @tone 4000}
+t112 @{analog::polyBrass} q8 v4 @fxchain{echo} @fx{echo @l 8 @feedback 0.35 @mix 0.22 @highcut 4000}
 $d7 = { 'o4a o5c o5e o5g'4 r8 'o4a o5c o5e o5g'8 r4 'o4a o5c o5e o5g'8. r16 }
 $f7 = { 'o5c o5e- o5g o5b-'4 r8 'o5c o5e- o5g o5b-'8 r4 'o5c o5e- o5g o5b-'8. r16 }
 $eb7 = { 'o4b- o5c+ o5f o5a-'4 r8 'o4b- o5c+ o5f o5a-'8 r4 'o4b- o5c+ o5f o5a-'8. r16 }
@@ -64,7 +64,7 @@ $a $a $b $a
 $d7 $d7 $d7 'o4a o5c o5e o5g'1
 
 #ch ハープ
-t112 @{analog::ringBell} q6 v4 @fxchain{echo} @fx{echo @l 8 @feedback 0.5 @mix 0.42 @tone 4000}
+t112 @{analog::ringBell} q6 v4 @fxchain{echo} @fx{echo @l 8 @feedback 0.5 @mix 0.42 @highcut 4000}
 $b1 = { o5e-8 o5f8 o5a-8 o5b-8 o6c+8 o6e-8 o6f8 o6a-8 o6b-8 o6a-8 o6f8 o6e-8 o6c+8 o5b-8 o5a-8 o5f8 }
 $b2 = { o5c+8 o5e-8 o5f+8 o5a-8 o5b8 o6c+8 o6e-8 o6f+8 o6a-8 o6f+8 o6e-8 o6c+8 o5b8 o5a-8 o5f+8 o5e-8 }
 $b3 = { o5c8 o5d8 o5f8 o5g8 o5b-8 o6c8 o6d8 o6f8 o6g8 o6f8 o6d8 o6c8 o5b-8 o5g8 o5f8 o5d8 }
@@ -99,8 +99,8 @@ $sh = { [v4 o4c8 v6 o4c8]4 }
 
 #ch スネア
 // 時計の秒針の音が深く響いているイメージ。
-// 112ms の値は SFC の エコー処理の設定値のひとつらしい。曲のテンポに合わせたいなら @l 16 とかく。
-t112 @{analog::noiseSnare} q7 v7 @fxchain{echo} @fx{echo 0.112 @feedback 0.8 @mix 0.7 @tone 4000}
+// 0.61.0: 112msの強い反復エコーは発音が連続して聞こえるため撤去。反復しないリバーブで一撃の余韻を作る。残響を少し長く強くする。
+t112 @{analog::noiseSnare} q7 v7 @fxchain{reverb} @fx{reverb 1.8 @mix 0.40}
 $sn = { [r4 o4c4]4 }
 [r1]4
 // LOOP（曲全体の共通ラベルは先頭チャンネルに定義）

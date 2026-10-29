@@ -106,7 +106,7 @@ o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2d16 o2
 
 #ch タム
 #role drums
-t168 q7 v7.484 @{seFall} @e{snap}
+t168 q7 v7.484 @{toneFall} @e{snap}
 // Intro（曲全体の共通ラベルは先頭パートに定義）
 @fade{0,0} @fade{15,10.666666666667}
 r1 r1 r2 r6

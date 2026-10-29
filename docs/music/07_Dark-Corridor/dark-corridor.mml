@@ -300,7 +300,7 @@ r2 o6d16 r4 r8 r16
 
 #ch ドラム補佐
 #role perc
-t120 q8 v8 @{seFall} @e{snap}
+t120 q8 v8 @{toneFall} @e{snap}
 // 毎小節の頭だけ16分。Bの休符でノイズのキックと重なる。
 o3d16 r2.. r16
 o3d16 r2.. r16
