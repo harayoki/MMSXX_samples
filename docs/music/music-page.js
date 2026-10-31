@@ -142,11 +142,9 @@
   }
   (async () => {
     try {
-      // Official 0.69.0 sound, except the explicitly deferred GRST1 page
-      // (15_GameNotes-STG), which remains on 0.55.0.
+      // Official Sound 0.69.0 for all DEV songs, including GRST1 v2.73.
       // Pico PLAYER 1.4.0 is unchanged.
-      const soundVersion = entry.dataset.song.replace(/\/$/, '') === '15_GameNotes-STG'
-        ? '0.55.0' : '0.69.0';
+      const soundVersion = '0.69.0';
       const soundRoot = 'runtime/sound-' + soundVersion + '/sound/';
       // The source release uses native ES modules; the attached min-split ZIP
       // is the matching browser-script build of the same sound version.

@@ -1,0 +1,869 @@
+#title Gradius Stage1 Arrange
+#version 2.73
+#tempo 134
+#meter 4/4
+#gain 1.1875
+
+#fx hp125 = highpass 20
+#fx hp3 = highpass 20
+#fx hp4 = highpass 5000
+#fx hall125 = reverb 1 @mix 0.3 @width 1
+#fx echo3 = echo 0.56 @feedback 0.62 @mix 0.33 @highcut 4800 @pingpong 0
+#fx wavestep4 = wavestep 32 @bits 4
+#fx tape4 = tape @drive 0.5 @speed 15 @wow 0.332 @flutter 0.224 @hiss 0.2 @mix 1
+#fx arpEchoA = echo 0.20 @feedback 0.43 @mix 0.34 @highcut 4200 @pingpong 0
+#fx arpEchoB = echo 0.20 @feedback 0.43 @mix 0.5 @highcut 4200 @pingpong 0
+#fx arpEcho3 = echo 0.20 @feedback 0.43 @mix 0.4 @highcut 4200 @pingpong 0
+
+#ch Lead
+#role lead
+#about アナログシンセでグラディウスっぽい音色を作成したのでSTAGE1アレンジBGMを作りました。ドラムにも似非TR-808音源を作って使用。[ステレオ対応]
+$edge_lead = { @{gamenotes::grdsSt1::edgeLead} }
+$common_lead_12 = {
+
+@p{0,0,1} t134 v9.36 q7 l16  $edge_lead o4 v7.44 g4 $edge_lead o4 g8. $edge_lead o5 c16 o5 f8 o5 e4 o5 c8 $edge_lead o5 v8.08 g8. $edge_lead o4 a+16 $edge_lead o4 a+4. $edge_lead o4 g16 o4 g+16 o4 a+16 o5 d+16 o5 f16 o5 g16 $edge_lead o5 v8.72 c8. o4 a8. $edge_lead o5 c4 o5 f8 o4 a16 o4 b16 o5 c16 o5 d16 o5 v9.12 d+8 o5 c16 o4 g+8 o5 d+8 o5 c16 o5 f8 o5 d16 o4 a+8 o5 d16 o5 f8 o4 v9.36 g4 $edge_lead o4 g8. $edge_lead o5 c16 o5 f8 o5 e4 o5 c8 $edge_lead o5 g8. $edge_lead o4 a+16 $edge_lead o4 a+4. $edge_lead o4 g16 o4 g+16 o4 a+16 o5 d+16 o5 f16 o5 g16 o5 a8 o5 c16 $edge_lead o5 c8. $edge_lead o5 f8 o5 g8 o5 a4 o5 f8 $edge_lead o5 d8. $edge_lead o5 g2. & o5 g16 $edge_lead o5 c8. o5 d+8. $edge_lead o5 g+2 & o5 g+8 $edge_lead o4 a+8. o5 d8. $edge_lead o5 d+2 & o5 d+8 $edge_lead o4 a16 o4 a+16 o5 c16 $edge_lead o5 f4 & o5 f16 $edge_lead o4 b16 o5 c16 o5 d16 $edge_lead o5 g4 & o5 g16 $edge_lead o5 c16 o5 d16 o5 d+16 $edge_lead o5 g+4 & o5 g+16 $edge_lead o5 d16 o5 d+16 o5 f16 $edge_lead o5 a+16 o5 a+8 $edge_lead o6 c2 & o6 c8
+}
+$lap13_Lead = {
+$common_lead_12  & o6 c2
+}
+$lap14_Lead = {
+$common_lead_12  r2
+
+$edge_lead o5 b2 & o5 b8 r8 r4
+}
+
+@d-100
+@fade{15,0}
+#label Round1
+
+@fxmasterchain{hp125,hall125,hp3,echo3,hp4}
+@fxmasterchain{hp125,hall125}
+
+@fade{12.6,0}
+@fade{15,16}
+$lap13_Lead
+#label Round2
+@fxmasterchain{hp125,hall125}
+@fade{15,0}
+$lap14_Lead
+@fade{15,0}
+#label Round3
+@fxmasterchain{hp3,echo3}
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+#label Fill-3to4
+@fxmasterchain{OFF}
+@d0
+
+r1
+@fade{3,0}
+#label Round4
+@fxmasterchain{hp4}
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+
+@fade{15,0}
+#label Fill-4to5
+@fxmasterchain{OFF}
+
+r1
+#label Round5
+@fxmasterchain{hp125,hall125}
+@fade{15,0}
+@d-100
+$lap14_Lead
+#label OUTRO
+
+@p{0,0,1} t134 q7 l16 @{gamenotes::grdsSt1::edgeLead}
+v9.36 $edge_lead o5 a+2 & o5 a+8 r4.
+v9.36 $edge_lead o5 a2 & o5 a8 r4.
+r1 r1 r1 r1
+
+#ch Lead-Harmony
+#role chord
+$lap13_LeadLowHarmony = {
+@p{-0.35,0,1} t134 q7 l16 @{gamenotes::grdsSt1::harmony}
+
+r1 r1 r1 r1
+
+v2.50 o4 e4 o4 e8. o4 g16 o4 a8 o4 g4 o4 e8
+
+v3.15 o4 a+8. o4 g16 o4 g4. o4 d+16 o4 d+16 o4 g16 o4 a+16 o4 a+16 o4 a+16
+
+v3.15 o5 c8 o4 a16 o4 a8. o5 c8 o5 c8 o5 c4 o4 a8
+
+v3.15 o4 g8. o5 d2. & o5 d16
+
+r1 r1 r1 r1 r1
+}
+$lap14_LeadLowHarmony = {
+$lap13_LeadLowHarmony
+
+r1
+}
+
+@d-100
+@fade{15,0}
+$lap13_LeadLowHarmony
+$lap14_LeadLowHarmony
+@fade{15,0}
+$lap13_LeadLowHarmony
+@d0
+
+r1
+@fade{3,0}
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+
+@fade{15,0}
+r1
+@d-100
+$lap14_LeadLowHarmony
+
+@p{0,0,1} t134 q7 v8 @{gamenotes::grdsSt1::edgeLead} @e{soft}
+r1 r1
+'o4 c o4 d+ o4 g+'1
+r1 r1 r1
+
+#ch Bass
+#role bass
+$lap13_Bass = {
+@p{0,0,1} t134 q6 l16
+
+@{gamenotes::grdsSt1::octaveBass}
+
+v12.07 o2 c8 r16 v10.96 o3 c16 v11.98 o3 g16 r16 v12.07 o2 c16 v9.61 o3 c16 r16 v10.96 o3 g16 v12.07 o2 c8 r16 v11.47 o3 c16 v12.07 o2 c8
+
+v12.78 o2 d+8 r16 v11.61 o3 d+16 v12.69 o3 a+16 r16 v12.78 o2 d+16 v10.17 o3 d+16 r16 v11.61 o3 a+16 v12.78 o2 d+8 r16 v12.15 o3 d+16 v12.78 o2 d+8
+
+v13.49 o2 f8 r16 v12.25 o3 f16 v13.39 o3 c16 r16 v13.49 o2 f16 v10.73 o3 f16 r16 v12.25 o3 c16 v13.49 o2 f8 r16 v12.82 o3 f16 v13.49 o2 f8
+
+v13.92 o2 g+8 r16 v12.64 o3 g+16 v13.82 o3 d+16 r16 v13.92 o2 g+16 v11.07 o3 g+16 r16 v12.64 o3 f16 v13.92 o2 a+8 r16 v13.23 o3 a+16 v13.92 o2 a+8
+
+v14.2 o2 c8 r16 v12.9 o3 c16 v14.1 o3 g16 r16 v14.2 o2 c16 v11.3 o3 c16 r16 v12.9 o3 g16 v14.2 o2 c8 r16 v13.5 o3 c16 v14.2 o2 c8
+
+v14.2 o2 d+8 r16 v12.9 o3 d+16 v14.1 o3 a+16 r16 v14.2 o2 d+16 v11.3 o3 d+16 r16 v12.9 o3 a+16 v14.2 o2 d+8 r16 v13.5 o3 d+16 v14.2 o2 d+8
+
+v14.2 o2 f8 r16 v12.9 o3 f16 v14.1 o3 c16 r16 v14.2 o2 f16 v11.3 o3 f16 r16 v12.9 o3 c16 v14.2 o2 f8 r16 v13.5 o3 f16 v14.2 o2 f8
+
+v14.2 o2 g8 r16 v12.9 o3 g16 v14.1 o3 d16 r16 v14.2 o2 g16 v11.3 o3 g16 r16 v12.9 o3 d16 v14.2 o2 g8 r16 v13.5 o3 g16 v14.2 o2 g8
+
+@{gamenotes::grdsSt1::tightBass} q7
+
+v12.6 o2 g+8 v11.2 o3 g+16 v9.9 o3 d+16
+v12.6 o2 g+8 v11.2 o3 g+16 v9.9 o3 d+16
+v12.6 o2 g+8 v11.2 o3 g+16 v9.9 o3 d+16
+v12.6 o2 g+16 v11.2 o3 g+16 v9.9 o3 d+16 v11.2 o3 g+16
+
+v12.6 o2 d+8 v11.2 o3 d+16 v9.9 o2 b16
+v12.6 o2 d+8 v11.2 o3 d+16 v9.9 o2 b16
+v12.6 o2 d+8 v11.2 o3 d+16 v9.9 o2 b16
+v12.6 o2 d+16 v11.2 o3 d+16 v9.9 o2 b16 v11.2 o3 d+16
+
+@{gamenotes::grdsSt1::octaveBass} q6
+
+v14.3 o2 f8 r16 v12.9 o3 c16 r16 v14.1 o2 f8 r16 v11.3 o3 f16 r16 v14.3 o2 g16 r16 v12.9 o3 d8 r16 v14.1 o2 g16
+
+v14.3 o2 g+8 r16 v12.9 o3 d+16 r16 v14.1 o2 g+16 r16 v11.3 o3 g+16 r16 v14.3 o2 a+8 r16 v12.9 o3 f16 r16 v14.3 o2 a+8
+
+v14.3 o2 g8 r16 v13.2 o3 g16 v14.3 o2 g8 r16 v13.2 o3 g16 v14.3 o2 g8 v13.2 o3 g16 v11.6 o3 g16 v14.3 o2 g8 v13.2 o3 g16 v11.6 o3 g16
+}
+$lap14_Bass = {
+$lap13_Bass
+
+@{gamenotes::grdsSt1::octaveBass} q6
+v14.3 o2 g8 r16 v13.2 o3 g16 v14.3 o2 g8 r16 v13.2 o3 g16 v14.3 o2 g8 v13.2 o3 g16 v11.6 o3 g16 v14.3 o2 g8 v13.2 o3 g16 v11.6 o3 g16
+}
+
+@d-100
+@fade{15,0}
+$lap13_Bass
+$lap14_Bass
+@fade{15,0}
+$lap13_Bass
+@d0
+
+r1
+@fade{3,0}
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+
+@fade{15,0}
+@p{0,0,1} t134 q7 l16 @{gamenotes::grdsSt1::octaveBass}
+v5 o2 c16 v5.8 d-16 d16 v6.6 e-16 e16 v7.4 f16 g-16 v8.2 g16 a-16 v9.0 a16 b-16 v9.8 b16 o3 c16 v10.6 d-16 d16 e-16
+@d-100
+$lap14_Bass
+@p{0,0,1} t134 q6 l16 @{gamenotes::grdsSt1::octaveBass}
+
+v14.3 o2 f8 r16 v13.2 o3 f16 v14.3 o2 f8 r16 v13.2 o3 f16 v14.3 o2 f8 v13.2 o3 f16 v11.6 o3 f16 v14.3 o2 f8 v13.2 o3 f16 v11.6 o3 f16
+v14.3 o2 f8 r16 v13.2 o3 f16 v14.3 o2 f8 r16 v13.2 o3 f16 v14.3 o2 f8 v13.2 o3 f16 v11.6 o3 f16 v14.3 o2 f8 v13.2 o3 f16 v11.6 o3 f16
+v11 o2 g+1 r1 r1 r1
+
+#ch Bass Tight
+#role bass
+$lap13_BassB1TightDouble = {
+
+@p{0.15,0,1} t134 q7 l16 @{gamenotes::grdsSt1::tightBass}
+
+r1 r1 r1 r1 r1 r1 r1 r1
+
+v9.1.1.6 o2 g+8 v9.1.1 o3 g+16 v9.1 o3 d+16
+v9.1.1.6 o2 g+8 v9.1.1 o3 g+16 v9.1 o3 d+16
+v9.1.1.6 o2 g+8 v9.1.1 o3 g+16 v9.1 o3 d+16
+v9.1.1.6 o2 g+16 v9.1.1 o3 g+16 v9.1 o3 d+16 v9.1.1 o3 g+16
+
+v9.1.1.6 o2 d+8 v9.1.1 o3 d+16 v9.1 o2 b16
+v9.1.1.6 o2 d+8 v9.1.1 o3 d+16 v9.1 o2 b16
+v9.1.1.6 o2 d+8 v9.1.1 o3 d+16 v9.1 o2 b16
+v9.1.1.6 o2 d+16 v9.1.1 o3 d+16 v9.1 o2 b16 v9.1.1 o3 d+16
+
+r1 r1 r1
+}
+$lap14_BassB1TightDouble = {
+$lap13_BassB1TightDouble
+
+r1
+}
+
+@d-100
+@fade{15,0}
+$lap13_BassB1TightDouble
+$lap14_BassB1TightDouble
+@fade{15,0}
+$lap13_BassB1TightDouble
+@d0
+
+r1
+@fade{3,0}
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+
+@fade{15,0}
+r1
+@d-100
+$lap14_BassB1TightDouble
+r1 r1 r1 r1
+r1 r1
+
+#ch Arp-Harmony
+#role arp
+$arp_fall_a = { o5 c16 o4 b16 o4 a16 o4 g16 }
+$arp_rise_a = { o4 f16 o4 g16 o4 a16 o4 b16 }
+$arp_fall_b = { o5 c16 o4 a+16 o4 g+16 o4 g16 }
+$arp_rise_b = { o4 f16 o4 g16 o4 g+16 o4 a+16 }
+$lap13_ArpeggioHarmony = {
+
+@p{-0.43,0,1} t134 l16 q7 @{gamenotes::grdsSt1::arpeggio} @fxchain{arpEchoA}
+
+v1.89 q7 l16 @p{-0.58,0,1} $arp_fall_a v2.43 @p{0.58,0,1} $arp_rise_a v2.97 @p{-0.58,0,1} $arp_fall_a v3.51 @p{0.58,0,1} $arp_rise_a
+
+v3.96 q7 l16 @p{-0.58,0,1} $arp_fall_b v4.32 @p{0.58,0,1} $arp_rise_b v4.77 @p{-0.58,0,1} $arp_fall_b v5.22 @p{0.58,0,1} $arp_rise_b
+
+v5.58 q7 l16 @p{-0.58,0,1} $arp_fall_a v5.94 @p{0.58,0,1} $arp_rise_a v6.3 @p{-0.58,0,1} $arp_fall_a v6.66 @p{0.58,0,1} $arp_rise_a
+
+v6.93 q7 l16 @p{-0.58,0,1} $arp_fall_b v7.2 @p{0.58,0,1} $arp_rise_b v7.47 @p{-0.58,0,1} o5 c16 o5 d16 o5 d+16 o5 d16 v7.74 @p{0.58,0,1} o5 c16 o4 a+16 o4 g+16 o4 a+16
+
+v6.03 q7 l16 @p{-0.58,0,1} $arp_fall_a @p{0.58,0,1} $arp_rise_a @p{-0.58,0,1} $arp_fall_a @p{0.58,0,1} $arp_rise_a
+
+v6.21 q7 l16 @p{-0.58,0,1} $arp_fall_b @p{0.58,0,1} $arp_rise_b @p{-0.58,0,1} $arp_fall_b @p{0.58,0,1} $arp_rise_b
+
+v6.3 q7 l16 @p{-0.58,0,1} $arp_fall_a @p{0.58,0,1} $arp_rise_a @p{-0.58,0,1} $arp_fall_a @p{0.58,0,1} o4 f16 o4 g16 o4 a16 o4 f16
+
+r1 r1 r1 r1 r1 r1
+}
+$lap13_ArpeggioHarmonyRound3 = {
+
+@p{-0.43,0,1} t134 l16 q7 @{gamenotes::grdsSt1::arpeggio} @fxchain{arpEcho3}
+
+v7.74 q7 l16 @p{-0.58,0,1} $arp_fall_a v7.74 @p{0.58,0,1} $arp_rise_a v7.74 @p{-0.58,0,1} $arp_fall_a v7.74 @p{0.58,0,1} $arp_rise_a
+
+v7.74 q7 l16 @p{-0.58,0,1} $arp_fall_b v7.74 @p{0.58,0,1} $arp_rise_b v7.74 @p{-0.58,0,1} $arp_fall_b v7.74 @p{0.58,0,1} $arp_rise_b
+
+v7.74 q7 l16 @p{-0.58,0,1} $arp_fall_a v7.74 @p{0.58,0,1} $arp_rise_a v7.74 @p{-0.58,0,1} $arp_fall_a v7.74 @p{0.58,0,1} $arp_rise_a
+
+v7.74 q7 l16 @p{-0.58,0,1} $arp_fall_b v7.74 @p{0.58,0,1} $arp_rise_b v7.74 @p{-0.58,0,1} o5 c16 o5 d16 o5 d+16 o5 d16 v7.74 @p{0.58,0,1} o5 c16 o4 a+16 o4 g+16 o4 a+16
+
+v7.74 q7 l16 @p{-0.58,0,1} $arp_fall_a @p{0.58,0,1} $arp_rise_a @p{-0.58,0,1} $arp_fall_a @p{0.58,0,1} $arp_rise_a
+
+v7.74 q7 l16 @p{-0.58,0,1} $arp_fall_b @p{0.58,0,1} $arp_rise_b @p{-0.58,0,1} $arp_fall_b @p{0.58,0,1} $arp_rise_b
+
+v7.74 q7 l16 @p{-0.58,0,1} $arp_fall_a @p{0.58,0,1} $arp_rise_a @p{-0.58,0,1} $arp_fall_a @p{0.58,0,1} o4 f16 o4 g16 o4 a16 o4 f16
+
+r1 r1 r1 r1 r1
+
+@p{-0.55,0,1} v7.74 [o4 g16 o5 c16 d16 g16 @p{0.55,0,1} o5 g16 d16 c16 o4 g16]1
+@p{-0.55,0,1} v7.74 [o4 g16 b16 o5 d16 g16 @p{0.55,0,1} o5 g16 d16 o4 b16 g16]1
+}
+
+$lap14_ArpeggioHarmony = {
+
+@p{-0.43,0,1} t134 l16 q7 @{gamenotes::grdsSt1::arpeggio} @fxchain{arpEchoB}
+
+v7.74 q7 l16 @p{-0.58,0,1} $arp_fall_a v7.74 @p{0.58,0,1} $arp_rise_a v7.74 @p{-0.58,0,1} $arp_fall_a v7.74 @p{0.58,0,1} $arp_rise_a
+
+v7.74 q7 l16 @p{-0.58,0,1} $arp_fall_b v7.74 @p{0.58,0,1} $arp_rise_b v7.74 @p{-0.58,0,1} $arp_fall_b v7.74 @p{0.58,0,1} $arp_rise_b
+
+v7.74 q7 l16 @p{-0.58,0,1} $arp_fall_a v7.74 @p{0.58,0,1} $arp_rise_a v7.74 @p{-0.58,0,1} $arp_fall_a v7.74 @p{0.58,0,1} $arp_rise_a
+
+v7.74 q7 l16 @p{-0.58,0,1} $arp_fall_b v7.74 @p{0.58,0,1} $arp_rise_b v7.74 @p{-0.58,0,1} o5 c16 o5 d16 o5 d+16 o5 d16 v7.74 @p{0.58,0,1} o5 c16 o4 a+16 o4 g+16 o4 a+16
+
+v7.74 q7 l16 @p{-0.58,0,1} $arp_fall_a @p{0.58,0,1} $arp_rise_a @p{-0.58,0,1} $arp_fall_a @p{0.58,0,1} $arp_rise_a
+
+v7.74 q7 l16 @p{-0.58,0,1} $arp_fall_b @p{0.58,0,1} $arp_rise_b @p{-0.58,0,1} $arp_fall_b @p{0.58,0,1} $arp_rise_b
+
+v7.74 q7 l16 @p{-0.58,0,1} $arp_fall_a @p{0.58,0,1} $arp_rise_a @p{-0.58,0,1} $arp_fall_a @p{0.58,0,1} o4 f16 o4 g16 o4 a16 o4 f16
+
+r1 r1 r1 r1 r1
+
+@p{-0.45,0,1} t134 q7 l16 @{gamenotes::grdsSt1::arpeggio} v5.6
+@p{-0.55,0,1} [o4 g16 o5 c16 d16 g16 @p{0.55,0,1} o5 g16 d16 c16 o4 g16]2
+@p{-0.55,0,1} [o4 g16 b16 o5 d16 g16 @p{0.55,0,1} o5 g16 d16 o4 b16 g16]2
+}
+
+@d-100
+@fade{15,0}
+@fade{0,0}
+@fade{13,8}
+$lap13_ArpeggioHarmony
+@fade{15,0}
+$lap14_ArpeggioHarmony
+@fade{15,0}
+$lap13_ArpeggioHarmonyRound3
+@d0
+
+@fxchain{OFF}
+r1
+@fade{3,0}
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+
+#voice fillArpDual5025 = @{pulse(50)} @gain{0.65}, @{pulse(25)} @gain{0.65}
+
+@fxchain{OFF}
+@fade{15,0}
+@p{-0.45,0,1} t134 q7 l16 @{fillArpDual5025}
+v5.0 o4 c16 v5.5 d-16 d16 v6.0 e-16 e16 v6.5 f16 g-16 v7.0 g16 a-16 v7.5 a16 b-16 v8.0 b16 o5 c16 v8.5 d-16 d16 e-16
+@d-100
+$lap14_ArpeggioHarmony
+@p{-0.55,0,1} t134 q7 l16 @{gamenotes::grdsSt1::arpeggio} v7.5
+
+@p{-0.55,0,1} [o4 f16 o4 a+16 o5 c16 o5 f16 @p{0.55,0,1} o5 f16 o5 c16 o4 a+16 o4 f16]2
+@p{-0.55,0,1} [o4 f16 o4 a16 o5 c16 o5 f16 @p{0.55,0,1} o5 f16 o5 c16 o4 a16 o4 f16]2
+
+@p{-0.55,0,1} @fade{0,16}
+@p{-0.55,0,1} r16 r16 o5 d+16 o5 g+16 @p{0.55,0,1} o5 g+16 o5 d+16 o5 c16 o4 g+16
+@p{-0.55,0,1} [o4 g+16 o5 c16 o5 d+16 o5 g+16 @p{0.55,0,1} o5 g+16 o5 d+16 o5 c16 o4 g+16]1
+@p{-0.55,0,1} [o4 g+16 o5 c16 o5 d+16 o5 g+16 @p{0.55,0,1} o5 g+16 o5 d+16 o5 c16 o4 g+16]2
+@p{-0.55,0,1} [o4 g+16 o5 c16 o5 d+16 o5 g+16 @p{0.55,0,1} o5 g+16 o5 d+16 o5 c16 o4 g+16]2
+@p{-0.55,0,1} [o4 g+16 o5 c16 o5 d+16 o5 g+16 @p{0.55,0,1} o5 g+16 o5 d+16 o5 c16 o4 g+16]2
+
+#ch Arp-Post
+#role harmony
+$lap13_ArpeggioPost = {
+
+@p{-0.43,0,1} t134 l16 q7 @{gamenotes::grdsSt1::arpeggio} @fxchain{OFF}
+
+r1 r1 r1 r1 r1 r1 r1
+
+v7 o5 d8 r16 v8 o5 c16 r16 v8 o4 b8 r16 v9 o4 a8 r16 v10 o4 g16 v11 o4 b8 v12 o5 d16 v12 o5 g16
+
+v11.7 q7 l16 @{gamenotes::grdsSt1::harmony} o5 d+8. o5 c8. @{gamenotes::grdsSt1::harmony} o5 d+4. @{gamenotes::grdsSt1::harmony} o5 c16 o5 d16 o5 d+8 @{gamenotes::grdsSt1::harmony} o5 d8. o4 a+8. @{gamenotes::grdsSt1::harmony} o4 g2 & o4 g8 @{gamenotes::grdsSt1::harmony} o5 c8. o4 a8. @{gamenotes::grdsSt1::harmony} o5 c16 o5 c16 @{gamenotes::grdsSt1::harmony} o5 d8. o4 b8. @{gamenotes::grdsSt1::harmony} o5 d16 o5 d16 @{gamenotes::grdsSt1::harmony} o5 d+8. o5 c8. @{gamenotes::grdsSt1::harmony} o5 d+16 o5 f16 @{gamenotes::grdsSt1::harmony} o5 f8. o5 d8. @{gamenotes::grdsSt1::harmony} o5 g1 & o5 g8
+}
+$lap14_ArpeggioPost = {
+$lap13_ArpeggioPost
+
+v11.7 q7 l16 @{gamenotes::grdsSt1::harmony} o5 g1
+}
+
+@d-100
+@fade{15,0}
+$lap13_ArpeggioPost
+$lap14_ArpeggioPost
+@fade{15,0}
+r1 r1 r1 r1 r1 r1 r1 r1
+
+@p{-0.43,0,1} t134 q7 l16 @fxchain{OFF} @fade{3,0}
+v11.7 @{gamenotes::grdsSt1::harmony} o5 d+8. o5 c8. @{gamenotes::grdsSt1::harmony} o5 d+4. @{gamenotes::grdsSt1::harmony} o5 c16 o5 d16 o5 d+8 @{gamenotes::grdsSt1::harmony} o5 d8. o4 a+8. @{gamenotes::grdsSt1::harmony} o4 g2 & o4 g8
+
+@p{-0.43,0,1} t134 q7 l16 @fxchain{OFF} @fade{3,0}
+v11.7 @{gamenotes::grdsSt1::harmony}
+
+o4 a16 o4 a+16 o5 c16 o5 f8. o5 c8
+ o4 b16 o5 c16 o5 d16 o5 g8. o5 d8
+ o5 c16 o5 d16 o5 d+16 o5 g+8. o5 d+8
+ o5 d16 o5 d+16 o5 f16 o5 a+16 o5 a+8 o6 c2 & o6 c8 o5 b2
+@fade{15,0}
+@d0
+
+r1
+@fade{3,0}
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+
+@fade{15,0}
+r1
+@d-100
+$lap14_ArpeggioPost
+@p{-0.43,0,1} t134 q7 l16 @{gamenotes::grdsSt1::harmony} @fxchain{OFF}
+
+v8 o4 a+1
+v8 o4 a1
+r1 r1 r1 r1
+
+#ch Arp-Second
+#role chord
+$lap13_ArpeggioSecond = {
+@p{0.48,0,1} t134 l16 q7 @{gamenotes::grdsSt1::arpeggio} @fxchain{OFF}
+
+r1
+
+r1
+
+r1
+
+r1
+
+r1
+
+r1
+
+r1
+
+v4.7 q5 l16 o4 c8 r16 v4.7 o4 c16 r8 v5.5 o4 c8 v6.3 o4 d8 r16 v6.3 o4 d16 v7.1 o4 d8 v7.1 o4 d16 v7.1 o4 d16
+
+@fxchain{OFF}
+r1
+r1
+r1
+r1
+r1
+}
+$lap14_ArpeggioSecond = {
+$lap13_ArpeggioSecond
+
+r1
+}
+
+@d-100
+@fade{15,0}
+$lap13_ArpeggioSecond
+$lap14_ArpeggioSecond
+@fade{15,0}
+$lap13_ArpeggioSecond
+@d0
+
+r1
+@fade{3,0}
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+
+@fade{15,0}
+r1
+@d-100
+$lap14_ArpeggioSecond
+r1 r1 r1 r1
+r1 r1
+
+#ch HighChord
+#role chord
+$lap13_HighChord = {
+
+@p{0.45,0,1} t134 q2 o6 l16 @{gamenotes::grdsSt1::arpeggio} @fxchain{OFF}
+
+r1 r1
+
+l16 r4 r8 @p{-0.75,0,1} 'v4 o5 a v4 o6 c v5 o6 f'8 r4 r8 @p{0.75,0,1} 'v4 o5 a v4 o6 c v5 o6 f'8
+
+l16 r4 r8 @p{0.75,0,1} 'v4 o5 g+ v4 o6 c v5 o6 d+'8 r4 r8 @p{-0.75,0,1} 'v4 o5 a+ v4 o6 d v5 o6 f'8
+@p{0.45,0,1}
+
+l16 r8 'v4 o5 g v4 o6 c v5 o6 d'8 r16 'v4 o5 g v3 o6 c v4 o6 d'8 r8. 'v4 o5 g v4 o6 c v5 o6 d'8 r8 'v4 o5 g v4 o6 c v4 o6 d'8
+
+l16 r8 'v4 o5 g v4 o6 a+ v5 o6 d+'8 r16 'v4 o5 g v3 o6 a+ v4 o6 d+'8 r8. 'v4 o5 g v4 o6 a+ v5 o6 d+'8 r8 'v4 o5 g v4 o6 a+ v4 o6 d+'8
+
+l16 r8 'v4 o5 a v4 o6 c v5 o6 f'8 r16 'v4 o5 a v3 o6 c v4 o6 f'8 r8. 'v4 o5 a v4 o6 c v5 o6 f'8 r8 'v4 o5 a v4 o6 c v4 o6 f'8
+
+r1 r1 r1 r1 r1
+
+l16 r8 'v5 o6 c v5 o6 d v6 o6 g'8 r16 'v4 o6 c v4 o6 d v5 o6 g'8 r8. 'v5 o5 b v5 o6 d v6 o6 g'8 r8 'v4 o5 b v4 o6 d v6 o6 g'8
+}
+$hc_C = {
+
+l16 r8 'v4 o5 g v4 o6 c v5 o6 d'8 r16 'v4 o5 g v3 o6 c v4 o6 d'8 r8. 'v4 o5 g v4 o6 c v5 o6 d'8 r8 'v4 o5 g v4 o6 c v4 o6 d'8
+}
+$hc_Eb = {
+
+l16 r8 'v4 o5 g v4 o6 a+ v5 o6 d+'8 r16 'v4 o5 g v3 o6 a+ v4 o6 d+'8 r8. 'v4 o5 g v4 o6 a+ v5 o6 d+'8 r8 'v4 o5 g v4 o6 a+ v4 o6 d+'8
+}
+$hc_F = {
+
+l16 r8 'v4 o5 a v4 o6 c v5 o6 f'8 r16 'v4 o5 a v3 o6 c v4 o6 f'8 r8. 'v4 o5 a v4 o6 c v5 o6 f'8 r8 'v4 o5 a v4 o6 c v4 o6 f'8
+}
+$hc_AbBb = {
+
+ l16 r8 'v4 o5 g+ v4 o6 c v5 o6 d+'8 r16 'v4 o5 g+ v3 o6 c v4 o6 d+'8 r8. 'v4 o5 a+ v4 o6 d v5 o6 f'8 r8 'v4 o5 a+ v4 o6 d v4 o6 f'8
+}
+$hc_intro12 = {
+
+@p{0.45,0,1} t134 q2 o6 l16 @{gamenotes::grdsSt1::arpeggio} @fxchain{OFF}
+
+$hc_C
+$hc_Eb
+$hc_F
+$hc_AbBb
+
+l16 r8 'v4 o5 g v4 o6 c v5 o6 d'8 r16 'v4 o5 g v3 o6 c v4 o6 d'8 r8. 'v4 o5 g v4 o6 c v5 o6 d'8 r8 'v4 o5 g v4 o6 c v4 o6 d'8
+
+l16 r8 'v4 o5 g v4 o6 a+ v5 o6 d+'8 r16 'v4 o5 g v3 o6 a+ v4 o6 d+'8 r8. 'v4 o5 g v4 o6 a+ v5 o6 d+'8 r8 'v4 o5 g v4 o6 a+ v4 o6 d+'8
+
+l16 r8 'v4 o5 a v4 o6 c v5 o6 f'8 r16 'v4 o5 a v3 o6 c v4 o6 f'8 r8. 'v4 o5 a v4 o6 c v5 o6 f'8 r8 'v4 o5 a v4 o6 c v4 o6 f'8
+
+r1 r1 r1 r1 r1
+}
+
+$lap13_HighChordRound3 = {
+$hc_intro12
+
+l16 r8 'v5 o6 c v5 o6 d v6 o6 g'8 r16 'v4 o6 c v4 o6 d v5 o6 g'8 r8. 'v5 o5 b v5 o6 d v6 o6 g'8 r8 'v4 o5 b v4 o6 d v6 o6 g'8
+}
+
+$lap14_HighChord = {
+$hc_intro12
+
+l16 r8 'v5 o6 c v5 o6 d v6 o6 g'8 r16 'v4 o6 c v4 o6 d v5 o6 g'8 r8. 'v5 o6 c v5 o6 d v6 o6 g'8 r8 'v4 o6 c v4 o6 d v6 o6 g'8
+
+l16 r8 'v5 o5 b v5 o6 d v6 o6 g'8 r16 'v4 o5 b v4 o6 d v5 o6 g'8 r8. 'v5 o5 b v5 o6 d v6 o6 g'8 r8 'v4 o5 b v4 o6 d v6 o6 g'8
+}
+
+@d-100
+@fade{15,0}
+$lap13_HighChord
+$lap14_HighChord
+@fade{15,0}
+$lap13_HighChordRound3
+@d0
+
+r1
+@fade{3,0}
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+
+@fade{15,0}
+r1
+@d-100
+$lap14_HighChord
+@p{0.45,0,1} t134 q2 o5 l16 @{gamenotes::grdsSt1::arpeggio} @fxchain{OFF}
+
+l16 r8 'v5 o5 f v5 o5 a+ v6 o6 c'8 r16 'v4 o5 f v4 o5 a+ v5 o6 c'8 r8. 'v5 o5 f v5 o5 a+ v6 o6 c'8 r8 'v4 o5 f v4 o5 a+ v6 o6 c'8
+l16 r8 'v5 o5 f v5 o5 a v6 o6 c'8 r16 'v4 o5 f v4 o5 a v5 o6 c'8 r8. 'v5 o5 f v5 o5 a v6 o6 c'8 r8 'v4 o5 f v4 o5 a v6 o6 c'8
+r1 r1 r1 r1
+
+#ch Kick
+#role perc
+$kick_bar = { a4 r4 a4 r4 }
+$lap13_TR808Kick = {
+
+@p{0,0,1} t134 q9 l4 v11.5 @{tr808::bassDrum(decay: 0.30)} o1
+[$kick_bar]13
+}
+$lap14_TR808Kick = {
+$lap13_TR808Kick
+
+$kick_bar
+}
+
+@fade{15,0}
+$lap13_TR808Kick
+$lap14_TR808Kick
+@fade{15,0}
+$lap13_TR808Kick
+
+@p{0,0,1} t134 q9 l8 v10.5 @{tr808::bassDrum(decay: 0.30)} o1 a8 r8 a8 a8 a8 r8 a8 a8
+@fade{3,0}
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+
+@fade{15,0}
+@p{0,0,1} t134 q9 l8 v11.4 @{tr808::bassDrum(decay: 0.30)} o1 a8 r8 a8 a8 a4 a8 a8
+$lap14_TR808Kick
+@p{0,0,1} t134 q9 l4 v10 @{tr808::bassDrum(decay: 0.30)} o1 [$kick_bar]2 r1 r1
+r1 r1
+
+#ch Snare
+#role perc
+$sn_standard = { . . . . S . . . . . . . S . . . }
+$sn_regular = { . . . . S . . . . . . . . . S . }
+$sn_early_harmony = { . . s . S . . . . . s . . . S . }
+$sn_harmony = { . . s . . . S . . . s . . . S . }
+$sn_busy = { . . s . . . S s . . s . . . S s }
+$sn_end = { . . s . . . S . . . s s . . S s }
+$sn_rest = { . . . . . . . . . . . . . . . . }
+#drum S = @{tr808::snareDrum} v9.5 Offbeat Snare
+#drum s = @{tr808::snareDrum} v5.5 Light Snare Hit
+$lap13_TR808Snare = {
+
+@p{-0.2,0,1} t134 q9
+@{drums 16}{
+v15
+
+[$sn_standard |]2
+[$sn_regular |]2
+
+[$sn_early_harmony |]4
+
+[$sn_busy |]2
+
+[$sn_harmony |]2
+
+$sn_end
+}
+}
+$lap13_TR808SnareRound3 = {
+
+@p{-0.2,0,1} t134 q9
+@{drums 16}{
+v15
+
+[$sn_early_harmony |]4
+
+[$sn_early_harmony |]4
+
+[$sn_busy |]2
+
+[$sn_harmony |]2
+
+$sn_end
+}
+}
+
+$lap14_TR808Snare = {
+
+@p{-0.2,0,1} t134 q9
+@{drums 16}{
+v15
+
+[$sn_early_harmony |]4
+
+[$sn_early_harmony |]4
+
+[$sn_busy |]2
+
+[$sn_harmony |]2
+
+$sn_end
+}
+
+@{drums 16}{ $sn_end }
+}
+
+@fade{15,0}
+@fade{12,0}
+@fade{15,16}
+$lap13_TR808Snare
+@fade{15,0}
+$lap14_TR808Snare
+@fade{15,0}
+$lap13_TR808SnareRound3
+
+@p{-0.2,0,1} t134 q9 @{drums 16}{ v13 . . s . S . s S . s . S s S s S }
+@fade{3,0}
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+
+@fade{15,0}
+@p{-0.2,0,1} t134 q9 @{drums 16}{ v13 s . s s S . S S s . S . s S S S }
+@fade{15,0}
+$lap14_TR808Snare
+@p{-0.2,0,1} t134 q9 @{drums 16}{ v11 [$sn_end |]2 $sn_rest | $sn_rest }
+r1 r1
+
+#ch Harmony-Accents
+#role perc
+$accents_rest = { . . . . . . . . . . . . . . . . }
+#drum S = @{tr808::openHihat(decay:0.36)} v6 Open Hi-hat
+#drum s = @{tr808::openHihat(decay:0.36)} v2.7 Soft Open Hi-hat
+$lap13_HarmonyAccents = {
+@p{-0.32,0,1} t134 q7
+@{drums 16}{
+v10
+
+[$accents_rest |]8
+
+. . s . . S . . . s . . . S . .
+|
+
+. . s . . . S . . . s . . S . .
+|
+
+. . s . . S . . . s . . S . . .
+|
+
+. . . s . . S . . . s . . S . .
+|
+
+. . s . . . S . . s . . . . . .
+}
+}
+$lap14_HarmonyAccents = {
+$lap13_HarmonyAccents
+
+@{drums 16}{ . . s . . . S . . s . . . . . . }
+}
+
+@fade{15,0}
+$lap13_HarmonyAccents
+$lap14_HarmonyAccents
+@fade{15,0}
+$lap13_HarmonyAccents
+
+@p{-0.32,0,1} t134 q7 @{drums 16}{ v11 . . . . . . . . . . . . . . . . }
+@fade{3,0}
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+
+@fade{15,0}
+@p{-0.32,0,1} t134 q7 @{drums 16}{ v12 . . . . . . . . . . . . . . . . }
+$lap14_HarmonyAccents
+@p{-0.32,0,1} t134 q7 @{drums 16}{ v7 [$accents_rest |]2 }
+r1 r1
+r1 r1
+
+#ch Low-Tom-Fill
+#role perc
+
+@p{-0.32,0,1} t134 q8 v4 o1 l16 @{tr808::lowTom}
+@fade{15,0}
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+@fade{15,0}
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+r16 a16 r16 r16 r16 a16 a16 a16 r16 a16 r16 r16 a16 r16 a16 a16
+@fade{3,0}
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+@fade{15,0}
+r16 r16 a16 r16 r16 a16 r16 a16 r16 a16 r16 a16 r16 a16 a16 a16
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+r1 r1 r1 r1 r1 r1
+
+#ch Handclap
+#role perc
+$clap_rest = { . . . . . . . . . . . . . . . . }
+#drum C = @{tr808::handclap} v8 Soft Handclap
+
+#drum L = @{tr808::handclap} v6.8 Quiet Handclap
+#drum H = @{tr808::handclap} v9.5 Strong Handclap
+
+$lap13_TR808Handclap = {
+
+@p{0.23,0,1} t134 q9
+@{drums 16}{
+v15
+
+[$clap_rest |]7
+
+. . . . . . . . C . . C . . C C
+|
+
+[$clap_rest |]4
+
+$clap_rest
+}
+}
+$lap14_TR808Handclap = {
+
+@p{0.23,0,1} t134 q9
+@{drums 16}{
+v15
+
+[$clap_rest |]7
+
+. . . . . . . . C . . C . . C C
+|
+
+[$clap_rest |]4
+
+$clap_rest
+}
+
+@{drums 16}{ $clap_rest }
+}
+
+@fade{15,0}
+@p{0.23,0,1} t134 q9 @{drums 16}{ v15 [$clap_rest |]7 . . . . . . . . L . . L . . L L | [$clap_rest |]4 $clap_rest }
+@p{0.23,0,1} t134 q9 @{drums 16}{ v15 [$clap_rest |]7 . . . . . . . . L . . L . . L L | [$clap_rest |]4 $clap_rest }
+@fade{15,0}
+@{drums 16}{ $clap_rest }
+$lap13_TR808Handclap
+
+@p{0.23,0,1} t134 q9 @{drums 16}{ v13 C . . . . C . . C . . C . C . C }
+@fade{3,0}
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+
+@fade{15,0}
+@p{0.23,0,1} t134 q9 @{drums 16}{ v15 H . . H . . H H . . H . H . H H }
+@p{0.23,0,1} t134 q9 @{drums 16}{ v15 [$clap_rest |]7 . . . . . . . . H . . H . . H H | [$clap_rest |]4 $clap_rest }
+@{drums 16}{ $clap_rest }
+@p{0.23,0,1} t134 q9 @{drums 16}{ [$clap_rest |]2 }
+r1 r1
+r1 r1
+
+#ch Original Lead
+#role lead
+$rlead = { @{gamenotes::grdsSt1::edgeLead} }
+@fade{15,0}
+@fxchain{OFF}
+t134
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+@fade{15,0}
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+
+r1
+@fade{3,0}
+@fxchain{wavestep4,tape4}
+t134 v8.0 q7 l16  $rlead o4 g4 $rlead o4 g8. $rlead o5 c16 o5 f8 o5 e4 o5 c8 $rlead o5 g8. $rlead o4 a+16 $rlead o4 a+4. $rlead o4 g16 o4 g+16 o4 a+16 o5 d+16 o5 f16 o5 g16 $rlead o5 c8. o4 a8. $rlead o5 c4 o5 f8 o4 a16 o4 b16 o5 c16 o5 d16 o5 d+8 o5 c16 o4 g+8 o5 d+8 o5 c16 o5 f8 o5 d16 o4 a+8 o5 d16 o5 f8 o4 g4 $rlead o4 g8. $rlead o5 c16 o5 f8 o5 e4 o5 c8 $rlead o5 g8. $rlead o4 a+16 $rlead o4 a+4. $rlead o4 g16 o4 g+16 o4 a+16 o5 d+16 o5 f16 o5 g16 o5 a8 o5 c16 $rlead o5 c8. $rlead o5 f8 o5 g8 o5 a4 o5 f8 $rlead o5 d8. $rlead o5 g2. & o5 g16 $rlead o5 c8. o5 d+8. $rlead o5 g+2 & o5 g+8 $rlead o4 a+8. o5 d8. $rlead o5 d+2 & o5 d+8 $rlead o4 a16 o4 a+16 o5 c16 $rlead o5 f4 & o5 f16 $rlead o4 b16 o5 c16 o5 d16 $rlead o5 g4 & o5 g16 $rlead o5 c16 o5 d16 o5 d+16 $rlead o5 g+4 & o5 g+16 $rlead o5 d16 o5 d+16 o5 f16 $rlead o5 a+16 o5 a+8 $rlead o6 c2 & o6 c8 $rlead o5 b2
+
+@fade{15,0}
+@fxchain{OFF}
+
+r1
+@fxchain{OFF}
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+r1 r1 r1 r1
+r1 r1
+
+#ch Original Bass
+#role bass
+@fade{15,0}
+@fxchain{OFF}
+t134
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+@fade{15,0}
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+
+r1
+@fade{3,0}
+@fxchain{wavestep4,tape4}
+t134 v8.0 q7 l16  @{gamenotes::grdsSt1::octaveBass} o2 c8 o3 c16 o3 c16 o2 c8 o3 c16 o3 c16 o2 c8 o3 c16 o3 c16 o2 c8 o3 c16 o3 c16 o2 d+8 o3 d+16 o3 d+16 o2 d+8 o3 d+16 o3 d+16 o2 d+8 o3 d+16 o3 d+16 o2 d+8 o3 d+16 o3 d+16 o2 f8 o3 f16 o3 f16 o2 f8 o3 f16 o3 f16 o2 f8 o3 f16 o3 f16 o2 f8 o3 f16 o3 f16 o2 g+8 o3 g+16 o3 g+16 o2 g+8 o3 g+16 o3 g+16 o2 a+8 o3 a+16 o3 a+16 o2 a+8 o3 a+16 o3 a+16 o2 c8 o3 c16 o3 c16 o2 c8 o3 c16 o3 c16 o2 c8 o3 c16 o3 c16 o2 c8 o3 c16 o3 c16 o2 d+8 o3 d+16 o3 d+16 o2 d+8 o3 d+16 o3 d+16 o2 d+8 o3 d+16 o3 d+16 o2 d+8 o3 d+16 o3 d+16 o2 f8 o3 f16 o3 f16 o2 f8 o3 f16 o3 f16 o2 f8 o3 f16 o3 f16 o2 f8 o3 f16 o3 f16 o2 g8 o3 g16 o3 g16 o2 g8 o3 g16 o3 g16 o2 g8 o3 g16 o3 g16 o2 g8 o3 g16 o3 g16 @{gamenotes::grdsSt1::tightBass} o2 g+16 o3 g+16 o3 d+16 o3 g+16 o2 g+16 o3 g+16 o3 d+16 o3 g+16 o2 g+16 o3 g+16 o3 d+16 o3 g+16 o2 g+16 o3 g+16 o3 d+16 o3 g+16 o2 d+16 o3 d+16 o2 b16 o3 d+16 o2 d+16 o3 d+16 o2 b16 o3 d+16 o2 d+16 o3 d+16 o2 b16 o3 d+16 o2 d+16 o3 d+16 o2 b16 o3 d+16 o2 f16 o3 f16 o3 c16 o3 f16 o2 f16 o3 f16 o3 c16 o3 f16 o2 g16 o3 g16 o3 d16 o3 g16 o2 g16 o3 g16 o3 d16 o3 g16 o2 g+16 o3 g+16 o3 d+16 o3 g+16 o2 g+16 o3 g+16 o3 d+16 o3 g+16 o2 a+16 o3 a+16 o3 f16 o3 a+16 o2 a+16 o3 a+16 o3 f16 o3 a+16 o2 g8 o3 g16 o3 g16 o2 g8 o3 g16 o3 g16 o2 g8 o3 g16 o3 g16 o2 g8 o3 g16 o3 g16
+
+@fade{15,0}
+@fxchain{OFF}
+
+r1
+@fxchain{OFF}
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+r1 r1 r1 r1
+r1 r1
+
+#ch Original Arp
+#role arp
+$rharm = { @{gamenotes::grdsSt1::harmony} }
+@fade{15,0}
+@fxchain{OFF}
+t134
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+@fade{15,0}
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+
+r1
+@fade{3,0}
+t134 v8.0 q7 l16 @pitch{+8,0} @{gamenotes::grdsSt1::arpeggio} o5 c16 o4 b16 o4 a16 o4 g16 o4 f16 o4 g16 o4 a16 o4 b16 o5 c16 o4 b16 o4 a16 o4 g16 o4 f16 o4 g16 o4 a16 o4 b16 o5 c16 o4 a+16 o4 g+16 o4 g16 o4 f16 o4 g16 o4 g+16 o4 a+16 o5 c16 o4 a+16 o4 g+16 o4 g16 o4 f16 o4 g16 o4 g+16 o4 a+16 o5 c16 o4 b16 o4 a16 o4 g16 o4 f16 o4 g16 o4 a16 o4 b16 o5 c16 o4 b16 o4 a16 o4 g16 o4 f16 o4 g16 o4 a16 o4 b16 o5 c16 o4 a+16 o4 g+16 o4 g16 o4 f16 o4 g16 o4 g+16 o4 a+16 o5 c16 o5 d16 o5 d+16 o5 d16 o5 c16 o4 a+16 o4 g+16 o4 a+16 o5 c16 o4 b16 o4 a16 o4 g16 o4 f16 o4 g16 o4 a16 o4 b16 o5 c16 o4 b16 o4 a16 o4 g16 o4 f16 o4 g16 o4 a16 o4 b16 o5 c16 o4 a+16 o4 g+16 o4 g16 o4 f16 o4 g16 o4 g+16 o4 a+16 o5 c16 o4 a+16 o4 g+16 o4 g16 o4 f16 o4 g16 o4 g+16 o4 a+16 o5 c16 o4 b16 o4 a16 o4 g16 o4 f16 o4 g16 o4 a16 o4 b16 o5 c16 o4 b16 o4 a16 o4 g16 o4 f16 o4 g16 o4 a16 o4 f16 o5 d16 o5 c16 o4 b16 o4 a16 o4 g16 o4 a16 o4 b16 o5 c16 o5 d16 o5 c16 o4 b16 o4 a16 o4 g16 o4 b16 o5 d16 o5 g16 $rharm o5 d+8. o5 c8. $rharm o5 d+4. $rharm o5 c16 o5 d16 o5 d+8 $rharm o5 d8. o4 a+8. $rharm o4 g2 & o4 g8 $rharm o5 c8. o4 a8. $rharm o5 c16 o5 c16 $rharm o5 d8. o4 b8. $rharm o5 d16 o5 d16 $rharm o5 d+8. o5 c8. $rharm o5 d+16 o5 f16 $rharm o5 f8. o5 d8. $rharm o5 g1 & o5 g8
+
+@fade{15,0}
+@fxchain{OFF}
+
+r1
+@fxchain{OFF}
+r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1 r1
+r1 r1 r1 r1
+r1 r1
