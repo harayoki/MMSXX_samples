@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SCSQ（スクシーク） | MMSXX Samples DEV</title>
+  <meta name="description" content="MSXらしくない音を効果的に使う、PSG・MSX-MUSIC・SCCによるSCSQ。エフェクトをON/OFFして試聴できます。">
+  <link rel="stylesheet" href="../music-page.css">
+  <style>
+    #scsq { --blue: #38b8d8; --mml-system: #9deaff; }
+    #scsq .scsq-fx-control { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    #scsq #scsq-fx {
+      font: inherit; font-size: .875rem; font-weight: 650;
+      color: var(--foreground); background: var(--background);
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: 8px 13px; cursor: pointer;
+    }
+    #scsq #scsq-fx[aria-pressed="true"] {
+      background: var(--blue); color: #07121a; border-color: var(--blue);
+    }
+    #scsq #scsq-fx:disabled { opacity: .55; cursor: wait; }
+    #scsq #scsq-fx:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  </style>
+</head>
+<body>
+<main class="music-page" id="scsq">
+  <nav class="music-top-nav" aria-label="ページナビゲーション"><a href="../" aria-label="1階層上へ" title="1階層上へ"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V4M5.5 10.5 12 4l6.5 6.5"/></svg></a></nav>
+  <div class="music-player" id="scsq-player"></div>
+  <div class="scsq-fx-control">
+    <button id="scsq-fx" type="button" aria-pressed="true" disabled>Effects: On</button>
+    <span class="text-small text-muted">再生中もエフェクトの有無を切り替えられます。</span>
+  </div>
+  <p class="text-small"><a id="scsq-webmsx" href="https://webmsx.org/?M=MSX2PJ&amp;ROM=https%3A%2F%2Fmedia.githubusercontent.com%2Fmedia%2Fharayoki%2FMMSXX_samples%2Frefs%2Fheads%2Fmain%2Fdocs%2Fmusic%2From%2Fscsq-v100l.rom&amp;PRESETS=SCC2&amp;SCREEN_FILTER_MODE=0&amp;SCREEN_CRT_SCANLINES=0" target="_blank" rel="noopener noreferrer">WebMSXでROM版を起動</a> <span class="text-muted">MSX2+（日本語）・スロット2にSCC・画面補間なし</span></p>
+  <p class="music-status text-small text-muted" data-music-status aria-live="polite">読み込み中…</p>
+  <div class="music-credits">
+    <p class="text-small text-muted">MMLはこの場で編集できます。Music, artwork, MML and exports:
+      <a href="https://creativecommons.org/licenses/by/4.0/" rel="license">CC BY 4.0</a>.
+      <a href="./scsq_bg.jpg" data-music-image="scsq_bg.jpg">Cover art</a>.</p>
+  </div>
+  <div class="music-editor">
+    <textarea data-music-background="scsq_bg.jpg" id="scsq-src" aria-label="MMLソース" rows="24" spellcheck="false" disabled>LOADING</textarea>
+  </div>
+  <div class="music-credits">
+    <p class="text-small text-muted">JavaScript source is not covered by CC BY 4.0. Redistribution is prohibited.</p>
+    <p class="text-small text-muted">Editor: <a href="https://codemirror.net/">CodeMirror 6</a> (MIT License).</p>
+  </div>
+</main>
+<script src="../music-page.js" data-song="17_SCSQ"></script>
+</body>
+</html>

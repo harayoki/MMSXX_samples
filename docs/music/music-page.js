@@ -23,7 +23,7 @@
   window.MusicAssets = Object.freeze({
     song, image, shared: path => new URL(path, root).href
   });
-  // Pico PLAYER 1.4.0 expects an MML array, while SOUND 0.61.0
+  // Pico PLAYER 1.5.0 accepts MML arrays, while SOUND 0.85.6
   // defines a BGM from one *complete* MML document. Do not copy global
   // #about / #title / #fx directives to every channel again.
   function splitMML(text) {
@@ -142,12 +142,11 @@
   }
   (async () => {
     try {
-      // Official Sound 0.69.0 for all DEV songs, including GRST1 v2.73.
-      // Pico PLAYER 1.4.0 is unchanged.
-      const soundVersion = '0.69.0';
+      // Official Sound 0.85.6 for all DEV songs, including GRST1 v2.73.
+      // Official Pico PLAYER 1.5.0 is loaded for all DEV song pages.
+      const soundVersion = '0.85.6';
       const soundRoot = 'runtime/sound-' + soundVersion + '/sound/';
-      // The source release uses native ES modules; the attached min-split ZIP
-      // is the matching browser-script build of the same sound version.
+      // The source release uses official native ES modules copied unchanged.
       const map = document.createElement('script');
       map.type = 'importmap';
       map.textContent = JSON.stringify({
@@ -158,7 +157,7 @@
         import(MusicAssets.shared(soundRoot + 'all.js')),
         import(MusicAssets.shared(soundRoot + 'mml.js')),
         import(MusicAssets.shared(soundRoot + 'tones.js')),
-        import(MusicAssets.shared('runtime/player-1.4.0/tool/ui/player.js')),
+        import(MusicAssets.shared('runtime/player-1.5.0/tool/ui/player.js')),
       ]);
       // Existing song player.js scripts use the legacy namespace API.
       // Bridge only the public API; do not modify the official engine/UI.
@@ -177,7 +176,7 @@
         try { return localStorage.getItem(playerOpenKey) === 'true'; }
         catch { return false; }
       };
-      // Player 1.4.0 passes an array to defineBGM; SOUND 0.55.0
+      // The shared page accepts arrays; SOUND 0.85.6
       // requires a single MML document. Adapt at the page boundary only.
       const asPlayerMML = value => {
         if (Array.isArray(value)) {
