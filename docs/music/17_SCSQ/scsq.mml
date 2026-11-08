@@ -1,6 +1,6 @@
 #title SCSQ（スクシーク）
-#about MSX らしくない音を、効果的に使う見本として作った曲。
-#about エフェクトを外した版は、PSG・MSX-MUSIC・SCC だけで鳴ってます。
+#about MSX らしからぬ *いい音* を、令和の技術で出してみようという試みの曲。
+#about 基本的には PSG・MSX-MUSIC・SCC だけで鳴ってます。（エフェクトOFFの場合）
 // Requires the addon: samples/addons/opllpsg808
 
 #fx tp = tape @speed 15
