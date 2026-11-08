@@ -1,6 +1,7 @@
 #title SCSQ（スクシーク）
 #about MSX らしからぬ *いい音* を、令和の技術で出してみようという試みの曲。
 #about 基本的には PSG・MSX-MUSIC・SCC だけで鳴ってます。（エフェクトOFFの場合）
+#about 5波形同時に使っているので実機に準ずる環境ではSCC+(SCC-I)が必要となります。
 // Requires the addon: samples/addons/opllpsg808
 
 #fx tp = tape @speed 15
