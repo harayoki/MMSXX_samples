@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Poison of Snake | MMSXX Samples DEV</title>
+<meta name="description" content="Poison of Snake: SCC+PSG+OPLLとSCC+PSGの2バージョンを比較試聴">
+<link rel="stylesheet" href="../music-page.css">
+<style>
+/* Dark theme for this song only; other pages retain their own settings. */
+:root {color-scheme: dark;--background:#181818;--foreground:#f5f7fb;--muted:#252831;--muted-foreground:#aab2c3;--border:#505765;--blue:#f18c56;--accent-ink:#161616}
+#poison {--blue:#f18c56;--mml-system:#b9e8ff}
+#poison .mix-tabs{display:flex;gap:0;align-items:stretch;width:100%}
+#poison .mix-tabs button{flex:1;min-width:0;margin:0 0 -1px;padding:10px 8px;color:#e5e8ff;background:#10111b;border:2px solid #777cc8;border-radius:0;cursor:pointer;font:inherit;font-size:.92rem;font-weight:650;transition:background-color .12s,border-color .12s}
+#poison .mix-tabs button + button{border-left:1px solid #777cc8}
+#poison .mix-tabs button:first-child{border-radius:8px 0 0 0}
+#poison .mix-tabs button:last-child{border-radius:0 8px 0 0}
+#poison .mix-tabs button[aria-selected="true"]{color:#fff;background:#4c48db;border-color:#8a8fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.28);position:relative;z-index:1}
+#poison .mix-tabs button:focus-visible{outline:2px solid var(--blue);outline-offset:-4px;position:relative;z-index:1}
+#poison #poison-src{display:block;width:100%;aspect-ratio:16/9;min-height:190px;margin:0;border-radius:0 0 8px 8px;overflow:hidden;overscroll-behavior:none;background-position:center;background-repeat:no-repeat;background-size:cover;image-rendering:pixelated;user-select:none;-webkit-user-select:none;pointer-events:none}
+#poison #poison-src code{user-select:none;-webkit-user-select:none}
+</style>
+</head>
+<body>
+<main class="music-page" id="poison">
+<nav class="music-top-nav" aria-label="ページナビゲーション"><a href="../" aria-label="1階層上へ" title="1階層上へ"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V4M5.5 10.5 12 4l6.5 6.5"/></svg></a></nav>
+<div class="music-player" id="poison-player" role="tabpanel" aria-labelledby="tab-fixch"></div>
+<p class="music-status text-small text-muted" data-music-status aria-live="polite">読み込み中…</p>
+<p class="text-small text-muted">この楽曲とMMLソースは CC BY 4.0 の対象外です。Music and MML are not licensed under CC BY 4.0.<a href="./bg.jpg" data-music-image="bg.jpg"> Cover art</a> is licensed under <a href="https://creativecommons.org/licenses/by/4.0/" rel="license">CC BY 4.0</a>.</p>
+<div class="music-editor">
+<div class="mix-tabs" role="tablist" aria-label="音源構成">
+<button type="button" role="tab" id="tab-fixch" aria-controls="poison-player" aria-selected="true" tabindex="0" data-variant="fixch">SCC + PSG + OPLL（14声）</button>
+<button type="button" role="tab" id="tab-scc" aria-controls="poison-player" aria-selected="false" tabindex="-1" data-variant="scc">SCC + PSG（7声）</button>
+</div>
+<pre id="poison-src" class="music-mml-preview" data-preview-lines="fill" aria-label="MML冒頭（閲覧専用）" data-music-background="bg.jpg"></pre>
+</div>
+<div class="music-credits">
+<p class="text-small text-muted">JavaScript source is not covered by CC BY 4.0. Redistribution is prohibited.</p>
+<p class="text-small text-muted">Editor: <a href="https://codemirror.net/">CodeMirror 6</a> (MIT License).</p>
+</div>
+</main>
+<script src="../music-page.js?v=20261113-player160-poison-rights" data-song="18_Poison-of-Snake" data-asset-version="20261113-player160-poison-rights"></script>
+</body></html>
