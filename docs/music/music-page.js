@@ -23,7 +23,7 @@
   window.MusicAssets = Object.freeze({
     song, image, shared: path => new URL(path, root).href
   });
-  // Pico PLAYER 1.5.0 accepts MML arrays, while SOUND 0.85.6
+  // Pico PLAYER 1.6.0 accepts MML arrays, while SOUND 0.87.1
   // defines a BGM from one *complete* MML document. Do not copy global
   // #about / #title / #fx directives to every channel again.
   function splitMML(text) {
@@ -142,9 +142,9 @@
   }
   (async () => {
     try {
-      // Official Sound 0.85.6 for all DEV songs, including GRST1 v2.73.
-      // Official Pico PLAYER 1.5.0 is loaded for all DEV song pages.
-      const soundVersion = '0.85.6';
+      // Official Sound 0.87.1 for all DEV songs, including GRST1 v2.73.
+      // Official Pico PLAYER 1.6.0 is loaded for all DEV song pages.
+      const soundVersion = '0.87.1';
       const soundRoot = 'runtime/sound-' + soundVersion + '/sound/';
       // The source release uses official native ES modules copied unchanged.
       const map = document.createElement('script');
@@ -157,7 +157,7 @@
         import(MusicAssets.shared(soundRoot + 'all.js')),
         import(MusicAssets.shared(soundRoot + 'mml.js')),
         import(MusicAssets.shared(soundRoot + 'tones.js')),
-        import(MusicAssets.shared('runtime/player-1.5.0/tool/ui/player.js')),
+        import(MusicAssets.shared('runtime/player-1.6.0/tool/ui/player.js')),
       ]);
       // Existing song player.js scripts use the legacy namespace API.
       // Bridge only the public API; do not modify the official engine/UI.
@@ -170,13 +170,8 @@
       const style = document.createElement('style');
       style.textContent = uiModule.PLAYER_CSS;
       document.head.prepend(style);
-      const playerOpenKey = 'mmsxx.samples.player.open';
       const originalMount = uiModule.mountPlayer;
-      const readPlayerOpen = () => {
-        try { return localStorage.getItem(playerOpenKey) === 'true'; }
-        catch { return false; }
-      };
-      // The shared page accepts arrays; SOUND 0.85.6
+      // The shared page accepts arrays; SOUND 0.87.1
       // requires a single MML document. Adapt at the page boundary only.
       const asPlayerMML = value => {
         if (Array.isArray(value)) {
@@ -186,8 +181,8 @@
         const source = String(value ?? '');
         return source.trim() ? [source] : [];
       };
-      const mountWithStoredOpen = (root, options = {}) => {
-        const { forceOpen = false, ...playerOptions } = options;
+      const mountWithClosedDefault = (root, options = {}) => {
+        const playerOptions = options;
         const audio = playerOptions.audio || new soundModule.ChipTuneSound();
         const defineBGM = audio.defineBGM.bind(audio);
         audio.defineBGM = (name, mml, config) =>
@@ -196,22 +191,17 @@
           ...playerOptions,
           audio,
           mml: asPlayerMML(playerOptions.mml),
-          open: forceOpen || readPlayerOpen(),
+          open: false, // All pages start collapsed. Users can open details manually.
           // The site has its own MML editor. Display and download are
           // independent PLAYER options (showMml / saveMml).
           showMml: false,
         });
         const originalSetMML = player.setMML.bind(player);
         player.setMML = value => originalSetMML(asPlayerMML(value));
-        const toggle = root.querySelector('[data-p="open"]');
-        if (!forceOpen) toggle?.addEventListener('click', () => {
-          try { localStorage.setItem(playerOpenKey, toggle.getAttribute('aria-expanded')); }
-          catch { /* Restricted frame may block storage. */ }
-        });
         return player;
       };
-      engine.player.mount = mountWithStoredOpen;
-      engine.mountPlayer = mountWithStoredOpen;
+      engine.player.mount = mountWithClosedDefault;
+      engine.mountPlayer = mountWithClosedDefault;
       const editorModule = await import(MusicAssets.shared('mml-editor.js'));
       window.MusicPage = Object.freeze({
         splitMML,

@@ -136,6 +136,16 @@ body {
   font-weight: 600;
 }
 .music-player button.sw { border-radius: 999px; }
+/* CH切替の最後にVolumeを続け、右端への追い出しと単独行を防ぐ。
+   .chs の子を親の折り返しフローへ出す。公式PLAYERのDOM/JSは変更しない。 */
+.music-player [data-p="chsrow"] { column-gap: 6px; }
+.music-player [data-p="chsrow"] > [data-p="chslbl"] { flex-basis: 100%; }
+.music-player [data-p="chsrow"] > [data-p="chs"] { display: contents; }
+.music-player [data-p="chsrow"] > .chmode { margin-left: 0; }
+.music-player [data-p="chsrow"] .chmode [data-p="volsw"] {
+  border-radius: 8px; /* CHの丸いピルと識別 */
+}
+
 .music-player button.sw[aria-pressed="true"] {
   color: var(--accent-ink);
   background: var(--player-blue);

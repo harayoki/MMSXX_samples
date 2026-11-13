@@ -17,7 +17,7 @@
         document.getElementById('pink-panther-src'), source
       );
       E.player.mount(root, {
-        mml: MusicPage.splitMML(source), loops: 1, copy: false, showMml: false, saveMml: false,
+        mml: MusicPage.splitMML(source), loops: 1, copy: false, showMml: false, saveMml: false, saveWav: false, saveStems: false,
       });
       status.textContent = '';
     })

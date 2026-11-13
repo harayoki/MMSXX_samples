@@ -1,8 +1,8 @@
-// GameNotes grdsSt1 + TR-808 voices using the official SOUND 0.69.0 APIs.
+// GameNotes grdsSt1 + TR-808 voices using the official SOUND 0.87.1 APIs.
 // Rebuilt from the v2.71.30 PLAYER sound definitions; no replacement synthesizer.
-import { registerAddon, listAddons } from '../runtime/sound-0.69.0/sound/addon.js';
-import { registerAnalogPatch, ANALOG_PATCHES } from '../runtime/sound-0.69.0/sound/analog.js';
-import { registerLayer, WAVEFORMS } from '../runtime/sound-0.69.0/sound/mml.js';
+import { registerAddon, listAddons } from '../runtime/sound-0.87.1/sound/addon.js';
+import { registerAnalogPatch, ANALOG_PATCHES } from '../runtime/sound-0.87.1/sound/analog.js';
+import { registerLayer, WAVEFORMS } from '../runtime/sound-0.87.1/sound/mml.js';
 
 const E={analog:{ANALOG_PATCHES},core:{'mml.js':{WAVEFORMS}},listAddons};
 const d = registerAnalogPatch, i = registerLayer;
