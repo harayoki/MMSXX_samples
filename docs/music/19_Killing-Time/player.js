@@ -1,10 +1,33 @@
-// Killing Time: original MMLs, official MMSXX PLAYER, no music-side JS effects.
+// Killing Time: original MMLs, official PLAYER; optional JS master reverb on MSX tab.
 (async () => {
   const E = MMSXX.sound;
   const root = document.getElementById('killing-player');
   const status = document.querySelector('[data-music-status]');
   const preview = document.getElementById('killing-src');
   const tabs = [...document.querySelectorAll('[data-variant]')];
+  const reverb = document.createElement('button');
+  reverb.type = 'button';
+  reverb.className = 'sw';
+  reverb.dataset.killingReverb = '';
+  let reverbOn = false;
+  const syncReverbButton = () => {
+    reverb.hidden = current !== 'msx';
+    reverb.textContent = 'Reverb ' + (reverbOn ? 'ON' : 'OFF');
+    reverb.setAttribute('aria-pressed', String(reverbOn));
+    reverb.title = reverbOn ? 'リバーブをOFF' : 'リバーブをON';
+  };
+  const REVERB = [{ name:'killing-msx-reverb', kind:'reverb', decay:1.9, width:1.0, mix:0.32 }];
+  let audio = null;
+  let fxSeq = Promise.resolve();
+  const updateFx = () => {
+    syncReverbButton();
+    if (!audio) return Promise.resolve();
+    const effects = current === 'msx' && reverbOn ? REVERB : [];
+    // Serialize rapid tab/checkbox changes so the last selection wins.
+    fxSeq = fxSeq.catch(() => {}).then(() => audio.setMasterEffects(effects));
+    fxSeq.catch(report);
+    return fxSeq;
+  };
   const variants = { normal:'killing-time.mml', msx:'killing-time-msx.mml' };
   const sources = {};
   let current = 'normal', player = null, editor = null;
@@ -20,6 +43,7 @@
       button.tabIndex = selected ? 0 : -1;
     }
     root.setAttribute('aria-labelledby','tab-'+key);
+    updateFx();
     if (!player) return;
     try {
       player.stop();
@@ -28,6 +52,7 @@
       status.textContent = '';
     } catch (error) { report(error); }
   }
+  reverb.addEventListener('click', () => { reverbOn = !reverbOn; updateFx(); });
   for (const button of tabs) {
     button.addEventListener('click',()=>select(button.dataset.variant));
     button.addEventListener('keydown',event=>{
@@ -49,11 +74,16 @@
       if (!response.ok) throw Error(file+' HTTP '+response.status);
       sources[key]=await response.text();
     }));
-    const audio=new E.ChipTuneSound(null,{spatial:'stereo'});
+    audio = new E.ChipTuneSound(null,{spatial:'stereo'});
+    await updateFx();
     player=E.player.mount(root,{
       audio,mml:MusicPage.splitMML(sources[current]),loops:2,
       copy:false,showMml:false,saveMml:false,saveWav:false,saveStems:false
     });
+    const level = root.querySelector('[data-p="level"]');
+    if (!level) throw Error('PLAYERのLevelボタンが見つかりません');
+    level.after(reverb);
+    syncReverbButton();
     editor = MusicPage.mountMMLTextarea(preview,sources[current],{
       onCommit: value => {
         sources[current] = value;
