@@ -1,5 +1,5 @@
 // Gradius Stage1 Arrange v2.73: all per-round effects are in the MML.
-// Official SOUND 0.87.1 + Pico PLAYER 1.5.1, no song-timed JS FX switching.
+// Official SOUND 0.93.0 + Pico PLAYER 1.5.1, no song-timed JS FX switching.
 (async () => {
   const E = MMSXX.sound;
   const root = document.getElementById('gamenotes-player');
@@ -13,9 +13,9 @@
   try {
     // Import the addon against the SAME official engine instance as the page loader.
     // Versioned URL avoids browser cache retaining its previous 0.69.0 imports.
-    await import(MusicAssets.song('addons.js') + '?v=20261113-tr808-0871');
-    const { findWave } = await import(MusicAssets.shared('runtime/sound-0.87.1/sound/mml.js'));
-    const { listAddons } = await import(MusicAssets.shared('runtime/sound-0.87.1/sound/addon.js'));
+    await import(MusicAssets.song('addons.js') + '?v=20261113-tr808-0930');
+    const { findWave } = await import(MusicAssets.shared('runtime/sound-0.93.0/sound/mml.js'));
+    const { listAddons } = await import(MusicAssets.shared('runtime/sound-0.93.0/sound/addon.js'));
     const required = ['tr808::snareDrum', 'tr808::bassDrum', 'tr808::closedHihat',
       'gamenotes::grdsSt1::edgeLead'];
     const missing = required.filter(name => findWave(name) < 0);
