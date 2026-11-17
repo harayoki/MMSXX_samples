@@ -7,7 +7,7 @@
   const tabs = [...document.querySelectorAll('[data-variant]')];
   const variants = { normal:'killing-time.mml', msx:'killing-time-msx.mml' };
   const sources = {};
-  let current = 'msx', player = null, editor = null;
+  let current = 'normal', player = null, editor = null;
   const report = error => { status.textContent = 'PLAYERエラー: ' + (error?.message || String(error)); console.error('[Killing Time]',error); };
   window.addEventListener('error', event => report(event.error || event.message));
   window.addEventListener('unhandledrejection', event => report(event.reason));
