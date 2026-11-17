@@ -1,6 +1,6 @@
 #title killing time
 #version 1.0.4
-#about ユーロビート風の周作。
+#about ユーロビート風の習作。
 
 #fx ceiling = limiter -1.5
 #fx hall = reverb 1.4 @mix 1
