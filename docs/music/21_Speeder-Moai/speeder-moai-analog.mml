@@ -1,0 +1,170 @@
+#title ネメシス エクストラステージBGM アレンジ スピーダーモアイ (80's シンセアレンジ)
+#about ネメシス(MSX)のエクストラステージBGMを、80年代のアナログシンセを使ったアレンジに。スピーダーバイク(アーケード)やワイワイワールド2のバージョンも参考にした。
+#version 1.0.0
+
+
+#looptimes 3
+
+#fx swirl = phaser @rate 0.1 @depth 0.7 @freq 400 @feedback 0.5 @stages 6 @mix 0.5
+#fx slap  = echo @l 16 @feedback 0.12 @mix 0.18
+#fx sheet = plate 1.1 @predelay 18 @mix 0.16
+#fx room  = plate 0.8 @predelay 10 @mix 0.10
+#fx wide  = widener @width 0.6
+
+#drum B = @{tr909::bassDrum(decay: 0.45)} v11 @o-3 @d+700 @ring BD
+#drum S = @{tr909::snareDrum(snappy: 0.8)} v15 @o-1 @ring SD
+#drum L = @{tr909::lowTom} v12 @o-2 @d+600 @ring LT
+#drum M = @{tr909::midTom} v8 @o-2 @d+900 @ring MT
+#drum D = @{tr909::midTom} v8 @o-2 @d+1000 @ring MT+
+#drum T = @{tr909::hiTom} v9 @o-1 @ring HT
+#drum E = @{tr909::hiTom} v9 @o-1 @d+200 @ring HT+
+#drum R = @{tr909::rimShot} v12 @o-1 @d+900 @ring RS
+#drum P = @{tr909::handClap} v12 @ring CP
+#drum Y = @{tr909::crashCymbal} v11 @o-1 @d+800 @ring CY
+#drum h = @{tr909::openHihat(decay: 0.43)} v8 @o-1 @d+800 @ring OH
+#drum F = @{tr909::openHihat(decay: 0.75)} v8 @o-1 @d+800 @ring OH(長)
+#drum H = @{tr909::closedHihat} v15 @o-1 @d+800 @ring CH
+#drum c = @{tr909::closedHihat} v6 @o-1 @d+800 @ring CH(弱)
+#drum o = @{tr909::openHihat(decay: 0.43)} v5 @o-1 @d+800 @ring OH(弱)
+
+#accent S !! { v: -4 }
+
+#ch 旋律
+t131 v8 q7 l64 @{analog::syncLead} @p{0.26,0,1} @fxchain{slap}
+r1
+r2. r8 o6 d8
+#label LOOP
+c8 c8 o5 a+8 g8 o6 c8 c8 o5 a+8 g8
+o6 c8 c8 o5 a+8 g8 o6 c8 c8 o5 a+8 g16 c16
+o6 c16 o5 c16 o6 c16 o5 c16 a+16 c16 g16 c16 f16 c16 d+16 c16 d16 c16 d+16 o4 g+16
+o5 d16 o4 g+16 o5 c16 o4 g+16 b16 g+16 o5 c16 o4 g+16 o5 d16 o4 g+16 o5 d+16 o4 g+16 o5 f16 o4 g+16 b16 o5 c8
+o4 f16 o5 d8 o4 f16 o5 d+8 o4 f16 o5 f8 o4 f16 o5 d+16 o4 f16 o5 c16 o4 f16 o5 c8
+o4 g16 o5 d8 o4 g16 o5 d+8 o4 g16 o5 f8 o4 g16 o5 d+16 o4 g16 o5 c16 o4 g16 o5 c8
+o4 g16 o5 d8 o4 g16 o5 d+8 o4 g16 o5 f8 o4 g16 o5 d+16 o4 g16 o5 c16 o4 g16 o5 c8.
+o4 g16 o5 d8 o4 g16 o5 d+8 o4 g16 o5 f16 o4 g16 o5 d+16 d16 c16 d8
+o4 g16 o6 c8 o4 g16 o5 a+16 o4 g16 o5 g8 o4 g16 o6 c8 o4 g16 o5 a+16 o4 g16 o5 g8
+o4 g16 o6 c8 o4 g16 o5 a+16 o4 g16 o5 g8 o4 g16 o6 c8 o4 g16 o5 a+16 o4 g16 o5 g8
+c16 o6 c8 o5 c16 a+16 c16 g8 c16 f16 d+16 c16 d+16 d16 d+8
+o4 g+16 o5 d16 c16 o4 g+16 o5 c16 o4 b16 o5 c16 o4 g+16 o5 d16 o4 g+16 o5 d+16 o4 g+16 o5 f16 o4 g+16 b16 c16
+f16 o5 c16 o4 f16 a+16 f16 g16 f16 f16 d+16 f16 d16 f16 c16 f16 d16 c16
+g16 o5 c16 o4 g16 a+16 g16 g16 f16 g16 d+16 g16 d16 g16 c16 g16 d16 c8
+o5 c8 o4 a+8 g16 f8. o5 f8 d+8 c8 g8.
+f8. d+8. d8. c4&c16
+#label OUTRO
+o4 c1
+r1
+
+#ch 対旋律
+t131 v7 q6 l8 @{analog::voxHumana} @p{-0.66,0,1} @fxchain{sheet}
+r1
+r1
+o6 d+8 d+8 d8 o5 a+8 o6 d+8 d+8 d8 o5 a+8
+o6 d+8 d+8 d8 o5 a+8 o6 d+8 d+8 d8 o5 a+8
+o6 d+8 d+8 d8 o5 a+8 g+8 g8 f8 g8
+f8 d+8 d8 d+8 f8 g8 g+8 d8
+r1
+r1
+r1
+r1
+o6 d+8 d+8 d8 o5 a+8 o6 d+8 d+8 d8 o5 a+8
+o6 d+8 d+8 d8 o5 a+8 o6 d+8 d+8 d8 o5 a+8
+o6 d+8 d+8 d8 o5 a+8 g+8 g8 f8 g8
+f8 d+8 d8 d+8 f8 g8 g+8 d8
+r1
+r1
+r1
+r1
+r1
+r1
+
+#ch ベース
+t131 v9 q4 l16 @{analog::seqBass} @p{0,0,1} @fxchain{swirl}
+o2 f > f < f f > f < f f > f < f f > f < f > f < f f > f <
+o2 g > g < g g > g < g g > g < g g > g < g > g < g g > g <
+o2 c > c < c c > c < c c > c < c c > c < c > c < c c > c <
+o2 g+ > g+ < g+ g+ > g+ < g+ g+ > g+ < g+ g+ > g+ < g+ > g+ < g+ g+ > g+ <
+o2 f > f < f f > f < f f > f < f f > f < f > f < f f > f <
+o2 g > g < g g > g < g g > g < g g > g < g > g < g g > g <
+l8 @{analog::delayBass} o2 [c > c <]4
+o2 [g+ > g+ <]4
+o2 [f > f <]4
+o2 [g > g <]4
+l16 @{analog::seqBass} o2 c > c < c c > c < c c > c < c c > c < c > c < c c > c <
+o2 g+ > g+ < g+ g+ > g+ < g+ g+ > g+ < g+ g+ > g+ < g+ > g+ < g+ g+ > g+ <
+o2 f > f < f f > f < f f > f < f f > f < f > f < f f > f <
+o2 g > g < g g > g < g g > g < g g > g < g > g < g g > g <
+o2 c > c < c c > c < c c > c < c c > c < c > c < c c > c <
+o2 g+ > g+ < g+ g+ > g+ < g+ g+ > g+ < g+ g+ > g+ < g+ > g+ < g+ g+ > g+ <
+o2 f > f < f f > f < f f > f < f f > f < f > f < f f > f <
+o2 g > g < g g > g < g g > g < g g > g < g > g < g g > g <
+v7 l1 o2 c
+r1
+
+#ch 和音
+t131 v7 q6 l8 @{analog::polyBrass} @p{0.58,0,1}
+r1
+r1
+r8 'o4 c d+ g'8 r8 'o4 c d+ g'8 r8 'o4 c d+ g'8 r8 'o4 c d+ g'8
+r8 'o4 c d+ g+'8 r8 'o4 c d+ g+'8 r8 'o4 c d+ g+'8 r8 'o4 c d+ g+'8
+r8 'o4 c f g+'8 r8 'o4 c f g+'8 r8 'o4 c f g+'8 r8 'o4 c f g+'8
+r8 'o4 d g b'8 r8 'o4 d g b'8 r8 'o4 d g b'8 r8 'o4 d g b'8
+'o4 c d+ g'1
+'o4 c d+ g+'1
+'o4 c f g+'1
+'o4 d g b'1
+r8 'o4 c d+ g'8 r8 'o4 c d+ g'8 r8 'o4 c d+ g'8 r8 'o4 c d+ g'8
+r8 'o4 c d+ g+'8 r8 'o4 c d+ g+'8 r8 'o4 c d+ g+'8 r8 'o4 c d+ g+'8
+r8 'o4 c f g+'8 r8 'o4 c f g+'8 r8 'o4 c f g+'8 r8 'o4 c f g+'8
+r8 'o4 d g b'8 r8 'o4 d g b'8 r8 'o4 d g b'8 r8 'o4 d g b'8
+r1
+r1
+r1
+r8 'o4 d g b'8 r8 'o4 d g b'8 r8 'o4 d g b'8 r8 'o4 d g b'8
+v5 'o4 c d+ g'1
+r1
+
+#ch 弦
+t131 v5 q7 l1 @{analog::pwmStrings} @p{-0.44,0,1} @fxchain{wide}
+r1
+r1
+'o4 c d+ g'1
+'o4 c d+ g+'1
+'o4 c f g+'1
+'o4 d g b'1
+r1
+r1
+r1
+r1
+'o4 c d+ g'1
+'o4 c d+ g+'1
+'o4 c f g+'1
+'o4 d g b'1
+'o4 c d+ g'1
+'o4 c d+ g+'1
+'o4 c f g+'1
+'o4 d g b'1
+v4 'o4 c d+ g'1
+v3 'o4 c d+ g'1
+
+#ch ドラム
+t131 q8 l16 @p{0,0,1} @fxchain{room}
+r1
+@{drums 32}{ v7 . . . . T T T T BST . ST . M . M . BS!!M . S!!M . M . M . BL . L . L . . . }
+@{drums 16}{ v7 B B H H SDRh . . H B BY . . SERF . EP . }
+@{drums 16}{ v7 B B H H SDRh . . H B BY . . SERF . E . }
+@{drums 16}{ v7 B B H H SDRh . . H B BY . . SERF . SE S }
+@{drums 16}{ v7 B B H H SDRh . . H B BY . . SERF S SE S }
+@{drums 16}{ v7 B B H H SDRh . . H B BY . . SERF . EP . }
+@{drums 16}{ v7 B B H H SDRh . . H B BY . . SERF . E . }
+@{drums 16}{ v7 B B H H SDRh . . H B BY . . SERF . SE S }
+@{drums 16}{ v7 B B H H SDRh . . H B BY . . SERF S SE S }
+@{drums 16}{ v7 B B H H SDRh . . H B BY . . SERF . EP . }
+@{drums 16}{ v7 B B H H SDRh . . H B BY . . SERF . E . }
+@{drums 16}{ v7 B B H H SDRh . . H B BY . . SERF . SE S }
+@{drums 16}{ v7 B B H H SDRh . . H B BY . . SERF S SE S }
+@{drums 16}{ v7 B B H H SDRh . . H B BY . . SERF . EP . }
+@{drums 16}{ v7 B B H H SDRh . . H B BY . . SERF . E . }
+@{drums 16}{ v7 B B H H SDRh . . H B BY . . SERF . SE S }
+@{drums 16}{ v7 B B H H SDRh . . H B BY . . SERF S SE S }
+@{drums 16}{ v7 E . T . D . M . L . . . . . . . }
+r1

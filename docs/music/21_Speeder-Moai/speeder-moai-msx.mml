@@ -1,0 +1,606 @@
+#title ネメシス エクストラステージBGM アレンジ スピーダーモアイ (MSX編成)
+#about アナログシンセアレンジをさらにMSX音源アレンジした物。逆輸入？スピーダーバイク(アーケード)やワイワイワールド2のバージョンも参考にした。
+#version 1.0.0
+
+#voice fmChordA = @opll{ mod{ratio 3, depth 8, attack 15, decay 4, sustain 2, release 6, hold 1}, car{ratio 1, attack 13, decay 3, sustain 1, release 6, hold 1}, feedback 4 }
+#voice fmChordB = @opll{ mod{ratio 1, depth 16, attack 15, decay 4, sustain 2, release 6, hold 1}, car{ratio 1, attack 13, decay 3, sustain 1, release 6, hold 1}, feedback 0 }
+#voice fmChord1 = @{fmChordA} @opllseq{fmChordA 2 >1 fmChordB 10} @pitch{3, 7, 10, 12, 12, 10, 7, 3, -1, -4, -6, -6, -4, -1} @loop{pitch 0}
+#voice fmChord2 = @{fmChordA} @opllseq{fmChordA 2 >1 fmChordB 10} @pitch{0, 4, 8, 10, 11, 10, 8, 4, 0, -4, -8, -10, -11, -10, -8, -4} @loop{pitch 0}
+#voice fmChord3 = @{fmChordA} @opllseq{fmChordA 2 >1 fmChordB 10} @pitch{-3, 0, 3, 5, 6, 6, 5, 4, 1, -2, -4, -7, -10, -11, -12, -12, -11, -9, -6} @loop{pitch 0}
+
+#voice fmStr1 = @{opll::organ} @pitch{6, 4, 5, 9, 7, 8, 11, 9, 10, 13, 10, 10, 13, 9, 9, 12, 8, 7, 9, 5, 5, 7, 2, 2, 3, -1, -1, 1, -3, -3, -1, -4, -4, -1, -4, -3, 0, -3, -1, 2, 0, 1, 5} @loop{pitch 0}
+#voice fmStr2 = @{opll::organ} @pitch{2, 0, 1, 4, 2, 3, 6, 4, 4, 8, 5, 5, 8, 5, 5, 7, 4, 4, 6, 2, 2, 4, 0, 0, 2, -2, -3, -1, -5, -5, -3, -6, -6, -4, -7, -7, -4, -7, -6, -3, -6, -5, -2, -4, -3, 0, -2} @loop{pitch 0}
+#voice fmStr3 = @{opll::organ} @pitch{-3, -5, -4, 0, -3, -1, 2, 0, 1, 4, 1, 2, 5, 2, 2, 5, 1, 1, 4, 0, 0, 2, -2, -3, -1, -5, -5, -3, -8, -8, -6, -10, -11, -9, -12, -13, -10, -14, -14, -11, -14, -14, -11, -14, -13, -9, -12, -11, -7, -10, -9, -5, -7} @loop{pitch 0}
+
+#voice shimmer = @{sccSine} @sccseq{sccSine 48 >3 sccSaw 24 >3 sccSine 24} @loop{sccseq 0}
+#voice shimmer2 = @{sccSaw} @sccseq{sccSaw 48 >3 sccSine 24 >3 sccSaw 24} @loop{sccseq 0}
+
+#drum B = @{gamenotes::manbowDrumkit::kick} v13 @ring BD
+#drum S = @{gamenotes::manbowDrumkit::snare} v14 @ring SD
+#drum G = @{gamenotes::manbowDrumkit::snareBig} v14 @ring SD(強)
+#drum R = @{gamenotes::manbowDrumkit::snareSoft} v11 @ring RS のかわり
+#drum P = @{gamenotes::manbowDrumkit::snareSoft} v11 @ring CP のかわり
+#drum Y = @{gamenotes::manbowDrumkit::crash} v11 @ring CY
+#drum H = @{gamenotes::manbowDrumkit::hat} v10 @ring CH
+#drum h = @{gamenotes::manbowDrumkit::hat} v8 @ring OH のかわり
+#drum F = @{gamenotes::manbowDrumkit::hat} v8 @ring OH(長)のかわり
+#drum c = @{gamenotes::manbowDrumkit::hatLight} v9 @ring CH(弱)
+#drum o = @{gamenotes::manbowDrumkit::hatLight} v7 @ring OH(弱)
+#drum L = @{ayTom} v13 @o-1 @d+700 @ring LT(o3 g)
+#drum M = @{ayTom} v13 @ring MT(o4 c)
+#drum D = @{ayTom} v13 @d+200 @ring MT+(o4 d)
+#drum T = @{ayTom} v13 @d+700 @ring HT(o4 g)
+#drum E = @{ayTom} v13 @d+900 @ring HT+(o4 a)
+#drum U = @{gamenotes::sccSrmnd::scctam} v13 @o-1 @d+700 @ring LT(o3 g、SCC)
+#drum W = @{gamenotes::sccSrmnd::scctam} v13 @ring MT(o4 c、SCC)
+#drum X = @{gamenotes::sccSrmnd::scctam} v13 @d+700 @ring HT(o4 g、SCC)
+
+#accent S !! { v: -4 }
+#accent E ! { v: -4 }
+#accent T ! { v: -4 }
+#accent D ! { v: -4 }
+#accent M ! { v: -4 }
+#accent L ! { v: -4 }
+
+#looptimes 1
+
+#ch SCC5-旋律
+#meta out lead
+t128.571429 v11 q7 l16 @{sccSaw}
+r1
+r2. r8 o6 d16*{32} o5 c16*{32}
+#label LOOP
+o6 c16*{32} o5 c16*{32} o6 c16*{32} o5 c16*{32} a+16*{32} c16*{32} g16*{32} c16*{32} o6 c16*{32} o5 c16*{32} o6 c16*{32} o5 c16*{32} a+16*{32} c16*{32} g16*{32} o4 g+16*{32}
+o6 c16*{32} o4 g+16*{32} o6 c16*{32} o4 g+16*{32} o5 a+16*{32} o4 g+16*{32} o5 g16*{32} o4 g+16*{32} o6 c16*{32} o4 g+16*{32} o6 c16*{32} o4 g+16*{32} o5 a+16*{32} o4 g+16*{32} o5 g16*{32} o4 f16*{32}
+o6 c16*{32} o4 f16*{32} o6 c16*{32} o4 f16*{32} o5 a+16*{32} o4 f16*{32} o5 g16*{32} o4 f16*{32} o5 f16*{32} o4 f16*{32} o5 d+16*{32} o4 f16*{32} o5 d16*{32} o4 f16*{32} o5 d+16*{32} o4 g16*{32}
+o5 d16*{32} o4 g16*{32} o5 c16*{32} o4 g16*{32} b16*{32} g16*{32} o5 c16*{32} o4 g16*{32} o5 d16*{32} o4 g16*{32} o5 d+16*{32} o4 g16*{32} o5 f16*{32} o4 g16*{32} b16*{32} o5 c8*{32}
+o4 g16*{32} o5 d8*{32} o4 g16*{32} o5 d+8*{32} o4 g16*{32} o5 f8*{32} o4 g16*{32} o5 d+16*{32} o4 g16*{32} o5 c16*{32} o4 g16*{32} o5 c8*{32}
+o4 g16*{32} o5 d8*{32} o4 g16*{32} o5 d+8*{32} o4 g16*{32} o5 f8*{32} o4 g16*{32} o5 d+16*{32} o4 g16*{32} o5 c16*{32} o4 g16*{32} o5 c8*{32}
+o4 g16*{32} o5 d8*{32} o4 g16*{32} o5 d+8*{32} o4 g16*{32} o5 f8*{32} o4 g16*{32} o5 d+16*{32} o4 g16*{32} o5 c16*{32} o4 g16*{32} o5 c8.*{32}
+o4 g16*{32} o5 d8*{32} o4 g16*{32} o5 d+8*{32} o4 g16*{32} o5 f16*{32} o4 g16*{32} o5 d+16*{32} d16*{32} c16*{32} d8*{32}
+c16*{32} o6 c8*{32} o5 c16*{32} a+16*{32} c16*{32} g8*{32} c16*{32} o6 c8*{32} o5 c16*{32} a+16*{32} c16*{32} g8*{32}
+o4 g+16*{32} o6 c8*{32} o4 g+16*{32} o5 a+16*{32} o4 g+16*{32} o5 g8*{32} o4 g+16*{32} o6 c8*{32} o4 g+16*{32} o5 a+16*{32} o4 g+16*{32} o5 g8*{32}
+o4 f16*{32} o6 c8*{32} o4 f16*{32} o5 a+16*{32} o4 f16*{32} o5 g8*{32} o4 f16*{32} o5 f16*{32} d+16*{32} o4 f16*{32} o5 d+16*{32} d16*{32} d+8*{32}
+o4 g16*{32} o5 d16*{32} c16*{32} o4 g16*{32} o5 c16*{32} o4 b16*{32} o5 c16*{32} o4 g16*{32} o5 d16*{32} o4 g16*{32} o5 d+16*{32} o4 g16*{32} o5 f16*{32} o4 g16*{32} b16*{32} c8*{32}
+o5 c8*{32} o4 a+8*{32} g16*{32} f8*{32} d+8*{32} d8*{32} c8*{32} d16*{32} c8*{32}
+o5 c8*{32} o4 a+8*{32} g16*{32} f8*{32} d+8*{32} d8*{32} c8*{32} d16*{32} c8*{32}
+o5 c8*{32} o4 a+8*{32} g16*{32} f8.*{32} o5 f8*{32} d+8*{32} c8*{32} g8.*{32}
+f8.*{32} d+8.*{32} d8.*{32} c4&c16*{32}
+o6 c16*{32} o5 c16*{32} o6 c16*{32} o5 c16*{32} a+16*{32} c16*{32} g16*{32} c16*{32} o6 c16*{32} o5 c16*{32} o6 c16*{32} o5 c16*{32} a+16*{32} c16*{32} g16*{32} o4 g+16*{32}
+o6 c16*{32} o4 g+16*{32} o6 c16*{32} o4 g+16*{32} o5 a+16*{32} o4 g+16*{32} o5 g16*{32} o4 g+16*{32} o6 c16*{32} o4 g+16*{32} o6 c16*{32} o4 g+16*{32} o5 a+16*{32} o4 g+16*{32} o5 g16*{32} o4 f16*{32}
+o6 c16*{32} o4 f16*{32} o6 c16*{32} o4 f16*{32} o5 a+16*{32} o4 f16*{32} o5 g16*{32} o4 f16*{32} o5 f16*{32} o4 f16*{32} o5 d+16*{32} o4 f16*{32} o5 d16*{32} o4 f16*{32} o5 d+16*{32} o4 g16*{32}
+o5 d16*{32} o4 g16*{32} o5 c16*{32} o4 g16*{32} b16*{32} g16*{32} o5 c16*{32} o4 g16*{32} o5 d16*{32} o4 g16*{32} o5 d+16*{32} o4 g16*{32} o5 f16*{32} o4 g16*{32} b16*{32} o5 c8*{32}
+o4 g16*{32} o5 d8*{32} o4 g16*{32} o5 d+8*{32} o4 g16*{32} o5 f8*{32} o4 g16*{32} o5 d+16*{32} o4 g16*{32} o5 c16*{32} o4 g16*{32} o5 c8*{32}
+o4 g16*{32} o5 d8*{32} o4 g16*{32} o5 d+8*{32} o4 g16*{32} o5 f8*{32} o4 g16*{32} o5 d+16*{32} o4 g16*{32} o5 c16*{32} o4 g16*{32} o5 c8*{32}
+o4 g16*{32} o5 d8*{32} o4 g16*{32} o5 d+8*{32} o4 g16*{32} o5 f8*{32} o4 g16*{32} o5 d+16*{32} o4 g16*{32} o5 c16*{32} o4 g16*{32} o5 c8.*{32}
+o4 g16*{32} o5 d8*{32} o4 g16*{32} o5 d+8*{32} o4 g16*{32} o5 f16*{32} o4 g16*{32} o5 d+16*{32} d16*{32} c16*{32} d8*{32}
+c16*{32} o6 c8*{32} o5 c16*{32} a+16*{32} c16*{32} g8*{32} c16*{32} o6 c8*{32} o5 c16*{32} a+16*{32} c16*{32} g8*{32}
+o4 g+16*{32} o6 c8*{32} o4 g+16*{32} o5 a+16*{32} o4 g+16*{32} o5 g8*{32} o4 g+16*{32} o6 c8*{32} o4 g+16*{32} o5 a+16*{32} o4 g+16*{32} o5 g8*{32}
+o4 f16*{32} o6 c8*{32} o4 f16*{32} o5 a+16*{32} o4 f16*{32} o5 g8*{32} o4 f16*{32} o5 f16*{32} d+16*{32} o4 f16*{32} o5 d+16*{32} d16*{32} d+8*{32}
+o4 g16*{32} o5 d16*{32} c16*{32} o4 g16*{32} o5 c16*{32} o4 b16*{32} o5 c16*{32} o4 g16*{32} o5 d16*{32} o4 g16*{32} o5 d+16*{32} o4 g16*{32} o5 f16*{32} o4 g16*{32} b16*{32} c8*{32}
+o5 c8*{32} o4 a+8*{32} g16*{32} f8*{32} d+8*{32} d8*{32} c8*{32} d16*{32} c8*{32}
+o5 c8*{32} o4 a+8*{32} g16*{32} f8*{32} d+8*{32} d8*{32} c8*{32} d16*{32} c8*{32}
+o5 c8*{32} o4 a+8*{32} g16*{32} f8.*{32} o5 f8*{32} d+8*{32} c8*{32} g8.*{32}
+f8.*{32} d+8.*{32} d8.*{32} c4&c16*{32}
+#label OUTRO
+o4 c1
+r1
+
+#ch SCC2-対旋律
+#meta out counter
+t128.571429 v8 q6 l8 @{sccSine}
+r1
+r1
+o6 d+8 d+8 d8 o5 a+8 o6 d+8 d+8 d8 o5 a+8
+o6 d+8 d+8 d8 o5 a+8 o6 d+8 d+8 d8 o5 a+8
+o6 d+8 d+8 d8 o5 a+8*{16} g+8*{16} g8*{16} f8*{16} g8*{16}
+f8*{16} d+8*{16} d8*{16} d+8*{16} f8*{16} g8*{16} g+8 d8
+r1
+r1
+r1
+r1
+o6 d+8 d+8 d8 o5 a+8 o6 d+8 d+8 d8 o5 a+8
+o6 d+8 d+8 d8 o5 a+8 o6 d+8 d+8 d8 o5 a+8
+o6 d+8 d+8 d8 o5 a+8*{16} g+8*{16} g8*{16} f8*{16} g8*{16}
+f8*{16} d+8*{16} d8*{16} d+8*{16} f8*{16} g8*{16} g+8 d8
+r1
+r1
+r1
+r1
+o6 d+8 d+8 d8 o5 a+8 o6 d+8 d+8 d8 o5 a+8
+o6 d+8 d+8 d8 o5 a+8 o6 d+8 d+8 d8 o5 a+8
+o6 d+8 d+8 d8 o5 a+8*{16} g+8*{16} g8*{16} f8*{16} g8*{16}
+f8*{16} d+8*{16} d8*{16} d+8*{16} f8*{16} g8*{16} g+8 d8
+r1
+r1
+r1
+r1
+o6 d+8 d+8 d8 o5 a+8 o6 d+8 d+8 d8 o5 a+8
+o6 d+8 d+8 d8 o5 a+8 o6 d+8 d+8 d8 o5 a+8
+o6 d+8 d+8 d8 o5 a+8*{16} g+8*{16} g8*{16} f8*{16} g8*{16}
+f8*{16} d+8*{16} d8*{16} d+8*{16} f8*{16} g8*{16} g+8 d8
+r1
+r1
+r1
+r1
+r1
+r1
+
+#ch PSG-ベース
+#meta out bass
+t128.571429 v13 q4 l16 @{ayTone}
+o2 f > f < f f > f < f f > f < f f > f < f > f < f f > f <
+o2 g > g < g g > g < g g > g < g g > g < g > g < g g > g <
+o2 c > c < c c > c < c c > c < c c > c < c > c < c c > c <
+o2 g+ > g+ < g+ g+ > g+ < g+ g+ > g+ < g+ g+ > g+ < g+ > g+ < g+ g+ > g+ <
+o2 f > f < f f > f < f f > f < f f > f < f > f < f f > f <
+o2 g > g < g g > g < g g > g < g g > g < g > g < g g > g <
+o2 [c8 > c8 <]4
+o2 [g+8 > g+8 <]4
+o2 [f8 > f8 <]4
+o2 [g8 > g8 <]4
+o2 c > c < c c > c < c c > c < c c > c < c > c < c c > c <
+o2 g+ > g+ < g+ g+ > g+ < g+ g+ > g+ < g+ g+ > g+ < g+ > g+ < g+ g+ > g+ <
+o2 f > f < f f > f < f f > f < f f > f < f > f < f f > f <
+o2 g > g < g g > g < g g > g < g g > g < g > g < g g > g <
+o2 c > c < c c > c < c c > c < c c > c < c > c < c c > c <
+o2 g+ > g+ < g+ g+ > g+ < g+ g+ > g+ < g+ g+ > g+ < g+ > g+ < g+ g+ > g+ <
+o2 f > f < f f > f < f f > f < f f > f < f > f < f f > f <
+o2 g > g < g g > g < g g > g < g g > g < g > g < g g > g <
+o2 c > c < c c > c < c c > c < c c > c < c > c < c c > c <
+o2 g+ > g+ < g+ g+ > g+ < g+ g+ > g+ < g+ g+ > g+ < g+ > g+ < g+ g+ > g+ <
+o2 f > f < f f > f < f f > f < f f > f < f > f < f f > f <
+o2 g > g < g g > g < g g > g < g g > g < g > g < g g > g <
+o2 [c8 > c8 <]4
+o2 [g+8 > g+8 <]4
+o2 [f8 > f8 <]4
+o2 [g8 > g8 <]4
+o2 c > c < c c > c < c c > c < c c > c < c > c < c c > c <
+o2 g+ > g+ < g+ g+ > g+ < g+ g+ > g+ < g+ g+ > g+ < g+ > g+ < g+ g+ > g+ <
+o2 f > f < f f > f < f f > f < f f > f < f > f < f f > f <
+o2 g > g < g g > g < g g > g < g g > g < g > g < g g > g <
+o2 c > c < c c > c < c c > c < c c > c < c > c < c c > c <
+o2 g+ > g+ < g+ g+ > g+ < g+ g+ > g+ < g+ g+ > g+ < g+ > g+ < g+ g+ > g+ <
+o2 f > f < f f > f < f f > f < f f > f < f > f < f f > f <
+o2 g > g < g g > g < g g > g < g g > g < g > g < g g > g <
+v9 o2 c1
+r1
+
+#ch SCC1-きらきら
+#meta out shimmer1
+t128.571429 v5 q8 l1 @{shimmer}
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+o5 c1
+o5 c1
+o5 c1
+o5 c1
+o5 c1
+o5 c1
+o5 c1
+o5 c1
+o5 c1
+o5 c1
+o5 c1
+o5 c1
+o5 c1
+o5 c1
+o5 c1
+o5 c1
+v4 o5 c1
+v2 o5 c1
+
+#ch SCC3-きらきら
+#meta out shimmer2
+t128.571429 v4 q8 l1 @{shimmer2}
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+o6 c1
+o6 c1
+o6 c1
+o6 c1
+o6 c1
+o6 c1
+o6 c1
+o6 c1
+o6 c1
+o6 c1
+o6 c1
+o6 c1
+o6 c1
+o6 c1
+o6 c1
+o6 c1
+v3 o6 c1
+v2 o6 c1
+
+#ch OPLL1-和音
+#meta out chord1
+t128.571429 v13 q6 l8 @{fmChord1}
+r1
+r1
+v9 r8 o4 c8 r8 c8 r8 c8 r8 c8
+v9 r8 o4 c8 r8 c8 r8 c8 r8 c8
+v9 r8 o4 c8 r8 c8 r8 c8 r8 c8
+v9 r8 o4 d8 r8 d8 r8 d8 r8 d8
+v13 o4 c1
+o4 c1
+o4 c1
+o4 d1
+r8 o4 c8 r8 c8 r8 c8 r8 c8
+r8 o4 c8 r8 c8 r8 c8 r8 c8
+r8 o4 c8 r8 c8 r8 c8 r8 c8
+r8 o4 d8 r8 d8 r8 d8 r8 d8
+r1
+r1
+r1
+r8 o4 d8 r8 d8 r8 d8 r8 d8
+r8 o4 c8 r8 c8 r8 c8 r8 c8
+r8 o4 c8 r8 c8 r8 c8 r8 c8
+r8 o4 c8 r8 c8 r8 c8 r8 c8
+r8 o4 d8 r8 d8 r8 d8 r8 d8
+o4 c1
+o4 c1
+o4 c1
+o4 d1
+r8 o4 c8 r8 c8 r8 c8 r8 c8
+r8 o4 c8 r8 c8 r8 c8 r8 c8
+r8 o4 c8 r8 c8 r8 c8 r8 c8
+r8 o4 d8 r8 d8 r8 d8 r8 d8
+r1
+r1
+r1
+r8 o4 d8 r8 d8 r8 d8 r8 d8
+v8 o4 c1
+r1
+
+#ch OPLL2-和音
+#meta out chord2
+t128.571429 v13 q6 l8 @{fmChord2}
+r1
+r1
+r1
+r1
+r1
+r1
+o4 d+1
+o4 d+1
+o4 f1
+o4 g1
+r8 o4 d+8 r8 d+8 r8 d+8 r8 d+8
+r8 o4 d+8 r8 d+8 r8 d+8 r8 d+8
+r8 o4 f8 r8 f8 r8 f8 r8 f8
+r8 o4 g8 r8 g8 r8 g8 r8 g8
+r1
+r1
+r1
+r8 o4 g8 r8 g8 r8 g8 r8 g8
+r8 o4 d+8 r8 d+8 r8 d+8 r8 d+8
+r8 o4 d+8 r8 d+8 r8 d+8 r8 d+8
+r8 o4 f8 r8 f8 r8 f8 r8 f8
+r8 o4 g8 r8 g8 r8 g8 r8 g8
+o4 d+1
+o4 d+1
+o4 f1
+o4 g1
+r8 o4 d+8 r8 d+8 r8 d+8 r8 d+8
+r8 o4 d+8 r8 d+8 r8 d+8 r8 d+8
+r8 o4 f8 r8 f8 r8 f8 r8 f8
+r8 o4 g8 r8 g8 r8 g8 r8 g8
+r1
+r1
+r1
+r8 o4 g8 r8 g8 r8 g8 r8 g8
+v8 o4 d+1
+r1
+
+#ch OPLL3-和音
+#meta out chord3
+t128.571429 v13 q6 l8 @{fmChord3}
+r1
+r1
+r1
+r1
+r1
+r1
+o4 g1
+o4 g+1
+o4 g+1
+o4 b1
+r8 o4 g8 r8 g8 r8 g8 r8 g8
+r8 o4 g+8 r8 g+8 r8 g+8 r8 g+8
+r8 o4 g+8 r8 g+8 r8 g+8 r8 g+8
+r8 o4 b8 r8 b8 r8 b8 r8 b8
+r1
+r1
+r1
+r8 o4 b8 r8 b8 r8 b8 r8 b8
+r8 o4 g8 r8 g8 r8 g8 r8 g8
+r8 o4 g+8 r8 g+8 r8 g+8 r8 g+8
+r8 o4 g+8 r8 g+8 r8 g+8 r8 g+8
+r8 o4 b8 r8 b8 r8 b8 r8 b8
+o4 g1
+o4 g+1
+o4 g+1
+o4 b1
+r8 o4 g8 r8 g8 r8 g8 r8 g8
+r8 o4 g+8 r8 g+8 r8 g+8 r8 g+8
+r8 o4 g+8 r8 g+8 r8 g+8 r8 g+8
+r8 o4 b8 r8 b8 r8 b8 r8 b8
+r1
+r1
+r1
+r8 o4 b8 r8 b8 r8 b8 r8 b8
+v8 o4 g1
+r1
+
+#ch OPLL4-弦
+#meta out strings1
+t128.571429 v12 q7 l1 @{fmStr1}
+r1
+r1
+o3 c1
+o3 c1
+o3 c1*{8}
+o3 d1
+r1
+r1
+r1
+r1
+o3 c1
+o3 c1
+o3 c1*{8}
+o3 d1*{8}
+o3 c1
+o3 c1
+o3 c1*{8}
+o3 d1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+v9 o3 c1
+v6 o3 c1
+
+#ch OPLL5-弦
+#meta out strings2
+t128.571429 v12 q7 l1 @{fmStr2}
+r1
+r1
+o3 d+1
+o3 d+1*{8}
+o3 f1*{8}
+o3 g1
+r1
+r1
+r1
+r1
+o3 d+1
+o3 d+1*{8}
+o3 f1*{8}
+o3 g1*{8}
+o3 d+1
+o3 d+1*{8}
+o3 f1*{8}
+o3 g1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+v9 o3 d+1
+v6 o3 d+1
+
+#ch OPLL6-弦
+#meta out strings3
+t128.571429 v12 q7 l1 @{fmStr3}
+r1
+r1
+o3 g1*{8}
+o3 g+1
+o3 g+1*{8}
+o3 b1
+r1
+r1
+r1
+r1
+o3 g1*{8}
+o3 g+1
+o3 g+1*{8}
+o3 b1*{8}
+o3 g1*{8}
+o3 g+1
+o3 g+1*{8}
+o3 b1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+r1
+v9 o3 g1
+v6 o3 g1
+
+#ch OPLL7-旋律重ね
+#meta out leadOct
+t128.571429 v12 q7 l16 @{opll::opllpTrumpet}
+r1
+r2. r8 o5 d8*{32}
+c8*{32} c8*{32} o4 a+8*{32} g8*{32} o5 c8*{32} c8*{32} o4 a+8*{32} g8*{32}
+o5 c8*{32} c8*{32} o4 a+8*{32} g8*{32} o5 c8*{32} c8*{32} o4 a+8*{32} g8*{32}
+o5 c8*{32} c8*{32} o4 a+8*{32} g8*{32} f8*{32} d+8*{32} d8*{32} d+8*{32}
+d8*{32} c8*{32} o3 b8*{32} o4 c8*{32} d8*{32} d+8*{32} f8*{32} o3 b16*{32} o4 c8.*{32}
+d8.*{32} d+8.*{32} f8.*{32} d+8*{32} c8*{32} c8.*{32}
+d8.*{32} d+8.*{32} f8.*{32} d+8*{32} c8*{32} c8.*{32}
+d8.*{32} d+8.*{32} f8.*{32} d+8*{32} c8*{32} c4*{32}
+d8.*{32} d+8.*{32} f8*{32} d+16*{32} d16*{32} c16*{32} d8.*{32}
+o5 c8.*{32} o4 a+8*{32} g8.*{32} o5 c8.*{32} o4 a+8*{32} g8.*{32}
+o5 c8.*{32} o4 a+8*{32} g8.*{32} o5 c8.*{32} o4 a+8*{32} g8.*{32}
+o5 c8.*{32} o4 a+8*{32} g8.*{32} f16*{32} d+8*{32} d+16*{32} d16*{32} d+8.*{32}
+d16*{32} c8*{32} c16*{32} o3 b16*{32} o4 c8*{32} d8*{32} d+8*{32} f8*{32} o3 b16*{32} c8*{32}
+o4 c8*{32} o3 a+8*{32} g16*{32} f8*{32} d+8*{32} d8*{32} c8*{32} d16*{32} c8*{32}
+o4 c8*{32} o3 a+8*{32} g16*{32} f8*{32} d+8*{32} d8*{32} c8*{32} d16*{32} c8*{32}
+o4 c8*{32} o3 a+8*{32} g16*{32} f8.*{32} o4 f8*{32} d+8*{32} c8*{32} g8.*{32}
+f8.*{32} d+8.*{32} d8.*{32} c4&c16*{32}
+c8*{32} c8*{32} o4 a+8*{32} g8*{32} o5 c8*{32} c8*{32} o4 a+8*{32} g8*{32}
+o5 c8*{32} c8*{32} o4 a+8*{32} g8*{32} o5 c8*{32} c8*{32} o4 a+8*{32} g8*{32}
+o5 c8*{32} c8*{32} o4 a+8*{32} g8*{32} f8*{32} d+8*{32} d8*{32} d+8*{32}
+d8*{32} c8*{32} o3 b8*{32} o4 c8*{32} d8*{32} d+8*{32} f8*{32} o3 b16*{32} o4 c8.*{32}
+d8.*{32} d+8.*{32} f8.*{32} d+8*{32} c8*{32} c8.*{32}
+d8.*{32} d+8.*{32} f8.*{32} d+8*{32} c8*{32} c8.*{32}
+d8.*{32} d+8.*{32} f8.*{32} d+8*{32} c8*{32} c4*{32}
+d8.*{32} d+8.*{32} f8*{32} d+16*{32} d16*{32} c16*{32} d8.*{32}
+o5 c8.*{32} o4 a+8*{32} g8.*{32} o5 c8.*{32} o4 a+8*{32} g8.*{32}
+o5 c8.*{32} o4 a+8*{32} g8.*{32} o5 c8.*{32} o4 a+8*{32} g8.*{32}
+o5 c8.*{32} o4 a+8*{32} g8.*{32} f16*{32} d+8*{32} d+16*{32} d16*{32} d+8.*{32}
+d16*{32} c8*{32} c16*{32} o3 b16*{32} o4 c8*{32} d8*{32} d+8*{32} f8*{32} o3 b16*{32} c8*{32}
+o4 c8*{32} o3 a+8*{32} g16*{32} f8*{32} d+8*{32} d8*{32} c8*{32} d16*{32} c8*{32}
+o4 c8*{32} o3 a+8*{32} g16*{32} f8*{32} d+8*{32} d8*{32} c8*{32} d16*{32} c8*{32}
+o4 c8*{32} o3 a+8*{32} g16*{32} f8.*{32} o4 f8*{32} d+8*{32} c8*{32} g8.*{32}
+f8.*{32} d+8.*{32} d8.*{32} c4&c16*{32}
+o3 c1
+r1
+
+#ch OPLL8-対旋律重ね
+#meta out counterOct
+t128.571429 v15 q6 l8 @{opll::violin}
+r1
+r1
+o5 d+8 d+8 d8 o4 a+8 o5 d+8 d+8 d8 o4 a+8
+o5 d+8 d+8 d8 o4 a+8 o5 d+8 d+8 d8 o4 a+8
+o5 d+8 d+8 d8 o4 a+8*{16} g+8*{16} g8*{16} f8*{16} g8*{16}
+f8*{16} d+8*{16} d8*{16} d+8*{16} f8*{16} g8*{16} g+8 d8
+r1
+r1
+r1
+r1
+o5 d+8 d+8 d8 o4 a+8 o5 d+8 d+8 d8 o4 a+8
+o5 d+8 d+8 d8 o4 a+8 o5 d+8 d+8 d8 o4 a+8
+o5 d+8 d+8 d8 o4 a+8*{16} g+8*{16} g8*{16} f8*{16} g8*{16}
+f8*{16} d+8*{16} d8*{16} d+8*{16} f8*{16} g8*{16} g+8 d8
+r1
+r1
+r1
+r1
+o5 d+8 d+8 d8 o4 a+8 o5 d+8 d+8 d8 o4 a+8
+o5 d+8 d+8 d8 o4 a+8 o5 d+8 d+8 d8 o4 a+8
+o5 d+8 d+8 d8 o4 a+8*{16} g+8*{16} g8*{16} f8*{16} g8*{16}
+f8*{16} d+8*{16} d8*{16} d+8*{16} f8*{16} g8*{16} g+8 d8
+r1
+r1
+r1
+r1
+o5 d+8 d+8 d8 o4 a+8 o5 d+8 d+8 d8 o4 a+8
+o5 d+8 d+8 d8 o4 a+8 o5 d+8 d+8 d8 o4 a+8
+o5 d+8 d+8 d8 o4 a+8*{16} g+8*{16} g8*{16} f8*{16} g8*{16}
+f8*{16} d+8*{16} d8*{16} d+8*{16} f8*{16} g8*{16} g+8 d8
+r1
+r1
+r1
+r1
+r1
+r1
+
+#ch PSG-ドラム
+t128.571429 q8 l16
+r1
+@{drums 32}{ v15 . . . . X X X X SX . SX . W . W . S!!W . S!!W . W . W . BU . U . U . . . }
+@{drums 16}{ v15 B B H H SD . . H B Y . . SE . EP . }
+@{drums 16}{ v15 B B H H SD . . H B Y . . SE . E . }
+@{drums 16}{ v15 B B H H SD . . H B Y . . SE . SE S }
+@{drums 16}{ v15 B B H H SD . . H B Y . . SE S SE S }
+@{drums 16}{ v15 B B H H SD . . H B Y . . SE . EP . }
+@{drums 16}{ v15 B B H H SD . . H B Y . . SE . E . }
+@{drums 16}{ v15 B B H H SD . . H B Y . . SE . SE S }
+@{drums 16}{ v15 B B H H SD . . H B Y . . SE S SE S }
+@{drums 16}{ v15 B B H H SD . . H B Y . . SE . EP . }
+@{drums 16}{ v15 B B H H SD . . H B Y . . SE . E . }
+@{drums 16}{ v15 B B H H SD . . H B Y . . SE . SE S }
+@{drums 16}{ v15 B B H H SD . . H B Y . . SE S SE S }
+@{drums 16}{ v15 B B H H SD . . H B Y . . SE . EP . }
+@{drums 16}{ v15 B B H H SD . . H B Y . . SE . E . }
+@{drums 16}{ v15 B B H H SD . . H B Y . . SE . SE S }
+@{drums 16}{ v15 B B H H SD . . H B Y . . E D M L }
+@{drums 16}{ v15 B B H H SD . . H B Y . . SE . EP . }
+@{drums 16}{ v15 B B H H SD . . H B Y . . SE . E . }
+@{drums 16}{ v15 B B H H SD . . H B Y . . SE . SE S }
+@{drums 16}{ v15 B B H H SD . . H B Y . . SE S SE S }
+@{drums 16}{ v15 B B H H SD . . H B Y . . SE . EP . }
+@{drums 16}{ v15 B B H H SD . . H B Y . . SE . E . }
+@{drums 16}{ v15 B B H H SD . . H B Y . . SE . SE S }
+@{drums 16}{ v15 B B H H SD . . H B Y . . SE S SE S }
+@{drums 16}{ v15 B B H H SD . . H B Y . . SE . EP . }
+@{drums 16}{ v15 B B H H SD . . H B Y . . SE . E . }
+@{drums 16}{ v15 B B H H SD . . H B Y . . SE . SE S }
+@{drums 16}{ v15 B B H H SD . . H B Y . . SE S SE S }
+@{drums 16}{ v15 B B H H SD . . H B Y . . SE . EP . }
+@{drums 16}{ v15 B B H H SD . . H B Y . . SE . E . }
+@{drums 16}{ v15 B B H H SD . . H B Y . . SE . SE S }
+@{drums 16}{ v15 B B H H SD . . H B Y . . SE S SE S }
+@{drums 16}{ v15 E! . T! . D! . M! . L! . . . . . . . }
+r1
