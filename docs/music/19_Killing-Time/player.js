@@ -67,7 +67,7 @@
   try {
     // These are the five addons explicitly referenced by the two supplied MMLs.
     await Promise.all(['tr909','tr808','ufo','manbowDrumkit','sccSrmnd'].map(
-      name=>import(MusicAssets.song('addons/'+name+'.js'))
+      name=>import(MusicAssets.shared('addons/'+name+'.js'))
     ));
     await Promise.all(Object.entries(variants).map(async ([key,file])=>{
       const response=await fetch(MusicAssets.song(file));

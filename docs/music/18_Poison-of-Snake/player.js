@@ -53,8 +53,7 @@
 
   try {
     // Addon modules register their voices as side effects before MML compile.
-    await Promise.all(['sccSrmnd','manbowDrumkit','grdsSccDrumkit'].map(name =>
-      import(MusicAssets.song('addons/' + name + '.js'))
+    await Promise.all(['sccSrmnd','manbowDrumkit','grdsSccDrumkit'].map(name => import(MusicAssets.shared('addons/' + (name === 'sccSrmnd' ? 'sccSrmnd-legacy' : name) + '.js'))
     ));
     await Promise.all(Object.entries(variants).map(async ([key, entry]) => {
       const response = await fetch(MusicAssets.song(entry.file));
