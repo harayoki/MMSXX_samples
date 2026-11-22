@@ -23,7 +23,7 @@
   window.MusicAssets = Object.freeze({
     song, image, shared: path => new URL(path, root).href
   });
-  // Pico PLAYER 1.6.0 accepts MML arrays, while SOUND 0.93.0
+  // Pico PLAYER 1.6.1 accepts MML arrays, while SOUND 0.93.0
   // defines a BGM from one *complete* MML document. Do not copy global
   // #about / #title / #fx directives to every channel again.
   function splitMML(text) {
@@ -143,7 +143,7 @@
   (async () => {
     try {
       // Official Sound 0.93.0 for all DEV songs, including GRST1 v2.73.
-      // Official Pico PLAYER 1.6.0 is loaded for all DEV song pages.
+      // Official Pico PLAYER 1.6.1 is loaded for all DEV song pages.
       const soundVersion = '0.93.0';
       const soundRoot = 'runtime/sound-' + soundVersion + '/sound/';
       // The source release uses official native ES modules copied unchanged.
@@ -157,7 +157,7 @@
         import(MusicAssets.shared(soundRoot + 'all.js')),
         import(MusicAssets.shared(soundRoot + 'mml.js')),
         import(MusicAssets.shared(soundRoot + 'tones.js')),
-        import(MusicAssets.shared('runtime/player-1.6.0/tool/ui/player.js')),
+        import(MusicAssets.shared('runtime/player-1.6.1/tool/ui/player.js')),
       ]);
       // Existing song player.js scripts use the legacy namespace API.
       // Bridge only the public API; do not modify the official engine/UI.
