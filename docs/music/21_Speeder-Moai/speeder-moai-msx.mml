@@ -1,5 +1,5 @@
 #title ネメシス エクストラステージBGM アレンジ スピーダーモアイ (MSX編成)
-#about アナログシンセアレンジをさらにMSX音源アレンジした物。逆輸入？スピーダーバイク(アーケード)やワイワイワールド2のバージョンも参考にした。
+#about シンセアレンジをさらにMSX音源でアレンジした物。スピーダーバイク(アーケード)やワイワイワールド2のバージョンも参考にしている。
 #version 1.0.1
 
 #voice fmChordA = @opll{ mod{ratio 3, depth 8, attack 15, decay 4, sustain 2, release 6, hold 1}, car{ratio 1, attack 13, decay 3, sustain 1, release 6, hold 1}, feedback 4 }
