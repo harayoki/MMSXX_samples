@@ -1,6 +1,6 @@
 #title ネメシス エクストラステージBGM アレンジ スピーダーモアイ (MSX編成)
 #about アナログシンセアレンジをさらにMSX音源アレンジした物。逆輸入？スピーダーバイク(アーケード)やワイワイワールド2のバージョンも参考にした。
-#version 1.0.0
+#version 1.0.1
 
 #voice fmChordA = @opll{ mod{ratio 3, depth 8, attack 15, decay 4, sustain 2, release 6, hold 1}, car{ratio 1, attack 13, decay 3, sustain 1, release 6, hold 1}, feedback 4 }
 #voice fmChordB = @opll{ mod{ratio 1, depth 16, attack 15, decay 4, sustain 2, release 6, hold 1}, car{ratio 1, attack 13, decay 3, sustain 1, release 6, hold 1}, feedback 0 }
@@ -46,7 +46,7 @@
 
 #ch SCC5-旋律
 #meta out lead
-t128.571429 v11 q7 l16 @{sccSaw}
+t128.571429 v11 q7 l16 @{sccSaw} @p{-0.504,0,1}
 r1
 r2. r8 o6 d16*{32} o5 c16*{32}
 #label LOOP
@@ -88,7 +88,7 @@ r1
 
 #ch SCC2-対旋律
 #meta out counter
-t128.571429 v8 q6 l8 @{sccSine}
+t128.571429 v8 q6 l8 @{sccSine} @p{1.614,0,1}
 r1
 r1
 o6 d+8 d+8 d8 o5 a+8 o6 d+8 d+8 d8 o5 a+8
@@ -168,7 +168,7 @@ r1
 
 #ch SCC1-きらきら
 #meta out shimmer1
-t128.571429 v5 q8 l1 @{shimmer}
+t128.571429 v5 q8 l1 @{shimmer} @p{1}
 r1
 r1
 r1
@@ -208,7 +208,7 @@ v2 o5 c1
 
 #ch SCC3-きらきら
 #meta out shimmer2
-t128.571429 v4 q8 l1 @{shimmer2}
+t128.571429 v4 q8 l1 @{shimmer2} @p{-1}
 r1
 r1
 r1
@@ -248,7 +248,7 @@ v2 o6 c1
 
 #ch OPLL1-和音
 #meta out chord1
-t128.571429 v13 q6 l8 @{fmChord1}
+t128.571429 v13 q6 l8 @{fmChord1} @p{-3.042,0,1}
 r1
 r1
 v9 r8 o4 c8 r8 c8 r8 c8 r8 c8
@@ -328,7 +328,7 @@ r1
 
 #ch OPLL3-和音
 #meta out chord3
-t128.571429 v13 q6 l8 @{fmChord3}
+t128.571429 v13 q6 l8 @{fmChord3} @p{3.042,0,1}
 r1
 r1
 r1
@@ -368,7 +368,7 @@ r1
 
 #ch OPLL4-弦
 #meta out strings1
-t128.571429 v12 q7 l1 @{fmStr1}
+t128.571429 v12 q7 l1 @{fmStr1} @p{1.134,0,1}
 r1
 r1
 o3 c1
@@ -448,7 +448,7 @@ v6 o3 d+1
 
 #ch OPLL6-弦
 #meta out strings3
-t128.571429 v12 q7 l1 @{fmStr3}
+t128.571429 v12 q7 l1 @{fmStr3} @p{-1.134,0,1}
 r1
 r1
 o3 g1*{8}
@@ -488,7 +488,7 @@ v6 o3 g1
 
 #ch OPLL7-旋律重ね
 #meta out leadOct
-t128.571429 v12 q7 l16 @{opll::opllpTrumpet}
+t128.571429 v12 q7 l16 @{opll::opllpTrumpet} @p{0.504,0,1}
 r1
 r2. r8 o5 d8*{32}
 c8*{32} c8*{32} o4 a+8*{32} g8*{32} o5 c8*{32} c8*{32} o4 a+8*{32} g8*{32}
@@ -528,7 +528,7 @@ r1
 
 #ch OPLL8-対旋律重ね
 #meta out counterOct
-t128.571429 v15 q6 l8 @{opll::violin}
+t128.571429 v15 q6 l8 @{opll::violin} @p{-1.614,0,1}
 r1
 r1
 o5 d+8 d+8 d8 o4 a+8 o5 d+8 d+8 d8 o4 a+8
