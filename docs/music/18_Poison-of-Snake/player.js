@@ -10,6 +10,10 @@
     scc: {file:'poison-of-snake-msx-scc.mml'}
   };
   const sources = {};
+  const requestedTab = new URLSearchParams(location.search).get('tab');
+  const tabKeys = [...tabs].map(button => button.dataset.variant);
+  const requestedKey = /^\d+$/.test(requestedTab ?? '') ? tabKeys[Number(requestedTab)] : requestedTab;
+  const initialTab = Object.hasOwn(variants, requestedKey) ? requestedKey : 'fixch';
   let current = 'fixch';
   let player = null;
   const report = error => {
@@ -24,6 +28,9 @@
   function select(key) {
     if (!variants[key] || key === current) return;
     current = key;
+    const url = new URL(location.href);
+    url.searchParams.set('tab', key);
+    history.replaceState(history.state, '', url);
     for (const button of tabs) {
       const selected = button.dataset.variant === key;
       button.setAttribute('aria-selected', String(selected));
@@ -66,6 +73,7 @@
       copy:false, showMml:false, saveMml:false, saveWav:false, saveStems:false
     });
     MusicPage.mountMMLPreview(preview, sources[current], {lines:'fill'});
+    if (initialTab !== current) select(initialTab);
     status.textContent = '';
   } catch (error) { report(error); }
 })();

@@ -33,12 +33,17 @@
   const status = document.querySelector('[data-music-status]');
   const audio = new E.ChipTuneSound(null, { psgTune: false, spatial: 'mono' });
   const drafts = new Map();
-  let current = songs.find(song =>
-    song.id === new URLSearchParams(location.search).get('mix')) ?? songs[0];
+  const requestedTab = new URLSearchParams(location.search).get('tab');
+  const selectedByIndex = /^\d+$/.test(requestedTab ?? '') ? songs[Number(requestedTab)] : null;
+  let current = selectedByIndex ?? songs.find(song => song.id === requestedTab) ?? songs[0];
   let player;
   let sourceEditor;
 
   function select(song) {
+    const url = new URL(location.href);
+    url.searchParams.set('tab', song.id);
+    url.searchParams.delete('mix');
+    history.replaceState(history.state, '', url);
     if (current?.source && sourceEditor) drafts.set(current.id, sourceEditor.getValue());
     current = song;
     const source = drafts.get(song.id) ?? song.source;

@@ -30,6 +30,10 @@
   };
   const variants = { normal:'killing-time.mml', msx:'killing-time-msx.mml' };
   const sources = {};
+  const requestedTab = new URLSearchParams(location.search).get('tab');
+  const tabKeys = [...tabs].map(button => button.dataset.variant);
+  const requestedKey = /^\d+$/.test(requestedTab ?? '') ? tabKeys[Number(requestedTab)] : requestedTab;
+  const initialTab = Object.hasOwn(variants, requestedKey) ? requestedKey : 'normal';
   let current = 'normal', player = null, editor = null;
   const report = error => { status.textContent = 'PLAYERエラー: ' + (error?.message || String(error)); console.error('[Killing Time]',error); };
   window.addEventListener('error', event => report(event.error || event.message));
@@ -37,6 +41,9 @@
   function select(key) {
     if (!variants[key] || current === key) return;
     current = key;
+    const url = new URL(location.href);
+    url.searchParams.set('tab', key);
+    history.replaceState(history.state, '', url);
     for (const button of tabs) {
       const selected = button.dataset.variant === key;
       button.setAttribute('aria-selected', String(selected));
@@ -91,6 +98,7 @@
         catch(error) { report(error); }
       }
     });
+    if (initialTab !== current) select(initialTab);
     status.textContent='';
   } catch(error) { report(error); }
 })();
