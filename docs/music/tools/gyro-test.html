@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport"
+ content="width=device-width,initial-scale=1">
+<title>ジャイロテスト</title>
+<style>
+body {
+  font-family: monospace;
+  padding: 12px;
+}
+button {
+  font-size: 18px;
+  padding: 12px;
+}
+#area {
+  position: relative;
+  height: 220px;
+  background: #eee;
+  overflow: hidden;
+}
+#ball {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: #168bff;
+  border-radius: 50%;
+  left: calc(50% - 20px);
+  top: calc(50% - 20px);
+}
+#log {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: #111;
+  color: #8f8;
+  padding: 12px;
+  font-size: 12px;
+}
+</style>
+</head>
+<body>
+<button id="start">ジャイロを有効にする</button>
+<div id="area"><div id="ball"></div></div>
+<pre id="log"></pre>
+
+<script>
+const logEl = document.querySelector("#log");
+const ball = document.querySelector("#ball");
+
+function log(...args) {
+  logEl.textContent += args.join(" ") + "\n";
+}
+
+function errorLog(e) {
+  log("ERROR NAME:", e?.name ?? "unknown");
+  log("ERROR MESSAGE:", e?.message ?? String(e));
+  log("ERROR STACK:", e?.stack ?? "none");
+}
+
+log("=== ENVIRONMENT ===");
+log("URL:", location.href);
+log("HTTPS:", isSecureContext);
+log("iframe:", window.self !== window.top);
+log("UserAgent:", navigator.userAgent);
+log("DeviceOrientation:",
+    typeof DeviceOrientationEvent);
+log("requestPermission:",
+    typeof DeviceOrientationEvent
+      ?.requestPermission);
+
+window.addEventListener("error", e => {
+  log("GLOBAL ERROR:", e.message);
+});
+
+window.addEventListener(
+  "unhandledrejection",
+  e => errorLog(e.reason)
+);
+
+let count = 0;
+
+document.querySelector("#start").onclick = async () => {
+  log("\n=== START ===");
+
+  try {
+    if (typeof DeviceOrientationEvent === "undefined") {
+      log("ERROR: DeviceOrientationEvent unsupported");
+      return;
+    }
+
+    if (typeof DeviceOrientationEvent.requestPermission
+        === "function") {
+
+      log("Requesting permission...");
+
+      const result =
+        await DeviceOrientationEvent.requestPermission();
+
+      log("Permission result:", result);
+
+      if (result !== "granted") {
+        log("ERROR: Permission denied");
+        return;
+      }
+    } else {
+      log("Permission API unavailable");
+    }
+
+    log("Registering listener...");
+
+    window.addEventListener("deviceorientation", e => {
+      count++;
+
+      if (count <= 5 || count % 60 === 0) {
+        log(
+          "EVENT", count,
+          "alpha:", e.alpha,
+          "beta:", e.beta,
+          "gamma:", e.gamma,
+          "absolute:", e.absolute
+        );
+      }
+
+      const x = e.gamma ?? 0;
+      const y = e.beta ?? 0;
+
+      ball.style.transform =
+        `translate(${x * 2}px, ${y * 2}px)`;
+    });
+
+    log("Listener registered");
+  } catch (e) {
+    errorLog(e);
+  }
+};
+</script>
+</body>
+</html>
