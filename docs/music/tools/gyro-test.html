@@ -1,139 +1,140 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport"
- content="width=device-width,initial-scale=1">
-<title>ジャイロテスト</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>GRAVITY ジャイロ権限テスト</title>
 <style>
-body {
-  font-family: monospace;
-  padding: 12px;
-}
-button {
-  font-size: 18px;
-  padding: 12px;
-}
-#area {
-  position: relative;
-  height: 220px;
-  background: #eee;
-  overflow: hidden;
-}
-#ball {
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  background: #168bff;
-  border-radius: 50%;
-  left: calc(50% - 20px);
-  top: calc(50% - 20px);
-}
-#log {
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  background: #111;
-  color: #8f8;
-  padding: 12px;
-  font-size: 12px;
-}
+body{font-family:system-ui,sans-serif;background:#101525;color:#eef;padding:16px;margin:0}
+button{font-size:18px;padding:14px;margin:5px 5px 10px 0;background:#24456e;color:white;border:1px solid #9bc;border-radius:8px}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#080b12;color:#bdf;padding:12px;font-size:12px;max-height:48vh;overflow:auto}
+.value{font-family:monospace;background:#202a3c;padding:12px;white-space:pre-wrap}
+h1{font-size:20px}
+small{color:#bac}
 </style>
 </head>
 <body>
-<button id="start">ジャイロを有効にする</button>
-<div id="area"><div id="ball"></div></div>
+<h1>GRAVITY ジャイロ権限テスト</h1>
+<small>GitHub Pages等のHTTPS上で、Safariから直接開いてください。</small>
+
+<p><button id="original">TAP ME!（GRAVITY方式）</button></p>
+<p>
+<button id="motion">Motionだけ要求</button>
+<button id="orientation">Orientationだけ要求</button>
+</p>
+<p><button id="clear">ログ消去</button></p>
+
+<div id="values" class="value">センサー値：未受信</div>
 <pre id="log"></pre>
 
 <script>
-const logEl = document.querySelector("#log");
-const ball = document.querySelector("#ball");
+const logEl=document.getElementById('log');
+const values=document.getElementById('values');
 
-function log(...args) {
-  logEl.textContent += args.join(" ") + "\n";
+const log=(...v)=>{
+  const s=v.map(x=>typeof x==='object'?JSON.stringify(x):String(x)).join(' ');
+  logEl.textContent+=new Date().toLocaleTimeString()+' '+s+'\n';
+  logEl.scrollTop=logEl.scrollHeight;
+};
+
+let audioContext;
+
+function wakeSound(){
+  log('wakeSound() 開始');
+  try{
+    audioContext ||= new (window.AudioContext||window.webkitAudioContext)();
+    const p=audioContext.resume();
+    if(p&&typeof p.catch==='function')
+      p.catch(e=>log('Audio resume error:',e.name,e.message));
+    log('wakeSound() 終了 / state:',audioContext.state);
+  }catch(e){
+    log('wakeSound error:',e.name,e.message);
+  }
 }
 
-function errorLog(e) {
-  log("ERROR NAME:", e?.name ?? "unknown");
-  log("ERROR MESSAGE:", e?.message ?? String(e));
-  log("ERROR STACK:", e?.stack ?? "none");
-}
+let motionCount=0,orientationCount=0;
 
-log("=== ENVIRONMENT ===");
-log("URL:", location.href);
-log("HTTPS:", isSecureContext);
-log("iframe:", window.self !== window.top);
-log("UserAgent:", navigator.userAgent);
-log("DeviceOrientation:",
-    typeof DeviceOrientationEvent);
-log("requestPermission:",
-    typeof DeviceOrientationEvent
-      ?.requestPermission);
+window.addEventListener('devicemotion',e=>{
+  motionCount++;
+  const g=e.accelerationIncludingGravity;
+  values.textContent='devicemotion: '+motionCount+' 件\n'+
+    'x: '+(g?.x??'null')+
+    '\ny: '+(g?.y??'null')+
+    '\nz: '+(g?.z??'null')+
+    '\ndeviceorientation: '+orientationCount+' 件';
 
-window.addEventListener("error", e => {
-  log("GLOBAL ERROR:", e.message);
+  if(motionCount<=3||motionCount%100===0)
+    log('MOTION EVENT',motionCount,'gravity:',
+      g?{x:g.x,y:g.y,z:g.z}:null);
 });
 
-window.addEventListener(
-  "unhandledrejection",
-  e => errorLog(e.reason)
-);
-
-let count = 0;
-
-document.querySelector("#start").onclick = async () => {
-  log("\n=== START ===");
-
-  try {
-    if (typeof DeviceOrientationEvent === "undefined") {
-      log("ERROR: DeviceOrientationEvent unsupported");
-      return;
-    }
-
-    if (typeof DeviceOrientationEvent.requestPermission
-        === "function") {
-
-      log("Requesting permission...");
-
-      const result =
-        await DeviceOrientationEvent.requestPermission();
-
-      log("Permission result:", result);
-
-      if (result !== "granted") {
-        log("ERROR: Permission denied");
-        return;
-      }
-    } else {
-      log("Permission API unavailable");
-    }
-
-    log("Registering listener...");
-
-    window.addEventListener("deviceorientation", e => {
-      count++;
-
-      if (count <= 5 || count % 60 === 0) {
-        log(
-          "EVENT", count,
-          "alpha:", e.alpha,
-          "beta:", e.beta,
-          "gamma:", e.gamma,
-          "absolute:", e.absolute
-        );
-      }
-
-      const x = e.gamma ?? 0;
-      const y = e.beta ?? 0;
-
-      ball.style.transform =
-        `translate(${x * 2}px, ${y * 2}px)`;
+window.addEventListener('deviceorientation',e=>{
+  orientationCount++;
+  if(orientationCount<=3||orientationCount%100===0)
+    log('ORIENTATION EVENT',orientationCount,{
+      alpha:e.alpha,beta:e.beta,gamma:e.gamma
     });
+});
 
-    log("Listener registered");
-  } catch (e) {
-    errorLog(e);
+async function request(type){
+  const ctor=type==='motion'
+    ?window.DeviceMotionEvent
+    :window.DeviceOrientationEvent;
+
+  log(type,'API:',typeof ctor,
+      'requestPermission:',typeof ctor?.requestPermission);
+
+  if(!ctor){
+    log(type,'RESULT: unsupported');
+    return;
   }
-};
+
+  if(typeof ctor.requestPermission!=='function'){
+    log(type,'RESULT: requestPermission unavailable');
+    return;
+  }
+
+  try{
+    log(type,'requestPermission() 呼び出し');
+    const result=await ctor.requestPermission();
+    log(type,'RESULT:',result);
+  }catch(e){
+    log(type,'EXCEPTION:',e.name,e.message,
+        'stack:',e.stack||'なし');
+  }
+}
+
+document.getElementById('original').addEventListener('click',()=>{
+  log('=== GRAVITY方式 TAP ME ===');
+  wakeSound();
+
+  const ask=window.DeviceMotionEvent&&
+            window.DeviceMotionEvent.requestPermission;
+
+  if(typeof ask==='function')request('motion');
+  else log('Motion権限要求APIなし（GRAVITYではwatchGyroへ）');
+});
+
+document.getElementById('motion').addEventListener('click',()=>{
+  log('=== Motion単独 ===');
+  request('motion');
+});
+
+document.getElementById('orientation').addEventListener('click',()=>{
+  log('=== Orientation単独 ===');
+  request('orientation');
+});
+
+document.getElementById('clear').addEventListener('click',()=>{
+  logEl.textContent='';
+});
+
+log('URL:',location.href);
+log('HTTPS secure context:',isSecureContext);
+log('iframe:',window.self!==window.top);
+log('UserAgent:',navigator.userAgent);
+log('DeviceMotionEvent:',typeof DeviceMotionEvent);
+log('DeviceOrientationEvent:',typeof DeviceOrientationEvent);
 </script>
 </body>
 </html>
